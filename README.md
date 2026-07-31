@@ -8,10 +8,9 @@ A set of enforceable development gates for AI-assisted coding—read your projec
 
 ## Get it
 
-1. From this repo’s **Releases**, download **`ai_dev_v3.2.0.7z`**
-   (create a release first; then you can pin
-   `https://github.com/zhaobolun-code/ai-gates/releases/latest`).
-2. Extract **into** the target project’s `.cursor/` folder
+1. From this repo’s **Releases**, download **`ai_dev_v3.2.0.7z`**  
+   ([latest release](https://github.com/zhaobolun-code/ai-gates/releases/latest)).
+2. Extract **into** the target project’s `.cursor/` folder  
    (archive root is `skills/`, `scripts/`, … — do **not** unzip into a nested `.cursor/.cursor/`).
 3. In Cursor **Agent** mode:
 
@@ -20,20 +19,31 @@ PM
 [what you need / what's broken]
 ```
 
-First time on a project? Say `PM init` (scaffolds `project-context`).
+First time on a project? Say `PM init` (scaffolds `project-context`), then fill a short project note (stack, careful paths, a few must-test cases). That is the setup—not ongoing ops config.
 
 Quick start (3 min): [skills/TEAM-GUIDE.md](skills/TEAM-GUIDE.md).  
-What this is / isn’t, and usage notes: [skills/METHODOLOGY.md](skills/METHODOLOGY.md).
+What this is / isn’t: [skills/METHODOLOGY.md](skills/METHODOLOGY.md).
+
+### Daily use (you do not memorize the table below)
+
+- Start with `PM` + need; confirm decisions with `approve`.  
+- The mechanism list is **guardrail documentation**, not a checklist you must learn before coding.  
+- The agent follows the gates; you accept / reject / retest.
+
+### Platform
+
+- **Shipped for Cursor Agent** (file-edit mode). Cursor Hooks live under `.cursor/`.  
+- Rules are plain Markdown—other agents can reuse them with adaptation; **other platforms are not officially packaged yet**.  
+- Bundled scripts are primarily **Windows PowerShell** (`.ps1`).
 
 ### Requirements
 
-- Cursor with **Agent** (file-edit) mode  
-- Scripts are primarily **Windows PowerShell** (`.ps1`)  
-- You fill **project-local** config after install (`project-context.md`, your own test list). The pack does **not** ship another team’s business windows or CHANGELOG.
+- Cursor **Agent** mode  
+- One-time `PM init` + short `project-context.md` / test list (the pack does **not** ship another team’s business windows or CHANGELOG)
 
 ### What's inside
 
-These are not feature checkboxes. They are guardrails—each one exists because that failure mode showed up in real development.
+These are not feature checkboxes. They are guardrails—each one exists because that failure mode showed up in real development. **You do not need to memorize this table to use the pack.**
 
 | Mechanism | What it does |
 | --- | --- |
@@ -58,19 +68,37 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 **AI 几秒就能改出一堆坏代码。这套东西在你点头接受之前插入真门禁——不是又一个补全插件。**
 
-一套可执行的质量门禁，用于 AI 辅助开发——不看本项目不能改、按车道走方案/审查、CR 有 blocker 不能收口、反复改不好有止损链叫停换路（不是拦 `git commit`）。以 Cursor Skill 形式分发，规则本身是纯 Markdown。
+一套可执行的质量门禁，用于 AI 辅助开发——不看本项目不能改、按车道走方案/审查、CR 有 blocker 不能收口、反复改不好有止损链叫停换路（不是拦 `git commit`）。当前以 Cursor Skill 形式发行；规则本身是纯 Markdown。
 
-1. 从本仓库 **Releases** 下载 **`ai_dev_v3.2.0.7z`**  
+1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.2.0.7z`**  
 2. **解压进**目标项目的 `.cursor/`（包内直接是 `skills/` 等，不要解成 `.cursor/.cursor/`）  
 3. Cursor **Agent** 模式里粘贴：`项目经理` + 需求  
 
-首次：`项目经理 初始化`。上手见 [skills/TEAM-GUIDE.md](skills/TEAM-GUIDE.md)；预期与边界见 [skills/METHODOLOGY.md](skills/METHODOLOGY.md)。
+首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置。
 
-**前提**：Agent 可改文件；脚本以 Windows PowerShell 为主。包**不含**业务方案窗、源项目的 `project-context` / CHANGELOG——须自填项目说明后再提需求。
+上手（约 3 分钟）：[skills/TEAM-GUIDE.md](skills/TEAM-GUIDE.md)。  
+预期与边界：[skills/METHODOLOGY.md](skills/METHODOLOGY.md)。
+
+### 日常怎么用（不用背下面的表）
+
+- 开口：`项目经理` + 需求；确认回「准」。  
+- 机制表是**护栏说明**，不是开工前必背清单。  
+- 门禁由助手执行；你负责确认、验收、回是否通过。
+
+### 平台
+
+- **当前正式发行面向 Cursor Agent**（可改文件）；Hooks 在 `.cursor/` 下。  
+- 规则是 Markdown，其他 Agent **可自行适配**；**尚未提供其他平台的官方安装包**。  
+- 附带脚本以 **Windows PowerShell**（`.ps1`）为主。
+
+### 前提
+
+- Cursor **Agent** 模式  
+- 一次初始化 + 短 `project-context` / 测试清单（包**不含**别人的业务窗与 CHANGELOG）
 
 ### 里面有什么
 
-这些不是功能清单，是护栏——每一条都对应真实改码里已经踩过的失败模式。
+这些不是功能清单，是护栏——每一条都对应真实改码里已经踩过的失败模式。**日常使用不必背这张表。**
 
 | 机制 | 做什么 |
 | --- | --- |
