@@ -6,13 +6,13 @@
 # .cursor/hooks-log/pm-gate.json。已知局限见该脚本头部注释：这是"最近判定过"而不是
 # "同条判定"的机械近似，不是精确复刻 CORE 文字规则。
 #
-# 业务默认（互斥）：非 .cursor/** 且无新鲜标记 → permission=deny（不再 ask）。
-# 禁止业务路径 fail-open allow。解析异常时：能识别 .cursor/** 则 allow（自救）；
-# 否则 deny（fail-closed，勿静默 allow 业务写）。与 hooks.json failClosed=true 互补
-# （能跑→deny JSON；跑不起来→Cursor 拦写）。
+# 行为（与 MAINTAINER §Cursor Hooks 一致 · observe/ask）：
+#   非 .cursor/** 且无新鲜 [PM] 标记 → permission=ask（人工确认；不是 deny）
+#   解析异常 → fail-open allow（避免 hook/落盘故障把人逼进死路）
+#   hooks.json 对本 hook 须 failClosed=false
 #
-# allow 仅旁路（与 deny 互斥，不得叠 ask）：
-#   1. .cursor/** 下的改动永远 allow——自救通道，防止硬门禁锁死自己。
+# allow 旁路：
+#   1. .cursor/** 下的改动永远 allow——自救通道。
 #   2. Kill switch：存在 .cursor/hooks-log/pm-gate-disabled 时整条检查临时关闭（仍写审计）。
 #   3. 该 conversation_id 在新鲜度窗口内有有效 [PM] 标记 → allow。
 
@@ -68,13 +68,13 @@ function Emit-Allow {
     exit 0
 }
 
-function Emit-Deny {
+function Emit-Ask {
     param([string]$ConversationId, [string]$Detail)
-    Write-Audit "DENY conversation=$ConversationId detail=$Detail"
-    $userMsg = "PM gate deny detail=$Detail : business write blocked. Emit [PM] first, or edit .cursor path / place hooks-log/pm-gate-disabled."
-    $agentMsg = "preToolUse: conversation=$ConversationId no fresh [PM] within $FreshnessMinutes min ($Detail); deny (not ask)."
+    Write-Audit "ASK conversation=$ConversationId detail=$Detail"
+    $userMsg = "PM gate ask detail=$Detail : no fresh [PM] marker detected. Confirm to continue write, or emit [PM] first / edit .cursor path / place hooks-log/pm-gate-disabled."
+    $agentMsg = "preToolUse: conversation=$ConversationId no fresh [PM] within $FreshnessMinutes min ($Detail); ask (not deny)."
     $result = @{
-        permission    = "deny"
+        permission    = "ask"
         user_message  = $userMsg
         agent_message = $agentMsg
     }
@@ -97,7 +97,8 @@ try {
     if (Test-CursorInfraPath -FilePath $fallbackPath) {
         Emit-Allow "cursor_infra_path_exempt_parse_fallback"
     }
-    Emit-Deny -ConversationId "unknown" -Detail "parse_failed"
+    # fail-open：解析失败不硬拦（与 MAINTAINER 一致；避免 mark 落盘故障连环死路）
+    Emit-Allow "parse_failed_fail_open"
 }
 
 $conversationId = if ($json.conversation_id) { [string]$json.conversation_id } else { "unknown" }
@@ -114,30 +115,30 @@ if (Test-CursorInfraPath -FilePath $filePath) {
 }
 
 if (-not (Test-Path -LiteralPath $gateFile)) {
-    Emit-Deny -ConversationId $conversationId -Detail "gate_file_missing"
+    Emit-Ask -ConversationId $conversationId -Detail "gate_file_missing"
 }
 
 try {
     $gateRaw = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8
     $gate = $gateRaw | ConvertFrom-Json -ErrorAction Stop
 } catch {
-    Emit-Deny -ConversationId $conversationId -Detail "gate_file_unreadable"
+    Emit-Ask -ConversationId $conversationId -Detail "gate_file_unreadable"
 }
 
 $entry = $gate.$conversationId
 if (-not $entry -or -not $entry.lastPmAtUtc) {
-    Emit-Deny -ConversationId $conversationId -Detail "no_pm_marker_for_conversation"
+    Emit-Ask -ConversationId $conversationId -Detail "no_pm_marker_for_conversation"
 }
 
 try {
     $lastPmUtc = [DateTime]::Parse($entry.lastPmAtUtc).ToUniversalTime()
 } catch {
-    Emit-Deny -ConversationId $conversationId -Detail "timestamp_unparseable"
+    Emit-Ask -ConversationId $conversationId -Detail "timestamp_unparseable"
 }
 
 $ageMinutes = ([DateTime]::UtcNow - $lastPmUtc).TotalMinutes
 if ($ageMinutes -gt $FreshnessMinutes) {
-    Emit-Deny -ConversationId $conversationId -Detail ("stale_pm_marker_age={0}min" -f [Math]::Round($ageMinutes,1))
+    Emit-Ask -ConversationId $conversationId -Detail ("stale_pm_marker_age={0}min" -f [Math]::Round($ageMinutes,1))
 }
 
 Emit-Allow ("fresh_pm_marker_age={0}min" -f [Math]::Round($ageMinutes,1))

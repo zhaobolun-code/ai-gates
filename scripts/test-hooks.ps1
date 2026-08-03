@@ -231,10 +231,15 @@ try {
     $convNone = "__test__conv-none-$([Guid]::NewGuid().ToString('N'))"
     $markLog = Join-Path $logDir "mark-pm-gate.log"
     $hooksJsonPath = Join-Path $repoRoot ".cursor\hooks.json"
+    # 避免残留 kill switch 污染 A5「缺标记 → ask」断言
+    $killSwitchPre = Join-Path $logDir "pm-gate-disabled"
+    if (Test-Path -LiteralPath $killSwitchPre) {
+        Remove-Item -LiteralPath $killSwitchPre -Force -ErrorAction SilentlyContinue
+    }
 
-    # A5：缺标记业务 Write → deny（不再 ask）
+    # A5：缺标记业务 Write → ask（不是 deny；与 MAINTAINER observe/ask 一致）
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $convNone } | ConvertTo-Json -Compress)
-    Assert-Test "A5 pm-gate-check: no marker business Write -> deny (exit 0)" ($r.ExitCode -eq 0 -and ((Get-Permission $r.Stdout) -eq "deny")) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    Assert-Test "A5 pm-gate-check: no marker business Write -> ask (exit 0)" ($r.ExitCode -eq 0 -and ((Get-Permission $r.Stdout) -eq "ask")) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
 
     # A4：text 字段命中 [PM] → 新鲜 pm-gate.json + mark-pm-gate.log 含 wrote=
     $r = Invoke-HookScript -ScriptName "mark-pm-gate.ps1" -StdinJson (@{ text = "[PM] 测试判定，你下一步：..."; conversation_id = $convFresh } | ConvertTo-Json -Compress)
@@ -282,11 +287,11 @@ try {
         Remove-Item -LiteralPath $killSwitch -ErrorAction SilentlyContinue -Force
     }
 
-    # 解析异常对业务路径 → deny（fail-closed；禁止静默 allow）
+    # 解析异常对业务路径 → allow（fail-open；与 MAINTAINER 一致）
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson 'garbage-not-json'
-    Assert-Test "A5 pm-gate-check: malformed stdin -> deny (fail-closed)" ((Get-Permission $r.Stdout) -eq "deny" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    Assert-Test "A5 pm-gate-check: malformed stdin -> allow (fail-open)" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
 
-    # A6：仅 pm-gate-check 条目 failClosed:true；其余 hook 保持 false
+    # A6：全部 hook failClosed:false（含 pm-gate-check）
     $hooksCfg = Get-Content -LiteralPath $hooksJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $allHookEntries = @()
     foreach ($ev in $hooksCfg.hooks.PSObject.Properties) {
@@ -294,11 +299,9 @@ try {
             $allHookEntries += [pscustomobject]@{ Event = $ev.Name; Command = [string]$entry.command; FailClosed = [bool]$entry.failClosed }
         }
     }
-    $checkEntries = @($allHookEntries | Where-Object { $_.Command -match 'pm-gate-check\.ps1' })
-    $otherEntries = @($allHookEntries | Where-Object { $_.Command -notmatch 'pm-gate-check\.ps1' })
-    $checkOk = ($checkEntries.Count -ge 1) -and (($checkEntries | Where-Object { -not $_.FailClosed }).Count -eq 0)
-    $othersOk = ($otherEntries.Count -ge 1) -and (($otherEntries | Where-Object { $_.FailClosed }).Count -eq 0)
-    Assert-Test "A6 hooks.json: only pm-gate-check failClosed=true; others false" ($checkOk -and $othersOk) "check=$($checkEntries | ConvertTo-Json -Compress) others_true=$(($otherEntries | Where-Object { $_.FailClosed } | ConvertTo-Json -Compress))"
+    $anyTrue = @($allHookEntries | Where-Object { $_.FailClosed })
+    $hasCheck = (@($allHookEntries | Where-Object { $_.Command -match 'pm-gate-check\.ps1' }).Count -ge 1)
+    Assert-Test "A6 hooks.json: all hooks failClosed=false (incl. pm-gate-check)" (($allHookEntries.Count -ge 4) -and $hasCheck -and ($anyTrue.Count -eq 0)) "entries=$($allHookEntries | ConvertTo-Json -Compress)"
 
 }
 finally {

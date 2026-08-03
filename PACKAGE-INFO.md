@@ -1,15 +1,18 @@
 ﻿# AI 开发流水线 Skill - 打包信息
 
 - 版本：v3.2.0
-- 打包日期：2026-07-31
+- 打包日期：2026-08-03
 - 来源：本包由 .cursor/package-release.ps1 从源仓库生成，仅含随 Skill 分发的通用文件。
 
-## 本包不含（按设计，维护者专属，见源仓库 project-local-config.md）
+## 本包不含（按设计，维护者专属）
 
 - MAINTAINER.md：版本升级策略、RC 转正条件、发布检查清单，含源仓库专属的审计记录，不通用
-- CHANGELOG.md：源仓库的完整变更历史
 
-如需查看完整版本历史或维护策略，请查阅源仓库对应文件；本包已随附 references/skill-eval-checklist.md（迷你 Harness，可直接用于新项目自测）。
+## 本包含变更历史
+
+- CHANGELOG.md：随包分发，便于公开仓/Release 增信与接入方对照版本。
+
+维护策略与发布清单仍以源仓库 MAINTAINER.md 为准；本包已随附 references/skill-eval-checklist.md（迷你 Harness，可直接用于新项目自测）。
 
 ## 首次接入新项目
 
@@ -23,4 +26,4 @@
 - 入口固定为「项目经理 + 需求」；跳过容易乱
 - 复杂问题仍可能失败并归档——那是叫停换路，不是流程坏了
 
-版本号以 skills/VERSION 为准；完整变更历史不随包分发。
+版本号以 skills/VERSION 为准；变更摘要见 skills/CHANGELOG.md。

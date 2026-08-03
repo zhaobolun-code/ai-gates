@@ -18,7 +18,7 @@
       {
         "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/pm-gate-check.ps1",
         "matcher": "Write|StrReplace|EditNotebook",
-        "failClosed": true,
+        "failClosed": false,
         "timeout": 10
       }
     ],
