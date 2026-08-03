@@ -1,4 +1,4 @@
-# Link .trae/skills -> .cursor/skills (same files for Cursor and Trae)
+﻿# Link .trae/skills -> .cursor/skills (same files for Cursor and Trae)
 # Run from repo root: powershell -ExecutionPolicy Bypass -File .cursor/scripts/link-trae-skills.ps1
 
 $ErrorActionPreference = "Stop"

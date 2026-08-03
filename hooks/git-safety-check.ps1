@@ -1,6 +1,8 @@
 ﻿# git-safety-check.ps1
-# beforeShellExecution hook — 硬门禁机械化第一版（observe/ask，不做硬 deny）。
-# 命中高危 Git 命令时返回 permission=ask，交回用户在 Cursor 里手动确认/拒绝；
+# beforeShellExecution hook — 高危 Git 命令门禁。
+# 命中高危 Git 命令时返回 permission=deny + user_message 逃生提示（2026-08-03 由 ask 改：
+# Cursor 2.2+ 的 hook `permission: ask` 是官方确认 bug，不弹窗直接放行，只剩 deny/allow 有效）；
+# 逃生路径：用户确认安全后手动在终端执行，或临时移除本 hook 条目（hooks.json），或编辑命令规避误判。
 # 脚本任何异常都不影响原命令执行（失败开放，见 .cursor/hooks.json 的 failClosed:false）。
 # 细则背景：CORE.md §Agent 失败模式与恢复 / references/rollback.md「任何回退前必须显式征得用户确认」。
 
@@ -31,10 +33,10 @@ $dangerousPatterns = @(
 
 foreach ($rule in $dangerousPatterns) {
     if ($cmd -match $rule.Pattern) {
-        $userMsg = "检测到高危 Git 命令：$cmd`n原因：$($rule.Reason)`n请确认这是你（或本轮已明确同意的操作），不确定就选择拒绝。"
-        $agentMsg = "hook 拦到高危 Git 命令 ($($rule.Reason))，已转人工确认（ask），不是自动拒绝；用户确认后会继续执行。"
+        $userMsg = "检测到高危 Git 命令：$cmd`n原因：$($rule.Reason)`n已被 hook 拦截（deny）。逃生：若你确认安全，请在终端手动执行该命令；或临时移除 hooks.json 中本 hook 条目后重试；或调整命令规避误判。"
+        $agentMsg = "hook 拦到高危 Git 命令 ($($rule.Reason))，已 deny（Cursor 2.2+ ask 无效，改硬拦）；逃生：用户手动执行 / 移除本 hook / 调整命令。"
         $result = @{
-            permission   = "ask"
+            permission   = "deny"
             user_message = $userMsg
             agent_message = $agentMsg
         }

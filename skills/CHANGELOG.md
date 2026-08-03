@@ -10,6 +10,151 @@
 
 ## [3.2.0] - 2026-07-21（流程收敛与正式发布；含同日机械化 Harness A/B/C/D 追加）
 
+### Included changes — 2026-08-03（机制三方向：协议级仿真台 + 流水线体检 + 索引减负 · 不 bump）
+
+> 窗：Standard · L1.5 · Hook/Test/Doc-only · 无窗。机制饱和期进化三方向：①协议级 hook 仿真台把发布闸「真演证据」从人工开真实会话变一键机器真演（大 payload ≥80KB 保真，直接打 2026-08-03 真演 81KB 解析失败教训）；②打点数据 → 流水线体检报告（数据闭环，PM 判定看数据；顺带实现退化信号巡检 D1-D5）；③CORE 翻车索引「命中驱动维护」（上限 15 条、近 90 天命中证据、超限降级），防索引无限膨胀。
+
+##### Added
+
+- `scripts/simulate-cursor-session.ps1`：协议级 hook 仿真台——按 Cursor 2.2 schema 模拟完整会话序列（sessionStart → preToolUse → postToolUse → afterAgentResponse），tool_input.content 塞 ≥80KB 真实级全文（中文/引号/反斜杠/制表符/换行/unicode 转义），stdin 以 UTF-8 无 BOM 字节流写子进程；P1-P9 断言（payload 保真 / 漂移检测 / CHANGELOG Level0 豁免 allow / 大 payload 打点链路不断 / [PM] 落盘 / 同会话有流水 Level1 allow / 无流水 deny / 业务无标记 deny / 会话终态双打点可查）；`__sim__` 前缀隔离跑完自清理；exit 0/1。
+- `scripts/pipeline-health.ps1`：流水线体检——聚合 pm-gate.json / changelog-writes.json / pm-gate-check.log / mark-*.log / unity-compile-check.log / kill switch，输出近 N 天报告（[PM] 打点规模/活跃/来源分布、CHANGELOG 流水、门禁 deny、PARSE_FAIL、Unity 命中）+ 退化信号 D1-D5（打点缺失 CRIT / 门禁无触发 WARN / PARSE_FAIL WARN / 全链路静默 CRIT / kill switch INFO）；`-Days` / `-OutFile` / `-JsonOutput`；exit 0/2（PM 判定从拍脑袋变看数据）。
+- `test-hooks.ps1`：A9（协议级仿真台全绿）+ A10（体检报告可生成，exit 0/2 + 含「流水线体检」）；finally 清理扩展 `__sim__` 前缀。
+
+##### Changed
+
+- `skills/references/anti-patterns.md`：CORE 翻车索引表加「近90天命中证据」列 + 索引维护规则（只列近 90 天真实命中、上限 15 条、新增带证据、超限最低命中降级回完整表）。
+- `skills/CORE.md`：翻车索引指针句补「仅列近 90 天真实命中反模式、上限 15 条，超限最低命中降级」。
+- `skills/MAINTAINER.md`：发布检查清单 +2 勾选项（协议级真演 simulate-cursor-session 全绿 + pipeline-health 无 CRIT；机制减负索引 ≤15 命中驱动）；已知限制 #4 补协议级仿真（仿真仍不覆盖 Cursor 侧触发/注入竞态，首次发布仍须面板真演核验）。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+### Included changes — 2026-08-03（真演闭环：打点链路健壮化 ×2 + 门禁分场景文案 + 真演进发布闸 · 不 bump）
+
+> 窗：Express · Hook/Doc-only · 无窗。真演第三轮实弹暴露两连故障（真实大 payload ~81KB 下 `Console.In.ReadToEnd`+`ConvertFrom-Json` 解析失败断打点 → 门禁误拦；Cursor 2.2+ `ask` 权限官方 bug 使门禁形同虚设）→ 打点链路健壮化 ×2 + Emit-Deny 分场景文案 + 教训沉淀进发布闸。真演验证闭环：真实会话写 CHANGELOG 自动打点落盘、Level 1 门禁真实 DENY/ALLOW。
+
+##### Changed
+
+- `hooks/mark-changelog-write.ps1`：stdin 读取改 `OpenStandardInput()` + StreamReader 显式 UTF-8；`ConvertFrom-Json` 失败时 fallback 正则提取 `conversation_id` + `file_path`，路径命中 changelog.md 仍照常打点（打点链路不因 parse 失败而断）；`Write-ChangelogMark` 合并既有记录；PARSE_FAIL 插桩保留（含 err）。
+- `hooks/mark-pm-gate.ps1`：同款健壮化——OpenStandardInput + parse fallback 正则提取 `conversation_id` + 文本字段，[PM] 检测仍照常执行（修业务路径 [PM] 打点断链）；PARSE_FAIL 插桩保留（含 err）。
+- `hooks/pm-gate-check.ps1`：`Emit-Deny` 增 `-BaseMsg` 参数（默认值保留业务路径 [PM] 文案）；3 处 Level 1 deny 调用传专用 BaseMsg——明确「此门禁看 CHANGELOG 写流水、不看 [PM] 标记」，逃生路径=先写 CHANGELOG / kill switch / 手动编辑（不误导 agent）。
+- `skills/MAINTAINER.md`：§发布检查清单新增「真实 Cursor 会话 hook 链路真演证据」勾选项（走读记录 ≠ 发布闸证据）。
+- `skills/references/skill-eval-checklist.md`：§I 新增「2026-08-03 真演记录（发布闸证据级）」段（真实 DENY/ALLOW + 打点落盘证据；教训：走读/假需求 ≠ 发布闸证据）。
+- `skills/references/anti-patterns.md`：CORE 翻车索引 +1（#15 走读/假需求冒充已真演）；§方案与文档状态 +1 行（发布前仅走读验证 hook 链路）。
+- `lessons-learned.md`（项目级）：+1 行（ask bug / 大 payload 解析失败两连教训，错因=验收仅走读未真演）。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+### Included changes — 2026-08-03（真演修复：PM 门禁 ask 链路两连修 · 不 bump）
+
+> 窗：Express · Hook/Test/Doc-only · 无窗。真演第一步（新会话写 `.cursor/skills/` 下非 CHANGELOG 文件）预期弹确认，实际直接放行，暴露两个独立故障：① Level 1 分支在 `changelog-writes.json` 缺失（= 初始状态，无任何会话有 CHANGELOG 流水）时 fail-open `allow`，轻门禁从不生效（`no_changelog_write_for_conversation_level1` 只出现在 test-hooks 注入场景）；② 修好①改 `permission: ask` 后真演仍不弹窗——**Cursor 2.2+ 的 hook `ask` 权限是官方确认 bug**（不弹窗直接放行，仅 allow/deny 有效，forum.cursor.com/t/hooks-ask-permission-broken-in-2-4-21 / t/hook-return-value-ask-has-no-practical-effect），脚本侧字节级验证 stdout 干净 `{"permission":"ask"}`。最终按官方 workaround 全部改 `deny` + user_message 逃生路径。
+
+##### Changed
+
+- `hooks/pm-gate-check.ps1`：Level 1 打点文件缺失从 fail-open `allow` → `deny`（两连修：先改 ask，再因 Cursor ask bug 改 deny；reason=`changelog_writes_missing_level1`）；`Emit-Ask` 整体改 `Emit-Deny`（permission=deny），8 处调用（业务路径 5 + Level 1 3）均带 user_message 逃生提示（业务：发 `[PM]` / kill switch `pm-gate-disabled` / 手动编辑；Level 1：先写 CHANGELOG / kill switch / 手动编辑）；损坏 / 时间戳不可解析 / 解析异常仍 fail-open `allow`。
+- `hooks/git-safety-check.ps1`：高危 Git 命令 `permission: ask` → `deny` + user_message 逃生（手动执行 / 移除本 hook / 调整命令）——同样受 Cursor ask bug 影响。
+- `scripts/test-hooks.ps1`：A1.1/A1.4/A1.5/A5 断言 ask → deny；git-safety 两条断言 ask → deny；注释同步（顺序依赖：文件缺失同样 deny）。
+- `scripts/check-hooks-policy.ps1`：断言反转——pm-gate-check 必须 `Emit-Deny`/`permission=deny` 且**不得**使用 `permission=ask`；MAINTAINER 必须声明 `permission: deny`。
+- `hooks/check-hooks-drift.ps1`：漂移 hint 文案 ask → deny（Cursor 2.2+ ask no-op）。
+- `skills/MAINTAINER.md`：hooks 表 git-safety/pm-gate-check 行、已知限制 #1（补 2026-08-03 再反转）、#7、发布检查清单全部 ask → deny。
+- `skills/references/skill-eval-checklist.md`：I2 验收项 ask → deny + 逃生路径。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+### Included changes — 2026-08-03（METHODOLOGY 定位：四合一 + 与众不同 · 不 bump）
+
+> 窗：Express · Skill/Doc-only · 无窗。外部调研（2026-08-03 方法论横评）确认：市面上「使用 AI 的方法论」已收敛到同一骨架；本文档四合一形态（新人导读 + 预期对齐 + 流程概要 + 使用记录）、文件夹状态机、一次确认包为市场少见 → 在 METHODOLOGY 显式写「和网上常见说法有什么不同」三条。
+
+##### Changed
+
+- `METHODOLOGY.md`：新增「和网上常见说法有什么不同」小节（交付闭环 = 文件夹状态机 / 确认方式 = 一次确认包 / 文档形态 = 四合一），置于「使用记录」之后、「新人建议阅读顺序」之前；行数 83 → 约 100（仍 ≤120 限）。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+### Included changes — 2026-08-03（自我治理 · 不 bump）
+
+> 窗：`self-governance-gates`（Standard · L1.5 · Skill/Doc-only · Delta-only）。上游复盘：机制对业务代码是硬门禁，对 `.cursor` 自己却靠自觉——本窗三 Step 对症（轻门禁 / BOM 机械化 / validate 绿门卡进发布）。
+
+#### Step 1 — `.cursor/**` 豁免改「轻门禁」（自我治理盲区修复）
+
+##### Added
+
+- `hooks/mark-changelog-write.ps1`（**postToolUse**，matcher `Write|StrReplace|EditNotebook`）：解析 stdin file_path，命中 `CHANGELOG.md`（大小写不敏感、路径可含 `.cursor/skills/`）→ 写 `.cursor/hooks-log/changelog-writes.json`（按 conversation_id 记 `lastChangelogWriteAtUtc`；**复用 mark-pm-gate 的 Write-GateAtomic 原子写模式** temp+Replace + 审计）；非 CHANGELOG 路径仅审计；一切异常 exit 0（纯观测、无拦截语义、fail-open）；UTF-8 BOM + 显式 `[Console]` 编码。
+- `hooks.json` postToolUse 新增条目 → mark-changelog-write，`failClosed:false`、timeout 10。
+- `pm-gate-check.ps1` **豁免分级重构**：Level 0 全豁免 allow（kill switch 最优先 / CHANGELOG.md 自身 / `.cursor/hooks-log/**` 运行时目录 / 项目专属文件 project-context.md、regression-index.yaml、lessons-*等）；Level 1 轻门禁（`.cursor/skills/**`、`hooks/**`、`scripts/**`、`rules/**`、`hooks.json` → 会话内最近 120 分钟有 CHANGELOG 写记录 → allow，无 → **`permission: ask`（非 deny）**，消息提示需带 CHANGELOG 流水；打点缺失/损坏/时间戳不可解析 → fail-open allow）；Level 2 兜底：其余 `.cursor/**`（package-release.ps1、README.md、mcp.json、LICENSE、ai_dev_*.7z、_release_staging/ 等）保持 allow；业务路径（非 `.cursor/**`）原 PM 标记新鲜度检查不变。
+- `scripts/test-hooks.ps1`：A5 改写为分级断言 + 新增 A1.1~A1.7 用例（无流水 → ask 非 deny / 有流水 → allow / Level 0 豁免 / Level 1 触发 / 业务路径回归 / 打点缺失 fail-open / 兜底 allow）；备份/还原扩展至 changelog-writes.json（`__test__` 前缀隔离）。
+
+##### Changed
+
+- MAINTAINER §Cursor Hooks：**六 hook → 七 hook**（hooks 表 +1 行 mark-changelog-write）；pm-gate-check 行为描述同步为分级豁免（Level 0 全豁免 / Level 1 轻门禁 ask / 其余兜底 allow）；已知限制补第 7 条（轻门禁打点落盘不可靠（同 #1）→ fallback fail-open allow、非 deny）。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+#### Step 2 — BOM 检查机械化（教训 → 机器检查）
+
+##### Added
+
+- `scripts/check-hooks-policy.ps1` `Get-HooksPolicyReport` 增加 **BOM 扫描段**：遍历 `.cursor/hooks/*.ps1` + `.cursor/scripts/*.ps1`，`ReadAllBytes` 取前 3 字节非 `EF BB BF` → issue "UTF-8 BOM missing: <path>"；函数签名加可选 `-HooksDir` / `-ScriptsDir`（默认从 RepoRoot 推导，**只进函数签名不进 param() 块**，保护 `. 点源`）；validate-pipeline -Strict 自动受益。
+- `scripts/test-hooks.ps1` A2 用例：临时 fixture 无 BOM fake.ps1 → `Get-HooksPolicyReport -HooksDir/-ScriptsDir` Ok=false + "UTF-8 BOM" issue；全 BOM → 无误报；真实仓库全绿。
+- `scripts/` 下 **8 个存量无 BOM ps1 重存**（append-pipeline-snapshot / check-pm-step-golden-evidence / ci-pressure-manager-gate / init-project-context / link-trae-skills / pipeline-doc-parse / suggest-pipeline-lane / summarize-pipeline-metrics）：`[IO.File]::ReadAllText($p,[Text.Encoding]::UTF8)` → `[IO.File]::WriteAllText($p,$content,(New-Object Text.UTF8Encoding($true)))`，内容不变仅加 3 字节 BOM 头（禁默认 Get-Content/Set-Content 防 GBK mojibake）。
+
+##### Changed
+
+- MAINTAINER 已知限制 #2 补「已机械化」句（check-hooks-policy 扫描 BOM）；§一键校验/§发布检查清单补 BOM 检查说明。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+#### Step 3 — validate 绿门卡进发布（执行纪律机械化）
+
+##### Added
+
+- `package-release.ps1`：param 增加 `[switch]$SkipValidate`、`[string]$ValidateScriptPath`（默认 `.cursor/scripts/validate-pipeline.ps1`）；在定位 7z 之后、staging 之前强制调 validate-pipeline.ps1 `-Strict`——exit≠0 → Write-Error 红字明细 + 拒绝句「validate-pipeline -Strict FAILED；已拒绝打包。需显式 -SkipValidate 才可继续（维护者签字级逃生）」+ `exit 1`；`-SkipValidate` 时打印醒目警告。
+- `scripts/test-hooks.ps1` A3 用例：stub validate（exit 1 / exit 0）经 `-ValidateScriptPath` 注入 → 拒绝/放行；`-SkipValidate` 逃生。
+
+##### Changed
+
+- MAINTAINER §发布检查清单加勾选项「打包前 validate-pipeline -Strict 全绿（package-release 默认强制；-SkipValidate 仅显式逃生）」；§发布打包脚本说明同步。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+### Included changes — 2026-08-03（语言感知 CR · 不 bump）
+
+#### Added
+
+- `code-reviewer/SKILL.md` §审查维度新增**语言维**小节（按 diff 语言层路由）：`.cs` → C# 层查 MonoBehaviour 生命周期 / 对象池复用 / 协程泄漏 / Editor 专有 API；`.lua` → Lua 层查 table 频繁分配 / 闭包泄漏 / 全局变量污染 / 跨语言装箱与 LuaFunction 预缓存；检查项**指针链接** project-context §代码审核额外关注点（不内联复制）；无 CRG/CodeGraph → 静态读码 + 按 codegraph-probe 记 soft risk / 验证缺口，不硬拦。
+
+#### Changed
+
+- `code-reviewer/SKILL.md` 集成维句补「语言维必扫」提及；总行数增量 ≤8（语言维小节 ≤8 行，不追存量）。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+### Included changes — 2026-08-03（引导式 init · 不 bump）
+
+#### Added
+
+- `scripts/pm-init.ps1`：`-Apply` 改为**引导式**——probe 四态（project-context / regression-index.yaml / doc-root / CodeGraph）零副作用；`-Apply` 输出「下一步清单」：① init-project-context（幂等不覆盖，`-Force` 语义不变）② rules 对齐（`link-trae-skills.ps1` 命令 + `.mdc ↔ .trae` 复制提示）③ CodeGraph 安装命令（可选，保持须用户同意）④ 人工填写项。全程无 npm。
+
+#### Changed
+
+- `references/pm-init.md`：同步引导式形态（探测 → 下一步清单 → 可选安装）；`README.md` §第一次接入补「引导式」一句。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+### Included changes — 2026-08-03（写后质量门 · 不 bump）
+
+#### Added
+
+- `postToolUse` → `hooks/check-unity-compile.ps1`（写后质量门）：命中 `.cs`/`.lua` 路径 → 扫最近 Unity `Editor.log` 的 `error CS\d{4}` 编译错误；命中 → 注入 `additional_context`（+ `additionalContext` 双键兼容）+ 审计行 `.cursor/hooks-log/unity-compile-check.log`；**恒 allow 不拦截**、解析异常/日志缺失/非代码路径 fail-open；支持 `-EditorLogPath` 注入 fixture（默认 Editor.log）；不做 batchmode / 业务断言（归黄金验窗，职责分离）。`hooks.json` 新条目 `failClosed:false`、timeout 10。
+- `scripts/test-hooks.ps1` 新增用例 A8：经 `-EditorLogPath` 临时 fixture 断言命中→additional_context+审计落盘、无错→静默、非代码路径→静默、日志缺失→静默、坏 stdin→fail-open 共五态。
+
+#### Changed
+
+- MAINTAINER §Cursor Hooks：**五 hook → 六 hook**（hooks 表 +1 行 postToolUse）；已知限制补第 6 条（轻量提示、非硬拦、A8 验证盲区同 test 局限）。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
+### Included changes — 2026-08-03（sessionStart 漂移检测 · 不 bump）
+
+#### Added
+
+- `sessionStart` → `check-hooks-drift.ps1`：会话启动自动比对 MAINTAINER ↔ hooks；漂移写 `.cursor/hooks-log/hooks-policy-drift.json` 并注入 `additional_context`（failClosed:false）。
+- `scripts/check-hooks-policy.ps1`：共享 hooks policy 报告（validate-pipeline + sessionStart 复用）。
+
+#### Changed
+
+- `validate-pipeline` hooks policy 改调共享脚本；`test-hooks` 增 A7；MAINTAINER 文档改为五个 hook。
+- **不 bump** `VERSION`（仍 3.2.0）。
+
 ### Included changes — 2026-08-03（hooks 漂移对齐 + CHANGELOG 随包 · 不 bump）
 
 #### Fixed
@@ -440,7 +585,7 @@
 
 ## [3.1.4] - 2026-07-16（A～D 真演 Pass + RC 转正 · patch）
 
-> TL 确认「bump / 转正」。收口 2026-07-16 全部「未发布」项；Skill 评测 A～D **21/21** 真演 Pass（≥90%）。观察期「候选定版 RC」结束，标 **定版**。  
+> TL 确认「bump / 转正」。收口 2026-07-16 全部「未发布」项；Skill 评测 A～D **21/21** 真演 Pass（≥90%）。观察期「候选定版 RC」结束，标 **定版**。
 
 > 说明：定版时以评测 Harness Pass + TL 书面转正为准；真实 Express 闭环证据于 **2026-07-17** 补齐（见上条「未发布」）；Standard+L1.5 仍建议后续补记。
 
@@ -1829,4 +1974,3 @@
 | 状态机新态、模式删除、门禁语义变更 | major（2.0.0） | 取消微型模式 |
 
 修改 Skill 后请同步更新本 CHANGELOG，并将 LTS 版本号同步至：**README 头**、**CORE 头**、**CHANGELOG 顶**、**MAINTAINER**、**`.cursor/rules/ai-dev-pipeline.mdc`**、**`.trae/rules/ai-dev-pipeline.md`**、**`validate-pipeline.ps1`**、**`check-pipeline-doc.ps1`**。
-

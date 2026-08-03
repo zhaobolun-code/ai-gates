@@ -239,54 +239,20 @@ try {
 
     if ($runScripts) {
         Write-Host "`n--- hooks policy (MAINTAINER ↔ hooks.json / pm-gate-check) ---" -ForegroundColor Cyan
-        $hooksJsonPath = Join-Path $repoRoot ".cursor/hooks.json"
-        $pmGateCheckPath = Join-Path $repoRoot ".cursor/hooks/pm-gate-check.ps1"
-        $hooksPolicyOk = $true
-        if (-not (Test-Path -LiteralPath $hooksJsonPath)) {
-            Write-Host "hooks policy: FAILED (hooks.json missing)" -ForegroundColor Red
-            $hooksPolicyOk = $false
-        } else {
-            $hooksCfg = (Read-Utf8Text $hooksJsonPath) | ConvertFrom-Json
-            $failClosedTrue = @()
-            foreach ($ev in $hooksCfg.hooks.PSObject.Properties) {
-                foreach ($entry in @($ev.Value)) {
-                    if ([bool]$entry.failClosed) {
-                        $failClosedTrue += ("{0}:{1}" -f $ev.Name, $entry.command)
-                    }
-                }
-            }
-            if ($failClosedTrue.Count -gt 0) {
-                Write-Host "hooks policy: FAILED (failClosed must be false for all hooks; MAINTAINER observe/ask):" -ForegroundColor Red
-                $failClosedTrue | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
-                $hooksPolicyOk = $false
-            }
-        }
-        if (-not (Test-Path -LiteralPath $pmGateCheckPath)) {
-            Write-Host "hooks policy: FAILED (pm-gate-check.ps1 missing)" -ForegroundColor Red
-            $hooksPolicyOk = $false
-        } else {
-            $pmGateRaw = Read-Utf8Text $pmGateCheckPath
-            if ($pmGateRaw -notmatch 'function\s+Emit-Ask\b' -or $pmGateRaw -notmatch 'permission\s*=\s*"ask"') {
-                Write-Host "hooks policy: FAILED (pm-gate-check must Emit-Ask / permission=ask)" -ForegroundColor Red
-                $hooksPolicyOk = $false
-            }
-            if ($pmGateRaw -match 'function\s+Emit-Deny\b') {
-                Write-Host "hooks policy: FAILED (pm-gate-check must not define Emit-Deny; use ask)" -ForegroundColor Red
-                $hooksPolicyOk = $false
-            }
-            if ($pmGateRaw -notmatch 'parse_failed_fail_open' -and $pmGateRaw -notmatch 'fail-open') {
-                Write-Host "hooks policy: FAILED (pm-gate-check must fail-open on parse errors)" -ForegroundColor Red
-                $hooksPolicyOk = $false
-            }
-        }
-        if ($maintainerRaw -notmatch 'permission:\s*ask' -or $maintainerRaw -notmatch 'failClosed:\s*false') {
-            Write-Host "hooks policy: FAILED (MAINTAINER must declare ask + failClosed:false)" -ForegroundColor Red
-            $hooksPolicyOk = $false
-        }
-        if ($hooksPolicyOk) {
-            Write-Host "hooks policy: OK (ask + all failClosed=false)" -ForegroundColor Green
-        } else {
+        $policyScript = Join-Path $scriptDir "check-hooks-policy.ps1"
+        if (-not (Test-Path -LiteralPath $policyScript)) {
+            Write-Host "hooks policy: FAILED (check-hooks-policy.ps1 missing)" -ForegroundColor Red
             $exitCode = 1
+        } else {
+            . $policyScript
+            $policyReport = Get-HooksPolicyReport -RepoRoot $repoRoot
+            if ($policyReport.Ok) {
+                Write-Host "hooks policy: OK (ask + all failClosed=false + sessionStart drift)" -ForegroundColor Green
+            } else {
+                Write-Host "hooks policy: FAILED (drift):" -ForegroundColor Red
+                $policyReport.Issues | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
+                $exitCode = 1
+            }
         }
 
         Write-Host "`n--- hooks 行为回归 (支柱 C) ---" -ForegroundColor Cyan

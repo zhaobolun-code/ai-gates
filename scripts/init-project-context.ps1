@@ -1,4 +1,4 @@
-# init-project-context.ps1 — 新项目初始化 project-context（v3.2.0）
+﻿# init-project-context.ps1 — 新项目初始化 project-context（v3.2.0）
 # Usage: powershell -ExecutionPolicy Bypass -File .cursor/scripts/init-project-context.ps1
 #   -Force  overwrite existing .cursor/project-context.md
 

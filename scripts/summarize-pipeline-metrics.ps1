@@ -1,4 +1,4 @@
-# summarize-pipeline-metrics.ps1 — 汇总 pipeline-snapshot.log + pipeline-recovery-log.md
+﻿# summarize-pipeline-metrics.ps1 — 汇总 pipeline-snapshot.log + pipeline-recovery-log.md
 # Usage: .\summarize-pipeline-metrics.ps1
 param(
     [int]$LastDays = 30

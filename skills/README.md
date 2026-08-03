@@ -1,4 +1,4 @@
-﻿# AI 开发流水线 Skill
+# AI 开发流水线 Skill
 
 > **版本**：[VERSION](./VERSION)  
 > **放哪**：推荐本仓库 `.cursor/skills/`；也可拷到个人技能目录多项目共用。  
@@ -29,8 +29,9 @@
 
 ## 第一次接入（三步）
 
-1. 在助手里粘贴 `项目经理 初始化`，或运行：  
-   `powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply`
+1. 在助手里粘贴 `项目经理 初始化`（**引导式**），或运行：  
+   `powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply`  
+   脚本会探测四态并输出「下一步清单」（生成/确认 project-context → rules 对齐 → 可选 CodeGraph），按清单逐步确认即可。
 2. 打开并填写 `.cursor/project-context.md`：用什么技术、哪些目录要格外小心、有哪些必测场景。填完如有同步脚本再跑一下（助手会提示）。  
 3. （推荐）征得同意后安装代码检索工具 CodeGraph，方便少读错文件。
 
@@ -50,7 +51,8 @@
 - 每个需求一个文件夹；事情结束应离开「进行中」，不能只改状态字。  
 - 只改说明、不改业务程序时，有时用另一助手做静态核对；业务现象仍以你亲眼看为准。  
 - 测不过会停下来换思路，而不是无限小改。  
-- 助手完全没按流程、直接乱改：回 **`按 CORE 重来`**。
+- 助手完全没按流程、直接乱改：回 **`按 CORE 重来`**。  
+- 标准车道：plan-lite → L1/L1.5/L2 方案审核 → 确认（细节见 CORE §三车道 → 派岗）。
 
 ## 给技术负责人（可选）
 

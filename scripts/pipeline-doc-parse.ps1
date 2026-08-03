@@ -1,4 +1,4 @@
-# pipeline-doc-parse.ps1 - shared plan-lite / regression-index parsers (dot-source)
+﻿# pipeline-doc-parse.ps1 - shared plan-lite / regression-index parsers (dot-source)
 # Usage: . (Join-Path $scriptDir "pipeline-doc-parse.ps1")
 
 function Get-PipelineStepNumber {

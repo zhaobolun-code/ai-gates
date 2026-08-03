@@ -176,7 +176,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 切换岗位前 Read 对应 `SKILL.md`。Express 切片由 **`[PM]`** 输出，**策划不参与**。直叫岗位名须同条先 `[PM]`（硬门禁 #7）；无 slice/plan-lite 且未 ready 不得直接 `[developer]`。一轮确认「准」→ 同条 `[developer]`（[handoff-automation.md](references/handoff-automation.md) §0/§F）。
 
-翻车索引 → [anti-patterns.md](references/anti-patterns.md)。写方案/改码/扩 README 前 → [execution-discipline.md](references/execution-discipline.md) **复用四问**（已有→复用→少写/不写→能删）。测挂修复 → `证据/_repair-blackboard.md`；止损/`repair_rounds` 触顶 → **A#/口径复议**（[diagnosis-gates.md](references/diagnosis-gates.md) §0.6/§0.7），禁同 A# 死磕。错题 → 大纲 `.cursor/lessons-outline.md`（错因+改正）+ 方案「错题本必读」指路（[lessons-learned.md](references/lessons-learned.md)）。
+翻车索引 → [anti-patterns.md](references/anti-patterns.md)（**仅列近 90 天真实命中反模式、上限 15 条**，超限最低命中降级回完整表）。写方案/改码/扩 README 前 → [execution-discipline.md](references/execution-discipline.md) **复用四问**（已有→复用→少写/不写→能删）。测挂修复 → `证据/_repair-blackboard.md`；止损/`repair_rounds` 触顶 → **A#/口径复议**（[diagnosis-gates.md](references/diagnosis-gates.md) §0.6/§0.7），禁同 A# 死磕。错题 → 大纲 `.cursor/lessons-outline.md`（错因+改正）+ 方案「错题本必读」指路（[lessons-learned.md](references/lessons-learned.md)）。
 
 ## Agent 失败模式与恢复
 

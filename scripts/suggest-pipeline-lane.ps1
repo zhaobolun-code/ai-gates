@@ -1,4 +1,4 @@
-# suggest-pipeline-lane.ps1 - git diff lane hint (advisory; does not set lane)
+﻿# suggest-pipeline-lane.ps1 - git diff lane hint (advisory; does not set lane)
 # Usage:
 #   .\suggest-pipeline-lane.ps1
 #   .\suggest-pipeline-lane.ps1 -DocPath "Assets/Doc/.../plan.md"

@@ -1,4 +1,4 @@
-# PM 初始化（半自动接入）
+# PM 初始化（引导式接入）
 
 > 口令等价（强制）：**`项目经理` = `PM`**，**`初始化` = `init`**。  
 > 二者相加即本流程（任选语种组合，**效果相同**）：如 `项目经理 初始化`、`PM init`、`PM 初始化`、`项目经理 init`；裸写 `init` 且本轮意图为流水线接入时亦同（勿与 `codegraph init` 混淆）。同义：`流水线初始化`。  
@@ -36,16 +36,18 @@
 | --- | --- |
 | 探测结果 | project-context / 文档根 / CodeGraph 各一行：已有 / 已创建 / 待装 / 失败 |
 | 已执行 | 实际跑过的脚本与创建的路径 |
+| 下一步清单（引导式） | `-Apply` 后按序输出：① init-project-context（自动，不覆盖）② rules 对齐（link-trae-skills 命令 + `.mdc ↔ .trae` 复制提示）③ CodeGraph 安装命令（可选，须同意）④ 人工填写项目专属项 |
 | 仍须你填 | 技术栈、回归索引（至少 1～2 条）、Express 升级表（可选） |
 | **你下一步** | 明确下一动作（改配置 / 同意装 CodeGraph / 重载 Cursor / 用 `PM + 需求` 开工） |
 
 ## 脚本入口
 
 ```powershell
-# 仅探测（默认）
+# 仅探测（默认；零副作用）
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1
 
-# 创建缺失的 project-context / 默认文档根（不覆盖已有 context）
+# 引导式 Apply：创建缺失的 project-context / 默认文档根（不覆盖已有 context），并输出「下一步清单」
+# （① init-project-context ② rules 对齐 link-trae-skills ③ 可选 CodeGraph ④ 人工填写项）
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply
 
 # 指定文档根（相对仓库根）

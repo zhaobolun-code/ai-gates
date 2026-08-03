@@ -1,4 +1,4 @@
-# append-pipeline-snapshot.ps1 — 追加 PM/恢复 机器可读快照（JSONL）
+﻿# append-pipeline-snapshot.ps1 — 追加 PM/恢复 机器可读快照（JSONL）
 # Usage:
 #   .\append-pipeline-snapshot.ps1 -Lane Express -ReviewTier skip -NextRole developer -UserState 进行中 -LaneRulesHit "4/4" -DiffHint Express -ProjectContext loaded
 #   .\append-pipeline-snapshot.ps1 -Event recovery -DeviationType "缺 PM 结构化输出" -Lane Express -Note "用户触发重来"

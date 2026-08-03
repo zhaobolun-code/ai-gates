@@ -1,12 +1,15 @@
-﻿# pm-init.ps1 — PM 初始化：探测 + 安全创建（半自动）
+﻿# pm-init.ps1 — PM 初始化：探测 + 引导式安全创建（半自动）
 # Usage (repo root):
 #   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1
 #   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply
 #   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply -DocRoot "Assets/Doc"
 #   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply -InstallCodeGraph
 #
-# Default is probe-only. -Apply creates missing project-context (via init-project-context.ps1)
-# and missing doc root dirs. -InstallCodeGraph only after explicit user consent.
+# Default is probe-only (zero side effects). -Apply runs guided init:
+#   1) create missing project-context (via init-project-context.ps1, never overwrites)
+#   2) create missing doc root dirs
+#   3) print "next-step checklist": rules alignment (link-trae-skills) + optional CodeGraph.
+# -InstallCodeGraph only after explicit user consent. No npm involved.
 
 param(
     [switch]$Apply,
@@ -35,6 +38,9 @@ $codegraphDir = Join-Path $repoRoot ".codegraph"
 $docAbs = Join-Path $repoRoot $DocRoot
 $weeklyAbs = Join-Path $docAbs "Weekly"
 $initScript = Join-Path $scriptDir "init-project-context.ps1"
+# rules 对齐探测（仅 -Apply 清单使用；probe 模式零副作用）
+$traeSkills = Join-Path $repoRoot ".trae/skills"
+$traeRules = Join-Path $repoRoot ".trae/rules/ai-dev-pipeline.md"
 
 Write-Host "=== PM Init probe ===" -ForegroundColor Cyan
 Write-Host "repo: $repoRoot"
@@ -64,6 +70,19 @@ if (-not $Apply) {
 
 Write-Host ""
 Write-Host "=== Apply ===" -ForegroundColor Cyan
+
+# rules 对齐探测（只读，不写）：.trae/skills 是否已联接 .cursor/skills；.trae/rules 是否已落位
+$traeSkillsLinked = $false
+if (Test-Path -LiteralPath $traeSkills) {
+    $item = Get-Item -LiteralPath $traeSkills -Force -ErrorAction SilentlyContinue
+    if ($item -and ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        # PS 5.1（.NET Framework）下 $item.Target 不存在；Resolve-Path 对 junction 会解析到目标
+        $t = (Resolve-Path -LiteralPath $traeSkills -ErrorAction SilentlyContinue).Path
+        if ($t -eq (Join-Path $repoRoot ".cursor\skills") -or $t -like "*\.cursor\skills") { $traeSkillsLinked = $true }
+    }
+}
+$traeRulesOk = Test-Path -LiteralPath $traeRules
+$rulesAligned = $traeSkillsLinked -and $traeRulesOk
 
 if ($ctxState -eq "missing") {
     if (-not (Test-Path -LiteralPath $initScript)) {
@@ -119,7 +138,32 @@ if ($InstallCodeGraph) {
 }
 
 Write-Host ""
-Write-Host "=== Done ===" -ForegroundColor Green
-Write-Host "Still fill by hand: tech stack, Express upgrade table, regression index (>=1-2 rows) in .cursor/project-context.md"
-Write-Host "Then: powershell -ExecutionPolicy Bypass -File .cursor/scripts/sync-regression-index.ps1 -Apply"
+Write-Host "=== 下一步清单（引导式 init） ===" -ForegroundColor Cyan
+# 1. project-context（-Apply 已自动创建/跳过；幂等不覆盖）
+$ctxText = if ($ctxState -eq "missing") { "已调用 init-project-context.ps1 生成（不覆盖已有文件）" } else { "已存在，跳过（不覆盖）" }
+Write-Host "1. [done] init-project-context：.cursor/project-context.md $ctxText；打开填写技术栈 / Express 升级表 / 回归索引。"
+# 2. rules 对齐（提示/调用 link-trae-skills；只做联接不做内容改写）
+if ($rulesAligned) {
+    Write-Host "2. [done] rules 对齐：.trae/skills 已联接 .cursor/skills；.trae/rules/ai-dev-pipeline.md 已存在。"
+} else {
+    Write-Host "2. [todo] rules 对齐（.mdc ↔ .trae）：" -ForegroundColor Yellow
+    if (-not $traeSkillsLinked) {
+        Write-Host "   - 运行联接（Trae 用）：powershell -ExecutionPolicy Bypass -File .cursor/scripts/link-trae-skills.ps1"
+    }
+    if (-not $traeRulesOk) {
+        Write-Host "   - 复制规则：copy .cursor/rules/ai-dev-pipeline.mdc → .trae/rules/ai-dev-pipeline.md"
+    }
+}
+# 3. CodeGraph（可选；保持须用户同意，未自动执行）
+if ($cgDirOk -and $cgCli) {
+    Write-Host "3. [done] CodeGraph：.codegraph/ + CLI 已就绪（必要时重载 Cursor）。"
+} elseif ($cgDirOk) {
+    Write-Host "3. [todo·可选] CodeGraph：.codegraph/ 已存在但 CLI/MCP 需重载 Cursor；如安装：codegraph install --platform cursor"
+} else {
+    Write-Host "3. [todo·可选] CodeGraph 安装（须用户同意后执行）：codegraph install --platform cursor && codegraph init"
+}
+# 4. 人工填写
+Write-Host "4. [人工] 填写 .cursor/project-context.md 的回归索引（≥1~2 行），然后运行：powershell -ExecutionPolicy Bypass -File .cursor/scripts/sync-regression-index.ps1 -Apply"
+Write-Host ""
+Write-Host "按清单逐步确认后，用「项目经理 + 需求」开工（未初始化前 Agent 走 CORE §无 project-context 冷启动，保守 Standard）。" -ForegroundColor DarkGray
 exit 0
