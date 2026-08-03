@@ -64,6 +64,8 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 ---
 
+The pack also validates itself: before each release, its own hooks are exercised by a protocol-level session simulator (large-payload regressions, including a real 81KB stdin failure), and a health report surfaces degraded gates—so the guardrails don't silently stop working.
+
 ## 中文
 
 **AI 几秒就能改出一堆坏代码。这套东西在你点头接受之前插入真门禁——不是又一个补全插件。**
@@ -118,5 +120,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **验收 A#** | 每步可证伪验收条款。「日志出了关键词」≠ 修好了 |
 
 ---
+
+这套包连自己也会被验证：每次发布前，hook 链路会跑一遍协议级会话仿真（大 payload 回归，含真实 81KB stdin 解析失败场景），并有健康度报告暴露「门禁形同虚设」这类退化信号——护栏不会悄悄失效。
 
 MIT · Proven in production on a physics-simulation codebase (many real tasks closed or deliberately stopped before spinning). Not a silver bullet: every step still needs human acceptance.
