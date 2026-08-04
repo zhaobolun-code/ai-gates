@@ -1,0 +1,101 @@
+# 模型路由 + 子窗派发（主窗仅 PM）
+
+> 权威：本文件（通用框架）。**具体 slug 优先**看 `.cursor/project-context.md` §模型路由（若有）。  
+> **优先派发，不硬拦**：Subagent/`model` 失败 → 次选手动新开 Chat → 最后才降级主窗并标注，流程不中断。  
+> 可用 slug 以当期会话 `available_subagent_models` 为准。  
+> 审核隔离细则 → [isolated-review.md](./isolated-review.md)。  
+> 项目边界 → [project-local-config.md](./project-local-config.md)。
+
+## 硬规则（主窗边界）
+
+1. **主窗 = 仅 `[PM]`**：判车道、确认包、「你下一步」、派发/回收子窗、止损与 Discover 白话、等 Unity/签收、短交接。  
+2. **流水线非 PM 岗位一律子窗**：策划 / 方案审 / 程序员 / 代码审（含对抗）/ 验收（`mode=verify`）/ 文档（`readme: docs`）——**有 Subagent 能力时必须 Task 拉起**，禁止主窗切换岗位标记后直接写改交付物。  
+3. 主窗**禁止**以 `[planner]` / `[plan-reviewer]` / `[developer]` / `[CR]` / `[CR-对抗]` / `[docs]` 身份执行该岗写改职责（派发说明里提及岗名除外）；验收子窗**禁止**改任何仓库交付物。  
+4. **只读咨询**（不改任何交付物）：主窗 PM 可直接答；一旦要落盘方案/改码/出审核 findings/改 README → 转子窗。  
+5. **周报例外**：`[weekly]` **不要求子窗**；用户单独调用「周报」时可在当前窗直接做（不参与 Express/Standard/Full 派岗）。
+
+## 目标
+
+- 主窗保持短、稳、可交接；规格与实现上下文不挤进 PM 对话。  
+- 贵模型砸**策划 + 方案审**；实现用便宜/快速模型；CR 相对实现自然异模型。
+
+## 主窗 vs 子窗
+
+| 场所 | 做什么 | 不做什么 |
+| --- | --- | --- |
+| **主窗（仅 PM）** | YAML 判定、确认包/续链、组装最短派发包、启动/回收 Subagent、五态白话、止损推荐、等测 | 写完整方案、改业务码、代写审核 findings、代 docs 改 README 结构 |
+| **策划子窗** | `未完成.md` / 口径 / Step / Mandatory / 选型 / 方案派发工件 | 擅自改业务 Runtime 码 |
+| **方案审子窗** | L1/L1.5/L2/L3 findings（只读为主） | 改工件（见 plan-reviewer） |
+| **实现子窗** | 按批准 Step 改码、自检、代码派发工件、dev-one-liner README | 改口径/扩 scope/标 runtime-validated |
+| **代码审子窗** | CR / 对抗 findings（只读） | 默认改码 |
+| **验收子窗**（`mode=verify`） | 按剧本只读/临时目录验收；交通过/不通过+退出码 | 改任何仓库交付物；冒充主 CR |
+| **文档子窗** | README 结构（`readme: docs`） | 无 CR 结论时写最终 README |
+| **周报（当前窗）** | 用户单独调用「周报」 | 不要求子窗；不参与流水线派岗 |
+
+## 解析顺序（强制）
+
+派 Task 前按下列顺序解析该岗 `model` 链（取第一条可用）：
+
+1. **用户本轮点名**的模型 / 「主窗做」等覆盖  
+2. **`.cursor/project-context.md` §模型路由**（若存在该节）— **项目专属，不进通用 Skill**  
+3. 本文件下方 **Skill 默认表示例**
+
+解析后 **必须**显式传 `model=` 首选 slug；**禁止**无理由省略 / 一律 `inherit`（省略时常被 UI 显示成某默认快模型）。首选不在白名单或调用失败 → 链上下一档，并标注实际 `model=`。`resume` 沿用原窗模型；要换模型 → **新开** Task。
+
+## Skill 默认表（无 project-context 覆盖时才用 · 示例）
+
+> 下列 slug 仅为**缺省示例**。若仓库有 `.cursor/project-context.md` §模型路由，**整表以项目节为准**。  
+> **统一两档**：普通 = Grok 4.5 → Composer 2.5；高级 = Sonnet 5 → Grok 4.5 → Composer 2.5（链用尽再 `inherit`）。
+
+| 岗位 / 场景 | 场所 | 档位 | Task `model`（首选 → 回退） |
+| --- | --- | --- | --- |
+| **PM**（主窗） | 主窗 | 用户所选 | — |
+| **策划** | **必须子窗** | 高级 | `claude-sonnet-5-thinking-medium` → `cursor-grok-4.5-high-fast` → `composer-2.5-fast` |
+| **方案审** L1～L3 | **必须子窗** | 高级 | 同上；L3/L2 **质量优先于异模型**；用户点名「异模型审」才换族 |
+| **程序员** / Auto 改码 | **必须子窗** | 普通 | `cursor-grok-4.5-high-fast` → `composer-2.5-fast` |
+| **代码审** / 对抗 | **必须子窗** | 高级 | 同策划；实现侧已是同族高级 → 换另一族（isolated-review） |
+| **验收/verify** | **必须子窗** | 高级 | 同策划 / 方案审 / CR；**禁止**普通档首发或省略 `model=` |
+| **文档** `readme: docs` | **必须子窗** | 普通 | `cursor-grok-4.5-high-fast` → `composer-2.5-fast` |
+| **周报** | **不要求子窗** | 用户所选 | — |
+| Express 切片文案 | **主窗 PM** 出切片；**实现仍必须子窗** | 实现走普通档 | 同上 |
+
+## 派发方式（全岗统一顺序）
+
+1. **优先**：主窗 PM 用 Task/Subagent 拉起目标岗 + **显式**解析后的首选 `model` + **最短派发包**（白名单；禁塞主对话长闲聊、`已完成/` 全文）  
+2. **次选**：Subagent 失败 → 提示用户**手动新开 Chat**粘贴派发块（写明岗位 + 应选模型）  
+3. **降级**：仅当用户书面要求主窗做、或 Subagent 与手动新开均不可用 → 主窗临时代行，**必须**标 **「主窗执行（未开子窗 · 非独立）」**；不得冒充已隔离  
+4. **`model` 失败**：按下表/项目覆盖链回退，最终 `inherit`，标 **「未按模型路由」**，不得停流程  
+
+子窗交回短结论；主窗 PM 更新「你下一步」与确认包。审核子窗默认只读。
+
+### Codex 桌面派发实测（2026-08-04 · codex-cli 0.146.0-alpha.9.2）
+
+> - 任务必须随 spawn **初始消息**投递；`followup_task` 补投在本环境不可靠（子窗只见环境
+>   上下文，连「回复 OK」都收不到）。
+> - 显式 `model=` / `reasoning_effort=` 覆盖仅在 `fork_turns=none`（或正整数）时生效；
+>   `fork_turns=all` 继承父模型、不接受覆盖，但消息送达可靠。
+> - 首选：`fork_turns=none` + 显式 `model=` + **完整任务放初始消息**；若首回合回复疑似
+>   空上下文（无任务内容）→ 立即改用 `fork_turns=all` 重派（继承父模型并标注），勿反复
+>   `followup_task` 补投。
+> - 模型可用性以当期 `available_subagent_models` / API 实测为准（2026-08-04：
+>   `deepseek-v4-pro` 未开放，高级档用 `deepseek-v4-flash` + `max` 顶替并标注）。
+
+### Auto
+
+每一刀：**实现子窗** → **CR 子窗** → 主窗 `await_human`。禁止主窗静默连改多 Step；禁止主窗自写自审。
+
+## 标注
+
+- 非审核岗：`venue=subagent|main` + `model=…`  
+- 审核岗：isolated-review 标注；高质量隔离 → **「隔离复核（Subagent · 异模型/同模型）」**  
+- 主窗代行非 PM 岗 → **「主窗执行（未开子窗 · 非独立）」**（硬标注）
+
+## 禁止
+
+- 主窗切换岗位后直接写方案 / 改码 / 出 CR·方案审 findings / 改 README（有子窗能力时）  
+- 因图省事把策划+实现+审核全堆在主窗  
+- 因模型/子窗不可用而跳过方案审、隔离审、或「准」门禁  
+- 把「开了子窗/用了某模型」写成已 Unity 验证  
+- 未「准」仅因「要开实现子窗」而提前改码  
+- 向子窗塞主对话长讨论或归档全文  
+- 把**项目专属**模型偏好写进通用 Skill（须进 project-context）  

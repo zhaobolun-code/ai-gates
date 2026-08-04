@@ -1,0 +1,12 @@
+# Codex 项目级配置（D:\Work\Chemical）
+# hooks 功能开关：不开则 .codex/hooks.json 不生效（Codex 0.146 实测：必须 [features] hooks=true）。
+[features]
+hooks = true
+
+[mcp_servers.codegraph]
+command = "codegraph"
+args = ["serve", "--mcp"]
+
+[mcp_servers.code-review-graph]
+command = "uvx"
+args = ["code-review-graph", "serve"]
