@@ -49,7 +49,20 @@ function New-DirPortal {
 function New-FilePortal {
     param([string]$Link, [string]$Target, [string]$Label)
     if (Test-Path -LiteralPath $Link) {
-        Write-Host "OK (file portal exists): $Label" -ForegroundColor Green
+        $it = Get-Item -LiteralPath $Link -Force
+        if ($it.LinkType) {
+            Write-Host "OK (file portal exists): $Label" -ForegroundColor Green
+            return
+        }
+        # 升级残留检测（2026-08-04）：真实文件且与中央库不一致 → 提示替换，不自动删除（防误删自定义接线）
+        $same = (Get-FileHash -LiteralPath $Link -Algorithm SHA256).Hash -eq (Get-FileHash -LiteralPath $Target -Algorithm SHA256).Hash
+        if ($same) {
+            Write-Host "OK (file matches central copy): $Label" -ForegroundColor Green
+        } else {
+            Write-Host "STALE: $Label is a real file and differs from $Target (old-version wiring)." -ForegroundColor Yellow
+            Write-Host "  Fix: remove $Link and re-run this script to link the new hooks.json." -ForegroundColor Yellow
+            Write-Host "  (keep it only if you intentionally customized the project hooks wiring)" -ForegroundColor Yellow
+        }
         return
     }
     New-Item -ItemType Directory -Path (Split-Path $Link -Parent) -Force | Out-Null

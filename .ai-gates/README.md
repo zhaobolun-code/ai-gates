@@ -23,6 +23,8 @@ PM
 
 First time on a project? Say `PM init` (scaffolds `project-context`), then fill a short project note (stack, careful paths, a few must-test cases). That is the setup—not ongoing ops config.
 
+Upgrading from an older pack (extracted into `.cursor/`)? Extract the new pack at the project root and re-run `link-platform.ps1` (idempotent) — project files (`project-context.md` etc.) are preserved, no re-init needed; the session-start hook reminds you if portals are missing or stale.
+
 Quick start (3 min): [USER-GUIDE.md](USER-GUIDE.md).  
 What this is / isn’t: [METHODOLOGY.md](METHODOLOGY.md).  
 
@@ -78,6 +80,8 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 4. 在任一能改文件的 AI 会话（Cursor Agent / Codex / Trae）粘贴：`项目经理` + 需求
 
 首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置。
+
+旧版用户升级（此前解压进 `.cursor/`）：解压新包到项目根后重跑 `link-platform.ps1`（幂等）即可——`project-context.md` 等项目文件保留，无需重新初始化；传送门缺失/残留会由会话启动检查自动提示。
 
 上手（约 3 分钟）：[USER-GUIDE.md](USER-GUIDE.md)。  
 预期与边界：[METHODOLOGY.md](METHODOLOGY.md)。  

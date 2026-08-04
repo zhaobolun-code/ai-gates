@@ -31,6 +31,51 @@ function Emit-Empty {
     exit 0
 }
 
+function Test-PortalHealth {
+    param([string]$RepoRoot)
+    $issues = New-Object System.Collections.Generic.List[string]
+    $central = Join-Path $RepoRoot '.ai-gates'
+    foreach ($d in @('skills', 'hooks', 'scripts', 'rules')) {
+        $link = Join-Path $RepoRoot (".cursor\$d")
+        if (-not (Test-Path -LiteralPath $link)) {
+            $issues.Add("portal missing: .cursor/$d (run link-platform.ps1)") | Out-Null
+        } else {
+            $it = Get-Item -LiteralPath $link -Force
+            if ($it.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+                if ($it.Target -notmatch [regex]::Escape((Join-Path $central $d))) {
+                    $issues.Add("portal target mismatch: .cursor/$d -> $($it.Target)") | Out-Null
+                }
+            } else {
+                $issues.Add("portal occupied by real dir: .cursor/$d (migrate then run link-platform.ps1)") | Out-Null
+            }
+        }
+    }
+    $hooksLink = Join-Path $RepoRoot '.cursor\hooks.json'
+    $centralHooks = Join-Path $central 'hooks.json'
+    if (-not (Test-Path -LiteralPath $hooksLink)) {
+        $issues.Add("portal missing: .cursor/hooks.json (run link-platform.ps1)") | Out-Null
+    } else {
+        $it = Get-Item -LiteralPath $hooksLink -Force
+        if (-not $it.LinkType) {
+            $h1 = (Get-FileHash -LiteralPath $hooksLink -Algorithm SHA256).Hash
+            $h2 = (Get-FileHash -LiteralPath $centralHooks -Algorithm SHA256).Hash
+            if ($h1 -ne $h2) {
+                $issues.Add("stale real file: .cursor/hooks.json differs from .ai-gates/hooks.json (delete it, then run link-platform.ps1)") | Out-Null
+            }
+        }
+    }
+    $codex = Join-Path $RepoRoot '.codex'
+    if (-not (Test-Path -LiteralPath $codex)) {
+        $issues.Add("portal missing: .codex (run link-platform.ps1)") | Out-Null
+    } else {
+        $it = Get-Item -LiteralPath $codex -Force
+        if (-not ($it.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            $issues.Add(".codex is a real dir (run link-platform.ps1 to auto-migrate)") | Out-Null
+        }
+    }
+    return @($issues)
+}
+
 try {
     # drain stdin (sessionStart may send JSON; ignore content)
     $null = [Console]::In.ReadToEnd()
@@ -51,9 +96,11 @@ try {
 
     . $policyScript
     $report = Get-HooksPolicyReport -RepoRoot $repoRoot
+    $portalIssues = @(Test-PortalHealth -RepoRoot $repoRoot)
+    $allIssues = @($report.Issues) + @($portalIssues)
     $utf8 = New-Object System.Text.UTF8Encoding $false
 
-    if ($report.Ok) {
+    if ($report.Ok -and $portalIssues.Count -eq 0) {
         if (Test-Path -LiteralPath $driftFile) {
             Remove-Item -LiteralPath $driftFile -Force -ErrorAction SilentlyContinue
         }
@@ -61,21 +108,25 @@ try {
         Emit-Empty
     }
 
-    $issueText = ($report.Issues -join "; ")
+    $issueText = ($allIssues -join "; ")
+    $hint = "MAINTAINER hooks declaration drifted from hooks.json / pm-gate-check.ps1. Align to deny + failClosed:false (Cursor 2.2+ ask no-op), or update MAINTAINER if policy intentionally changed. Run: powershell -File .cursor/scripts/check-hooks-policy.ps1"
+    if ($portalIssues.Count -gt 0) {
+        $hint += " Portal issues: run: powershell -ExecutionPolicy Bypass -File .ai-gates/link-platform.ps1 (idempotent)."
+    }
     $payload = [ordered]@{
         ok         = $false
         checkedAt  = $report.CheckedAt
-        issues     = @($report.Issues)
-        hint       = "MAINTAINER hooks declaration drifted from hooks.json / pm-gate-check.ps1. Align to deny + failClosed:false (Cursor 2.2+ ask no-op), or update MAINTAINER if policy intentionally changed. Run: powershell -File .cursor/scripts/check-hooks-policy.ps1"
+        issues     = @($allIssues)
+        hint       = $hint
     }
     [System.IO.File]::WriteAllText($driftFile, ($payload | ConvertTo-Json -Depth 6), $utf8)
     Write-Audit ("DRIFT issues={0}" -f $issueText)
 
     $ctx = @"
-[hooks-policy-drift] SessionStart detected drift between MAINTAINER and hooks implementation:
-- $($report.Issues -join "`n- ")
+[hooks-policy-drift] SessionStart detected drift:
+- $($allIssues -join "`n- ")
 Side channel: .ai-gates/hooks-log/hooks-policy-drift.json
-Do not silently ignore: fix hooks or update MAINTAINER, then re-run check-hooks-policy.ps1.
+Do not silently ignore: fix hooks / update MAINTAINER / re-run link-platform.ps1 as hinted.
 "@
     $result = [ordered]@{
         additional_context = $ctx

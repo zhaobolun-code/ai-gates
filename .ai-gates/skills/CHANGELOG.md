@@ -36,6 +36,67 @@
 
 ### Included changes — 2026-08-04（Codex 桌面子窗派发实测补丁 · 不 bump）
 
+### Included changes — 2026-08-04（车道机制修正三件套 · 不 bump）
+
+### Included changes — 2026-08-04（link-platform 升级残留检测 · 不 bump）
+
+### Included changes — 2026-08-04（SessionStart 传送门健康提示 · 不 bump）
+
+> 窗：Standard · Skill/Doc-only · 无窗。老用户升级后无人提醒重跑 link-platform：旧版 hooks.json
+> 无 sessionStart 漂移检查（v3.2.0 前只有 beforeShellExecution/preToolUse/afterAgentResponse）。
+> 两处补提示：(1) 文档（SKILLS.md / README）写明老用户升级步骤；(2) SessionStart 漂移 hook
+> （Cursor + Codex）新增传送门健康检查——缺失 / 真实目录残留 / 目标错 / hooks.json 残留 →
+> additionalContext 提示运行 link-platform.ps1。
+
+##### Changed
+
+- `hooks/check-hooks-drift.ps1` / `hooks/codex/check-hooks-drift.ps1`：新增 `Test-PortalHealth`
+  （`.cursor/skills|hooks|scripts|rules` 传送门、`.cursor/hooks.json` 哈希、`.codex` 链接），
+  漂移时 hint 附带 link-platform.ps1 命令。
+- `SKILLS.md` / `README.md`：新增「老用户升级」步骤（解压新包 → 重跑 link-platform，
+  项目文件保留，无需重新初始化）。
+
+##### 验证
+
+- test-hooks 69/69 + test-codex-hooks 全绿（传送门检查在已链接仓库不误报）；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。老用户从旧布局（解压进 `.cursor/`）升级到中央库布局时，
+> `.cursor/hooks.json` 旧真实文件会被 link-platform 判「存在即 OK」而残留（旧内容缺新版
+> sessionStart 漂移检查等 hook）。为 link-platform.ps1/.sh 增加残留检测：已存在文件若是指向
+> 中央库的链接 → OK；真实文件与 `.ai-gates/hooks.json` 哈希不一致 → 黄色提示「删除后重跑」，
+> 不自动删除（防误删用户自定义接线）。
+
+##### Changed
+
+- `link-platform.ps1` / `link-platform.sh`：`link_file` 增加链接类型 + SHA256 哈希校验；
+  真实旧文件与中央库不一致 → 提示替换步骤；一致或已是链接 → OK。
+
+##### 验证
+
+- link-platform 幂等重跑全 OK（本仓已链接）；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。用户反馈「问很简单的问题却生成了文档」→ 排查为车道
+> 机制系统性高估：默认 Standard（Express 准入制）、核心/回归路径命中升级不看改动规模、冷启动
+> Standard。按方案（`Assets/Doc/AI流水线/Skill车道机制修正方案-2026-08-04.md`）落地三项修正。
+
+##### Changed
+
+- **判定入口先分流纯问答**（CORE §三车道判定 判定前 0 + AGENTS.md）：纯问答 / 只读咨询 →
+  主窗直接答，不判车道、不建窗、不生成文档、不派岗、不写快照；仅落盘改动才进车道判定。
+- **小改默认 Express**（CORE 第 4/5 步）：Express 准入放宽至小功能改动（≤3 业务源文件、
+  单文件净增删 ≤~150 行、无 public API/持久/跨模块、一句话说清、未命中升级）；第 5 步仅收
+  超量 / 跨模块 / 命中升级 / 说不清 → Standard。
+- **核心/回归路径命中加规模门槛**（CORE 第 2 步第 4 条）：功能性改动 + 升级前缀/回归模块，
+  规模较大（>3 文件 / 净增删 >~150 行 / 跨模块·API·持久·生成文件）→ Full；小规模 →
+  最低 Standard+L1.5。同步 `project-context.md` §Express 车道升级、
+  `references/full-lane-decision-tree.md`、`scripts/suggest-pipeline-lane.ps1`
+  （Full 提示阈值 >8 → >3）、`references/examples.md`。
+- 不 bump VERSION（随 v3.2.1 包重建）。
+
+##### 验证
+
+- `validate-pipeline -Strict` 全绿；规则一致性扫描无残留「一命中即 Full」表述；发行包重建。
+
 > 窗：Standard · Skill/Doc-only · 无窗。另一 Codex 桌面窗口实跑发现两个问题：
 > (1) `followup_task` 补投消息不可靠——子窗只见环境上下文，连「回复 OK」都收不到；
 > (2) `deepseek-v4-pro` API 当前未开放（返回「8 月初才开放，请先用 deepseek-v4-flash」）。

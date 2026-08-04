@@ -25,7 +25,18 @@ link_dir() {
 link_file() {
   local link="$1" target="$2" label="$3"
   if [[ -e "$link" || -L "$link" ]]; then
-    echo "OK (file portal exists): $label"
+    if [[ -L "$link" ]]; then
+      echo "OK (linked): $label -> $(readlink "$link")"
+      return
+    fi
+    # 升级残留检测（2026-08-04）：真实文件且与中央库不一致 → 提示替换，不自动删除
+    if cmp -s "$link" "$target"; then
+      echo "OK (file matches central copy): $label"
+    else
+      echo "STALE: $label is a real file and differs from $target (old-version wiring)."
+      echo "  Fix: rm '$link' and re-run this script to link the new hooks.json."
+      echo "  (keep it only if you intentionally customized the project hooks wiring)"
+    fi
     return
   fi
   mkdir -p "$(dirname "$link")"

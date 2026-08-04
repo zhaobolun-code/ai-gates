@@ -101,9 +101,9 @@ try {
         $diffHint = "unknown"
     } elseif ($hitsExpressUpgrade -or $hitsRegression) {
         $diffHint = "Standard"
-        if ($fileCount -gt 8) {
+        if ($fileCount -gt 3) {
             $diffHint = "Full"
-            $reasons += "many files in scope + core module -> consider Full (TL)"
+            $reasons += "core module + scale over threshold (>3 files) -> consider Full (CORE 2.4)"
         }
     } elseif ($fileCount -le 3) {
         $diffHint = "Express"

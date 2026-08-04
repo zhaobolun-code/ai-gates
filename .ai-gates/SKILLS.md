@@ -17,6 +17,12 @@
 
 若你解压的是安装包：解压到目标项目根（得到 `.ai-gates/`），跑 `link-platform.ps1` 建好传送门，然后从第 3 步做起。包里**没有**源项目的业务文档和项目说明。
 
+**老用户升级**（旧版解压进 `.cursor/` 的安装）：解压新包到项目根 → 跑
+`powershell -ExecutionPolicy Bypass -File .ai-gates/link-platform.ps1`（Unix：`bash .ai-gates/link-platform.sh`，幂等可重跑）。
+若旧 `.cursor/skills|hooks|scripts|rules` 是真实目录，脚本会报错拒删——确认后删掉再重跑；
+`.cursor/hooks.json` 残留会被脚本黄色提示。`project-context.md` 等项目文件保留，**无需重新初始化**；
+新会话起 SessionStart 会自动体检传送门。
+
 ## 日常怎么开口
 
 ```text
