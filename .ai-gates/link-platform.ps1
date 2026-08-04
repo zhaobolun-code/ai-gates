@@ -22,6 +22,7 @@ param(
     [switch]$NoMigrate
 )
 $ErrorActionPreference = 'Stop'
+$portalConflicts = New-Object System.Collections.Generic.List[string]
 $repoRoot = Split-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) -Parent
 $central = Join-Path $repoRoot '.ai-gates'
 if (-not (Test-Path (Join-Path $central 'skills\CORE.md'))) {
@@ -36,7 +37,9 @@ function New-DirPortal {
             Write-Host "OK (linked): $Label -> $($it.Target)" -ForegroundColor Green
             return
         }
-        throw "portal path occupied by a real directory (refusing to delete): $Link"
+        $portalConflicts.Add("$Label (real dir: $Link)") | Out-Null
+        Write-Host "CONFLICT: $Label occupied by a real directory (old-version layout) - $Link" -ForegroundColor Yellow
+        return
     }
     New-Item -ItemType Directory -Path (Split-Path $Link -Parent) -Force | Out-Null
     if ($isWindows) {
@@ -60,6 +63,7 @@ function New-FilePortal {
             Write-Host "OK (file matches central copy): $Label" -ForegroundColor Green
         } else {
             Write-Host "STALE: $Label is a real file and differs from $Target (old-version wiring)." -ForegroundColor Yellow
+            $portalConflicts.Add("$Label (stale real file: $Link)") | Out-Null
             Write-Host "  Fix: remove $Link and re-run this script to link the new hooks.json." -ForegroundColor Yellow
             Write-Host "  (keep it only if you intentionally customized the project hooks wiring)" -ForegroundColor Yellow
         }
@@ -117,7 +121,9 @@ function New-TraePortal {
             Write-Host "OK (linked): .trae/skills -> $($it.Target)" -ForegroundColor Green
             return
         }
-        throw ".trae/skills exists as a real directory; migrate it manually then re-run."
+        $portalConflicts.Add(".trae/skills (real dir: $link)") | Out-Null
+        Write-Host "CONFLICT: .trae/skills occupied by a real directory (old-version layout) - $link" -ForegroundColor Yellow
+        return
     }
     New-Item -ItemType Directory -Path (Split-Path $link -Parent) -Force | Out-Null
     if ($isWindows) {
@@ -134,4 +140,18 @@ foreach ($d in @('skills', 'hooks', 'scripts', 'rules')) {
 New-FilePortal -Link (Join-Path $repoRoot '.cursor\hooks.json') -Target (Join-Path $central 'hooks.json') -Label '.cursor/hooks.json'
 New-CodexPortal
 New-TraePortal
+if ($portalConflicts.Count -gt 0) {
+    Write-Host ""
+    Write-Host "=== 升级处理指引 ===" -ForegroundColor Cyan
+    Write-Host "以下位置被旧版真实目录/文件占据，脚本拒绝自动删除（防误删项目数据）：" -ForegroundColor Yellow
+    $portalConflicts | ForEach-Object { Write-Host "  - $_" -ForegroundColor Yellow }
+    Write-Host ""
+    Write-Host "处理步骤：" -ForegroundColor Cyan
+    Write-Host "1) 确认 .cursor/skills|hooks|scripts|rules 里没有项目自己放的文件（按设计只放技能内容）；"
+    Write-Host "2) 删除这些旧目录和旧的 .cursor/hooks.json；"
+    Write-Host "3) 保留、不要删：.cursor/project-context.md、regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、mcp.json；"
+    Write-Host "4) 删除后重新运行本脚本。"
+    Write-Host "（.codex 旧真实目录会自动迁移，无需手动删。）" -ForegroundColor DarkGray
+    exit 1
+}
 Write-Host 'link-platform: all portals ready.' -ForegroundColor Green

@@ -4,6 +4,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CENTRAL="$ROOT/.ai-gates"
+CONFLICTS=()
 if [[ ! -f "$CENTRAL/skills/CORE.md" ]]; then
   echo "central library not found: $CENTRAL/skills/CORE.md" >&2
   exit 1
@@ -15,8 +16,9 @@ link_dir() {
       echo "OK (linked): $label -> $(readlink "$link")"
       return
     fi
-    echo "portal path occupied by a real directory (refusing to delete): $link" >&2
-    exit 1
+    echo "CONFLICT: $label occupied by a real directory (old-version layout) - $link"
+    CONFLICTS+=("$label (real dir: $link)")
+    return
   fi
   mkdir -p "$(dirname "$link")"
   ln -s "$target" "$link"
@@ -34,6 +36,7 @@ link_file() {
       echo "OK (file matches central copy): $label"
     else
       echo "STALE: $label is a real file and differs from $target (old-version wiring)."
+      CONFLICTS+=("$label (stale real file: $link)")
       echo "  Fix: rm '$link' and re-run this script to link the new hooks.json."
       echo "  (keep it only if you intentionally customized the project hooks wiring)"
     fi
@@ -69,8 +72,27 @@ link_codex
 if [[ -L "$ROOT/.trae/skills" ]]; then
   echo "OK (linked): .trae/skills -> $(readlink "$ROOT/.trae/skills")"
 else
-  mkdir -p "$ROOT/.trae"
-  ln -s "$CENTRAL/skills" "$ROOT/.trae/skills"
-  echo "linked: .trae/skills -> $CENTRAL/skills"
+  if [[ -e "$ROOT/.trae/skills" ]]; then
+    echo "CONFLICT: .trae/skills occupied by a real directory (old-version layout) - $ROOT/.trae/skills"
+    CONFLICTS+=(".trae/skills (real dir: $ROOT/.trae/skills)")
+  else
+    mkdir -p "$ROOT/.trae"
+    ln -s "$CENTRAL/skills" "$ROOT/.trae/skills"
+    echo "linked: .trae/skills -> $CENTRAL/skills"
+  fi
+fi
+if (( ${#CONFLICTS[@]} > 0 )); then
+  echo ""
+  echo "=== 升级处理指引 ==="
+  echo "以下位置被旧版真实目录/文件占据，脚本拒绝自动删除（防误删项目数据）："
+  for c in "${CONFLICTS[@]}"; do echo "  - $c"; done
+  echo ""
+  echo "处理步骤："
+  echo "1) 确认 .cursor/skills|hooks|scripts|rules 里没有项目自己放的文件（按设计只放技能内容）；"
+  echo "2) 删除这些旧目录和旧的 .cursor/hooks.json；"
+  echo "3) 保留、不要删：.cursor/project-context.md、regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、mcp.json；"
+  echo "4) 删除后重新运行本脚本。"
+  echo "（.codex 旧真实目录会自动迁移，无需手动删。）"
+  exit 1
 fi
 echo "link-platform: all portals ready."

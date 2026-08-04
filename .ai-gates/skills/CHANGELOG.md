@@ -42,6 +42,84 @@
 
 ### Included changes — 2026-08-04（SessionStart 传送门健康提示 · 不 bump）
 
+### Included changes — 2026-08-04（link-platform 老用户冲突提示优化 · 不 bump）
+
+### Included changes — 2026-08-04（下载运行指引：MOTW 解除锁定 · 不 bump）
+
+### Included changes — 2026-08-04（link-platform 运行方式改为不嵌套 · 不 bump）
+
+### Included changes — 2026-08-04（老用户升级排查清单 · 不 bump）
+
+### Included changes — 2026-08-04（Agent 窗口一键升级 · 不 bump）
+
+> 窗：Standard · Skill/Doc-only · 无窗。老用户手动 PowerShell 升级门槛高（嵌套被拒 / 路径 /
+> MOTW 等）。新增「Agent 窗口一键升级」：解压新包到项目根后，在 Agent 窗口粘贴
+> `项目经理 升级 ai-gates 到最新版`，Agent 按 SKILLS.md §老用户升级 执行（删旧 .cursor 技能
+> 目录 → 跑 link-platform → 确认传送门）；手动 PowerShell 作为备选。hooks 只拦 apply_patch /
+> 高危 git，不拦升级用 shell 命令。
+
+##### Changed
+
+- `SKILLS.md` §老用户升级：新增「Agent 窗口一键升级（推荐）」块 + 升级口令。
+
+##### 验证
+
+- `validate-pipeline -Strict` 全绿；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。老用户升级遇到三类高频报错，SKILLS.md §老用户升级
+> 后追加「升级遇到问题排查」：①拒绝访问 → Unblock-File；②powershell.exe 拒绝访问 → 不嵌套直跑；
+> ③`.\ai-gates\link-platform.ps1` 识别为函数/找不到 → 检查当前目录与解压位置。
+
+##### Changed
+
+- `SKILLS.md`：新增「升级遇到问题排查」三条（含 Get-Location / Test-Path / 递归查找命令）。
+
+##### 验证
+
+- `validate-pipeline -Strict` 全绿；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。部分受限 PowerShell 窗口会拒绝拉起嵌套的
+> `powershell.exe`（报「拒绝访问 / ApplicationFailedException」）。推荐命令改为：在 PowerShell
+> 窗口内直接运行脚本本体（`Set-ExecutionPolicy -Scope Process Bypass -Force` 后
+> `.\ai-gates\link-platform.ps1`），不再嵌套；cmd 用户保留 `powershell -ExecutionPolicy Bypass -File` 形式。
+
+##### Changed
+
+- `SKILLS.md` §老用户升级 / `README.md`（中英）Get it / `package-release.ps1` PACKAGE-INFO：
+  传送门脚本运行命令改为主推「不嵌套直跑」，cmd 形式作为备选。
+
+##### 验证
+
+- `validate-pipeline -Strict` 全绿；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。老用户从 GitHub 下载 7z 解压后运行 link-platform 报
+> 「无法运行，拒绝访问」：下载文件的 Zone.Identifier（MOTW）被 Windows 拦截执行。SKILLS.md /
+> README 老用户升级步骤补「先 Unblock-File 解除网络标记」。
+
+##### Changed
+
+- `SKILLS.md` §老用户升级 / `README.md`（中英）Get it：新增下载后若提示拒绝访问 →
+  `Get-ChildItem .ai-gates -Recurse -File | Unblock-File` 再运行 link-platform。
+
+##### 验证
+
+- `validate-pipeline -Strict` 全绿；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。老用户运行 link-platform 报
+> `portal path occupied by a real directory (refusing to delete)`：旧版真实 `.cursor/skills` 等
+> 目录被拒删（防误删项目数据），但原脚本遇第一个冲突即 throw，报错不解释处理步骤。改为收集
+> 全部冲突并输出中文「升级处理指引」（保留哪些项目文件、删除哪些旧目录、如何重跑），不再半途中断。
+
+##### Changed
+
+- `link-platform.ps1` / `link-platform.sh`：`New-DirPortal`/`New-TraePortal` 遇真实目录不再 throw，
+  收集到 `$portalConflicts` 后继续；结束时若有冲突 → 输出「升级处理指引」（含保留清单）并 exit 1。
+- `.cursor/hooks.json` STALE 残留同样计入冲突清单。
+
+##### 验证
+
+- 模拟旧布局升级：能列出全部冲突 + 指引；删除旧目录后重跑全 OK；发行包重建。
+
 > 窗：Standard · Skill/Doc-only · 无窗。老用户升级后无人提醒重跑 link-platform：旧版 hooks.json
 > 无 sessionStart 漂移检查（v3.2.0 前只有 beforeShellExecution/preToolUse/afterAgentResponse）。
 > 两处补提示：(1) 文档（SKILLS.md / README）写明老用户升级步骤；(2) SessionStart 漂移 hook

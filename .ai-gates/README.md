@@ -12,8 +12,8 @@ A set of enforceable development gates for AI-assisted coding—read your projec
    ([latest release](https://github.com/zhaobolun-code/ai-gates/releases/latest)).
 2. Extract **at** the target project’s root — the archive contains `.ai-gates/`
    (do **not** unzip into `.cursor/`).
-3. Run the portal script once:
-   `powershell -ExecutionPolicy Bypass -File .ai-gates/link-platform.ps1` (macOS/Linux: `bash .ai-gates/link-platform.sh`).
+3. Run the portal script once — in a PowerShell window run it directly (no nested powershell needed):
+   `Set-ExecutionPolicy -Scope Process Bypass -Force; .\ai-gates\link-platform.ps1` (macOS/Linux: `bash .ai-gates/link-platform.sh`).
 4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae):
 
 ```
@@ -24,6 +24,7 @@ PM
 First time on a project? Say `PM init` (scaffolds `project-context`), then fill a short project note (stack, careful paths, a few must-test cases). That is the setup—not ongoing ops config.
 
 Upgrading from an older pack (extracted into `.cursor/`)? Extract the new pack at the project root and re-run `link-platform.ps1` (idempotent) — project files (`project-context.md` etc.) are preserved, no re-init needed; the session-start hook reminds you if portals are missing or stale.
+If Windows refuses to run the downloaded script ("access denied"), unblock the extracted files first: `Get-ChildItem .ai-gates -Recurse -File | Unblock-File`, then re-run.
 
 Quick start (3 min): [USER-GUIDE.md](USER-GUIDE.md).  
 What this is / isn’t: [METHODOLOGY.md](METHODOLOGY.md).  
@@ -76,12 +77,13 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.2.1.7z`**
 2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
-3. 跑一次传送门脚本：`powershell -ExecutionPolicy Bypass -File .ai-gates/link-platform.ps1`（macOS/Linux：`bash .ai-gates/link-platform.sh`）
+3. 跑一次传送门脚本（PowerShell 窗口直接运行，不嵌套）：`Set-ExecutionPolicy -Scope Process Bypass -Force; .\ai-gates\link-platform.ps1`（macOS/Linux：`bash .ai-gates/link-platform.sh`）
 4. 在任一能改文件的 AI 会话（Cursor Agent / Codex / Trae）粘贴：`项目经理` + 需求
 
 首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置。
 
 旧版用户升级（此前解压进 `.cursor/`）：解压新包到项目根后重跑 `link-platform.ps1`（幂等）即可——`project-context.md` 等项目文件保留，无需重新初始化；传送门缺失/残留会由会话启动检查自动提示。
+若下载后 Windows 提示「无法运行，拒绝访问」：先解除下载文件标记 `Get-ChildItem .ai-gates -Recurse -File | Unblock-File`，再重跑。
 
 上手（约 3 分钟）：[USER-GUIDE.md](USER-GUIDE.md)。  
 预期与边界：[METHODOLOGY.md](METHODOLOGY.md)。  

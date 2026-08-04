@@ -17,11 +17,33 @@
 
 若你解压的是安装包：解压到目标项目根（得到 `.ai-gates/`），跑 `link-platform.ps1` 建好传送门，然后从第 3 步做起。包里**没有**源项目的业务文档和项目说明。
 
-**老用户升级**（旧版解压进 `.cursor/` 的安装）：解压新包到项目根 → 跑
-`powershell -ExecutionPolicy Bypass -File .ai-gates/link-platform.ps1`（Unix：`bash .ai-gates/link-platform.sh`，幂等可重跑）。
+**老用户升级**（旧版解压进 `.cursor/` 的安装）：解压新包到项目根 → 在 PowerShell 窗口直接运行
+`Set-ExecutionPolicy -Scope Process Bypass -Force; .\ai-gates\link-platform.ps1`
+（cmd 里用 `powershell -ExecutionPolicy Bypass -File .ai-gates\link-platform.ps1`；Unix：`bash .ai-gates/link-platform.sh`，幂等可重跑）。
+
+**Agent 窗口一键升级（推荐，不用手动碰 PowerShell）**：先把新版 7z 解压到项目根（得到
+`.ai-gates/`），然后在 Agent 窗口（Cursor / Codex / Trae 均可）粘贴：
+
+```text
+项目经理 升级 ai-gates 到最新版
+```
+
+Agent 会读本节步骤执行：删除旧 `.cursor/skills|hooks|scripts|rules` 与旧 `.cursor/hooks.json`
+→ 运行 link-platform 建传送门 → 确认 `.cursor/*`、`.codex` 指向 `.ai-gates/`。手动 PowerShell
+步骤作为备选（Agent 执行升级不受 hooks 门禁影响——hooks 只拦无 [PM] 的 apply_patch 与高危 git 命令）。
 若旧 `.cursor/skills|hooks|scripts|rules` 是真实目录，脚本会报错拒删——确认后删掉再重跑；
 `.cursor/hooks.json` 残留会被脚本黄色提示。`project-context.md` 等项目文件保留，**无需重新初始化**；
 新会话起 SessionStart 会自动体检传送门。
+**下载后若提示「无法运行，拒绝访问」**：先解除下载文件的网络标记，再重跑：
+`Get-ChildItem .ai-gates -Recurse -File | Unblock-File`
+
+**升级遇到问题排查**：
+- 提示「无法运行，拒绝访问」→ 先 `Get-ChildItem .ai-gates -Recurse -File | Unblock-File` 再重跑。
+- 提示 `powershell.exe` 拒绝访问 → 已在 PowerShell 窗口时直接运行脚本，不嵌套：
+  `Set-ExecutionPolicy -Scope Process Bypass -Force; .\ai-gates\link-platform.ps1`。
+- 提示 `.\ai-gates\link-platform.ps1` 无法识别/找不到 → 先 `Get-Location` 确认在项目根，
+  再 `Test-Path .\ai-gates\link-platform.ps1`；不存在则把 `.ai-gates` 移到项目根
+  （解压后应直接是 `.ai-gates\link-platform.ps1`，不要解进 `.cursor/` 或嵌套文件夹）。
 
 ## 日常怎么开口
 

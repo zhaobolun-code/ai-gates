@@ -17,7 +17,7 @@
 ## 首次接入新项目
 
 1. 解压本包到目标仓库根：包顶层 = 中央技能库 .ai-gates/ 的内容（skills/、hooks/、scripts/、rules/、codex/、link-platform.* 等），无需额外嵌套
-2. 跑一次传送门脚本：powershell -ExecutionPolicy Bypass -File .ai-gates/link-platform.ps1（macOS/Linux：bash .ai-gates/link-platform.sh）——自动建 .cursor/*、.codex、.trae/skills 软连接
+2. 跑一次传送门脚本（PowerShell 窗口直接运行，不嵌套 powershell）：Set-ExecutionPolicy -Scope Process Bypass -Force; .\ai-gates\link-platform.ps1（macOS/Linux：bash .ai-gates/link-platform.sh）——自动建 .cursor/*、.codex、.trae/skills 软连接
 3. 先读 .ai-gates/METHODOLOGY.md（预期）→ .ai-gates/USER-GUIDE.md（口令）→ .ai-gates/SKILLS.md（第一次接入）
 4. Codex 用户：按源仓库示例创建根级 AGENTS.md（入口路由；本包不含，项目相关），再在 Agent 粘贴「项目经理 初始化」（项目经理=PM，初始化=init），填写 project-context 后提需求
 
