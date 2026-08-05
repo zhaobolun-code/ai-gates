@@ -52,6 +52,114 @@
 
 ### Included changes — 2026-08-04（Agent 窗口一键升级 · 不 bump）
 
+### Included changes — 2026-08-05（桌面 hooks 覆盖实测与局限补记 · 不 bump）
+
+### Included changes — 2026-08-05（子窗健康检查与有界等待 · 不 bump）
+
+### Included changes — 2026-08-05（用户向文档去 PowerShell 化 · 不 bump）
+
+### Included changes — 2026-08-05（口令扩展与文本优化 · 不 bump）
+
+### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
+
+### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）
+
+> 窗：Standard · Hook/Script-only · 无窗。PARSE_FAIL 分离统计：真实会话 153 条全部在
+> 2026-08-04 11:55 junction 就位前（GBK 根因期）；之后真实会话 0 例——根因已修，解析器无需改。
+> 体检 D3 把 30 天窗口内的历史 PARSE_FAIL 误报为 WARN。修正：近 7 天有 → WARN（活退化）；
+> 仅历史（近 7 天 0）→ INFO「已收敛，非活退化」。
+
+##### Changed
+
+- `scripts/pipeline-health.ps1`：`Count-LogLines` 增加 `-SinceUtc`；新增 `Get-LastMatchTime`；
+  D3 改双窗口判定（近 7 天 WARN / 仅历史 INFO），报告增加 `parseFail7d` 字段。
+
+##### 验证
+
+- 分离统计：mark-changelog PARSE_FAIL 153 条全在 junction 前，junction 后 0；
+  `pipeline-health.ps1 -Days 30` 复跑 D3 由 WARN → INFO；`validate-pipeline -Strict` 全绿；
+  发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。老用户升级清理旧 `.cursor` 时，旧 `.cursor/` 根的
+> 项目状态/中间文件（regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、tmp/、
+> verify/）现在由 link-platform 自动迁入 `.ai-gates/` 对应位置（目标已存在则跳过、不覆盖，
+> 拷贝成功删旧源=移动）；`project-context.md` / `mcp.json` 保留在 `.cursor/`。
+
+##### Changed
+
+- `link-platform.ps1` / `link-platform.sh`：新增 `Migrate-ProjectState` / `migrate_state`，
+  升级流程开头执行；冲突指引第 3 条同步改为「项目状态文件已自动迁入 .ai-gates/」。
+- `SKILLS.md`：老用户升级说明补「自动迁移项目状态文件」。
+
+##### 验证
+
+- 模拟旧布局：9 类文件全部迁入 .ai-gates、旧源删除、project-context/mcp.json 保留、
+  目标已存在跳过；`validate-pipeline -Strict` 全绿；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。口令同义表新增「升级=upgrade」「检查健康=doctor」；
+> 文本优化：`升级 ai-gates 到最新版` → `升级 ai-gates`，`检查流水线健康` → `检查健康`；
+> 建窗/签收改为项目经理自动完成、无需用户对话（用户向文档不再引导「新建任务窗/结案」口令）。
+
+##### Changed
+
+- 口令同义表（AGENTS / CORE / pm-init / rules mdc / .trae rules / USER-GUIDE / SKILLS）：
+  新增 `升级=upgrade`、`检查健康=doctor`。
+- SKILLS / README（中英）/ PACKAGE-INFO：升级口令改 `项目经理 升级 ai-gates`（=`PM upgrade ai-gates`）；
+  `检查健康`（=`PM doctor`）；建窗/签收标注「项目经理自动完成，无需用户对话」。
+
+##### 验证
+
+- 无残留「升级 ai-gates 到最新版 / 检查流水线健康 / 新建任务窗」用户向口令；
+  `validate-pipeline -Strict` 全绿；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。说明文档里大量用户向 PowerShell 指令改为
+> 「项目经理 + XXX」口径：升级/装传送门 → `项目经理 升级 ai-gates 到最新版`；初始化 →
+> `项目经理 初始化`；建窗/签收/体检 → 对应项目经理口令。Agent / 维护者向文档
+> （references、MAINTAINER、scripts、hooks）保留命令原文不动。
+
+##### Changed
+
+- `SKILLS.md`：老用户升级与排查合并为「对项目经理说一句」；首次接入与「给技术负责人」表改 PM 口令。
+- `README.md`（中英）：安装步骤 3 与升级说明改 PM 口令（手动运行 link-platform 降为可选）。
+- `package-release.ps1` PACKAGE-INFO：步骤 2 改 PM 口令。
+
+##### 验证
+
+- 用户向文档 PowerShell 命令残留仅剩事实性说明（「附带脚本以 Windows PowerShell 为主」）；
+  `validate-pipeline -Strict` 全绿；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。真实会话时间线：23 次 wait_agent 中 16 次等满 600s
+> （合计 ~175 分钟），主窗超时续等放大是小时级窗口主因。采纳两阶段策略写入 model-routing：
+> 「等 ACK（子窗首回合 [ACK] 通知，≤5 分钟）」→「等完成（长容忍）」；5 分钟无 ACK →
+> interrupt + fork_turns=all 重派，重启上限 2 次后降级主窗标注非独立；等 ACK 阶段禁止连续
+> wait 满 600s。
+
+##### Changed
+
+- `references/model-routing.md`：新增 §子窗健康检查与有界等待（两阶段：等 ACK ≤5 分钟 →
+  等完成长容忍；5 分钟无 ACK 重启协议 / 上限 / 降级兜底）。
+
+##### 验证
+
+- `validate-pipeline -Strict` 全绿；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。按「如实备注」建议补做桌面 / CLI hooks 覆盖单独验证：
+> 桌面受控 apply_patch 探针零打点（信任已批准），CLI 0.147.0-alpha.1.2 真演全链路触发并落盘。
+> 结论如实写入 AGENTS.md / MAINTAINER 局限。
+
+##### Changed
+
+- `AGENTS.md` / `MAINTAINER.md` §Codex hooks：新增 2026-08-05 实测——Codex 桌面应用会话
+  对 `apply_patch` 钩子可能不触发（信任已批准仍零打点）；CLI 侧全链路可用；桌面端机械强制按
+  「模型自觉 + 逃生通道」降级，关键写操作后自查 `.ai-gates/hooks-log/` 或 CLI 真演补证。
+
+##### 验证
+
+- 桌面探针：apply_patch 写 `.ai-gates/tmp/hook-probe-desktop.txt` 成功，各 hook 日志零新增。
+- CLI 真演（0.147.0-alpha.1.2 `--enable hooks --dangerously-bypass-hook-trust`）：apply_patch 探针
+  → write-audit / pm-gate ALLOW / mark-changelog / drift OK 全部落盘（session=019fcf83-…）。
+- 探针产物已清理；`validate-pipeline -Strict` 全绿；发行包重建。
+
 > 窗：Standard · Skill/Doc-only · 无窗。老用户手动 PowerShell 升级门槛高（嵌套被拒 / 路径 /
 > MOTW 等）。新增「Agent 窗口一键升级」：解压新包到项目根后，在 Agent 窗口粘贴
 > `项目经理 升级 ai-gates 到最新版`，Agent 按 SKILLS.md §老用户升级 执行（删旧 .cursor 技能

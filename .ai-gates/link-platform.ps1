@@ -133,7 +133,45 @@ function New-TraePortal {
     }
     Write-Host "linked: .trae/skills -> $target" -ForegroundColor Green
 }
+
+function Migrate-ProjectState {
+    # 老用户升级（2026-08-05）：.cursor 根的项目状态/中间文件 → .ai-gates 对应位置。
+    # 目标已存在则跳过（不覆盖）；拷贝成功后删除旧源（等同移动，避免双份漂移）。
+    $mappings = @(
+        @{ Name = 'regression-index.yaml';    From = '.cursor\regression-index.yaml';    To = 'regression-index.yaml' },
+        @{ Name = 'lessons-learned.md';       From = '.cursor\lessons-learned.md';       To = 'lessons-learned.md' },
+        @{ Name = 'lessons-outline.md';       From = '.cursor\lessons-outline.md';       To = 'lessons-outline.md' },
+        @{ Name = 'pipeline-outcome.log';     From = '.cursor\pipeline-outcome.log';     To = 'pipeline-outcome.log' },
+        @{ Name = 'pipeline-snapshot.log';    From = '.cursor\pipeline-snapshot.log';    To = 'pipeline-snapshot.log' },
+        @{ Name = 'pipeline-recovery-log.md'; From = '.cursor\pipeline-recovery-log.md'; To = 'pipeline-recovery-log.md' },
+        @{ Name = 'hooks-log';                From = '.cursor\hooks-log';                To = 'hooks-log' },
+        @{ Name = 'tmp';                      From = '.cursor\tmp';                      To = 'tmp' },
+        @{ Name = 'verify';                   From = '.cursor\verify';                   To = 'verify' }
+    )
+    foreach ($m in $mappings) {
+        $src = Join-Path $repoRoot $m.From
+        $dst = Join-Path $central $m.To
+        if (-not (Test-Path -LiteralPath $src)) { continue }
+        if (Test-Path -LiteralPath $dst) {
+            Write-Host "MIGRATE skip (target exists): .ai-gates/$($m.To)" -ForegroundColor DarkGray
+            continue
+        }
+        try {
+            if ((Get-Item -LiteralPath $src -Force).PSIsContainer) {
+                Copy-Item -LiteralPath $src -Destination $dst -Recurse -Force
+            } else {
+                Copy-Item -LiteralPath $src -Destination $dst -Force
+            }
+            Remove-Item -LiteralPath $src -Recurse -Force
+            Write-Host "MIGRATED: .cursor/$($m.Name) -> .ai-gates/$($m.To)" -ForegroundColor Green
+        } catch {
+            Write-Host "MIGRATE WARN: $($m.Name) copy failed: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
+    }
+}
+
 Write-Host "=== link-platform: central = $central ===" -ForegroundColor Cyan
+Migrate-ProjectState
 foreach ($d in @('skills', 'hooks', 'scripts', 'rules')) {
     New-DirPortal -Link (Join-Path $repoRoot ".cursor\$d") -Target (Join-Path $central $d) -Label ".cursor/$d"
 }
@@ -149,7 +187,7 @@ if ($portalConflicts.Count -gt 0) {
     Write-Host "处理步骤：" -ForegroundColor Cyan
     Write-Host "1) 确认 .cursor/skills|hooks|scripts|rules 里没有项目自己放的文件（按设计只放技能内容）；"
     Write-Host "2) 删除这些旧目录和旧的 .cursor/hooks.json；"
-    Write-Host "3) 保留、不要删：.cursor/project-context.md、regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、mcp.json；"
+    Write-Host "3) 项目状态文件（regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、tmp/、verify/）已自动迁入 .ai-gates/；保留、不要删：.cursor/project-context.md、mcp.json；"
     Write-Host "4) 删除后重新运行本脚本。"
     Write-Host "（.codex 旧真实目录会自动迁移，无需手动删。）" -ForegroundColor DarkGray
     exit 1

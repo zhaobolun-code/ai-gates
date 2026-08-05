@@ -12,8 +12,9 @@ A set of enforceable development gates for AI-assisted coding—read your projec
    ([latest release](https://github.com/zhaobolun-code/ai-gates/releases/latest)).
 2. Extract **at** the target project’s root — the archive contains `.ai-gates/`
    (do **not** unzip into `.cursor/`).
-3. Run the portal script once — in a PowerShell window run it directly (no nested powershell needed):
-   `Set-ExecutionPolicy -Scope Process Bypass -Force; .\ai-gates\link-platform.ps1` (macOS/Linux: `bash .ai-gates/link-platform.sh`).
+3. Ask the project manager agent to wire it up — paste this in any AI session (Cursor / Codex / Trae):
+   `项目经理 升级 ai-gates` (= `PM upgrade ai-gates`)
+   (the agent runs `link-platform.ps1` / `.sh` for you; manual run is optional).
 4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae):
 
 ```
@@ -21,10 +22,10 @@ PM
 [what you need / what's broken]
 ```
 
-First time on a project? Say `PM init` (scaffolds `project-context`), then fill a short project note (stack, careful paths, a few must-test cases). That is the setup—not ongoing ops config.
+First time on a project? Say `PM init` (scaffolds `project-context`), then fill a short project note (stack, careful paths, a few must-test cases). That is the setup—not ongoing ops config. Upgrade the pack? Say `项目经理 升级 ai-gates` / `PM upgrade ai-gates`. Health check? Say `项目经理 检查健康` / `PM doctor`.
 
-Upgrading from an older pack (extracted into `.cursor/`)? Extract the new pack at the project root and re-run `link-platform.ps1` (idempotent) — project files (`project-context.md` etc.) are preserved, no re-init needed; the session-start hook reminds you if portals are missing or stale.
-If Windows refuses to run the downloaded script ("access denied"), unblock the extracted files first: `Get-ChildItem .ai-gates -Recurse -File | Unblock-File`, then re-run.
+Upgrading from an older pack (extracted into `.cursor/`)? Extract the new pack at the project root, then paste `项目经理 升级 ai-gates` (`PM upgrade ai-gates`) in your AI session — the agent removes stale `.cursor` skill dirs, re-wires the portals and verifies. Project files (`project-context.md` etc.) are preserved, no re-init needed; the session-start hook also reminds you if portals are missing or stale.
+If Windows refuses to run the downloaded script ("access denied"), just paste the error back into the same AI session — the agent unblocks the downloaded files and re-wires it for you.
 
 Quick start (3 min): [USER-GUIDE.md](USER-GUIDE.md).  
 What this is / isn’t: [METHODOLOGY.md](METHODOLOGY.md).  
@@ -77,13 +78,14 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.2.1.7z`**
 2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
-3. 跑一次传送门脚本（PowerShell 窗口直接运行，不嵌套）：`Set-ExecutionPolicy -Scope Process Bypass -Force; .\ai-gates\link-platform.ps1`（macOS/Linux：`bash .ai-gates/link-platform.sh`）
+3. 在任一 AI 会话粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`），由 Agent 建好传送门（手动运行
+   `link-platform.ps1` / `.sh` 亦可，非必需）
 4. 在任一能改文件的 AI 会话（Cursor Agent / Codex / Trae）粘贴：`项目经理` + 需求
 
-首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置。
+首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置。升级包：`项目经理 升级 ai-gates` / `PM upgrade ai-gates`；体检：`项目经理 检查健康` / `PM doctor`。
 
-旧版用户升级（此前解压进 `.cursor/`）：解压新包到项目根后重跑 `link-platform.ps1`（幂等）即可——`project-context.md` 等项目文件保留，无需重新初始化；传送门缺失/残留会由会话启动检查自动提示。
-若下载后 Windows 提示「无法运行，拒绝访问」：先解除下载文件标记 `Get-ChildItem .ai-gates -Recurse -File | Unblock-File`，再重跑。
+旧版用户升级（此前解压进 `.cursor/`）：解压新包到项目根后，在 Agent 窗口粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`）即可——Agent 会清理旧 `.cursor` 技能目录并重建传送门；`project-context.md` 等项目文件保留，无需重新初始化；传送门缺失/残留会由会话启动检查自动提示。
+若下载后 Windows 提示「无法运行，拒绝访问」：把报错原文粘贴给项目经理处理即可（Agent 会解除下载文件的网络标记并重新接线）。
 
 上手（约 3 分钟）：[USER-GUIDE.md](USER-GUIDE.md)。  
 预期与边界：[METHODOLOGY.md](METHODOLOGY.md)。  

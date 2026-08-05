@@ -5,7 +5,7 @@ alwaysApply: true
 
 # AI 开发流水线 Skills（当前版本见 `.cursor/skills/VERSION`）
 
-**入口**：`项目经理` / `PM` + 需求（等价：`项目经理`=`PM`，`初始化`=`init`，`准`=`approve`）→ Read **`.cursor/skills/references/agent-entry-route.md`**（再按该页读 `project-context` / 当前岗 checklist）。CORE **全文**仅争议 / recovery / `按 CORE 重来`。每轮 `[PM]` 须内部结构化判定 + 白话 **你下一步**。新项目：`项目经理 初始化` / `PM init` 等组合效果相同（见 `references/pm-init.md`）。运行前 → `.ai-gates/SKILLS.md` §首次接入。Full/L3/反模式 → `.cursor/skills/references/` lazy load。
+**入口**：`项目经理` / `PM` + 需求（等价：`项目经理`=`PM`，`初始化`=`init`，`准`=`approve`，`升级`=`upgrade`，`检查健康`=`doctor`）→ Read **`.cursor/skills/references/agent-entry-route.md`**（再按该页读 `project-context` / 当前岗 checklist）。CORE **全文**仅争议 / recovery / `按 CORE 重来`。每轮 `[PM]` 须内部结构化判定 + 白话 **你下一步**。新项目：`项目经理 初始化` / `PM init`；升级：`项目经理 升级 ai-gates` / `PM upgrade ai-gates`；体检：`项目经理 检查健康` / `PM doctor`（见 `references/pm-init.md`）。运行前 → `.ai-gates/SKILLS.md` §首次接入。Full/L3/反模式 → `.cursor/skills/references/` lazy load。
 
 **硬门禁 #7**：无 PM 结构化判定不得改交付物；直叫岗位须同条先 `[PM]`。改代码前 Read **`.cursor/project-context.md`**（若存在）。Unity 测试、新开 Chat / 换模型 — **人工选择，只提示不校验**。
 

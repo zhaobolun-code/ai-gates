@@ -9,6 +9,32 @@ if [[ ! -f "$CENTRAL/skills/CORE.md" ]]; then
   echo "central library not found: $CENTRAL/skills/CORE.md" >&2
   exit 1
 fi
+migrate_state() {
+  local from to name
+  migrate_one() {
+    from="$1"; to="$2"; name="$3"
+    if [[ -e "$from" && ! -e "$to" ]]; then
+      if cp -r "$from" "$to" 2>/dev/null; then
+        rm -rf "$from"
+        echo "MIGRATED: .cursor/$name -> .ai-gates/$name"
+      else
+        echo "MIGRATE WARN: $name copy failed"
+      fi
+    elif [[ -e "$from" && -e "$to" ]]; then
+      echo "MIGRATE skip (target exists): .ai-gates/$name"
+    fi
+  }
+  migrate_one "$ROOT/.cursor/regression-index.yaml" "$CENTRAL/regression-index.yaml" "regression-index.yaml"
+  migrate_one "$ROOT/.cursor/lessons-learned.md" "$CENTRAL/lessons-learned.md" "lessons-learned.md"
+  migrate_one "$ROOT/.cursor/lessons-outline.md" "$CENTRAL/lessons-outline.md" "lessons-outline.md"
+  migrate_one "$ROOT/.cursor/pipeline-outcome.log" "$CENTRAL/pipeline-outcome.log" "pipeline-outcome.log"
+  migrate_one "$ROOT/.cursor/pipeline-snapshot.log" "$CENTRAL/pipeline-snapshot.log" "pipeline-snapshot.log"
+  migrate_one "$ROOT/.cursor/pipeline-recovery-log.md" "$CENTRAL/pipeline-recovery-log.md" "pipeline-recovery-log.md"
+  migrate_one "$ROOT/.cursor/hooks-log" "$CENTRAL/hooks-log" "hooks-log"
+  migrate_one "$ROOT/.cursor/tmp" "$CENTRAL/tmp" "tmp"
+  migrate_one "$ROOT/.cursor/verify" "$CENTRAL/verify" "verify"
+}
+migrate_state
 link_dir() {
   local link="$1" target="$2" label="$3"
   if [[ -e "$link" || -L "$link" ]]; then
@@ -90,7 +116,7 @@ if (( ${#CONFLICTS[@]} > 0 )); then
   echo "处理步骤："
   echo "1) 确认 .cursor/skills|hooks|scripts|rules 里没有项目自己放的文件（按设计只放技能内容）；"
   echo "2) 删除这些旧目录和旧的 .cursor/hooks.json；"
-  echo "3) 保留、不要删：.cursor/project-context.md、regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、mcp.json；"
+  echo "3) 项目状态文件（regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、tmp/、verify/）已自动迁入 .ai-gates/；保留、不要删：.cursor/project-context.md、mcp.json；"
   echo "4) 删除后重新运行本脚本。"
   echo "（.codex 旧真实目录会自动迁移，无需手动删。）"
   exit 1

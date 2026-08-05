@@ -6,7 +6,7 @@
 #   - [PM] 打点规模 / 最近活跃 / 来源分布（text / planner-subagent / developer-subagent）
 #   - CHANGELOG 写流水规模 / 最近活跃
 #   - 门禁 deny 触发次数（pm-gate-check.log）
-#   - 打点解析健壮性（PARSE_FAIL 次数）
+#   - 打点解析健壮性（PARSE_FAIL：近 12 小时 WARN；仅历史则 INFO 已收敛）
 #   - 退化信号判定：打点缺失 / 门禁长期无触发 / 全链路静默（= 方向⑤「退化信号自动巡检」）
 #
 # 数据源（.ai-gates/hooks-log/）：
@@ -21,7 +21,8 @@
 # 退化信号（WARN/CRIT）：
 #   D1  打点文件缺失（pm-gate.json / changelog-writes.json）→ CRIT：对应门禁退化为 fail-open/初始态
 #   D2  近 N 天门禁 deny = 0 但有打点 → WARN：门禁可能未接线或全豁免（机制形同虚设仍当已生效）
-#   D3  近 N 天 PARSE_FAIL > 0 → WARN：打点链路不稳（大 payload 解析失败，fallback 兜底中）
+#   D3  近 12 小时 PARSE_FAIL > 0 → WARN：打点链路不稳（大 payload 解析失败，fallback 兜底中）；
+#       仅 30 天内历史（近 12 小时为 0）→ INFO（根因 2026-08-04 11:55 junction 已修，非活退化）
 #   D4  近 N 天打点 = 0 且 deny = 0 → CRIT：hook 链路全静默（hooks.json 未接线或 Cursor 侧失效）
 #   D5  kill switch 存在 → INFO：门禁被人工禁用（豁免期内不判退化）
 #
@@ -48,6 +49,7 @@ if (-not $repoRoot) { $repoRoot = (Resolve-Path (Join-Path $scriptDir "..\..")).
 $logDir = Join-Path $repoRoot ".ai-gates\hooks-log"
 
 $sinceUtc = [DateTime]::UtcNow.AddDays(-$Days)
+$since12h = [DateTime]::UtcNow.AddHours(-12)
 
 function Get-FileUtcTime {
     param([string]$Iso)
@@ -90,7 +92,7 @@ function Read-MarkFile {
 # 统计 log 文件近 N 天匹配关键字的行数（行首时间戳 yyyy-MM-dd HH:mm:ss，本地时间 → UTC 比较；
 # 排除测试/仿真会话行，避免 test-hooks / simulate-cursor-session 的刻意构造污染体检）
 function Count-LogLines {
-    param([string]$Path, [string]$Pattern, [string]$ExcludePattern = "__test__|__sim__")
+    param([string]$Path, [string]$Pattern, [string]$ExcludePattern = "__test__|__sim__", [DateTime]$SinceUtc = $sinceUtc)
     if (-not (Test-Path -LiteralPath $Path)) { return 0 }
     $count = 0
     try {
@@ -101,7 +103,7 @@ function Count-LogLines {
                 if ($ExcludePattern -and $line -match $ExcludePattern) { continue }
                 if ($line -match $Pattern) {
                     $lineTime = [DateTime]::ParseExact($ts, "yyyy-MM-dd HH:mm:ss", $null)
-                    if ($lineTime.ToUniversalTime() -ge $sinceUtc) { $count++ }
+                    if ($lineTime.ToUniversalTime() -ge $SinceUtc) { $count++ }
                 }
             }
         }
@@ -111,11 +113,30 @@ function Count-LogLines {
     return $count
 }
 
+function Get-LastMatchTime {
+    param([string]$Path, [string]$Pattern, [string]$ExcludePattern = "__test__|__sim__")
+    $last = $null
+    if (-not (Test-Path -LiteralPath $Path)) { return $last }
+    try {
+        foreach ($line in [System.IO.File]::ReadLines($Path, [System.Text.Encoding]::UTF8)) {
+            if ($line -match '^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})') {
+                $ts = $Matches[1]
+                if ($ExcludePattern -and $line -match $ExcludePattern) { continue }
+                if ($line -match $Pattern) { $last = $ts }
+            }
+        }
+    } catch {
+    }
+    return $last
+}
+
 $pmGate = Read-MarkFile -Path (Join-Path $logDir "pm-gate.json") -SourceFieldName "sourceField"
 $cw = Read-MarkFile -Path (Join-Path $logDir "changelog-writes.json")
 $denyCount = Count-LogLines -Path (Join-Path $logDir "pm-gate-check.log") -Pattern "DENY|deny"
 $parseFailMarkPm = Count-LogLines -Path (Join-Path $logDir "mark-pm-gate.log") -Pattern "PARSE_FAIL"
 $parseFailMarkCw = Count-LogLines -Path (Join-Path $logDir "mark-changelog-write.log") -Pattern "PARSE_FAIL"
+$parseFailMarkPm12 = Count-LogLines -Path (Join-Path $logDir "mark-pm-gate.log") -Pattern "PARSE_FAIL" -SinceUtc $since12h
+$parseFailMarkCw12 = Count-LogLines -Path (Join-Path $logDir "mark-changelog-write.log") -Pattern "PARSE_FAIL" -SinceUtc $since12h
 $unityHit = Count-LogLines -Path (Join-Path $logDir "unity-compile-check.log") -Pattern "HIT"
 $killSwitch = Test-Path -LiteralPath (Join-Path $logDir "pm-gate-disabled")
 
@@ -128,8 +149,15 @@ if ($pmGate.Total -lt 0 -or $cw.Total -lt 0) {
     $signals += "CRIT D1 打点文件缺失：门禁退化为 fail-open/初始态"; $level = "CRIT"
 }
 $parseFailTotal = $parseFailMarkPm + $parseFailMarkCw
-if ($parseFailTotal -gt 0) {
-    $signals += "WARN D3 近 $Days 天 PARSE_FAIL x$parseFailTotal（mark-pm-gate $parseFailMarkPm / mark-changelog-write $parseFailMarkCw）打点链路不稳，fallback 兜底中"; if ($level -ne "CRIT") { $level = "WARN" }
+$parseFail12h = $parseFailMarkPm12 + $parseFailMarkCw12
+if ($parseFail12h -gt 0) {
+    $signals += "WARN D3 近 12 小时 PARSE_FAIL x$parseFail12h（mark-pm-gate $parseFailMarkPm12 / mark-changelog-write $parseFailMarkCw12）打点链路不稳，fallback 兜底中"; if ($level -ne "CRIT") { $level = "WARN" }
+} elseif ($parseFailTotal -gt 0) {
+    $lastPm = Get-LastMatchTime -Path (Join-Path $logDir "mark-pm-gate.log") -Pattern "PARSE_FAIL"
+    $lastCw = Get-LastMatchTime -Path (Join-Path $logDir "mark-changelog-write.log") -Pattern "PARSE_FAIL"
+    $lastPf = $lastCw
+    if ($lastPm -and (-not $lastPf -or $lastPm -gt $lastPf)) { $lastPf = $lastPm }
+    $signals += "INFO D3 历史 PARSE_FAIL（近 $Days 天 x$parseFailTotal，最近 $lastPf；近 12 小时 0 例，已收敛，非活退化）"
 }
 if ($killSwitch) {
     $signals += "INFO D5 kill switch 存在：门禁被人工禁用（豁免期内不判退化）"
@@ -157,6 +185,7 @@ $report = [ordered]@{
     changelogWrites = [ordered]@{ total = $cw.Total; recent = $cw.Recent; latestUtc = $latestCwStr }
     gateDeny = $denyCount
     parseFail = $parseFailTotal
+    parseFail12h = $parseFail12h
     unityCompileHit = $unityHit
     killSwitchActive = $killSwitch
     signals = $signals
@@ -177,7 +206,7 @@ if ($JsonOutput) {
     $md += "- 会话数：$($cw.Total)（近 $Days 天 $($cw.Recent)）· 最近：$latestCwStr"
     $md += ""
     $md += "## 门禁与质量门"
-    $md += "- 门禁 deny：$denyCount 次 · PARSE_FAIL：$parseFailTotal 次 · Unity 编译命中：$unityHit 次"
+    $md += "- 门禁 deny：$denyCount 次 · PARSE_FAIL（近 $Days 天/近 12 小时）：$parseFailTotal/$parseFail12h 次 · Unity 编译命中：$unityHit 次"
     $md += "- kill switch：$killSwitch"
     $md += ""
     $md += "## 退化信号"

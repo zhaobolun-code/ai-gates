@@ -15,35 +15,23 @@
 3. 下文「第一次接入」— 做完再让 AI 稳定改本项目  
 4. 日常由助手按内部说明执行；你不必先读完所有规则
 
-若你解压的是安装包：解压到目标项目根（得到 `.ai-gates/`），跑 `link-platform.ps1` 建好传送门，然后从第 3 步做起。包里**没有**源项目的业务文档和项目说明。
+若你解压的是安装包：解压到目标项目根（得到 `.ai-gates/`），然后在 Agent 窗口（Cursor /
+Codex / Trae 均可）粘贴 **`项目经理 升级 ai-gates`**——Agent 会建好传送门并确认。
+包里**没有**源项目的业务文档和项目说明。
 
-**老用户升级**（旧版解压进 `.cursor/` 的安装）：解压新包到项目根 → 在 PowerShell 窗口直接运行
-`Set-ExecutionPolicy -Scope Process Bypass -Force; .\ai-gates\link-platform.ps1`
-（cmd 里用 `powershell -ExecutionPolicy Bypass -File .ai-gates\link-platform.ps1`；Unix：`bash .ai-gates/link-platform.sh`，幂等可重跑）。
-
-**Agent 窗口一键升级（推荐，不用手动碰 PowerShell）**：先把新版 7z 解压到项目根（得到
-`.ai-gates/`），然后在 Agent 窗口（Cursor / Codex / Trae 均可）粘贴：
+**升级 / 安装传送门，对项目经理说一句即可**（不需要手动碰 PowerShell）：
 
 ```text
-项目经理 升级 ai-gates 到最新版
+项目经理 升级 ai-gates   （= PM upgrade ai-gates）
 ```
 
-Agent 会读本节步骤执行：删除旧 `.cursor/skills|hooks|scripts|rules` 与旧 `.cursor/hooks.json`
-→ 运行 link-platform 建传送门 → 确认 `.cursor/*`、`.codex` 指向 `.ai-gates/`。手动 PowerShell
-步骤作为备选（Agent 执行升级不受 hooks 门禁影响——hooks 只拦无 [PM] 的 apply_patch 与高危 git 命令）。
-若旧 `.cursor/skills|hooks|scripts|rules` 是真实目录，脚本会报错拒删——确认后删掉再重跑；
-`.cursor/hooks.json` 残留会被脚本黄色提示。`project-context.md` 等项目文件保留，**无需重新初始化**；
-新会话起 SessionStart 会自动体检传送门。
-**下载后若提示「无法运行，拒绝访问」**：先解除下载文件的网络标记，再重跑：
-`Get-ChildItem .ai-gates -Recurse -File | Unblock-File`
-
-**升级遇到问题排查**：
-- 提示「无法运行，拒绝访问」→ 先 `Get-ChildItem .ai-gates -Recurse -File | Unblock-File` 再重跑。
-- 提示 `powershell.exe` 拒绝访问 → 已在 PowerShell 窗口时直接运行脚本，不嵌套：
-  `Set-ExecutionPolicy -Scope Process Bypass -Force; .\ai-gates\link-platform.ps1`。
-- 提示 `.\ai-gates\link-platform.ps1` 无法识别/找不到 → 先 `Get-Location` 确认在项目根，
-  再 `Test-Path .\ai-gates\link-platform.ps1`；不存在则把 `.ai-gates` 移到项目根
-  （解压后应直接是 `.ai-gates\link-platform.ps1`，不要解进 `.cursor/` 或嵌套文件夹）。
+Agent 会自动执行：删除旧 `.cursor/skills|hooks|scripts|rules` 与旧 `.cursor/hooks.json` →
+运行 link-platform 建传送门 → 自动把旧 `.cursor/` 根的项目状态文件迁入 `.ai-gates/` 对应位置
+（regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、tmp/、verify/；目标已存在则跳过）
+→ 确认 `.cursor/*`、`.codex` 指向 `.ai-gates/`。`project-context.md`、`mcp.json` 保留在
+`.cursor/`，**无需重新初始化**。若旧目录是真实目录被拒删、或下载文件被 Windows 拦截
+（「拒绝访问」）、或报路径找不到——**把报错原文粘贴给项目经理即可**，Agent 会按内部步骤处理
+（解除网络标记 Unblock-File、确认解压位置、不嵌套运行等）。新会话起 SessionStart 会自动体检传送门。
 
 ## 日常怎么开口
 
@@ -52,14 +40,15 @@ Agent 会读本节步骤执行：删除旧 `.cursor/skills|hooks|scripts|rules` 
 [需求 / 现象 / 报错]
 ```
 
-也可写 `PM`（`项目经理`=`PM`）。新项目第一次先说：`项目经理 初始化`（`初始化`=`init`）。  
+也可写 `PM`（`项目经理`=`PM`）。新项目第一次先说：`项目经理 初始化`（`初始化`=`init`）；
+升级技能包：`项目经理 升级 ai-gates`（`升级`=`upgrade`，`PM upgrade ai-gates`）；体检：
+`项目经理 检查健康`（`检查健康`=`doctor`，`PM doctor`）。  
 没填项目说明时，助手会偏保守，车道可能判不准。
 
 ## 第一次接入（三步）
 
-1. 在助手里粘贴 `项目经理 初始化`（**引导式**），或运行：  
-   `powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply`  
-   脚本会探测四态并输出「下一步清单」（生成/确认 project-context → rules 对齐 → 可选 CodeGraph），按清单逐步确认即可。
+1. 在助手里粘贴 `项目经理 初始化`（**引导式**；Agent 会运行 pm-init.ps1 探测四态并输出
+   「下一步清单」——生成/确认 project-context → rules 对齐 → 可选 CodeGraph），按清单逐步确认即可。
 2. 打开并填写 `.cursor/project-context.md`：用什么技术、哪些目录要格外小心、有哪些必测场景。填完如有同步脚本再跑一下（助手会提示）。  
 3. （推荐）征得同意后安装代码检索工具 CodeGraph，方便少读错文件。
 
@@ -84,10 +73,9 @@ Agent 会读本节步骤执行：删除旧 `.cursor/skills|hooks|scripts|rules` 
 
 ## 给技术负责人（可选）
 
-| 用途 | 去哪 |
+| 用途 | 怎么做 |
 | --- | --- |
-| 新建任务文件夹 | 脚本 `new-pipeline-window.ps1` |
-| 结束后挪文件夹 | 脚本 `migrate-pipeline-window.ps1` |
-| 检查文档是否合规 | 脚本 `check-pipeline-doc.ps1` / `validate-pipeline.ps1` |
+| 新建任务文件夹 / 结束后挪文件夹（签收） | **项目经理自动完成**，无需用户对话 |
+| 检查文档是否合规 | 对项目经理说：`项目经理 检查健康`（=`doctor`；Agent 运行 check-pipeline-doc / validate-pipeline） |
 
 岗位细则在各 `*/SKILL.md`；规则争议查 [CORE.md](skills/CORE.md)。
