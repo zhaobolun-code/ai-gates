@@ -79,8 +79,25 @@ try {
     $yamlPath = Join-Path $repoRoot ".ai-gates\regression-index.yaml"
     $regressionModules = @(Get-PipelineRegressionModulesFromYaml -YamlPath $yamlPath)
 
+    # 2026-08-05：lessons-learned 热度（CORE §三车道判定 第3步 的机器层；
+    # pipeline-outcome.log 的失败已由「准全自动」沉淀进 lessons，此处直接读 lessons 作用域/模块）
+    $lessonHot = New-Object System.Collections.Generic.List[string]
+    $lessonsPath = Join-Path $repoRoot ".ai-gates\lessons-learned.md"
+    if (Test-Path -LiteralPath $lessonsPath) {
+        foreach ($ln in (Get-Content -LiteralPath $lessonsPath -Encoding UTF8)) {
+            if ($ln -notmatch '^\|') { continue }
+            $cols = $ln -split '\|'
+            if ($cols.Count -lt 13) { continue }
+            $mod = $cols[2].Trim()
+            $scope = $cols[12].Trim()
+            if ($scope) { [void]$lessonHot.Add($scope) }
+            if ($mod) { [void]$lessonHot.Add($mod) }
+        }
+    }
+
     $hitsExpressUpgrade = $false
     $hitsRegression = $false
+    $hitsLessonHot = $false
     foreach ($f in $fileList) {
         if (Test-PipelinePathHitsPrefix -Path $f -Prefixes $expressUpgradePrefixes) {
             $hitsExpressUpgrade = $true
@@ -94,16 +111,25 @@ try {
                 break
             }
         }
+        foreach ($h in $lessonHot) {
+            if (-not $h) { continue }
+            $hn = $h -replace '\\','/'
+            if ($f -match [regex]::Escape($hn)) {
+                $hitsLessonHot = $true
+                $reasons += "path hits lessons hotspot ($h): $f"
+                break
+            }
+        }
     }
 
     $diffHint = "unknown"
     if ($fileCount -eq 0) {
         $diffHint = "unknown"
-    } elseif ($hitsExpressUpgrade -or $hitsRegression) {
+    } elseif ($hitsExpressUpgrade -or $hitsRegression -or $hitsLessonHot) {
         $diffHint = "Standard"
         if ($fileCount -gt 3) {
             $diffHint = "Full"
-            $reasons += "core module + scale over threshold (>3 files) -> consider Full (CORE 2.4)"
+            $reasons += "core/regression/hotspot + scale over threshold (>3 files) -> consider Full (CORE 2.4)"
         }
     } elseif ($fileCount -le 3) {
         $diffHint = "Express"
@@ -132,6 +158,7 @@ try {
         git_changed_in_scope = @($changedInScope | Select-Object -Unique)
         hits_express_upgrade = $hitsExpressUpgrade
         hits_regression_module = $hitsRegression
+        hits_lesson_hotspot = $hitsLessonHot
         diff_hint = $diffHint
         reasons = @($uniqueReasons)
         advisory = "PM applies CORE section 3-lane rules; diff_hint does not auto-set lane"
@@ -154,6 +181,7 @@ try {
         }
         Write-Host "hits_express_upgrade: $hitsExpressUpgrade"
         Write-Host "hits_regression_module: $hitsRegression"
+        Write-Host "hits_lesson_hotspot: $hitsLessonHot"
         Write-Host "diff_hint: $diffHint" -ForegroundColor Yellow
         Write-Host "note: $($result.advisory)" -ForegroundColor DarkGray
         if ($uniqueReasons.Count -gt 0) {

@@ -34,3 +34,22 @@ if (Test-Path $traeSkills) {
 Write-Host "Creating junction..."
 cmd /c "mklink /J `"$traeSkills`" `"$centralSkills`""
 Write-Host "Done: .trae/skills -> .ai-gates/skills"
+
+# 2026-08-05：规则目录同步（.trae/rules -> .ai-gates/rules）
+$centralRules = Join-Path $root ".ai-gates\rules"
+$traeRules = Join-Path $root ".trae\rules"
+if (-not (Test-Path $centralRules)) {
+    Write-Host "WARN: central rules dir missing (skip .trae/rules): $centralRules"
+} else {
+    if (Test-Path $traeRules) {
+        $item = Get-Item $traeRules -Force
+        if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+            Write-Host "OK: .trae/rules already linked (target: $($item.Target))"
+        } else {
+            throw ".trae/rules occupied by a real directory: $traeRules. Remove it first."
+        }
+    } else {
+        cmd /c "mklink /J `"$traeRules`" `"$centralRules`""
+        Write-Host "Done: .trae/rules -> .ai-gates/rules"
+    }
+}

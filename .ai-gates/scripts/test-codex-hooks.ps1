@@ -153,7 +153,10 @@ $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ldG
 Write-Case 'C14 .ai-gates/skills fresh changelog -> allow' ($out -notmatch 'permissionDecision') $out
 $p = Get-SessionPayload -SessionId $sid -ToolName 'apply_patch' -Command $patchAiReadme
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ldG
-Write-Case 'C15 .ai-gates/README -> allow (level2)' ($out -notmatch 'permissionDecision') $out
+Write-Case 'C15 .ai-gates/README.md fresh changelog -> allow (level1)' ($out -notmatch 'permissionDecision') $out
+Remove-Item -LiteralPath (Join-Path $ldG 'changelog-writes.json') -Force -ErrorAction SilentlyContinue
+$out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ldG
+Write-Case 'C15b .ai-gates/README.md no changelog -> deny (level1)' ($out -match '"permissionDecision":"deny"' -and $out -match 'Level-1') $out
 $p = Get-SessionPayload -SessionId $sid -ToolName 'apply_patch' -Command $patchCodexWiring
 Remove-Item -LiteralPath (Join-Path $ldG 'changelog-writes.json') -Force -ErrorAction SilentlyContinue
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ldG

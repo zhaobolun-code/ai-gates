@@ -105,6 +105,9 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 - `max_auto_steps`：**3**（单次预算内最多推进至待验的 Step 数）
 - `max_repair_rounds`：**2**（交审级修复；微循环不计）
 - 停滞：同一失败标签 / 同一 Mandatory 无实质 diff 连续 **2** 轮 → `fuse`
+- **超时硬停（2026-08-05）**：同一 Step 连续 **60 分钟**无新 diff / 无新证据 / 无子窗返回 → `fuse reason=stall_timeout`；Auto 子窗无响应 **15 分钟** → 主窗接管（不再干等），按 §3 恢复路径处理。
+- **token 预算（可选）**：project-context 或方案夹 `.state.json` 配置 `budget_tokens`；Auto 链累计估算超限 → `fuse reason=budget_exhausted`，须 TL 确认续额（不自动续）。
+- **审计打点**：`mark-pm-gate.ps1` 记录 `auto_active` / `auto_rounds` / `auto_startedAt`（pm-gate.json），供诊断与预算审计；机器层不改门禁语义。
 
 计数：每完成一个 Step 的实现+CR 收口（进入待验）→ `auto_steps_done +1`；然后**唯一** reason：命中 AI 验收 → 可瞬态 `await_verify reason=ai_static` 并派子窗；未命中且 `< max` → `unity_test`；`≥ max` → `max_auto_steps`。禁止双写；命中时**禁止**只写 `unity_test` 干等。
 

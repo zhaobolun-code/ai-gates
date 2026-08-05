@@ -107,7 +107,7 @@ try {
     # 2) hooks.json 必需事件映射
     $expected = @(
         @{ Event = 'SessionStart';  Matcher = $null;        Scripts = @('check-hooks-drift.ps1') },
-        @{ Event = 'PreToolUse';    Matcher = '^Bash$';     Scripts = @('git-safety-check.ps1') },
+        @{ Event = 'PreToolUse';    Matcher = '^Bash$';     Scripts = @('git-safety-check.ps1', 'bash-write-gate.ps1') },
         @{ Event = 'PreToolUse';    Matcher = '^apply_patch$'; Scripts = @('audit-write.ps1', 'pm-gate-check.ps1') },
         @{ Event = 'PostToolUse';   Matcher = '^apply_patch$'; Scripts = @('check-unity-compile.ps1', 'mark-changelog-write.ps1') },
         @{ Event = 'Stop';          Matcher = $null;        Scripts = @('mark-pm-gate.ps1') }
@@ -161,7 +161,24 @@ try {
         $issues.Add("AGENTS.md 未提及 Codex hooks 接线说明") | Out-Null
     }
 
-    # 5) 传送门健康（升级残留 / 缺失提示）
+    # 5) 安装信息与包版本一致性（本地检查；远端最新版用 install-ai-gates.ps1 -CheckUpdate）
+    $installInfo = Join-Path $repoRoot '.ai-gates\install-info.json'
+    $versionFile = Join-Path $repoRoot '.ai-gates\skills\VERSION'
+    if (Test-Path -LiteralPath $installInfo) {
+        try {
+            $ii = Get-Content -LiteralPath $installInfo -Raw -Encoding UTF8 | ConvertFrom-Json
+            if (Test-Path -LiteralPath $versionFile) {
+                $ver = (Get-Content -LiteralPath $versionFile -Raw -Encoding UTF8).Trim()
+                if ($ii.tag -and $ii.tag -notmatch [regex]::Escape($ver)) {
+                    $issues.Add("install-info tag ($($ii.tag)) != pack VERSION ($ver); run: powershell -File .ai-gates/scripts/install-ai-gates.ps1 -CheckUpdate") | Out-Null
+                }
+            }
+        } catch {
+            # install-info 解析失败不阻塞（fail-open）
+        }
+    }
+
+    # 6) 传送门健康（升级残留 / 缺失提示）
     $portal = @(Test-PortalHealth -RepoRoot $repoRoot)
     foreach ($p in $portal) { $issues.Add($p) | Out-Null }
 
@@ -170,7 +187,13 @@ try {
             Remove-Item -LiteralPath $driftFile -Force -ErrorAction SilentlyContinue
         }
         Write-Audit 'OK no_drift'
-        Emit-SessionStartEmpty
+        $ctx = @"
+[codex-hooks-live] 机器强制层提醒（2026-08-05 实测）：
+- Codex CLI 侧 PreToolUse/PostToolUse 对 Bash 与 apply_patch 均触发，deny 真正拦截。
+- Codex 桌面应用会话对 apply_patch 钩子可能不触发（信任已批准仍零打点）——关键写操作后请自查 .ai-gates/hooks-log/。
+- 验证钩子是否生效：powershell -File .ai-gates/scripts/test-codex-hooks.ps1
+"@
+        Emit-SessionStartContext -Context $ctx
     }
 
     $hint = 'Codex hooks wiring drifted from .codex/hooks.json / .codex/config.toml / .cursor/hooks/codex/. Align or update docs, then re-run: powershell -File .cursor/scripts/check-hooks-policy.ps1'

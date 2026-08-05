@@ -62,6 +62,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 - **语义自检**：三问后发现的疑点及证据；无疑点写「未发现语义疑点」即可
 - 验证状态（static-checked / not run）
 - **回归验证**：Unity 操作步骤 + 预期 Console 关键词（优先引用 project-context 回归索引）
+- **Analyze 对表**：A# ↔ Mandatory ↔ 预期 Console 关键词三表一致（缺任一不得交 CR / 自检；细则见 [acceptance-and-delta.md](../references/acceptance-and-delta.md) §Analyze 对表）
 
 ## 禁止
 

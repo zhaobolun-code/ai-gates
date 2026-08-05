@@ -6,6 +6,7 @@
 
 - **项目经理 / 各岗位**：CORE 翻车索引优先；派岗或交接前扫本表是否命中其他反模式。
 - **与 hard blocker 关系**：命中反模式通常对应 **hard blocker** 或须立即 **升级模式**；详见 [evidence-levels.md](./evidence-levels.md)。
+- **复盘写回（P2）**：连续同类 blocker（≥2 次复现）→ CR / 方案审 提议补写本表或 lessons；**用户「准」后才改 Skill**（改前 CHANGELOG）；静默改规则 = **major**（评测 E2）。
 
 ## CORE 翻车索引（v3.1.3 · 命中驱动维护）
 

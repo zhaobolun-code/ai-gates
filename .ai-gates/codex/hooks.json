@@ -17,6 +17,10 @@
           {
             "type": "command",
             "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/git-safety-check.ps1"
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/bash-write-gate.ps1"
           }
         ]
       },

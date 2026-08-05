@@ -46,26 +46,58 @@ try {
 # [PM] 作为岗位标记出现（CORE.md：首行标记 [PM]）；不要求必须在行首，宁可宽松不漏判。
 $hasPmMarker = $text -match [Regex]::Escape("[PM]")
 
-if ($hasPmMarker) {
-    $gate = [ordered]@{}
-    if (Test-Path -LiteralPath $gateFile) {
-        try {
-            $existingRaw = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8
-            $existing = $existingRaw | ConvertFrom-Json -ErrorAction Stop
-            $existing.PSObject.Properties | ForEach-Object { $gate[$_.Name] = $_.Value }
-        } catch {
-            # 旧文件损坏就当空表重建，不阻塞
-        }
+# 2026-08-05：Auto 链审计打点（预算护栏配套，见 loop-engineering §4）。
+# - 批准消息含 Auto（「准 auto」「继续 Auto」「本窗 Auto」）→ auto_active=true + auto_started_at
+# - Auto 激活期间每次 Stop（含无 [PM] 的 [developer]/[CR] 轮）→ auto_rounds+1（审计用，不改门禁语义）
+$hasAuto = $text -match '(?i)\bAuto\b'
+
+$gate = [ordered]@{}
+if (Test-Path -LiteralPath $gateFile) {
+    try {
+        $existingRaw = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8
+        $existing = $existingRaw | ConvertFrom-Json -ErrorAction Stop
+        $existing.PSObject.Properties | ForEach-Object { $gate[$_.Name] = $_.Value }
+    } catch {
+        # 旧文件损坏就当空表重建，不阻塞
     }
+}
+
+$prev = $gate.$sessionId
+$prevAutoActive = $false
+$prevRounds = 0
+if ($prev) {
+    if ($prev.auto_active) { $prevAutoActive = $true }
+    if ($prev.auto_rounds) { $prevRounds = [int]$prev.auto_rounds }
+}
+
+if ($hasPmMarker) {
     $snippet = $text.Substring(0, [Math]::Min(160, $text.Length))
-    $gate[$sessionId] = [ordered]@{
+    $entry = [ordered]@{
         lastPmAtUtc = [DateTime]::UtcNow.ToString('o')
         snippet     = $snippet
         sourceField = $fieldUsed
     }
+    if ($hasAuto) {
+        $entry.auto_active    = $true
+        $entry.auto_startedAt = [DateTime]::UtcNow.ToString('o')
+        $entry.auto_rounds    = 0
+    } elseif ($prevAutoActive) {
+        # 已在 Auto 链中的新一轮 [PM] 确认：保留 Auto 状态并累计轮次
+        $entry.auto_active    = $true
+        if ($prev.auto_startedAt) { $entry.auto_startedAt = $prev.auto_startedAt }
+        $entry.auto_rounds    = $prevRounds + 1
+    }
+    $gate[$sessionId] = $entry
     $json2 = $gate | ConvertTo-Json -Depth 6
     Write-JsonAtomic -Path $gateFile -Content $json2
-    Write-HookAudit -LogDir $LogDir -FileName 'mark-pm-gate.log' -Line ("session={0} field={1} hasPm=True wrote=pm-gate.json" -f $sessionId, $fieldUsed)
+    Write-HookAudit -LogDir $LogDir -FileName 'mark-pm-gate.log' -Line ("session={0} field={1} hasPm=True auto={2} rounds={3} wrote=pm-gate.json" -f $sessionId, $fieldUsed, $hasAuto, $entry.auto_rounds)
+} elseif ($prevAutoActive) {
+    # Auto 链内非 [PM] 轮（developer/CR/verify 等）：累计轮次，供诊断与预算审计
+    $prev.auto_rounds = $prevRounds + 1
+    $gate[$sessionId] = $prev
+    $json2 = $gate | ConvertTo-Json -Depth 6
+    Write-JsonAtomic -Path $gateFile -Content $json2
+    Write-HookAudit -LogDir $LogDir -FileName 'mark-pm-gate.log' -Line ("session={0} field={1} hasPm=False auto_rounds_inc={2}" -f $sessionId, $fieldUsed, ($prevRounds + 1))
 } else {
     Write-HookAudit -LogDir $LogDir -FileName 'mark-pm-gate.log' -Line ("session={0} field={1} hasPm=False wrote=none" -f $sessionId, $fieldUsed)
 }

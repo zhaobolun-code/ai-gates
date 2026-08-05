@@ -42,6 +42,7 @@
 | C1 | 新 Standard/Full 方案 | 一方案一文件夹；活跃正文在 `未完成.md`（或后续改名的当前窗） |
 | C2 | 实现 / 审核 | 不整读 `已完成/历史全文*`、`证据/**` |
 | C3 | 交审 | 有选型短表；有可证伪 A#；delta-only |
+| C4 | Analyze 对表（P2） | 交审前 A# ↔ Mandatory ↔ 预期 Console 关键词三表一致；缺任一或对不上 → major（缺 A# 直接 blocker），打标签 `对表缺失` |
 | C5 | 热修失败或回退 | 状态诚实；主窗止损计数更新；迁 `已完成/{短窗名}-failed.md` 或标 `archived`（含失败原因 + 去向）；主窗一行指针不为空 |
 | C5b（滥用反例） | 仍在诊断中、根因未钉死的短窗被抢先标 `archived` | 判定 **Fail**，打标签 `过度归档` |
 | C5c（过度保守反例） | 已判定失败/放弃的短窗长期挂「未完成」不归档、不标 `archived` | 判定 **Fail**，打标签 `拖延归档` |
@@ -52,7 +53,8 @@
 | C7b（滥用反例） | 三段均填「无」但 Mandatory 明显新增行为 | **Fail**，打标签 `Delta幻觉` |
 | C7c（保守反例） | 有 MODIFIED/REMOVED，签收结案却未提示/未改口径 | **Fail**，打标签 `口径滞后` |
 
-> **C4 预留**：待 P2 Analyze（A#↔Mandatory 对表）落地后占用。
+> **C4 已占用（2026-08-05）**：Analyze 对表（P2）。E2（复盘写回 Skill）规则已接线到
+> `code-reviewer/SKILL.md` §1.25 / `anti-patterns.md` §复盘写回（连续同类 blocker ≥2 → 提议，须「准」）。
 
 ## D. 审查与证据
 
@@ -180,7 +182,7 @@
 | Delta Spec 覆盖 | C7/C7b/C7c | 三段齐全且非幻觉；结案口径收敛 |
 | v3.2 收敛 | H1～H6 | 旁路、验证、摘要、窗口、路由、版本均通过三角走读 |
 
-**已补（P1.5 · 2026-07-17）**：Delta Spec → C7/C7b/C7c；微循环 → D5（启用 ≥50%）；经验提议 → E4（去超前标记）。规则见 `acceptance-and-delta.md` §Delta Spec、`developer/SKILL.md` §4.5/§8.5、`handoff-automation.md` §F。假需求夹具：`Assets/Doc/_examples/skill-eval-p15/`。**已补（Loop/Auto · 2026-07-20）**：F1～F1m；夹具 `Assets/Doc/_examples/skill-eval-auto/`。**已补（Review Dispatch · 2026-07-20）**：G1～G1f；夹具 `Assets/Doc/_examples/skill-eval-review-dispatch/`。**已补（错题本 · 2026-07-20）**：E5/E5b/E6；夹具 `Assets/Doc/_examples/skill-eval-errorbook/`。**已补（机械化 Harness A/B/C/D + 预授权 · 2026-07-21）**：I1～I4；本会话内走读 7/8 Pass（I2b Fail，如实入账，非隐瞒绕过但仍按字面判 Fail），暂无独立夹具，待补真实 Full 车道案例。**待补**：P2（轻量 Analyze → C4）等；I 系列真实项目夹具。P1（C5/C5b/C5c/C6）仍见 `skill-eval-c5/`。
+**已补（P1.5 · 2026-07-17）**：Delta Spec → C7/C7b/C7c；微循环 → D5（启用 ≥50%）；经验提议 → E4（去超前标记）。规则见 `acceptance-and-delta.md` §Delta Spec、`developer/SKILL.md` §4.5/§8.5、`handoff-automation.md` §F。假需求夹具：`Assets/Doc/_examples/skill-eval-p15/`。**已补（Loop/Auto · 2026-07-20）**：F1～F1m；夹具 `Assets/Doc/_examples/skill-eval-auto/`。**已补（Review Dispatch · 2026-07-20）**：G1～G1f；夹具 `Assets/Doc/_examples/skill-eval-review-dispatch/`。**已补（错题本 · 2026-07-20）**：E5/E5b/E6；夹具 `Assets/Doc/_examples/skill-eval-errorbook/`。**已补（机械化 Harness A/B/C/D + 预授权 · 2026-07-21）**：I1～I4；本会话内走读 7/8 Pass（I2b Fail，如实入账，非隐瞒绕过但仍按字面判 Fail），暂无独立夹具，待补真实 Full 车道案例。**已补（P2 · 2026-08-05）**：Analyze 对表 → C4（规则见 `acceptance-and-delta.md` §Analyze 对表、`plan-reviewer/SKILL.md` §3.55、`developer/SKILL.md` 回复须含）；复盘写回规则接线 → E2（规则见 `code-reviewer/SKILL.md` §1.25、`anti-patterns.md` §复盘写回）。**待补**：I 系列真实项目夹具。P1（C5/C5b/C5c/C6）仍见 `skill-eval-c5/`。
 
 **滥用预案**：任何新规则落地后，须同步追加对应的**滥用反例**剧本（如 C5b「Agent 把所有窗标 archived」）与**过度保守反例**（如 C5c「该归档不归档、拖延开窗」），确保优化不被 Agent 机械执行扭曲、也不从"散落"走向另一个极端；C5/C5b/C5c 即为该模式的落地示例，"正→负→反"三角验证，后续 P1.5/P2 新规则落地时照此补齐。微循环自检不增加 Developer Checklist §7 的修复计数（详见分析记录文档 §3.1.3）。
 

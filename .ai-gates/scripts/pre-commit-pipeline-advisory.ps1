@@ -1,4 +1,4 @@
-﻿# pre-commit-pipeline-advisory.ps1 — optional git pre-commit advisory (v3.2.1)
+﻿# pre-commit-pipeline-advisory.ps1 — optional git pre-commit advisory (v3.3.0)
 # Always exits 0 unless -Strict. Warn-only by default.
 # Usage (manual): powershell -ExecutionPolicy Bypass -File .cursor/scripts/pre-commit-pipeline-advisory.ps1
 # CI:       powershell -File .cursor/scripts/pre-commit-pipeline-advisory.ps1 -Strict -BaseRef origin/main

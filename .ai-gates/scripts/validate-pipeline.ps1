@@ -365,6 +365,17 @@ try {
         Write-Host "windowing scan: skip (chem doc root missing)" -ForegroundColor DarkGray
     }
 
+    # 架构边界（可选 · advisory；project-context §架构边界 配置时运行）
+    $boundaryScript = Join-Path $scriptDir 'check-boundaries.ps1'
+    if (Test-Path -LiteralPath $boundaryScript) {
+        if ($Strict) {
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $boundaryScript -Strict 2>&1 | ForEach-Object { Write-Host $_ }
+        } else {
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $boundaryScript 2>&1 | ForEach-Object { Write-Host $_ }
+        }
+        if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
+    }
+
     if ($exitCode -eq 0) {
         Write-Host "`nvalidate-pipeline: OK" -ForegroundColor Green
     } else {

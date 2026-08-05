@@ -2,11 +2,25 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v3.2.1（2026-08-04 · **发布**；前版 v3.2.0 于 2026-07-21 定版）
+**当前 LTS**：v3.3.0（2026-08-05 · **发布**；前版 v3.2.1 于 2026-08-04 定版）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 
 ---
+
+## [3.3.0] - 2026-08-05（README 宣传 + 设施改造 6 项 · 发布）
+
+### Changed
+
+- **README 宣传定稿**：Codex 桌面端钩子缺口如实标注（官方 hooks 机制接线 + CLI 0.146/0.147 实测 deny）；机制表补齐差异化点（回归索引+热度 / 切片先行 / 机器强制层 / 恢复口令 / 审查门禁分档 / 三车道改判）；四个独有机制提到头牌（「和别家不一样的地方」），跨平台去独特化；平台段明确 Trae 软层。
+- **机器层补洞**：新增 PreToolUse(^Bash$) 钩子 `bash-write-gate.ps1`（显式写文件命令纳入 PM/CHANGELOG 门禁，生成目录白名单，fail-open）；SessionStart 注入"桌面端钩子可能不触发，关键写后自查 hooks-log"提醒；Trae 补 `.trae/rules` 传送门并明确软层定位（README/CORE）。
+- **规则层对齐**：`pm-gate-check.ps1` Level 1 纳入根文档 README/SKILLS/USER-GUIDE/METHODOLOGY（改前须先写 CHANGELOG）。
+- **自动验证闭环**：新增 `verify-regression-smoke.ps1`（回归索引模块冒烟，命中 golden 自动跑）+ `collect-acceptance-evidence.ps1`（A# 证据归集 evidence.md）；CORE 验收段接线（自动验证 ≠ 手测签收）。
+- **热度数据化**：`append-pipeline-outcome.ps1` 失败事件增量更新 `regression-heat.yaml`；新增 `compute-failure-heat.ps1` 重算；plan-review-tiers §L1.5 / CORE 触发改读机器热度（heat≥medium 或近 6 个月记录），替代人工扫表。
+- **预算护栏**：loop-engineering §4 增加超时硬停（60 分钟无进展 / 子窗 15 分钟无响应接管）+ 可选 token 预算；`mark-pm-gate.ps1` 记录 `auto_active/auto_rounds/auto_startedAt` 审计打点。
+- **发布形态**：新增 `install-ai-gates.ps1`（从发布仓库按 tag 一键安装/升级 + `-CheckUpdate` + 用户级缓存）；SessionStart 本地校验 install-info 与包版本一致性。
+- **验证**：全部脚本语法 + BOM 通过；bash-write-gate 的 DENY/ALLOW/2>&1 场景沙箱实测；heat 增量与重算沙箱实测；冒烟/证据/安装检查/Auto 打点沙箱实测；初始 `regression-heat.yaml` 已从真实 pipeline-outcome.log 生成（other=medium、PressureManager=high）。
+- 2026-08-05 早前 Included changes（桌面 hooks 覆盖实测 / 子窗健康检查 / 用户向文档去 PowerShell 化）随本版发布。
 
 ## [3.2.1] - 2026-08-04（Codex 适配 + 文档布局收口 · 发布）
 
@@ -63,6 +77,66 @@
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）
+
+### Included changes — 2026-08-05（路由/规格/CR 三处轻量优化 · 不 bump）
+
+### Included changes — 2026-08-05（数据飞轮 + 架构边界 advisory · 不 bump）
+
+### Included changes — 2026-08-05（P2：Analyze 对表 + 复盘写回接线 · 不 bump）
+
+> 窗：Standard · Skill/Doc-only · 无窗。按 `Assets/Doc/AI流水线/Skill优化与评测清单-v3.1.3.md`
+> 剩余 P2 待办落地：①交审前轻量 Analyze（A# ↔ Mandatory ↔ 预期 Console 关键词对表，占 C4）；
+> ②复盘写回 Skill 规则接线（连续同类 blocker ≥2 → 提议补 anti-patterns/lessons，须「准」；
+> E2 评测项原只有标准、无岗位规则）。
+
+##### Changed
+
+- `plan-reviewer/SKILL.md` §3.55、`developer/SKILL.md` 回复须含、`references/acceptance-and-delta.md`
+  §Analyze 对表：新增三表对表（缺任一或对不上 → major，缺 A# blocker）。
+- `code-reviewer/SKILL.md` §1.25、`references/anti-patterns.md` §复盘写回：连续同类 blocker ≥2 →
+  提议补 anti-patterns/lessons，用户「准」后才改 Skill；静默改规则 = major。
+- `references/skill-eval-checklist.md`：C4 占用（Analyze 对表）、E2 接线说明、P2 已补标注。
+
+##### 验证
+
+- `validate-pipeline -Strict` 全绿；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。按评估落地两条：①方向一「动态路由」取务实版——
+> `suggest-pipeline-lane.ps1` 新增 lessons-learned 热度计算（CORE §三车道 第3步的机器层；
+> outcome 失败已由准全自动沉淀进 lessons）；②方向二「架构边界」取降级版——
+> 新增 `check-boundaries.ps1`（project-context §架构边界 配置驱动，advisory / -Strict 才 exit 1，
+> 不做 pre-tool-use DENY，避免跨语言正则误报卡死），接入 validate-pipeline。
+
+##### Changed
+
+- `scripts/suggest-pipeline-lane.ps1`：读 `.ai-gates/lessons-learned.md` 作用域/模块列，
+  命中当前 diff → `hits_lesson_hotspot` → 最低 Standard（>3 文件 → Full 提示）。
+- `scripts/check-boundaries.ps1`（新增）：解析 project-context §架构边界 规则
+  （`- `源glob` 禁引用 `目标glob``），扫 git 变更文件的 using/require/import/#include。
+- `scripts/validate-pipeline.ps1`：接入 check-boundaries（-Strict 联动）。
+
+##### 验证
+
+- suggest-pipeline-lane：临时仓 lessons 作用域命中 → hotspot=true、hint=Standard；
+- check-boundaries：越界 .cs → WARN + exit 0，-Strict → exit 1，未配置 → 跳过；
+- `validate-pipeline -Strict` 全绿（Chemical 未配边界规则 → 跳过）；发行包重建。
+
+> 窗：Standard · Skill/Doc-only · 无窗。吸收外部建议中与现有机制兼容的三处小增量：
+> Express 风险复述 + 升道出口、需求澄清三问模板（按车道分级）、CR 变更摘要 ≤3 条（diff 追问再给）。
+> 未采纳：随机红牌（hook 层无法诚实实现、与人性化相悖）、自动改车道配置（误判风险高）。
+
+##### Changed
+
+- `CORE.md` §Express 简略：**你下一步** 必须附「我判定为小改动，走快车道；若你认为涉及架构 /
+  核心路径 / 跨模块变更，请回『走标准道』（或『完整流程』）」。
+- `references/demand-clarification.md`：新增 §需求澄清三问（目标量化 / 负面约束 / 验证环境；
+  Express 只问 1 问，Standard/Full 完整三问；合计 1 轮；产出进物理口径/A#）。
+- `skills/code-reviewer/SKILL.md` §输出格式：CR 报告首行为「变更摘要 ≤3 条（人类可读）」，
+  diff 只在用户追问时输出。
+
+##### 验证
+
+- `validate-pipeline -Strict` 全绿；发行包重建。
 
 > 窗：Standard · Hook/Script-only · 无窗。PARSE_FAIL 分离统计：真实会话 153 条全部在
 > 2026-08-04 11:55 junction 就位前（GBK 根因期）；之后真实会话 0 例——根因已修，解析器无需改。

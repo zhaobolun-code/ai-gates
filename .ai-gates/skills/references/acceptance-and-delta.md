@@ -36,6 +36,18 @@ A#：[场景] + [操作] + [预期现象或 Console 关键词] + [失败判据]
 - **Skill / 纯文档**：静态引用核对 + 可证伪假需求即可，不伪造 Unity；developer §7 的业务 C# 连续 static 计数不适用。
 - 缺最小验证 → 不得交 CR；业务 C# 连续第2次交审级 `static-checked` 仍未 Unity → 停车请测，微循环不计。
 
+## Analyze 对表（交审前轻量 · P2）
+
+交审/定版前把三表对齐，防「验收条款与实现范围脱节」：
+
+| 表 | 内容 |
+| --- | --- |
+| A# | 本 Step / 切片覆盖哪些可证伪验收条款（`满足验收：A1, A2`） |
+| Mandatory | Code Changes / Delta Spec（ADDED/MODIFIED/REMOVED 相对当前物理口径） |
+| 预期 Console 关键词 | 回归索引场景 / 验收信号（[unity-editor-log.md](./unity-editor-log.md)） |
+
+三表须一致：A# 覆盖范围 ⊇ 实现改动（不得超出），Mandatory 的 MODIFIED/REMOVED 与 A# 现象对应，预期关键词能作为 A# 的观察信号。缺任一或对不上 → 方案审 **major**（缺 A# 直接 blocker，见 §验收条款）；Developer 交 CR 前自检缺任一不得交。
+
 ## Delta Spec（形式化 · P1.5）
 
 Standard / Full 每个 Step（Express 切片可极简）须相对**当前** `物理口径.md`（无则相对模块 README 相关节）写清三段：

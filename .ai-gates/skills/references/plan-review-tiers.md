@@ -9,7 +9,7 @@
 | 档位 | 何时用 | 做法 | 独立复核 |
 | --- | --- | --- | --- |
 | **L1 自审** | Standard、单模块、无状态机/持久化 | 同 Agent 读取 `plan-reviewer/SKILL.md` 审查；输出须标注「L1 非独立复核」 | 否 |
-| **L1.5 加强** | Standard 且 Mandatory Code Changes 命中 project-context 回归索引模块，**或**命中 `.ai-gates/lessons-learned.md` 近 6 个月内有记录的模块/文件（文件热度） | L1 同 Chat；CR **优先** Subagent 隔离（见 [isolated-review.md](./isolated-review.md)） | 方案否 / CR 隔离优先 |
+| **L1.5 加强** | Standard 且 Mandatory Code Changes 命中 project-context 回归索引模块，**或**命中 `.ai-gates/lessons-learned.md` 近 6 个月内有记录的模块/文件（文件热度），**或** `.ai-gates/regression-heat.yaml` 该模块 heat≥medium（机器热度，自动生成） | L1 同 Chat；CR **优先** Subagent 隔离（见 [isolated-review.md](./isolated-review.md)） | 方案否 / CR 隔离优先 |
 | **L2 交叉审** | Standard、未触 Full，跨 2 模块或涉及 public API | **优先** Subagent 隔离；仍读 plan-reviewer SKILL | 部分 |
 | **L3 独立审** | Full 车道、状态机/事务/持久数据/跨模块并行 | **优先**每轮 Subagent 隔离；每轮独立找 blocker | 是 |
 
@@ -61,7 +61,7 @@ L1 审查结论必须包含：
 
 ## L1.5 文件热度触发（新增）
 
-回归索引模块之外，若 Mandatory Code Changes 涉及的文件/模块在 `.ai-gates/lessons-learned.md` 中**近 6 个月内有记录**（即该处曾出现真实 blocker），同样触发 L1.5——不要求正式进入回归索引表才算数，"最近真的出过问题"本身就是风险信号。`策划`/`方案审核`按模块关键词扫表时顺带判断即可，不新增独立评分脚本。命中原因记为「文件热度」，与「回归索引模块」二选一或并列写入方案审核档位说明。
+回归索引模块之外，若 Mandatory Code Changes 涉及的文件/模块在 `.ai-gates/lessons-learned.md` 中**近 6 个月内有记录**（即该处曾出现真实 blocker），同样触发 L1.5——不要求正式进入回归索引表才算数，"最近真的出过问题"本身就是风险信号。**机器热度（2026-08-05 起）**：`.ai-gates/regression-heat.yaml` 中该模块 `heat≥medium` 或近 6 个月有 `last_fail_ts` 记录即触发 L1.5；该文件由 `append-pipeline-outcome.ps1`（失败事件增量更新）与 `compute-failure-heat.ps1`（重算）自动维护，`策划`/`方案审核`直接读 heat 文件即可，**替代人工关键词扫表**。命中原因记为「文件热度」/「机器热度」，与「回归索引模块」二选一或并列写入方案审核档位说明。    
 
 ## L1.5 输出要求（Standard 加强）
 

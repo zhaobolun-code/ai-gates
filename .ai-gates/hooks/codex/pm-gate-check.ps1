@@ -20,8 +20,9 @@
 #     .cursor/hooks.json、.cursor/rules/** → 查 changelog-writes.json 该 session 最近
 #     $FreshnessMinutes 分钟内有 CHANGELOG 写记录 → allow；无 → deny（逃生：先写 CHANGELOG /
 #     kill switch / 手动编辑）；打点文件缺失 → deny（初始状态）；损坏/时间戳不可解析 → fail-open allow。
-#   Level 2 兜底 allow：其余 .cursor/**（package-release.ps1、README.md、mcp.json、LICENSE、
-#     ai_dev_*.7z、_release_staging/ 等）。
+#   Level 2 兜底 allow：其余 .cursor/**（package-release.ps1、mcp.json、LICENSE、
+#     ai_dev_*.7z、_release_staging/ 等）。根文档（README/SKILLS/USER-GUIDE/METHODOLOGY）2026-08-05 起
+#     升入 Level 1：与 CORE 硬门禁 #7「README 属交付物」及「改 .ai-gates 设施先写 CHANGELOG」对齐。
 #
 # 混合 patch（业务 + .cursor 设施）语义（2026-08-04）：两道门禁都须通过——业务路径查
 # [PM] 标记、.cursor 设施查 CHANGELOG 流水；任一道 deny 即拦截（最严格者胜，不短路）。
@@ -77,6 +78,7 @@ function Test-CursorLevel1Path {
     if ($rel -match '(?:^|/)(skills|hooks|scripts|rules)(?:/|$)') { return $true }
     if ($rel -eq 'hooks.json') { return $true }
     if ($rel -match '^codex(?:/|$)') { return $true }
+    if ($rel -match '(?i)^(README|SKILLS|USER-GUIDE|METHODOLOGY)\.md$') { return $true }
     return $false
 }
 

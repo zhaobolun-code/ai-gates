@@ -30,6 +30,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 1.1 派发白名单外不得自行扩大 Read；缺材料记验证缺口或 blocker。开始前重算 revision；不符/`target_files` ⊄ whitelist → **blocker** `stale_dispatch`。blocker 后**只返回 findings**；Maker 更新工件后再复审。对抗 `mode=adversarial` 不可替代隔离主 CR
 1.15 **图谱定向（审核岗）**：**优先 CRG**（diff / `detect-changes` / impact / review context；业务 C# 在 `Assets/LabSDK` 子模块时对子模块根查图，见 [codegraph-probe.md](../references/codegraph-probe.md)）；需 verbatim 或 CRG 未命中符号时再窄用 `codegraph_explore`。**禁止**宣称 CodeGraph「额度已用尽」后整轮改 Grep/Read；禁止全目录扫读；禁止 CRG+CodeGraph 各跑一遍完整影响面。本 Step **仅** Skill/Doc、无业务 C# 时无图谱 → soft risk / 验证缺口，**不得**单独 hard blocker 挡收口
 1.2 **命中文件热度时反推同类隐患**：本次 diff 涉及的文件/模块若命中 `lessons-learned.md`，**不止核对该条教训本身是否复现**，还要用该教训的根因反问一遍当前 diff 是否存在同类风险（参考 L3 多轮独立审的"换角度攻击"思路，如：单位/顺序/因果关系类教训 → 查本次 diff 有无同类隐患，即使触发路径不同）；无同类风险须在 findings 中写一句「已按 [教训一句话] 反推，未发现同类隐患」
+1.25 **复盘写回提议（P2 · 须「准」）**：本次 blocker 与 lessons / 近窗同类复现 **≥2 次** → findings 附一行「**复盘写回提议**：<拟补 anti-patterns/lessons 的一句>」；**用户「准」后**才改 Skill（改前 CHANGELOG）。**禁止**静默改规则 / 把一次偶发提为规则（评测 [skill-eval-checklist.md](../references/skill-eval-checklist.md) E2）。
 1.5 **经验/错题（准全自动）**（见 [lessons-learned.md](../references/lessons-learned.md)）：blocker 修复确认后交主窗 PM **自动**起草 `证据/_lesson-pending.md`（类型默认 `CR blocker`）；成功路径同条可代拟 pending；**须用户「准」**才写入主表；禁静默/空泛；扫表命中须更新「最近命中」。
 2. **L1.5**：经 [cr-dispatch-l1.5.md](../templates/cr-dispatch-l1.5.md) 派发；**优先** Subagent（标「L1.5 隔离复核（Subagent）」）；手动新 Chat 标「L1.5 独立 CR」；原 Chat 标「非独立 CR」。细则 → [isolated-review.md](../references/isolated-review.md)
 3. 有图谱则探测影响面：**先 CRG，必要时补 CodeGraph**（见 [references/codegraph-probe.md](../references/codegraph-probe.md)）
@@ -72,6 +73,11 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 ## 输出格式
 
 ```markdown
+变更摘要（≤3 条 · 人类可读 · 禁罗列 diff）：
+1. …（如：提取公共常量）
+2. …（如：删除冗余循环）
+3. …（如：调整边界校验）
+
 findings:
 - [blocker] … — 影响 — 建议修复点
 - [major] …
@@ -81,7 +87,7 @@ findings:
 证据等级：static-checked
 ```
 
-无 blocker 时明确写「未发现 blocker」+ 建议迁 `step-completed` + README 记录建议 + 建议回归场景；命中 AI 验收条件则提示派 `mode=verify` 验收子窗，否则请用户 Unity 测（§C）；禁自动 `runtime-validated`。
+**diff 只在用户追问细节时输出**；CR 报告默认只给「变更摘要 ≤3 条 + findings 短表」。无 blocker 时明确写「未发现 blocker」+ 建议迁 `step-completed` + README 记录建议 + 建议回归场景；命中 AI 验收条件则提示派 `mode=verify` 验收子窗，否则请用户 Unity 测（§C）；禁自动 `runtime-validated`。
 
 ## 禁止
 

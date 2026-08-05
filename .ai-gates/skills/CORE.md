@@ -38,7 +38,7 @@ pm:
 - 非 recovery / `按 CORE 重来` 恢复轮
 - 本轮**无**车道升级（`lane_rules_hit` 不含 `→`）
 
-**你下一步**（可 1～2 句，禁只写「等待」）：车道理由 · 下一岗 · 五态 · 用户动作（确认切片 / 等改完 / Unity 测 / 回是否通过）。二选一/多选一另加 **推荐 + 为什么**（≤3 句）→ [demand-clarification.md](references/demand-clarification.md)。缺任一项或推荐 → **缺 PM 结构化判定**。
+**你下一步**（可 1～2 句，禁只写「等待」）：车道理由 · 下一岗 · 五态 · 用户动作（确认切片 / 等改完 / Unity 测 / 回是否通过）。二选一/多选一另加 **推荐 + 为什么**（≤3 句）→ [demand-clarification.md](references/demand-clarification.md)。缺任一项或推荐 → **缺 PM 结构化判定**。Express 判定**必须**附一句**风险复述 + 升道出口**：「我判定为小改动，走快车道；若你认为涉及架构 / 核心路径 / 跨模块变更，请回『走标准道』（或『完整流程』）。」
 
 **Verify / Unity 失败**：「你下一步」走 [diagnosis-gates.md](references/diagnosis-gates.md) §0（含有意义评审）；禁默认开 Step N+1、静默代选、「新切片」清零止损。
 
@@ -123,15 +123,15 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 | **Standard** | plan-lite → L1/L1.5/L2 → **一轮确认** → `[developer]` → `[CR]` → README | plan-lite；A# + delta-only |
 | **Full** | TL 显式启用；见 [references/](references/) | 执行文档；须含验收 A# |
 
-文档须含可证伪 **验收条款 A1…** 且 Step/切片写 **满足验收：A#**；只写相对现状变更（**delta-only**）。缺则方案审核 blocker。细则 → [acceptance-and-delta.md](references/acceptance-and-delta.md)。
+文档须含可证伪 **验收条款 A1…** 且 Step/切片写 **满足验收：A#**；只写相对现状变更（**delta-only**）。缺则方案审核 blocker。细则 → [acceptance-and-delta.md](references/acceptance-and-delta.md)。回归索引模块相关 Step 验收时：优先用 `scripts/verify-regression-smoke.ps1` 跑冒烟（命中 golden 且 UNITY_EXE 可用则自动跑，否则生成人工 Play 清单），并用 `scripts/collect-acceptance-evidence.ps1` 把日志尾部/截图/测试报告归入窗口 `证据/`（evidence.md）；**自动验证 ≠ 业务手测签收**，A# 仍以你亲眼看为准。
 
 Express 完成后 **不得**再派独立「代码审核」。Standard：方案审无 blocker → 发一次确认包；「准」同条开始改码。普通 CR 无 blocker 后，Full 或热文件反复修复/运行仍异常 → PM **优先**可选 Subagent `代码审核 模式：对抗`；失败再提示手动新开；用户可跳过。细则 → [isolated-review.md](references/isolated-review.md)。
 
-**一轮确认硬律** → [handoff-automation.md](references/handoff-automation.md) §0；白话包 → [demand-clarification.md](references/demand-clarification.md)。每决策点 1 条确认包；「准」同条定版/开窗/改码；续链用**合并包**。禁口令门、先改再补理由、零用户句改码。Standard/Full「准」**默认 Auto**（非第四车道；Express 不启用；退出「准, 不 Auto」）→ [loop-engineering.md](references/loop-engineering.md) + handoff §H：连跑实现→CR→待测；测挂默认同条跟可自动跟推荐（硬停除外，见 diagnosis §0）；用户停点=待测/AI 验/硬停；每 Step 仍要测（禁攒批）；口令「本窗 Auto」「继续 Auto」。
+**一轮确认硬律** → [handoff-automation.md](references/handoff-automation.md) §0；白话包 → [demand-clarification.md](references/demand-clarification.md)。每决策点 1 条确认包；「准」同条定版/开窗/改码；续链用**合并包**。禁口令门、先改再补理由、零用户句改码。Standard/Full「准」**默认 Auto**（非第四车道；Express 不启用；退出「准, 不 Auto」）→ [loop-engineering.md](references/loop-engineering.md) + handoff §H：连跑实现→CR→待测；测挂默认同条跟可自动跟推荐（硬停除外，见 diagnosis §0）；用户停点=待测/AI 验/硬停；每 Step 仍要测（禁攒批）；口令「本窗 Auto」「继续 Auto」。Auto 链受 [loop-engineering.md](references/loop-engineering.md) §4 预算护栏约束（max_auto_steps / max_repair_rounds / 停滞 fuse / 超时硬停 / 可选 token 预算）。
 
 ## Standard 加强审核（L1.5）
 
-第 2 步**未**触 Full 且 Mandatory Code Changes 命中 project-context 回归索引**模块**，或命中 `.ai-gates/lessons-learned.md` 近 6 个月记录（文件热度）→ L1.5（热度细则 → [plan-review-tiers.md](references/plan-review-tiers.md)）。
+第 2 步**未**触 Full 且 Mandatory Code Changes 命中 project-context 回归索引**模块**，或命中 `.ai-gates/lessons-learned.md` 近 6 个月记录（文件热度），或 `.ai-gates/regression-heat.yaml` 该模块 heat≥medium（机器热度，自动生成）→ L1.5（热度细则 → [plan-review-tiers.md](references/plan-review-tiers.md)）。
 
 - **方案审核**：L1 同 Chat；plan-lite 档位 **L1.5**；Regression Validation **须引用**索引行
 - **代码审核**：**优先** Subagent 隔离 + [cr-dispatch-l1.5.md](./templates/cr-dispatch-l1.5.md)；失败再提示手动新开；同 Chat 须标 **「非独立 CR」**
@@ -160,6 +160,8 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 7. **无 PM 门禁不改交付物** — 用户直接叫岗位名时，须同条先 `[PM]` 判车道并输出 **你下一步**；**本轮尚无 PM 结构化判定时不得**创建/修改代码、执行文档、README（只读咨询除外）
 
 **非门禁**：隔离审核是否成功 / 用户是否手动新开 Chat / 换模型 — 只要求诚实标注，不硬阻断。缺 PM 结构化判定或 **你下一步**（含 Express 简略四条）→ **已阻塞**。
+
+**机器强制层（如实）**：Codex CLI / Cursor 侧 hooks 可 deny 拦截；Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点，关键写后自查 `.ai-gates/hooks-log/`）；Trae 为软层（规则 + 技能传送门，无机器 hooks）。
 
 **工作区卫生（非门禁）**：一次性中间产物（revision/hash 计算、压力测试、批量迁移脚本等）只放 **`.ai-gates/tmp/`**（不入库，环节收尾整目录清空）；不得散落在 `.cursor/` 根、`.ai-gates/hooks-log/`（运行时证据）或 `.ai-gates/skills|scripts|hooks|rules`（中央库内容）。细则 → [execution-discipline.md](references/execution-discipline.md) §工作区卫生。
 

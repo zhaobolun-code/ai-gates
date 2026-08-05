@@ -32,6 +32,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 3. 每 Step 查：Mandatory Code Changes、**DO NOT TOUCH（冻结表）**、**Delta Spec（ADDED/MODIFIED/REMOVED）**、**满足验收：A#**、验证、Prerequisites
 3.05 **DO NOT TOUCH（冻结表）**：每 Step 须有该节（README 版本段 + 点名 API/文件，或「无（已扫）」）；缺节 → **major**。窗级「不要动什么」≠ Step 冻结表，不可用窗级替代
 3.5 **验收条款 + Delta-only + Delta Spec**（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md)）：无 `A1…`、条款不可证伪、Step 未引用 A#、文档复述整模块原理、或缺 Delta Spec 三段 → **blocker**，不得定版
+3.55 **Analyze 对表（P2）**：交审时核对三表——A# ↔ Mandatory（Code Changes / Delta）↔ 预期 Console 关键词（回归索引 / 验收信号）；缺任一或对不上 → **major**（缺 A# 直接 blocker，见 3.5）。细则 → [acceptance-and-delta.md](../references/acceptance-and-delta.md) §Analyze 对表
 3.6 **Agent 易错语义**：每 Step 须有该字段（Full 在 Pitfalls）；有记录则核对符号、实际语义及代码证据，写「未发现」时须列已检查的关键符号；缺字段、无证据或为凑数编造 → **blocker**
 3.7 **窗口化**：新建 Standard/Full 须文件夹 + `未完成.md`；已完成长文仍留活跃窗或 Mandatory 仅在历史全文 → **blocker**；首段与状态矛盾 → **major/blocker**；Discover＞15行未外置 → **major**；`未完成.md`＞150行且无超限原因/压缩时点 → **major**；为压行删A#/当前Mandatory/状态真相 → **blocker**
 3.7.1 **窗口关系摘要**（跨窗 plan-lite / Full）：须有 `## 窗口关系摘要` **四列表**（主题短名 + Beads 关系枚举 + 状态 + 关键结论一句）；缺表 → **major**；用散文段落替代四列表 → **blocker**

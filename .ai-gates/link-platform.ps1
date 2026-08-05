@@ -132,6 +132,26 @@ function New-TraePortal {
         New-Item -ItemType SymbolicLink -Path $link -Target $target | Out-Null
     }
     Write-Host "linked: .trae/skills -> $target" -ForegroundColor Green
+    # 2026-08-05：Trae 侧规则目录传送门（.trae/rules -> .ai-gates/rules），与 Cursor 侧对齐。
+    $linkRules = Join-Path $repoRoot '.trae\rules'
+    $targetRules = Join-Path $central 'rules'
+    if (Test-Path -LiteralPath $linkRules) {
+        $it = Get-Item -LiteralPath $linkRules -Force
+        if ($it.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+            Write-Host "OK (linked): .trae/rules -> $($it.Target)" -ForegroundColor Green
+        } else {
+            $portalConflicts.Add(".trae/rules (real dir: $linkRules)") | Out-Null
+            Write-Host "CONFLICT: .trae/rules occupied by a real directory - $linkRules" -ForegroundColor Yellow
+        }
+    } else {
+        New-Item -ItemType Directory -Path (Split-Path $linkRules -Parent) -Force | Out-Null
+        if ($isWindows) {
+            New-Item -ItemType Junction -Path $linkRules -Target $targetRules | Out-Null
+        } else {
+            New-Item -ItemType SymbolicLink -Path $linkRules -Target $targetRules | Out-Null
+        }
+        Write-Host "linked: .trae/rules -> $targetRules" -ForegroundColor Green
+    }
 }
 
 function Migrate-ProjectState {
