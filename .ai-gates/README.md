@@ -17,7 +17,7 @@ One `.ai-gates/` library is shared across Cursor / Codex / Trae through portals;
 
 ## Get it
 
-1. From this repo’s **Releases**, download **`ai_dev_v3.3.0.7z`**
+1. From this repo’s **Releases**, download **`ai_dev_v3.3.1.7z`**
    ([latest release](https://github.com/zhaobolun-code/ai-gates/releases/latest)).
 2. Extract **at** the target project’s root — the archive contains `.ai-gates/`
    (do **not** unzip into `.cursor/`).
@@ -33,8 +33,22 @@ PM
 
 First time on a project? Say `PM init` (scaffolds `project-context`), then fill a short project note (stack, careful paths, a few must-test cases). That is the setup—not ongoing ops config. Upgrade the pack? Say `项目经理 升级 ai-gates` / `PM upgrade ai-gates`. Health check? Say `项目经理 检查健康` / `PM doctor`.
 
-Upgrading from an older pack (extracted into `.cursor/`)? Extract the new pack at the project root, then paste `项目经理 升级 ai-gates` (`PM upgrade ai-gates`) in your AI session — the agent removes stale `.cursor` skill dirs, re-wires the portals and verifies. Project files (`project-context.md` etc.) are preserved, no re-init needed; the session-start hook also reminds you if portals are missing or stale.
+Upgrading? Say `项目经理 升级 ai-gates` (`PM upgrade ai-gates`) — the agent compares the official GitHub source's latest tag with your installed version, downloads and replaces the library only when a newer version exists (project files are preserved), then re-checks/creates the portals. No manual download needed. If the network is unavailable, extract the new pack at the project root and say the same phrase — the agent falls back to rewiring the portals from the local pack and verifying; the session-start hook also reminds you if portals are missing or stale.
 If Windows refuses to run the downloaded script ("access denied"), just paste the error back into the same AI session — the agent unblocks the downloaded files and re-wires it for you.
+
+### Zero-manual-download install (recommended for new users)
+
+Don't want to download/extract by hand? Paste the whole block below into any file-editing agent window (Cursor **Agent** / Codex / Trae). The agent fetches the latest version from GitHub, installs the library, creates the portals, and walks you through initialization:
+
+```text
+Install the ai-gates skill pack (AI development pipeline) into this project from https://github.com/zhaobolun-code/ai-gates, replacing manual download, extraction, and initialization:
+- Take the latest release tag, clone/download it to a temp dir; validate that the root contains `.ai-gates/` and `skills/VERSION` is a valid x.y.z equal to that tag — otherwise stop.
+- Copy `.ai-gates/` contents (skills/hooks/scripts/rules/codex, root docs, hooks.json, link-platform.*, LICENSE) into the project root `.ai-gates/`; if already installed, compare versions and replace only when newer, preserving project state (project-context, mcp.json, hooks-log, tmp, verify, regression-*, pipeline-* etc.).
+- Run link-platform.ps1 (Unix: .sh) to create the portals; write install-info.json.
+- Run pm-init.ps1 to walk me through the project note (stack, careful paths, must-test scenarios) and generate `.cursor/project-context.md`.
+- Finally report the version and portal status, and tell me the entry phrase for future requests —「项目经理 + 需求」.
+Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
+```
 
 Quick start (3 min): [USER-GUIDE.md](USER-GUIDE.md).  
 What this is / isn’t: [METHODOLOGY.md](METHODOLOGY.md).  
@@ -100,7 +114,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 Cursor / Codex / Trae 经传送门共用同一份 `.ai-gates/` 中央库；规则是纯 Markdown，其他 Agent 也可适配。
 
-1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.3.0.7z`**
+1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.3.1.7z`**
 2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
 3. 在任一 AI 会话粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`），由 Agent 建好传送门（手动运行
    `link-platform.ps1` / `.sh` 亦可，非必需）
@@ -108,8 +122,22 @@ Cursor / Codex / Trae 经传送门共用同一份 `.ai-gates/` 中央库；规�
 
 首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置。升级包：`项目经理 升级 ai-gates` / `PM upgrade ai-gates`；体检：`项目经理 检查健康` / `PM doctor`。
 
-旧版用户升级（此前解压进 `.cursor/`）：解压新包到项目根后，在 Agent 窗口粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`）即可——Agent 会清理旧 `.cursor` 技能目录并重建传送门；`project-context.md` 等项目文件保留，无需重新初始化；传送门缺失/残留会由会话启动检查自动提示。
+升级：直接说 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`）——Agent 默认联网比对官方源最新版本与本地版本，**有新版才下载并替换**库内容（项目状态文件保留），随后校验/补齐传送门，无需手动下载；网络不可用时回退旧流程（本地已解压新包 → 清理旧 `.cursor` 技能目录并重建传送门）。`project-context.md` 等项目文件保留，无需重新初始化；传送门缺失/残留会由会话启动检查自动提示。
 若下载后 Windows 提示「无法运行，拒绝访问」：把报错原文粘贴给项目经理处理即可（Agent 会解除下载文件的网络标记并重新接线）。
+
+### 零手动安装（推荐给新用户）
+
+不想手动下载/解压？把下面这段**整段**粘贴给任一能改文件的 Agent 窗口（Cursor Agent / Codex / Trae），Agent 会联网获取最新版、安装库、建好传送门并引导初始化：
+
+```text
+请把 ai-gates（AI 开发流水线技能包）从 https://github.com/zhaobolun-code/ai-gates 安装到当前项目，替代手动下载、解压和初始化：
+- 取最新 release tag，克隆/下载到临时目录；校验根目录有 .ai-gates/ 且 skills/VERSION 是合法 x.y.z 并等于该 tag，不符就停下。
+- 把临时 .ai-gates/ 的 skills/hooks/scripts/rules/codex、根文档、hooks.json、link-platform.*、LICENSE 复制到项目根 .ai-gates/；若已装过，先比对版本，仅更新时替换，保留 project-context、mcp.json、hooks-log、tmp、verify、regression-*、pipeline-* 等项目状态。
+- 运行 link-platform.ps1（Unix 用 .sh）建传送门，写 install-info.json。
+- 运行 pm-init.ps1 引导我填项目说明（技术栈、要小心的目录、必测场景），生成 .cursor/project-context.md。
+- 完成后报告版本与传送门状态，并告诉我以后用「项目经理 + 需求」入口。
+动手前先列计划等我确认；失败或网络问题不要改文件，给出手动下载方案。
+```
 
 上手（约 3 分钟）：[USER-GUIDE.md](USER-GUIDE.md)。  
 预期与边界：[METHODOLOGY.md](METHODOLOGY.md)。  

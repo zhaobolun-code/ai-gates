@@ -2,11 +2,20 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v3.3.0（2026-08-05 · **发布**；前版 v3.2.1 于 2026-08-04 定版）
+**当前 LTS**：v3.3.1（2026-08-05 · **发布**；前版 v3.3.0 于 2026-08-05 定版）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 
 ---
+
+## [3.3.1] - 2026-08-05（升级流程联网化 + 零手动安装 · 发布）
+
+### Changed
+
+- **升级 ai-gates 改联网更新**：`项目经理 升级 ai-gates` 默认官方源（`https://github.com/zhaobolun-code/ai-gates`）→ 比对远端最新 tag 与本地版本（install-info 优先，否则 `skills/VERSION`）→ 有新版才下载替换库内容（项目状态保留）→ link-platform 校验/补齐传送门（含 `.trae/rules`）→ 写 install-info.json；网络不可用或无新版回退旧流程（本地已解压包重接传送门）。
+- **install-ai-gates.ps1 增强**：`-Source` 默认官方 GitHub URL；`-CheckUpdate` 以本地 VERSION 为基准的语义化比对且不克隆源（URL 走 `git ls-remote`）；URL 取最新 tag 后浅克隆；替换前校验源含 `.ai-gates/` + `skills/VERSION` 语义化版本；修复 git stderr 在 `$ErrorActionPreference=Stop` 下误判终止错误。
+- **README 零手动安装**：新增「零手动安装」段落（中英），新用户把自包含提示词整段粘贴给任一 Agent 即可联网安装 + 建传送门 + 引导初始化；提示词不依赖已装 skill（不要求先认识「项目经理」口令），精简为要点式（校验来源 / 保留项目状态 / 先确认 / 失败不落盘）。
+- **CORE/SKILLS 接线**：入口路由补 `升级 ai-gates` 联网更新语义；SKILLS 升级段改写（联网优先、本地回退）。
 
 ## [3.3.0] - 2026-08-05（README 宣传 + 设施改造 6 项 · 发布）
 

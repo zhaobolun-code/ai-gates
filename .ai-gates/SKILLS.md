@@ -25,11 +25,17 @@ Codex / Trae 均可）粘贴 **`项目经理 升级 ai-gates`**——Agent 会�
 项目经理 升级 ai-gates   （= PM upgrade ai-gates）
 ```
 
-Agent 会自动执行：删除旧 `.cursor/skills|hooks|scripts|rules` 与旧 `.cursor/hooks.json` →
-运行 link-platform 建传送门 → 自动把旧 `.cursor/` 根的项目状态文件迁入 `.ai-gates/` 对应位置
-（regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、tmp/、verify/；目标已存在则跳过）
-→ 确认 `.cursor/*`、`.codex` 指向 `.ai-gates/`。`project-context.md`、`mcp.json` 保留在
-`.cursor/`，**无需重新初始化**。若旧目录是真实目录被拒删、或下载文件被 Windows 拦截
+Agent 默认**联网更新**（官方源 `https://github.com/zhaobolun-code/ai-gates`）：先比对远端
+最新 tag 与本地版本（`install-info.json` 优先，否则读 `skills/VERSION`）→ **有新版才下载并替换**
+库内容（skills/hooks/scripts/rules/codex + 文档；项目状态文件 `project-context`、`hooks-log`、
+`tmp`、`verify`、`regression-*`、`pipeline-*` 保留）→ 运行 link-platform 校验/补齐传送门
+（含 `.trae/rules`）→ 写 `install-info.json`。
+
+**本地已最新或网络不可用时回退旧流程**：本地已解压新包 → 删除旧 `.cursor/skills|hooks|scripts|rules`
+与旧 `.cursor/hooks.json` → link-platform 建传送门 → 自动把旧 `.cursor/` 根的项目状态文件迁入
+`.ai-gates/` 对应位置（regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、tmp/、verify/；
+目标已存在则跳过）→ 确认 `.cursor/*`、`.codex` 指向 `.ai-gates/`。`project-context.md`、`mcp.json`
+保留在 `.cursor/`，**无需重新初始化**。若旧目录是真实目录被拒删、或下载文件被 Windows 拦截
 （「拒绝访问」）、或报路径找不到——**把报错原文粘贴给项目经理即可**，Agent 会按内部步骤处理
 （解除网络标记 Unblock-File、确认解压位置、不嵌套运行等）。新会话起 SessionStart 会自动体检传送门。
 

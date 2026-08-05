@@ -1,6 +1,6 @@
 # 使用指南 — 3 分钟上手
 
-> 版本：**v3.3.0**（与 [VERSION](skills/VERSION) 一致）
+> 版本：**v3.3.1**（与 [VERSION](skills/VERSION) 一致）
 > 第一次接触：先扫一眼 [METHODOLOGY.md](./METHODOLOGY.md)（能少原地打转、能做完，**不是**万能药）。  
 > 新仓库还没配置？先说 **`项目经理 初始化`**，再提需求。
 
