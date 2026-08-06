@@ -75,7 +75,7 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 | **黑板** | 本窗修挂日志：改了什么 → 为何失败 → 禁止再做 |
 | **错题本** | 跨窗教训；自动起草，**须你回「准」**才写入项目主表 |
 | **Delta Spec** | 每步跟踪 ADDED / MODIFIED / REMOVED，防无声扩大范围 |
-| **验收 A#** | 每步可证伪验收条款。「日志出了关键词」≠ 修好了 |
+| **验收 A#** | 每步可证伪验收条款。「日志出了关键词」≠ 修好了。命中回归模块时自动跑冒烟 + 归集日志/截图/测试报告入证据——自动验证 ≠ 手测签收 |
 
 ## 平台
 
@@ -178,7 +178,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Blackboard** | Per-window repair log: what changed → why failed → do not repeat |
 | **Lessons** | Cross-window error book; drafts auto, **your `approve`** required before the project table |
 | **Delta Spec** | ADDED / MODIFIED / REMOVED tracked per step; no silent scope creep |
-| **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done |
+| **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done. Hot-path regression modules auto-run a smoke check and collect logs/screenshots/test reports as evidence — auto-verification ≠ manual acceptance |
 
 ### Platform
 

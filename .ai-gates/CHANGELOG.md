@@ -140,6 +140,11 @@
 - USER-GUIDE 头部阅读路径改为「README（30 秒+安装）→ 本文（上手）→ METHODOLOGY（为什么/数据）」，消除「README vs METHODOLOGY 谁是入口」的歧义；新增「被拦了怎么办（速查）」6 行表（PM 标记 / Level-1 CHANGELOG / Bash write gate / 高危 git / 桌面钩子缺口 / 按 CORE 重来）。
 - METHODOLOGY「定位」段补指针（护栏机制清单见 README 机制表）；「怎么做（概要）」开头注明分工（机制清单在 README，本文只讲流程为什么这么走）。
 
+### Included changes — 2026-08-06（黄金验窗宣传进用户文档 · 不 bump）
+
+- README（中英）机制表「验收 A#」行补自动验证闭环：命中回归模块自动跑冒烟 + 归集日志/截图/测试报告入证据，明确「自动验证 ≠ 手测签收」——黄金验窗此前只在 CORE/developer SKILL 技术层，对外隐身。
+- USER-GUIDE「对你意味着什么」新增「它自动做的」：机器能验的（编译错误、回归模块冒烟、证据归集）会自动验并留证据，但「通过了」最后一句仍要人说。
+
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）
