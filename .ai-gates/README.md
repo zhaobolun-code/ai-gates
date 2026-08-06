@@ -9,6 +9,10 @@
 - **3 分钟接入、跨平台**：Cursor / Codex / Trae 共用同一份 `.ai-gates/` 库；新用户贴一段提示词即可装好。
 - **免费（MIT）、非银弹**：每步仍要你验收——省的是空转，不是人的判断。
 
+## 和同类工具比，位置在哪
+
+ai-gates 不是在真空中竞争。Forge 是 Claude Code 的最佳拍档，CoFounder 是安全合规守门员，Warden 是离线代码质量扫描仪——它们主要管「代码长什么样」。ai-gates 是 **AI 编码的项目经理**：管的是整个开发流程的秩序，而不只是代码——需求对齐、方案确认、执行、验收、复盘、止损串成一个可重复、可度量的闭环；失败过的地方自动升档，把过程数据变成智能规则，这类机制在同类产品里非常少见。
+
 ## 快速开始（3 分钟）
 
 **方式 A（推荐 · 零手动）**：把下面这段**整段**粘贴给任一能改文件的 Agent 窗口（Cursor Agent / Codex / Trae），Agent 会联网获取最新版、安装库、建好传送门并引导初始化：
@@ -106,6 +110,10 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 - **Past failures raise the bar.** Modules that already broke are tracked; touching them again auto-escalates the lane and review tier (minimum Standard + L1.5).
 - **3-minute setup, cross-platform.** One `.ai-gates/` library shared by Cursor / Codex / Trae; new users can paste one prompt to install.
 - **Free (MIT), not a silver bullet.** Every step still needs your acceptance — it removes busywork, not human judgment.
+
+### Where it fits vs. similar tools
+
+ai-gates does not compete in a vacuum. Forge is Claude Code's best companion, CoFounder is a security-and-compliance gatekeeper, and Warden is an offline code-quality scanner — they mostly care about *what the code looks like*. ai-gates is the **project manager for AI coding**: it governs the order of the whole development process, not just the code — requirement alignment, plan approval, execution, acceptance, retrospective, and stop-loss are wired into one repeatable, measurable loop; places that already failed auto-escalate, turning process data into smart rules, a mechanism rarely seen in similar tools.
 
 ### Get it (3 minutes)
 

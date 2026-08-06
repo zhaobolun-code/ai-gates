@@ -122,6 +122,11 @@
 - README 中 USER-GUIDE/METHODOLOGY/CHANGELOG 三个相对链接在 GitHub 仓库根（README 与文档不在同一目录）会 404，改为 GitHub 绝对地址（blob/main/.ai-gates/...），仓库根与包内两种位置均可打开。
 - 安装方式定序为 A（零手动提示词）→ B（一条命令）→ C（手动，放最后，标注"备选"），中英同步。
 
+### Included changes — 2026-08-06（README/METHODOLOGY 写入竞争定位：AI 编码的项目经理 · 不 bump）
+
+- README（中英）新增「和同类工具比，位置在哪」：Forge=Claude Code 最佳拍档、CoFounder=安全合规守门员、Warden=离线代码质量扫描仪；ai-gates 定位「AI 编码的项目经理」——管整个开发流程的秩序（需求对齐→方案确认→执行→验收→复盘→止损），成可重复、可度量的闭环；失败过的地方自动升档，把过程数据变成智能规则。英文区纯英文镜像。
+- METHODOLOGY「一句话」后新增「在同类工具里的位置」段：不是又一个补全/质检插件，而是流程秩序治理 + 机器强制门禁 + 自动升档 + 止损链闭环。
+
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）
