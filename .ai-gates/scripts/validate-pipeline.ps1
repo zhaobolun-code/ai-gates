@@ -124,7 +124,7 @@ try {
     }
 
     Write-Host "`n--- workflow / version consistency ---" -ForegroundColor Cyan
-    $readmeRaw = Read-Utf8Text (Join-Path $repoRoot ".ai-gates/SKILLS.md")
+    $readmeRaw = Read-Utf8Text (Join-Path $repoRoot ".ai-gates/USER-GUIDE.md")
     $evalRaw = Read-Utf8Text (Join-Path $skillsRoot "references/skill-eval-checklist.md")
     $maintainerRaw = Read-Utf8Text (Join-Path $skillsRoot "MAINTAINER.md")
     $workflowOk = $true
@@ -163,7 +163,6 @@ try {
 
     $entrySpecs = @(
         @{ Name = "CORE"; Path = (Join-Path $skillsRoot "CORE.md"); Pattern = '(?m)^# AI 开发流水线 CORE（v(?<v>\d+\.\d+\.\d+)' },
-        @{ Name = "SKILLS"; Path = (Join-Path $repoRoot ".ai-gates/SKILLS.md"); Pattern = '(?m)^> \*\*当前 LTS：v(?<v>\d+\.\d+\.\d+)' },
         @{ Name = "MAINTAINER"; Path = (Join-Path $skillsRoot "MAINTAINER.md"); Pattern = '(?m)^- \*\*当前 LTS\*\*：\*\*v(?<v>\d+\.\d+\.\d+)' },
         @{ Name = "Cursor rule"; Path = (Join-Path $repoRoot ".cursor/rules/ai-dev-pipeline.mdc"); Pattern = '(?m)^description: .*v(?<v>\d+\.\d+\.\d+)' },
         @{ Name = "Trae rule"; Path = (Join-Path $repoRoot ".trae/rules/ai-dev-pipeline.md"); Pattern = '(?m)^description: .*v(?<v>\d+\.\d+\.\d+)' }
@@ -182,7 +181,7 @@ try {
         Write-Host "version consistency: FAILED (mixed hardcoded/pointer current entries)" -ForegroundColor Red
         $exitCode = 1
     }
-    $changelogRaw = Read-Utf8Text (Join-Path $skillsRoot "CHANGELOG.md")
+    $changelogRaw = Read-Utf8Text (Join-Path $repoRoot ".ai-gates/CHANGELOG.md")
     if ($changelogRaw -notmatch "(?m)^\*\*当前 LTS\*\*：v$([regex]::Escape($pipelineVersion))\b") {
         Write-Host "version consistency: FAILED (CHANGELOG current LTS)" -ForegroundColor Red
         $exitCode = 1

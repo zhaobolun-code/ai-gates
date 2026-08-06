@@ -2,7 +2,7 @@
 # PostToolUse hook (matcher: ^apply_patch$) -- 自我治理轻门禁打点（观测，不拦截）。
 #
 # Cursor 原版 matcher 是 Write|StrReplace|EditNotebook；Codex 文件写入工具为 apply_patch，
-# 路径从 patch 文本提取。把"这一轮写操作的目标是 .cursor/skills/CHANGELOG.md"落盘到
+# 路径从 patch 文本提取。把"这一轮写操作的目标是 .ai-gates/CHANGELOG.md"落盘到
 # .ai-gates/hooks-log/changelog-writes.json（按 session_id 记 lastChangelogWriteAtUtc），
 # 供 pm-gate-check.ps1（PreToolUse）的 Level 1 轻门禁读取。
 #

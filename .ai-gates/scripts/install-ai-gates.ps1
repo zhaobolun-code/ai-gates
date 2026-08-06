@@ -169,7 +169,7 @@ foreach ($d in @('skills', 'hooks', 'scripts', 'rules', 'codex')) {
         Copy-Item -LiteralPath $src -Destination $targetLib -Recurse -Force
     }
 }
-foreach ($f in @('hooks.json', 'link-platform.ps1', 'link-platform.sh', 'README.md', 'SKILLS.md', 'USER-GUIDE.md', 'METHODOLOGY.md', 'LICENSE')) {
+foreach ($f in @('hooks.json', 'link-platform.ps1', 'link-platform.sh', 'README.md', 'USER-GUIDE.md', 'METHODOLOGY.md', 'LICENSE', 'CHANGELOG.md')) {
     $src = Join-Path $srcLib $f
     if (Test-Path -LiteralPath $src) {
         $dst = Join-Path $targetLib $f

@@ -83,6 +83,20 @@
 
 ### Included changes — 2026-08-05（口令扩展与文本优化 · 不 bump）
 
+### Included changes — 2026-08-06（README 结构重排：中文前置 + 英雄块 + 安装置顶 + 英文纯英文化 · 不 bump）
+
+- README 由「英前中后」改为「中文前置、英文镜像后置」；顶部新增「为什么值得下载（30 秒看懂）」英雄块；安装/升级（含零手动安装提示词）提到第一屏「快速开始」；英文段移除全部中文口令（改用 `PM upgrade ai-gates` / `PM + request` 等），英文区纯英文、中文口令只留在中文区。
+
+### Included changes — 2026-08-06（tagline 强调 + CHANGELOG 上移根目录 + SKILLS.md 迁移删除 · 不 bump）
+
+- README tagline 改「不是…是…」：从「不是又一个补全插件」改为「不是又一个补全插件，而是一套在代码落地前强制把关的质量门禁」（中英同步）。
+- `CHANGELOG.md` 从 `skills/` 上移到 `.ai-gates/` 根（易读）；引用面同步：validate-pipeline 读取路径、package-release（从根复制 + PACKAGE-INFO 文案）、pm-gate-check（Cursor/Codex）逃生文案、mark-changelog-write 注释、三个测试夹具、MAINTAINER 链接与打包范围/打点说明；README 中英新增「版本迭代与变更历史：CHANGELOG.md」。
+- `SKILLS.md` 内容迁移后删除：第一次接入三步与 TL 表并入 USER-GUIDE（新增「第一次接入」节 + 技术负责人表），标准车道行迁入 USER-GUIDE 供 validate 校验；引用面更新（rules/ai-dev-pipeline.mdc、validate-pipeline、package-release、MAINTAINER、METHODOLOGY、USER-GUIDE、anti-patterns、tl-onboarding、install-ai-gates）。
+
+### Included changes — 2026-08-06（USER-GUIDE 常见问题精简 · 不 bump）
+
+- USER-GUIDE 常见问题 8 条精简为 6 条：角色/子窗类 4 条合并为 2 条，删除与机制重复的「经验总结要我手写吗」，新增「怎么安装 / 更新 / 查版本」入口（零手动安装 / 联网升级 / CHANGELOG / doctor）；USER-GUIDE 回到 ≤130 行。
+
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）
@@ -2554,4 +2568,4 @@
 
 | 状态机新态、模式删除、门禁语义变更 | major（2.0.0） | 取消微型模式 |
 
-修改 Skill 后请同步更新本 CHANGELOG，并将 LTS 版本号同步至：**README 头**、**CORE 头**、**CHANGELOG 顶**、**MAINTAINER**、**`.cursor/rules/ai-dev-pipeline.mdc`**、**`.trae/rules/ai-dev-pipeline.md`**、**`validate-pipeline.ps1`**、**`check-pipeline-doc.ps1`**。
+修改 Skill 后请同步更新根目录本 CHANGELOG（`.ai-gates/CHANGELOG.md`），并将 LTS 版本号同步至：**README 头**、**CORE 头**、**CHANGELOG 顶**、**MAINTAINER**、**`.cursor/rules/ai-dev-pipeline.mdc`**、**`.trae/rules/ai-dev-pipeline.md`**、**`validate-pipeline.ps1`**、**`check-pipeline-doc.ps1`**。

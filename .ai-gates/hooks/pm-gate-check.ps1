@@ -79,7 +79,7 @@ function Test-CursorLevel0Path {
     param([string]$FilePath)
     $rel = Get-CursorRelativePath -FilePath $FilePath
     if (-not $rel) { return $false }
-    # CHANGELOG.md 自身（路径可含 skills/ 前缀，大小写不敏感）
+    # CHANGELOG.md 自身（路径以 changelog.md 结尾即可，大小写不敏感）
     if ($rel -match '(?i)(?:^|/)changelog\.md$') { return $true }
     # .ai-gates/hooks-log/** 运行时目录（pm-gate.json / changelog-writes.json / *.log）
     if ($rel -match '(?:^|/)hooks-log(?:/|$)') { return $true }
@@ -191,7 +191,7 @@ if (Test-CursorInfraPath -FilePath $filePath) {
         # 必然无流水，与「有文件但无记录」同语义 → deny + 逃生提示（2026-08-03 两连修：
         # 先 fail-open allow → ask；再因 Cursor 2.2+ ask 无效 → deny）。
         if (-not (Test-Path -LiteralPath $changelogFile)) {
-            $hint = "逃生：先写 .cursor/skills/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch，临时全放行）后重试；或手动编辑目标文件。"
+            $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch，临时全放行）后重试；或手动编辑目标文件。"
             Emit-Deny -ConversationId $conversationId -Detail "changelog_writes_missing_level1" -UserHint $hint -BaseMsg $level1BaseMsg
         }
         try {
@@ -209,7 +209,7 @@ if (Test-CursorInfraPath -FilePath $filePath) {
         $changelogEntry = $changelog.$conversationId
         if (-not $changelogEntry -or -not $changelogEntry.lastChangelogWriteAtUtc) {
             # 无 CHANGELOG 写记录 → deny（硬拦，Cursor 2.2+ ask 无效），提示逃生路径
-            $hint = "逃生：先写 .cursor/skills/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+            $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
             Emit-Deny -ConversationId $conversationId -Detail "no_changelog_write_for_conversation_level1" -UserHint $hint -BaseMsg $level1BaseMsg
         }
         try {
@@ -219,7 +219,7 @@ if (Test-CursorInfraPath -FilePath $filePath) {
         }
         $changelogAgeMinutes = ([DateTime]::UtcNow - $lastChangelogUtc).TotalMinutes
         if ($changelogAgeMinutes -gt $FreshnessMinutes) {
-            $hint = "逃生：重新写 .cursor/skills/CHANGELOG.md（Included 条目）后再试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+            $hint = "逃生：重新写 .ai-gates/CHANGELOG.md（Included 条目）后再试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
             Emit-Deny -ConversationId $conversationId -Detail ("stale_changelog_write_age={0}min_level1" -f [Math]::Round($changelogAgeMinutes,1)) -UserHint $hint -BaseMsg $level1BaseMsg
         }
         Emit-Allow ("recent_changelog_write_age={0}min" -f [Math]::Round($changelogAgeMinutes,1))

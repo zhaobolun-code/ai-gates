@@ -126,7 +126,7 @@ function Test-Level1Gate {
     param([string]$SessionId)
     $level1BaseMsg = "PM gate Level-1 deny : no fresh CHANGELOG write for this session within $FreshnessMinutes min (changing .cursor facilities requires a CHANGELOG entry; this gate does NOT read [PM] markers)."
     if (-not (Test-Path -LiteralPath $changelogFile)) {
-        $hint = "逃生：先写 .cursor/skills/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch，临时全放行）后重试；或手动编辑目标文件。"
+        $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch，临时全放行）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=changelog_writes_missing_level1" -f $SessionId)
         Emit-PreToolUseDeny -Reason ($level1BaseMsg + ' ' + $hint)
     }
@@ -143,7 +143,7 @@ function Test-Level1Gate {
     }
     $changelogEntry = $changelog.$SessionId
     if (-not $changelogEntry -or -not $changelogEntry.lastChangelogWriteAtUtc) {
-        $hint = "逃生：先写 .cursor/skills/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+        $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=no_changelog_write_for_session_level1" -f $SessionId)
         Emit-PreToolUseDeny -Reason ($level1BaseMsg + ' ' + $hint)
     }
@@ -155,7 +155,7 @@ function Test-Level1Gate {
     }
     $changelogAgeMinutes = ([DateTime]::UtcNow - $lastChangelogUtc).TotalMinutes
     if ($changelogAgeMinutes -gt $FreshnessMinutes) {
-        $hint = "逃生：重新写 .cursor/skills/CHANGELOG.md（Included 条目）后再试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+        $hint = "逃生：重新写 .ai-gates/CHANGELOG.md（Included 条目）后再试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=stale_changelog_write_age={1}min_level1" -f $SessionId, [Math]::Round($changelogAgeMinutes, 1))
         Emit-PreToolUseDeny -Reason ($level1BaseMsg + ' ' + $hint)
     }

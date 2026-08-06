@@ -186,7 +186,7 @@ try {
 
     $bigContent = New-BigFileContent -MinBytes $PayloadBytes
     $bigBytes = $utf8NoBom.GetBytes($bigContent)
-    $changelogPath = ".cursor\skills\CHANGELOG.md"
+    $changelogPath = ".ai-gates\CHANGELOG.md"
     $skillsPath = ".cursor\skills\foo.md"
     $businessPath = "Assets\Foo.cs"
 

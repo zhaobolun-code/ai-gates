@@ -2,7 +2,7 @@
 
 给新人、试用者看：先弄清「为什么要用」。
 动手改代码 → [USER-GUIDE.md](./USER-GUIDE.md)。
-第一次接到仓库或解压安装包 → [SKILLS.md](./SKILLS.md)。
+第一次接到仓库或解压安装包 → [USER-GUIDE.md](./USER-GUIDE.md)。  
 助手不必默认读本文。版本见 [VERSION](skills/VERSION)。
 
 ## 一句话
@@ -74,7 +74,7 @@
 
 ## 新人建议阅读顺序
 
-1. 本文 → 2. [USER-GUIDE.md](./USER-GUIDE.md) → 3. [SKILLS.md](./SKILLS.md) → 4. 需要时再查细则。
+1. 本文 → 2. [USER-GUIDE.md](./USER-GUIDE.md) → 3. 需要时再查细则。
 
 ```text
 项目经理

@@ -1,7 +1,7 @@
 ﻿# mark-changelog-write.ps1
 # postToolUse hook (matcher: Write|StrReplace|EditNotebook) -- 自我治理轻门禁打点（观测，不拦截）。
 #
-# 目的：把"这一轮写操作的目标是 .cursor/skills/CHANGELOG.md"这件事落盘到
+# 目的：把"这一轮写操作的目标是 .ai-gates/CHANGELOG.md"这件事落盘到
 # .ai-gates/hooks-log/changelog-writes.json（按 conversation_id 记 lastChangelogWriteAtUtc），
 # 供 pm-gate-check.ps1（preToolUse）的 Level 1 轻门禁读取：会话内最近 N 分钟写过
 # CHANGELOG → 写 .cursor/skills|hooks|scripts|rules|hooks.json 设施 allow；无 → deny。

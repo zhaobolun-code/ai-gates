@@ -70,7 +70,7 @@ function Get-SessionPayload {
 
 $sid = 'test-session-0001'
 $patchBusiness = "*** Begin Patch`n*** Add File: Assets/Doc/Probe.cs`n+public class Probe {}`n*** End Patch`n"
-$patchChangelog = "*** Begin Patch`n*** Update File: .cursor/skills/CHANGELOG.md`n@@`n+- test`n*** End Patch`n"
+$patchChangelog = "*** Begin Patch`n*** Update File: .ai-gates/CHANGELOG.md`n@@`n+- test`n*** End Patch`n"
 $patchCursorSkill = "*** Begin Patch`n*** Add File: .cursor/skills/foo/SKILL.md`n+# x`n*** End Patch`n"
 $patchLog = "*** Begin Patch`n*** Add File: .ai-gates/hooks-log/foo.log`n+x`n*** End Patch`n"
 $patchReadme = "*** Begin Patch`n*** Update File: .cursor/README.md`n@@`n+x`n*** End Patch`n"

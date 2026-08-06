@@ -1,14 +1,14 @@
-# AI 开发流水线 — 维护者手册
+﻿# AI 开发流水线 — 维护者手册
 
 > 面向修改 `.cursor/skills/` 的维护者。
 > **团队用户** → [USER-GUIDE.md](../USER-GUIDE.md) · **Agent/TL 日常** → [agent-entry-route.md](./references/agent-entry-route.md)
 
 ## 稳定版本（LTS）
 
-- **当前版本值**：[VERSION](./VERSION)（唯一来源）；发布状态与历史见 [CHANGELOG.md](./CHANGELOG.md)
+- **当前版本值**：[VERSION](./VERSION)（唯一来源）；发布状态与历史见 [CHANGELOG.md](../CHANGELOG.md)
 - **争议/recovery/按 CORE 重来 权威**：[CORE.md](./CORE.md)（≤200 行；三车道 + PM 输出 + 硬门禁 + 冷启动 + 恢复）；**日常入口**：[agent-entry-route.md](./references/agent-entry-route.md)
 - **Skill 母本**：本仓库 `.cursor/skills/`（Trae 经 `.trae/skills/` 联接；**建议纳入 Git**）
-- **版本历史**：[CHANGELOG.md](./CHANGELOG.md)
+- **版本历史**：[CHANGELOG.md](../CHANGELOG.md)
 
 ### RC 转正条件（v3.1.3 → 已关闭）
 
@@ -30,7 +30,7 @@ v3.1.3 观察期已于 **2026-07-16** 由 TL「bump / 转正」关闭；当前 L
 | 项 | 说明 |
 | --- | --- |
 | **适用范围** | Unity + Cursor / Codex / Trae；唯一入口「项目经理 + 需求」；Express / Standard / Full |
-| **运行前** | [SKILLS.md](../SKILLS.md) §首次接入 — project-context、回归索引双写、§热路径批量回归（可选）、**推荐 CodeGraph** |
+| **运行前** | [USER-GUIDE.md](../USER-GUIDE.md) §第一次接入 — project-context、回归索引双写、§热路径批量回归（可选）、**推荐 CodeGraph** |
 | **用户可见** | PM 内部字段仅 Agent 使用；面向用户只输出白话「你下一步」（CORE §用户可见输出）；Full 强制须白话提示完整流程 |
 | **人工验收** | Unity 测试、新开 Chat / 换模型审查 — **设计为人工选择**，Agent 只提示，不自动化、不校验、不阻断 Standard 闭环 |
 | **PM 门禁** | 硬门禁 #7 + 各岗 SKILL §PM 门禁 — 无本轮 PM 结构化判定不得改交付物（仍依赖 Agent 执行） |
@@ -52,7 +52,6 @@ v3.1.3 观察期已于 **2026-07-16** 由 TL「bump / 转正」关闭；当前 L
 | [USER-GUIDE.md](../USER-GUIDE.md) | **新手指南 / 团队用户（首选）** | ≤130 |
 | [METHODOLOGY.md](../METHODOLOGY.md) | **叙事简介**（老板/新 TL/对外；非 Agent 默认必读） | ≤120 |
 | [CORE.md](./CORE.md) | **争议/recovery/按 CORE 重来**（日常入口见 agent-entry-route） | ≤200 |
-| [SKILLS.md](../SKILLS.md) | 索引 + 校验入口（原 `skills/README.md` 改名上移） | ≤100 |
 | 本文件 | 维护者 / Full 车道 | 不限 |
 | 各 `*/SKILL.md` | 岗位 Agent | ≤60 |
 | [templates/](./templates/) | plan-lite、L1.5 CR 派发、恢复记录 | — |
@@ -189,7 +188,7 @@ powershell -ExecutionPolicy Bypass -File .cursor/package-release.ps1
 powershell -ExecutionPolicy Bypass -File .cursor/package-release.ps1 -Version "v$((Get-Content .cursor/skills/VERSION -Raw).Trim())"
 ```
 
-输出 `.ai-gates/releases/ai_dev_<版本号>.7z`，打包范围来自**中央技能库 `.ai-gates/`**，**包顶层 = 中央技能库内容**（解压到目标项目根即得 `.ai-gates/`）：`skills/`（**排除** `MAINTAINER.md`；**纳入** `CHANGELOG.md` 供公开增信）+ `scripts/*.ps1|*.sh` + `rules/ai-dev-pipeline.mdc` + `hooks.json`/`hooks/*.ps1` + `hooks/codex/*.ps1` + `codex/hooks.json` + `codex/config.toml`（Codex 接线）+ `SKILLS.md`/`METHODOLOGY.md`/`USER-GUIDE.md`（新人说明文档）+ `link-platform.ps1/.sh` + `README.md` + `LICENSE`；**不含** `.trae/`、脚本自身（`package-release.ps1`）、`project-context.md`、`regression-index.yaml`、`hooks-log/`（运行时日志）、`AGENTS.md`（项目相关，Codex 用户按 §Codex Hooks 自建）等。**新项目接入三步**：解压到项目根 → 跑 `link-platform.ps1`（建 `.cursor/*`、`.codex`、`.trae/skills` 传送门）→ 按需建 `AGENTS.md`。若目标项目用 Trae，`.trae/rules/ai-dev-pipeline.md` 与 `.trae/skills/` 联接需按 [MAINTAINER §目录与同步策略](#目录与同步策略) 单独处理（`link-trae-skills.ps1`/`.sh` 已随包）。依赖本机已安装 7-Zip（`7z.exe` 在 PATH 或默认安装目录）。**打包前默认强制 `validate-pipeline.ps1 -Strict`**（2026-08-03 Step 3）：红 → `Write-Error` 拒绝句「已拒绝打包」+ `exit 1`；`-SkipValidate` 为显式逃生（打印醒目警告后跳过，维护者签字级），`-ValidateScriptPath` 可注入替代校验脚本（测试用）。
+输出 `.ai-gates/releases/ai_dev_<版本号>.7z`，打包范围来自**中央技能库 `.ai-gates/`**，**包顶层 = 中央技能库内容**（解压到目标项目根即得 `.ai-gates/`）：`skills/`（**排除** `MAINTAINER.md`）+ `scripts/*.ps1|*.sh` + `rules/ai-dev-pipeline.mdc` + `hooks.json`/`hooks/*.ps1` + `hooks/codex/*.ps1` + `codex/hooks.json` + `codex/config.toml`（Codex 接线）+ `METHODOLOGY.md`/`USER-GUIDE.md`（新人说明文档）+ 根 `CHANGELOG.md`（供公开增信）+ `link-platform.ps1/.sh` + `README.md` + `LICENSE`；**不含** `.trae/`、脚本自身（`package-release.ps1`）、`project-context.md`、`regression-index.yaml`、`hooks-log/`（运行时日志）、`AGENTS.md`（项目相关，Codex 用户按 §Codex Hooks 自建）等。**新项目接入三步**：解压到项目根 → 跑 `link-platform.ps1`（建 `.cursor/*`、`.codex`、`.trae/skills` 传送门）→ 按需建 `AGENTS.md`。若目标项目用 Trae，`.trae/rules/ai-dev-pipeline.md` 与 `.trae/skills/` 联接需按 [MAINTAINER §目录与同步策略](#目录与同步策略) 单独处理（`link-trae-skills.ps1`/`.sh` 已随包）。依赖本机已安装 7-Zip（`7z.exe` 在 PATH 或默认安装目录）。**打包前默认强制 `validate-pipeline.ps1 -Strict`**（2026-08-03 Step 3）：红 → `Write-Error` 拒绝句「已拒绝打包」+ `exit 1`；`-SkipValidate` 为显式逃生（打印醒目警告后跳过，维护者签字级），`-ValidateScriptPath` 可注入替代校验脚本（测试用）。
 
 ## Cursor Hooks（机器强制层 · observe/ask 模式）
 
@@ -203,7 +202,7 @@ powershell -ExecutionPolicy Bypass -File .cursor/package-release.ps1 -Version "v
 | PM 判定标记打点 | `afterAgentResponse`（matcher: `AgentResponse`） | 回复文本命中 `[PM]` → 把 `{conversation_id: {lastPmAtUtc, snippet}}` 写入 `.ai-gates/hooks-log/pm-gate.json`；纯观测，无 `permission` 语义 | `mark-pm-gate.ps1` |
 | PM 门禁机械检查（支柱 D） | `preToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 业务路径按 `conversation_id` 查 `pm-gate.json` 里最近 120 分钟内有无 `[PM]` 标记；`.cursor/**` **分级豁免**——**Level 0 全豁免** `allow`（kill switch / `CHANGELOG.md` 自身 / `hooks-log/**` 运行时 / 项目专属文件 project-context.md、regression-index.yaml、lessons-* 等）；**Level 1 轻门禁**（`.cursor/skills\|hooks\|scripts\|rules\|hooks.json` 写操作：会话内最近 120 分钟有 CHANGELOG 写记录 → `allow`，无 → `permission: deny` + user_message 逃生提示——先写 CHANGELOG / kill switch / 手动编辑；2026-08-03 由 ask 改，Cursor 2.2+ hook `ask` 无效是官方确认 bug；打点文件缺失 → 同 `deny`（初始状态 = 无任何会话有流水）；损坏/时间戳不可解析 → fail-open `allow`）；**其余 `.cursor/**` 兜底 `allow`**（package-release.ps1、README.md、mcp.json、ai_dev_*.7z、`_release_staging/` 等）；标记缺失/过期 → `permission: deny`（逃生：发 `[PM]` / kill switch / 手动编辑）；解析异常 fail-open 为 `allow` | `pm-gate-check.ps1` |
 | 写后编译错误提示（写后质量门） | `postToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 命中 `.cs`/`.lua` 路径 → 扫最近 Unity `Editor.log` 的 `error CS\d{4}` 编译错误；命中 → 注入 `additional_context`（+ `additionalContext` 兼容）+ 审计一行 `.ai-gates/hooks-log/unity-compile-check.log`；**恒 `allow` 不拦截**；日志缺失/解析异常/非代码路径 → 静默放行；不做 batchmode / 业务断言（归黄金验窗） | `check-unity-compile.ps1` |
-| CHANGELOG 写打点（轻门禁数据源） | `postToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 写 `.cursor/skills/CHANGELOG.md`（大小写不敏感、路径可含 `skills/` 前缀）时把 `{conversation_id: {lastChangelogWriteAtUtc}}` 原子写入 `.ai-gates/hooks-log/changelog-writes.json`（复用 mark-pm-gate 的 Write-GateAtomic 原子写模式）；非 CHANGELOG 路径仅审计；纯观测恒 `allow`，一切异常 exit 0（fail-open）；供 pm-gate-check Level 1 轻门禁读取 | `mark-changelog-write.ps1` |
+| CHANGELOG 写打点（轻门禁数据源） | `postToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 写 `.ai-gates/CHANGELOG.md`（路径以 `changelog.md` 结尾即可，大小写不敏感）时把 `{conversation_id: {lastChangelogWriteAtUtc}}` 原子写入 `.ai-gates/hooks-log/changelog-writes.json`（复用 mark-pm-gate 的 Write-GateAtomic 原子写模式）；非 CHANGELOG 路径仅审计；纯观测恒 `allow`，一切异常 exit 0（fail-open）；供 pm-gate-check Level 1 轻门禁读取 | `mark-changelog-write.ps1` |
 
 **已知限制 / 后续升级路径**：
 

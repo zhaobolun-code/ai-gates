@@ -1,133 +1,17 @@
 # ai-gates
 
-**AI can ship bad code in seconds. This inserts real gates before you accept the change—not another autocomplete.**
+**AI 几秒就能改出一堆坏代码。这套东西不是又一个补全插件，而是一套在代码落地前强制把关的质量门禁。**
 
-A set of enforceable development gates for AI-assisted coding—read your project before edit, clear the lane's review gates before you accept the change, verify before done, stop-and-reassess when stuck.
+## 为什么值得下载（30 秒看懂）
 
-**What's different here:**
+- **真门禁，不是建议稿**：无本轮 PM 判定的写入、高危 git（push --force 等）会被 hooks 直接 deny（CLI 已实测），门禁真的拦。
+- **失败过的地方自动加严**：回归热度 + 错题本命中 → 车道与审核档位自动升级（最低 Standard + L1.5），不靠人记。
+- **3 分钟接入、跨平台**：Cursor / Codex / Trae 共用同一份 `.ai-gates/` 库；新用户贴一段提示词即可装好。
+- **免费（MIT）、非银弹**：每步仍要你验收——省的是空转，不是人的判断。
 
-- **Past failures raise the bar.** Modules that already broke are tracked; touching them again auto-escalates the lane and review tier (minimum Standard + L1.5)—not something you have to remember.
-- **A machine gate, not just prompts.** Writes without a fresh PM go-ahead, and dangerous git commands, are denied by hooks (verified on Codex CLI), so the gates actually block.
-- **Auto-routed lanes that re-judge mid-task.** Express / Standard / Full are picked from the task, and escalate on the spot if the scope grows beyond the lane.
-- **A stop-loss chain.** Repeated same-approach failures trigger re-scoping and acceptance re-review—not endless micro-patches.
+## 快速开始（3 分钟）
 
-One `.ai-gates/` library is shared across Cursor / Codex / Trae through portals; the rules are plain Markdown, so other agents can adapt them too.
-
----
-
-## Get it
-
-1. From this repo’s **Releases**, download **`ai_dev_v3.3.1.7z`**
-   ([latest release](https://github.com/zhaobolun-code/ai-gates/releases/latest)).
-2. Extract **at** the target project’s root — the archive contains `.ai-gates/`
-   (do **not** unzip into `.cursor/`).
-3. Ask the project manager agent to wire it up — paste this in any AI session (Cursor / Codex / Trae):
-   `项目经理 升级 ai-gates` (= `PM upgrade ai-gates`)
-   (the agent runs `link-platform.ps1` / `.sh` for you; manual run is optional).
-4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae):
-
-```
-PM
-[what you need / what's broken]
-```
-
-First time on a project? Say `PM init` (scaffolds `project-context`), then fill a short project note (stack, careful paths, a few must-test cases). That is the setup—not ongoing ops config. Upgrade the pack? Say `项目经理 升级 ai-gates` / `PM upgrade ai-gates`. Health check? Say `项目经理 检查健康` / `PM doctor`.
-
-Upgrading? Say `项目经理 升级 ai-gates` (`PM upgrade ai-gates`) — the agent compares the official GitHub source's latest tag with your installed version, downloads and replaces the library only when a newer version exists (project files are preserved), then re-checks/creates the portals. No manual download needed. If the network is unavailable, extract the new pack at the project root and say the same phrase — the agent falls back to rewiring the portals from the local pack and verifying; the session-start hook also reminds you if portals are missing or stale.
-If Windows refuses to run the downloaded script ("access denied"), just paste the error back into the same AI session — the agent unblocks the downloaded files and re-wires it for you.
-
-### Zero-manual-download install (recommended for new users)
-
-Don't want to download/extract by hand? Paste the whole block below into any file-editing agent window (Cursor **Agent** / Codex / Trae). The agent fetches the latest version from GitHub, installs the library, creates the portals, and walks you through initialization:
-
-```text
-Install the ai-gates skill pack (AI development pipeline) into this project from https://github.com/zhaobolun-code/ai-gates, replacing manual download, extraction, and initialization:
-- Take the latest release tag, clone/download it to a temp dir; validate that the root contains `.ai-gates/` and `skills/VERSION` is a valid x.y.z equal to that tag — otherwise stop.
-- Copy `.ai-gates/` contents (skills/hooks/scripts/rules/codex, root docs, hooks.json, link-platform.*, LICENSE) into the project root `.ai-gates/`; if already installed, compare versions and replace only when newer, preserving project state (project-context, mcp.json, hooks-log, tmp, verify, regression-*, pipeline-* etc.).
-- Run link-platform.ps1 (Unix: .sh) to create the portals; write install-info.json.
-- Run pm-init.ps1 to walk me through the project note (stack, careful paths, must-test scenarios) and generate `.cursor/project-context.md`.
-- Finally report the version and portal status, and tell me the entry phrase for future requests —「项目经理 + 需求」.
-Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
-```
-
-Quick start (3 min): [USER-GUIDE.md](USER-GUIDE.md).  
-What this is / isn’t: [METHODOLOGY.md](METHODOLOGY.md).  
-
-### Daily use (you do not memorize the table below)
-
-- Start with `PM` + need; confirm decisions with `approve`.
-- The mechanism list is **guardrail documentation**, not a checklist you must learn before coding.
-- The agent follows the gates; you accept / reject / retest.
-
-### Platform
-
-- **Cursor / Codex / Trae share one `.ai-gates/` library**; one `link-platform` run creates the portals (`.cursor/*`, `.codex`, `.trae/skills`).
-- Cursor Hooks live under `.cursor/hooks/` (portal). **Codex is wired through its official hooks mechanism**: `.ai-gates/codex/hooks.json` + `config.toml` → `.ai-gates/hooks/codex/*.ps1` (deny actually blocks; verified on codex-cli 0.146.0-alpha.9.2 / 0.147.0-alpha.1.2). Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
-- **Machine layer, not prompt-only**: hooks deny high-risk git and unapproved writes, flag Unity compile errors, and re-check portal wiring at session start.
-- **Trae runs soft-layer only** (rules + skills portals, no machine hooks) — the gates still apply as instructions there, but enforcement is not machine-backed.
-- Rules are plain Markdown—other agents can reuse them with adaptation. Bundled scripts are primarily **Windows PowerShell** (`.ps1`).
-
-### Requirements
-
-- Cursor **Agent**, Codex desktop/CLI, or Trae — any session that can edit files
-- One-time `PM init` + short `project-context.md` / test list (the pack does **not** ship another team’s business windows or CHANGELOG)
-
-### What's inside
-
-These are not feature checkboxes. They are guardrails—each one exists because that failure mode showed up in real development. **You do not need to memorize this table to use the pack.**
-
-| Mechanism | What it does |
-| --- | --- |
-| **Regression index + heat** | Modules/files that already failed are tracked; touching them again auto-escalates (minimum Standard + L1.5)—past failures raise the bar, not your memory |
-| **Machine-enforced gates** | Dangerous git (e.g. `push --force`) and writes without a fresh PM go-ahead are denied by hooks, not just discouraged (verified on Codex CLI; desktop Codex has a known gap—self-check `.ai-gates/hooks-log/`) |
-| **Three-lane routing** | Express / Standard / Full auto-picked from the task (you can still force Full); escalates mid-task if the scope grows beyond the lane |
-| **Stop-loss chain** | Repeated same-approach fails → forced reassessment / A# reopen—not endless micro-patches |
-| **Slice-first** | Even small edits start as a slice—what changes, what counts as passing; one slice at a time, over-scope stops |
-| **Mandatory review, tiered** | Where the lane requires it: no plan-review pass → no coding; CR blocker → not “done” (Express may skip plan review). Tiers escalate with risk: L1.5 for modules with past failures, L2 cross-module, L3 Full, adversarial CR for high-risk |
-| **Round confirmation** | One confirm package per decision (`approve`); no silent start of implement/CR |
-| **Harness + Auto** | In-session gates constrain the agent; after `approve`, Standard/Full may run implement↔CR until hard-stop or await-verify (Express: no Auto) |
-| **Recovery phrases** | `按 CORE 重来` snaps a derailed session back into process; `方案推翻` rolls back code via a confirmed `git checkout` |
-| **Roles** | PM dispatches planner / developer / CR / docs; main chat stays PM when possible |
-| **Subagents** | Prefer isolated sub-sessions for implement/review so the main chat stays PM-only—not one mega-thread |
-| **Model routing** | Reviews can use a stronger model than implementation (project-configurable)—not the same cheap model for both |
-| **Windowed docs** | One task = one folder (plan / physical spec / evidence / done); status-classified |
-| **Physical spec** | Hard constraints + negative constraints + failure criteria (Standard/Full windows) |
-| **Blackboard** | Per-window repair log: what changed → why failed → do not repeat |
-| **Lessons** | Cross-window error book; drafts auto, **your `approve`** required before the project table |
-| **Delta Spec** | ADDED / MODIFIED / REMOVED tracked per step; no silent scope creep |
-| **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done |
-
----
-
-## 中文
-
-**AI 几秒就能改出一堆坏代码。这套东西在你点头接受之前插入真门禁——不是又一个补全插件。**
-
-一套可执行的质量门禁，用于 AI 辅助开发——不看本项目不能改、按车道走方案/审查、CR 有 blocker 不能收口、反复改不好有止损链叫停换路（不是拦 `git commit`）。
-
-**和别家不一样的地方：**
-
-- **失败过的地方会自动加严。** 挂过的模块/文件被跟踪，再次改动 → 车道与审核档位自动升级（最低 Standard + L1.5），不靠人记。
-- **真机器门禁，不是提示词。** 无本轮 PM 判定的写入、高危 git 命令会被 hooks 直接 deny（CLI 已实测），门禁真的拦。
-- **车道自动判定，过程中还会改判。** Express / Standard / Full 按任务自动选，超范围当场升级，不硬撑。
-- **止损链闭环。** 同一手法反复失败 → 强制重定界 / 验收口径复议，不无限小补丁。
-
-Cursor / Codex / Trae 经传送门共用同一份 `.ai-gates/` 中央库；规则是纯 Markdown，其他 Agent 也可适配。
-
-1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.3.1.7z`**
-2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
-3. 在任一 AI 会话粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`），由 Agent 建好传送门（手动运行
-   `link-platform.ps1` / `.sh` 亦可，非必需）
-4. 在任一能改文件的 AI 会话（Cursor Agent / Codex / Trae）粘贴：`项目经理` + 需求
-
-首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置。升级包：`项目经理 升级 ai-gates` / `PM upgrade ai-gates`；体检：`项目经理 检查健康` / `PM doctor`。
-
-升级：直接说 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`）——Agent 默认联网比对官方源最新版本与本地版本，**有新版才下载并替换**库内容（项目状态文件保留），随后校验/补齐传送门，无需手动下载；网络不可用时回退旧流程（本地已解压新包 → 清理旧 `.cursor` 技能目录并重建传送门）。`project-context.md` 等项目文件保留，无需重新初始化；传送门缺失/残留会由会话启动检查自动提示。
-若下载后 Windows 提示「无法运行，拒绝访问」：把报错原文粘贴给项目经理处理即可（Agent 会解除下载文件的网络标记并重新接线）。
-
-### 零手动安装（推荐给新用户）
-
-不想手动下载/解压？把下面这段**整段**粘贴给任一能改文件的 Agent 窗口（Cursor Agent / Codex / Trae），Agent 会联网获取最新版、安装库、建好传送门并引导初始化：
+**方式 A（推荐 · 零手动）**：把下面这段**整段**粘贴给任一能改文件的 Agent 窗口（Cursor Agent / Codex / Trae），Agent 会联网获取最新版、安装库、建好传送门并引导初始化：
 
 ```text
 请把 ai-gates（AI 开发流水线技能包）从 https://github.com/zhaobolun-code/ai-gates 安装到当前项目，替代手动下载、解压和初始化：
@@ -139,32 +23,26 @@ Cursor / Codex / Trae 经传送门共用同一份 `.ai-gates/` 中央库；规�
 动手前先列计划等我确认；失败或网络问题不要改文件，给出手动下载方案。
 ```
 
+**方式 B（手动）**：
+
+1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.3.1.7z`**
+2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
+3. 在任一 AI 会话粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`），由 Agent 建好传送门（手动运行 `link-platform.ps1` / `.sh` 亦可，非必需）
+4. 装好后，在任一能改文件的 AI 会话粘贴：`项目经理` + 需求
+
+首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置；详细三步见 [USER-GUIDE.md](USER-GUIDE.md) §第一次接入。体检：`项目经理 检查健康` / `PM doctor`。
+
+**已装用户升级**：直接说 **`项目经理 升级 ai-gates`**——Agent 默认联网比对官方源最新版本与本地版本，**有新版才下载并替换**库内容（项目状态文件保留），随后校验/补齐传送门；网络不可用时回退本地已解压包流程。
+
+若下载后 Windows 提示「无法运行，拒绝访问」：把报错原文粘贴给项目经理处理即可（Agent 会解除下载文件的网络标记并重新接线）。
+
 上手（约 3 分钟）：[USER-GUIDE.md](USER-GUIDE.md)。  
-预期与边界：[METHODOLOGY.md](METHODOLOGY.md)。  
+这是什么、好不好用：[METHODOLOGY.md](METHODOLOGY.md)。  
+版本迭代与变更历史：[CHANGELOG.md](CHANGELOG.md)。
 
-### 日常怎么用（不用背下面的表）
-
-- 开口：`项目经理` + 需求；确认回「准」。
-- 机制表是**护栏说明**，不是开工前必背清单。
-- 门禁由助手执行；你负责确认、验收、回是否通过。
-
-### 平台
-
-- **Cursor / Codex / Trae 共用同一份库**：跑一次 `link-platform` 即建好 `.cursor/*`、`.codex`、`.trae/skills` 传送门。
-- Cursor Hooks 在 `.cursor/hooks/`（传送门）；**Codex 经官方 hooks 机制接线**（`.ai-gates/codex/hooks.json` + `config.toml` → `.ai-gates/hooks/codex/*.ps1`；codex-cli 0.146/0.147 已实测 deny 拦截）。已知缺口：**Codex 桌面应用对 `apply_patch` 钩子可能不触发**（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
-- **机器强制层，不是提示词**：高危 git / 无 PM 判定写入直接 deny；Unity 编译错误提示；会话启动自动体检传送门漂移。
-- **Trae 为软层**：规则 + 技能传送门齐全，但无机器 hooks——门禁以规则生效，机器强制暂不覆盖。
-- 规则是纯 Markdown，其他 Agent 也可自行适配。附带脚本以 **Windows PowerShell**（`.ps1`）为主。
-
-### 前提
-
-- Cursor Agent / Codex / Trae 任一能改文件的会话
-- 一次初始化 + 短 `project-context` / 测试清单（包**不含**别人的业务窗与 CHANGELOG）
-
-### 里面有什么
+## 里面有什么（机制表）
 
 这些不是功能清单，是护栏——每一条都对应真实改码里已经踩过的失败模式。**日常使用不必背这张表。**
-
 
 | 机制 | 做什么 |
 | --- | --- |
@@ -186,6 +64,113 @@ Cursor / Codex / Trae 经传送门共用同一份 `.ai-gates/` 中央库；规�
 | **错题本** | 跨窗教训；自动起草，**须你回「准」**才写入项目主表 |
 | **Delta Spec** | 每步跟踪 ADDED / MODIFIED / REMOVED，防无声扩大范围 |
 | **验收 A#** | 每步可证伪验收条款。「日志出了关键词」≠ 修好了 |
+
+## 平台
+
+- **Cursor / Codex / Trae 共用同一份库**：跑一次 `link-platform` 即建好 `.cursor/*`、`.codex`、`.trae/skills`、`.trae/rules` 传送门。
+- Cursor Hooks 在 `.cursor/hooks/`（传送门）；**Codex 经官方 hooks 机制接线**（`.ai-gates/codex/hooks.json` + `config.toml` → `.ai-gates/hooks/codex/*.ps1`；codex-cli 0.146/0.147 已实测 deny 拦截）。已知缺口：**Codex 桌面应用对 `apply_patch` 钩子可能不触发**（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
+- **机器强制层，不是提示词**：高危 git / 无 PM 判定写入直接 deny；Unity 编译错误提示；会话启动自动体检传送门漂移。
+- **Trae 为软层**：规则 + 技能传送门齐全，但无机器 hooks——门禁以规则生效，机器强制暂不覆盖。
+- 规则是纯 Markdown，其他 Agent 也可自行适配。附带脚本以 **Windows PowerShell**（`.ps1`）为主。
+
+## 前提
+
+- Cursor Agent / Codex / Trae 任一能改文件的会话
+- 一次初始化 + 短 `project-context` / 测试清单（包**不含**别人的业务窗与 CHANGELOG）
+
+## 日常怎么用（不用背机制表）
+
+- 开口：`项目经理` + 需求；确认回「准」。
+- 机制表是**护栏说明**，不是开工前必背清单。
+- 门禁由助手执行；你负责确认、验收、回是否通过。
+
+---
+
+## English
+
+**AI can ship bad code in seconds. This is not another autocomplete—it is an enforceable gate system that checks every change before you accept it.**
+
+### Why download it (30-second read)
+
+- **Real gates, not prompt suggestions.** Writes without a fresh PM go-ahead, and dangerous git commands (e.g. `push --force`), are denied by hooks (verified on Codex CLI).
+- **Past failures raise the bar.** Modules that already broke are tracked; touching them again auto-escalates the lane and review tier (minimum Standard + L1.5).
+- **3-minute setup, cross-platform.** One `.ai-gates/` library shared by Cursor / Codex / Trae; new users can paste one prompt to install.
+- **Free (MIT), not a silver bullet.** Every step still needs your acceptance — it removes busywork, not human judgment.
+
+### Get it (3 minutes)
+
+**Option A (recommended, zero manual steps):** paste the whole block below into any file-editing agent window (Cursor **Agent** / Codex / Trae):
+
+```text
+Install the ai-gates skill pack (AI development pipeline) into this project from https://github.com/zhaobolun-code/ai-gates, replacing manual download, extraction, and initialization:
+- Take the latest release tag, clone/download it to a temp dir; validate that the root contains `.ai-gates/` and `skills/VERSION` is a valid x.y.z equal to that tag — otherwise stop.
+- Copy `.ai-gates/` contents (skills/hooks/scripts/rules/codex, root docs, hooks.json, link-platform.*, LICENSE) into the project root `.ai-gates/`; if already installed, compare versions and replace only when newer, preserving project state (project-context, mcp.json, hooks-log, tmp, verify, regression-*, pipeline-* etc.).
+- Run link-platform.ps1 (Unix: .sh) to create the portals; write install-info.json.
+- Run pm-init.ps1 to walk me through the project note (stack, careful paths, must-test scenarios) and generate `.cursor/project-context.md`.
+- Finally report the version and portal status, and tell me the entry phrase for future requests — `PM + request`.
+Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
+```
+
+**Option B (manual):**
+
+1. Download **`ai_dev_v3.3.1.7z`** from this repo’s **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)**.
+2. Extract **at** the target project’s root — the archive contains `.ai-gates/` (do **not** unzip into `.cursor/`).
+3. Paste **`PM upgrade ai-gates`** in any AI session (the agent runs `link-platform.ps1` / `.sh` for you; manual run is optional).
+4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae): `PM` + request.
+
+First time on a project? Say `PM init`, then fill a short project note (stack, careful paths, a few must-test cases). Detailed first-time steps: USER-GUIDE. Health check? Say `PM doctor`.
+
+**Already installed?** Say `PM upgrade ai-gates` — the agent compares the official GitHub source's latest tag with your installed version, downloads and replaces the library only when a newer version exists (project files are preserved), then re-checks/creates the portals. No manual download needed. If the network is unavailable, extract the new pack at the project root and say the same phrase — the agent falls back to rewiring the portals from the local pack.
+
+If Windows refuses to run the downloaded script ("access denied"), paste the error back into the same AI session — the agent unblocks the downloaded files and re-wires it for you.
+
+Quick start (3 min): [USER-GUIDE.md](USER-GUIDE.md).  
+What this is / isn’t: [METHODOLOGY.md](METHODOLOGY.md).  
+Version history: [CHANGELOG.md](CHANGELOG.md).
+
+### What's inside
+
+These are not feature checkboxes. They are guardrails—each one exists because that failure mode showed up in real development. **You do not need to memorize this table.**
+
+| Mechanism | What it does |
+| --- | --- |
+| **Regression index + heat** | Modules/files that already failed are tracked; touching them again auto-escalates (minimum Standard + L1.5)—past failures raise the bar, not your memory |
+| **Machine-enforced gates** | Dangerous git (e.g. `push --force`) and writes without a fresh PM go-ahead are denied by hooks, not just discouraged (verified on Codex CLI; desktop Codex has a known gap—self-check `.ai-gates/hooks-log/`) |
+| **Three-lane routing** | Express / Standard / Full auto-picked from the task (you can still force Full); escalates mid-task if the scope grows beyond the lane |
+| **Stop-loss chain** | Repeated same-approach fails → forced reassessment / A# reopen—not endless micro-patches |
+| **Slice-first** | Even small edits start as a slice—what changes, what counts as passing; one slice at a time, over-scope stops |
+| **Mandatory review, tiered** | Where the lane requires it: no plan-review pass → no coding; CR blocker → not “done” (Express may skip plan review). Tiers escalate with risk: L1.5 for modules with past failures, L2 cross-module, L3 Full, adversarial CR for high-risk |
+| **Round confirmation** | One confirm package per decision (`approve`); no silent start of implement/CR |
+| **Harness + Auto** | In-session gates constrain the agent; after `approve`, Standard/Full may run implement↔CR until hard-stop or await-verify (Express: no Auto) |
+| **Recovery phrases** | A reset phrase snaps a derailed session back into process; a rollback phrase reverts code through a confirmed `git checkout` |
+| **Roles** | PM dispatches planner / developer / CR / docs; main chat stays PM when possible |
+| **Subagents** | Prefer isolated sub-sessions for implement/review so the main chat stays PM-only—not one mega-thread |
+| **Model routing** | Reviews can use a stronger model than implementation (project-configurable)—not the same cheap model for both |
+| **Windowed docs** | One task = one folder (plan / physical spec / evidence / done); status-classified |
+| **Physical spec** | Hard constraints + negative constraints + failure criteria (Standard/Full windows) |
+| **Blackboard** | Per-window repair log: what changed → why failed → do not repeat |
+| **Lessons** | Cross-window error book; drafts auto, **your `approve`** required before the project table |
+| **Delta Spec** | ADDED / MODIFIED / REMOVED tracked per step; no silent scope creep |
+| **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done |
+
+### Platform
+
+- **One `.ai-gates/` library for Cursor / Codex / Trae**; one `link-platform` run creates the portals (`.cursor/*`, `.codex`, `.trae/skills`, `.trae/rules`).
+- Cursor Hooks live under `.cursor/hooks/` (portal). **Codex is wired through its official hooks mechanism**: `.ai-gates/codex/hooks.json` + `config.toml` → `.ai-gates/hooks/codex/*.ps1` (deny actually blocks; verified on codex-cli 0.146/0.147). Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
+- **Machine layer, not prompt-only**: hooks deny high-risk git and unapproved writes, flag Unity compile errors, and re-check portal wiring at session start.
+- **Trae runs soft-layer only** (rules + skills portals, no machine hooks) — the gates still apply as instructions there, but enforcement is not machine-backed.
+- Rules are plain Markdown—other agents can reuse them with adaptation. Bundled scripts are primarily **Windows PowerShell** (`.ps1`).
+
+### Requirements
+
+- Cursor **Agent**, Codex desktop/CLI, or Trae — any session that can edit files
+- One-time `PM init` + short `project-context.md` / test list (the pack does **not** ship another team’s business windows or CHANGELOG)
+
+### Daily use (you do not memorize the table above)
+
+- Start with `PM` + need; confirm decisions with `approve`.
+- The mechanism list is **guardrail documentation**, not a checklist you must learn before coding.
+- The agent follows the gates; you accept / reject / retest.
 
 ---
 

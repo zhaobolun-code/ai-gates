@@ -164,7 +164,7 @@
 | 主窗兼策划/程序员/CR/方案审/文档写改（有 Subagent 仍不派子窗） | 上下文共谋、模型路由失效、非独立冒充独立 | 主窗仅 PM；流水线非 PM 岗必须子窗（[model-routing.md](./model-routing.md)；**周报除外**）；降级须标「主窗执行（未开子窗 · 非独立）」 |
 | 实现/审核 Task 省略 `model` 或无视 project-context §模型路由 | 落到平台默认快模型、绕过项目偏好 | 按 [model-routing.md](./model-routing.md) 解析后显式传 `model=`；换模型须新开 Task |
 | 把项目专属模型 slug 写进通用 Skill | Skill 不可复用 | 偏好只进 `.cursor/project-context.md` §模型路由（[project-local-config.md](./project-local-config.md)） |
-| 用户未初始化 project-context 仍期望 Express 小改核心模块 | 误判车道、漏回归 | 冷启动保守 Standard；提示 TL 按 [SKILLS.md](../../SKILLS.md) §首次接入 初始化 |
+| 用户未初始化 project-context 仍期望 Express 小改核心模块 | 误判车道、漏回归 | 冷启动保守 Standard；提示 TL 按 [USER-GUIDE.md](../../USER-GUIDE.md) §第一次接入 初始化 |
 
 ## 并发与协作
 

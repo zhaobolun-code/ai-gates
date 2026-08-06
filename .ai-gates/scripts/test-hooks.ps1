@@ -286,7 +286,7 @@ try {
     # 顺序依赖：A1.2 必须先于「A1.2 续」执行（同会话写 skills 设施需已有新鲜流水）；
     # A1.1 的「无流水 → deny」不依赖文件存在——文件缺失同样 deny（初始状态无流水，
     # 2026-08-03 真演修复，见 A1.5）。
-    $r = Invoke-HookScript -ScriptName "mark-changelog-write.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".cursor\skills\CHANGELOG.md" }; conversation_id = $convL1Fresh } | ConvertTo-Json -Compress)
+    $r = Invoke-HookScript -ScriptName "mark-changelog-write.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".ai-gates\CHANGELOG.md" }; conversation_id = $convL1Fresh } | ConvertTo-Json -Compress)
     Assert-Test "A1.2 mark-changelog-write: CHANGELOG write -> exit 0" ($r.ExitCode -eq 0) "exit=$($r.ExitCode)"
     $cwNow = [System.IO.File]::ReadAllText($changelogWritesFile, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
     Assert-Test "A1.2 mark-changelog-write: changelog-writes.json contains conversation entry" ($null -ne $cwNow.$convL1Fresh.lastChangelogWriteAtUtc) "keys=$($cwNow.PSObject.Properties.Name -join ',')"
@@ -300,7 +300,7 @@ try {
     Assert-Test "A1.2 pm-gate-check: Level1 skills with fresh changelog flow -> allow" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
 
     # A1.3：Level 0 豁免——CHANGELOG.md 自身 / hooks-log 运行时 / 项目专属文件，均 allow
-    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".cursor\skills\CHANGELOG.md" }; conversation_id = $convL1None } | ConvertTo-Json -Compress)
+    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".ai-gates\CHANGELOG.md" }; conversation_id = $convL1None } | ConvertTo-Json -Compress)
     Assert-Test "A1.3 pm-gate-check: CHANGELOG.md itself Level0 exempt -> allow" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".ai-gates\hooks-log\pm-gate.json" }; conversation_id = $convL1None } | ConvertTo-Json -Compress)
     Assert-Test "A1.3 pm-gate-check: hooks-log runtime Level0 exempt -> allow" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
