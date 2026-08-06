@@ -134,6 +134,12 @@
 - 单脚本保留（独立可测）：`test-codex-hooks.ps1` 28/28、合并入口行为回归 12/12、`validate-pipeline -Strict` 全绿（含 69 项 Cursor 回归与 BOM 扫描）；`check-hooks-drift.ps1` 接线期望同步为合并入口。
 - **Cursor 侧对称合并（同日）**：新增 `cursor-hooks-common.ps1`（stdin 全局缓存）+ `pre-write-gate.ps1`（audit-write + pm-gate-check）+ `post-write-gate.ps1`（mark-changelog-write + check-unity-compile）；`hooks.json` preToolUse/postToolUse 各减为单条目（Write/StrReplace/EditNotebook 事件 spawn 2→1）；Cursor 版子脚本判定点改为输出后 `return` 终止（Emit-Allow/Emit-Deny/Emit-Empty 去 exit），单行 JSON 语义不变；`test-hooks.ps1` A6/A1.6 接线断言同步为合并入口；MAINTAINER Cursor 表文件列更新 + 合并说明。
 
+### Included changes — 2026-08-06（文档分工收口：定位去重 + 排障速查 · 不 bump）
+
+- README（中英）「定位：AI 编码的项目经理」压缩为两句并指向 METHODOLOGY（完整版保留在 METHODOLOGY，避免两处镜像漂移）；「日常怎么用」补「被拦了怎么办」入口（deny 提示自带逃生路径，完整速查在 USER-GUIDE）。
+- USER-GUIDE 头部阅读路径改为「README（30 秒+安装）→ 本文（上手）→ METHODOLOGY（为什么/数据）」，消除「README vs METHODOLOGY 谁是入口」的歧义；新增「被拦了怎么办（速查）」6 行表（PM 标记 / Level-1 CHANGELOG / Bash write gate / 高危 git / 桌面钩子缺口 / 按 CORE 重来）。
+- METHODOLOGY「定位」段补指针（护栏机制清单见 README 机制表）；「怎么做（概要）」开头注明分工（机制清单在 README，本文只讲流程为什么这么走）。
+
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）

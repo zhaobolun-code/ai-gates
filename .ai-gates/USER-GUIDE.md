@@ -1,7 +1,7 @@
 # 使用指南 — 3 分钟上手
 
 > 版本：**v3.3.1**（与 [VERSION](skills/VERSION) 一致）
-> 第一次接触：先扫一眼 [METHODOLOGY.md](./METHODOLOGY.md)（能少原地打转、能做完，**不是**万能药）。  
+> 第一次接触：README（30 秒看懂 + 安装）→ 本文（3 分钟上手）→ 需要时再扫 [METHODOLOGY.md](./METHODOLOGY.md)（为什么这么设计、真实数据；**不是**万能药）。  
 > 新仓库还没配置？先说 **`项目经理 初始化`**，再提需求。
 
 ## 你只需要记住一件事
@@ -117,6 +117,17 @@
 **它乱改、没告诉你下一步？** 回 **`按 CORE 重来`**。
 
 **要不要新开对话再审？** 提示时优先新开（主对话只当「项目经理」，写方案/改代码/再检查多在别的对话里）；留在原对话可以，但独立性差一些。
+
+## 被拦了怎么办（速查）
+
+| 现象 | 原因 | 做法 |
+| --- | --- | --- |
+| 写入被 deny，提示 `no fresh [PM] marker` | 本会话最近 120 分钟没有过 PM 判定 | 回一句带 `[PM]` 的话（如「[PM] 判定：…」），等打点后重试；或人工确认后放 `.ai-gates/hooks-log/pm-gate-disabled` 临时放行 |
+| 写入被 deny，提示 `Level-1` / `CHANGELOG` | 改 `.cursor` / `.ai-gates` 设施前没写 CHANGELOG | 先写 `.ai-gates/CHANGELOG.md`（Included 条目）再重试 |
+| Bash 写文件被 deny，提示 `Bash write gate` | 显式写文件没走 PM 门禁 | 改用 apply_patch；或先发 `[PM]` 待打点后重试 |
+| `git push --force` / `reset --hard` 被 deny | 高危 git 被机器层硬拦 | 确认安全后在终端手动执行，或临时移除对应 hook 条目 |
+| 写完没见到任何门禁痕迹 | 桌面端 apply_patch 钩子可能不触发 | 自查 `.ai-gates/hooks-log/`，或临时用 CLI 会话验证 |
+| 流程乱了、想重来 | 没按流程走 | 回 **`按 CORE 重来`** |
 
 ## 技术负责人可选
 

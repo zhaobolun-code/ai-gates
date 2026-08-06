@@ -11,7 +11,7 @@
 
 ## 定位：AI 编码的项目经理
 
-ai-gates 不是又一个代码补全 / 质检插件。多数同类工具聚焦在「代码本身」——补全、审查、扫描；ai-gates 多管一层：整个开发流程的秩序。需求对齐、方案确认、执行、验收、复盘、止损串成一个可重复、可度量的闭环；失败过的地方自动升档，把过程数据变成智能规则。
+ai-gates 不是又一个代码补全 / 质检插件：多数工具聚焦「代码本身」，它多管一层——整个开发流程的秩序（需求对齐 → 方案确认 → 执行 → 验收 → 复盘 → 止损），并把失败过的地方自动升档成规则。为什么这样设计、真实效果数据见 [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)。
 
 ## 快速开始（3 分钟）
 
@@ -97,6 +97,7 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 - 开口：`项目经理` + 需求；确认回「准」。
 - 机制表是**护栏说明**，不是开工前必背清单。
 - 门禁由助手执行；你负责确认、验收、回是否通过。
+- 被拦了？deny 提示自带逃生路径；完整速查见 [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §被拦了怎么办。
 
 ---
 
@@ -113,7 +114,7 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 
 ### Positioning: the project manager for AI coding
 
-ai-gates is not another autocomplete or quality-check plugin. Most similar tools focus on the code itself — completion, review, scanning; ai-gates adds one more layer: the order of the whole development process. Requirement alignment, plan approval, execution, acceptance, retrospective, and stop-loss are wired into one repeatable, measurable loop; places that already failed auto-escalate, turning process data into smart rules.
+ai-gates is not another autocomplete or quality-check plugin: most tools focus on the code itself, ai-gates adds one more layer — the order of the whole development process (requirement alignment → plan approval → execution → acceptance → retrospective → stop-loss), and places that already failed auto-escalate into smart rules. Why it is designed this way, plus real usage data: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).
 
 ### Get it (3 minutes)
 
@@ -199,6 +200,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 - Start with `PM` + need; confirm decisions with `approve`.
 - The mechanism list is **guardrail documentation**, not a checklist you must learn before coding.
 - The agent follows the gates; you accept / reject / retest.
+- Blocked? The deny message itself carries escape steps; full quick-reference: USER-GUIDE (troubleshooting quick-ref section).
 
 ---
 
