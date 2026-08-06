@@ -30,18 +30,21 @@ try {
     $paths = @(Get-TargetPaths -ToolInput $json.tool_input -Raw $raw)
 } catch {
     # 解析异常 fail-open：不拦写操作
-    Emit-PostToolUseEmpty
+    Write-Output (Emit-PostToolUseEmpty)
+    return
 }
 
 # matcher 是工具名过滤，路径过滤必须在脚本内做：仅 .cs/.lua 代码路径继续
 $codePaths = @($paths | Where-Object { $_ -match '\.(cs|lua)$' })
 if ($codePaths.Count -eq 0) {
-    Emit-PostToolUseEmpty
+    Write-Output (Emit-PostToolUseEmpty)
+    return
 }
 
 # 日志缺失 → 静默 allow
 if (-not (Test-Path -LiteralPath $EditorLogPath)) {
-    Emit-PostToolUseEmpty
+    Write-Output (Emit-PostToolUseEmpty)
+    return
 }
 
 $compileErrorLines = @()
@@ -55,12 +58,14 @@ try {
     }
 } catch {
     # 读取/解析异常 fail-open
-    Emit-PostToolUseEmpty
+    Write-Output (Emit-PostToolUseEmpty)
+    return
 }
 
 if ($compileErrorLines.Count -eq 0) {
     Write-HookAudit -LogDir $LogDir -FileName 'unity-compile-check.log' -Line ("OK no_compile_error paths={0}" -f ($codePaths -join ','))
-    Emit-PostToolUseEmpty
+    Write-Output (Emit-PostToolUseEmpty)
+    return
 }
 
 Write-HookAudit -LogDir $LogDir -FileName 'unity-compile-check.log' -Line ("HIT compile_error count={0} first={1}" -f $compileErrorLines.Count, $compileErrorLines[0])

@@ -16,11 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/git-safety-check.ps1"
-          },
-          {
-            "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/bash-write-gate.ps1"
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/pre-bash-gate.ps1"
           }
         ]
       },
@@ -29,11 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/audit-write.ps1"
-          },
-          {
-            "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/pm-gate-check.ps1"
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/pre-apply-patch-gate.ps1"
           }
         ]
       }
@@ -44,11 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/check-unity-compile.ps1"
-          },
-          {
-            "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/mark-changelog-write.ps1"
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/codex/post-apply-patch-gate.ps1"
           }
         ]
       }

@@ -105,11 +105,13 @@ try {
     }
 
     # 2) hooks.json 必需事件映射
+    # 2026-08-06 合并入口：同一事件多门禁已合成单脚本（pre-*-gate.ps1），
+    # 单进程内依次执行原门禁脚本；此处接线期望随之更新。
     $expected = @(
         @{ Event = 'SessionStart';  Matcher = $null;        Scripts = @('check-hooks-drift.ps1') },
-        @{ Event = 'PreToolUse';    Matcher = '^Bash$';     Scripts = @('git-safety-check.ps1', 'bash-write-gate.ps1') },
-        @{ Event = 'PreToolUse';    Matcher = '^apply_patch$'; Scripts = @('audit-write.ps1', 'pm-gate-check.ps1') },
-        @{ Event = 'PostToolUse';   Matcher = '^apply_patch$'; Scripts = @('check-unity-compile.ps1', 'mark-changelog-write.ps1') },
+        @{ Event = 'PreToolUse';    Matcher = '^Bash$';     Scripts = @('pre-bash-gate.ps1') },
+        @{ Event = 'PreToolUse';    Matcher = '^apply_patch$'; Scripts = @('pre-apply-patch-gate.ps1') },
+        @{ Event = 'PostToolUse';   Matcher = '^apply_patch$'; Scripts = @('post-apply-patch-gate.ps1') },
         @{ Event = 'Stop';          Matcher = $null;        Scripts = @('mark-pm-gate.ps1') }
     )
     $foundScripts = New-Object System.Collections.Generic.List[string]
@@ -193,7 +195,8 @@ try {
 - Codex 桌面应用会话对 apply_patch 钩子可能不触发（信任已批准仍零打点）——关键写操作后请自查 .ai-gates/hooks-log/。
 - 验证钩子是否生效：powershell -File .ai-gates/scripts/test-codex-hooks.ps1
 "@
-        Emit-SessionStartContext -Context $ctx
+        Write-Output (Emit-SessionStartContext -Context $ctx)
+        return
     }
 
     $hint = 'Codex hooks wiring drifted from .codex/hooks.json / .codex/config.toml / .cursor/hooks/codex/. Align or update docs, then re-run: powershell -File .cursor/scripts/check-hooks-policy.ps1'

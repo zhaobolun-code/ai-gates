@@ -82,13 +82,13 @@ function Test-CursorLevel1Path {
     return $false
 }
 
-# 业务门禁：无新鲜 [PM] → deny + exit；通过返回 $true（不 emit allow，由主流程统一放行）
+# 业务门禁：无新鲜 [PM] → 返回 deny reason 字符串（主流程 emit+return）；通过返回 $true
 function Test-BusinessGate {
     param([string]$SessionId)
     if (-not (Test-Path -LiteralPath $gateFile)) {
         $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 Stop hook 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=gate_file_missing" -f $SessionId)
-        Emit-PreToolUseDeny -Reason ("PM gate deny detail=gate_file_missing : no fresh [PM] marker detected. " + $hint)
+        return ("PM gate deny detail=gate_file_missing : no fresh [PM] marker detected. " + $hint)
     }
     try {
         $gateRaw = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8
@@ -96,39 +96,39 @@ function Test-BusinessGate {
     } catch {
         $hint = "逃生：先在本会话回复中发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=gate_file_unreadable" -f $SessionId)
-        Emit-PreToolUseDeny -Reason ("PM gate deny detail=gate_file_unreadable : no fresh [PM] marker detected. " + $hint)
+        return ("PM gate deny detail=gate_file_unreadable : no fresh [PM] marker detected. " + $hint)
     }
     $entry = $gate.$SessionId
     if (-not $entry -or -not $entry.lastPmAtUtc) {
         $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 Stop hook 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=no_pm_marker_for_session" -f $SessionId)
-        Emit-PreToolUseDeny -Reason ("PM gate deny detail=no_pm_marker_for_session : no fresh [PM] marker detected. " + $hint)
+        return ("PM gate deny detail=no_pm_marker_for_session : no fresh [PM] marker detected. " + $hint)
     }
     try {
         $lastPmUtc = [DateTime]::Parse($entry.lastPmAtUtc).ToUniversalTime()
     } catch {
         $hint = "逃生：先在本会话回复中重新发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=timestamp_unparseable" -f $SessionId)
-        Emit-PreToolUseDeny -Reason ("PM gate deny detail=timestamp_unparseable : no fresh [PM] marker detected. " + $hint)
+        return ("PM gate deny detail=timestamp_unparseable : no fresh [PM] marker detected. " + $hint)
     }
     $ageMinutes = ([DateTime]::UtcNow - $lastPmUtc).TotalMinutes
     if ($ageMinutes -gt $FreshnessMinutes) {
         $hint = "逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 $FreshnessMinutes 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=stale_pm_marker_age={1}min" -f $SessionId, [Math]::Round($ageMinutes, 1))
-        Emit-PreToolUseDeny -Reason (("PM gate deny detail=stale_pm_marker_age={0}min : no fresh [PM] marker detected. " -f [Math]::Round($ageMinutes, 1)) + $hint)
+        return (("PM gate deny detail=stale_pm_marker_age={0}min : no fresh [PM] marker detected. " -f [Math]::Round($ageMinutes, 1)) + $hint)
     }
     Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("ALLOW fresh_pm_marker_age={0}min" -f [Math]::Round($ageMinutes, 1))
     return $true
 }
 
-# Level 1 轻门禁：无会话内新鲜 CHANGELOG 流水 → deny + exit；通过返回 $true
+# Level 1 轻门禁：无会话内新鲜 CHANGELOG 流水 → 返回 deny reason 字符串（主流程 emit+return）；通过返回 $true
 function Test-Level1Gate {
     param([string]$SessionId)
     $level1BaseMsg = "PM gate Level-1 deny : no fresh CHANGELOG write for this session within $FreshnessMinutes min (changing .cursor facilities requires a CHANGELOG entry; this gate does NOT read [PM] markers)."
     if (-not (Test-Path -LiteralPath $changelogFile)) {
         $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch，临时全放行）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=changelog_writes_missing_level1" -f $SessionId)
-        Emit-PreToolUseDeny -Reason ($level1BaseMsg + ' ' + $hint)
+        return ($level1BaseMsg + ' ' + $hint)
     }
     try {
         $changelogRaw = [System.IO.File]::ReadAllText($changelogFile, [System.Text.Encoding]::UTF8)
@@ -145,7 +145,7 @@ function Test-Level1Gate {
     if (-not $changelogEntry -or -not $changelogEntry.lastChangelogWriteAtUtc) {
         $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=no_changelog_write_for_session_level1" -f $SessionId)
-        Emit-PreToolUseDeny -Reason ($level1BaseMsg + ' ' + $hint)
+        return ($level1BaseMsg + ' ' + $hint)
     }
     try {
         $lastChangelogUtc = [DateTime]::Parse($changelogEntry.lastChangelogWriteAtUtc).ToUniversalTime()
@@ -157,7 +157,7 @@ function Test-Level1Gate {
     if ($changelogAgeMinutes -gt $FreshnessMinutes) {
         $hint = "逃生：重新写 .ai-gates/CHANGELOG.md（Included 条目）后再试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=stale_changelog_write_age={1}min_level1" -f $SessionId, [Math]::Round($changelogAgeMinutes, 1))
-        Emit-PreToolUseDeny -Reason ($level1BaseMsg + ' ' + $hint)
+        return ($level1BaseMsg + ' ' + $hint)
     }
     Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("ALLOW recent_changelog_write_age={0}min" -f [Math]::Round($changelogAgeMinutes, 1))
     return $true
@@ -166,7 +166,8 @@ function Test-Level1Gate {
 # kill switch first (no stdin parse needed)
 if (Test-Path -LiteralPath $killSwitch) {
     Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line 'ALLOW kill_switch_active'
-    Emit-PreToolUseAllow
+    Write-Output (Emit-PreToolUseAllow)
+    return
 }
 
 $raw = Read-HookStdin
@@ -176,7 +177,8 @@ try {
 } catch {
     # fail-open：解析失败不硬拦（与 MAINTAINER 一致；避免 mark 落盘故障连环死路）
     Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line 'ALLOW parse_failed_fail_open'
-    Emit-PreToolUseAllow
+    Write-Output (Emit-PreToolUseAllow)
+    return
 }
 
 $sessionId = Get-SessionId -Json $json -Raw $raw
@@ -199,10 +201,18 @@ foreach ($p in $paths) {
 
 # 两道门禁都须通过（业务查 [PM]、.cursor 设施查 CHANGELOG）；任一道 deny 即拦截
 if ($hasBusiness) {
-    $null = Test-BusinessGate -SessionId $sessionId
+    $gateResult = Test-BusinessGate -SessionId $sessionId
+    if ($gateResult -ne $true) {
+        Write-Output (Emit-PreToolUseDeny -Reason $gateResult)
+        return
+    }
 }
 if ($hasLevel1) {
-    $null = Test-Level1Gate -SessionId $sessionId
+    $gateResult = Test-Level1Gate -SessionId $sessionId
+    if ($gateResult -ne $true) {
+        Write-Output (Emit-PreToolUseDeny -Reason $gateResult)
+        return
+    }
 }
 
 # 业务门禁 + Level 1 均通过（或仅 Level 0/Level 2 豁免路径）

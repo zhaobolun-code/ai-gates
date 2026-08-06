@@ -142,22 +142,26 @@ try {
     }
 } catch {
     Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("ALLOW parse_failed_fail_open session={0}" -f $sessionId)
-    Emit-PreToolUseAllow
+    Write-Output (Emit-PreToolUseAllow)
+    return
 }
 
 if ([string]::IsNullOrWhiteSpace($cmd)) {
-    Emit-PreToolUseAllow
+    Write-Output (Emit-PreToolUseAllow)
+    return
 }
 
 if (Test-KillSwitch) {
     Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("ALLOW kill_switch_active session={0}" -f $sessionId)
-    Emit-PreToolUseAllow
+    Write-Output (Emit-PreToolUseAllow)
+    return
 }
 
 $paths = @(Get-BashWritePaths -CommandText $cmd)
 if ($paths.Count -eq 0) {
     Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("ALLOW no_write_detected session={0}" -f $sessionId)
-    Emit-PreToolUseAllow
+    Write-Output (Emit-PreToolUseAllow)
+    return
 }
 
 $blocked = New-Object System.Collections.Generic.List[string]
@@ -180,7 +184,8 @@ foreach ($p in $paths) {
 if ($blocked.Count -gt 0) {
     $hint = "逃生：先在本会话回复中发出 [PM] 标记（设施路径则先写 CHANGELOG），待 Stop hook 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或改用 apply_patch 走常规写门禁。"
     Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("DENY session={0} paths={1} reasons={2}" -f $sessionId, ($blocked -join ','), ($blockedReasons -join ','))
-    Emit-PreToolUseDeny -Reason ("Bash write gate deny: explicit file write to {0} without {1}. {2}" -f ($blocked -join ', '), ($blockedReasons -join ', '), $hint)
+    Write-Output (Emit-PreToolUseDeny -Reason ("Bash write gate deny: explicit file write to {0} without {1}. {2}" -f ($blocked -join ', '), ($blockedReasons -join ', '), $hint))
+    return
 }
 
 Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("ALLOW write_paths_ok session={0} paths={1}" -f $sessionId, ($paths -join ','))

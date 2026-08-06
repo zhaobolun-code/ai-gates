@@ -18,6 +18,10 @@
 # 读取 stdin 全部内容（显式 UTF-8；与 mark-pm-gate/mark-changelog-write 同健壮模式，
 # 避免超大 payload 时 PS5.1 Console.In.ReadToEnd 解析失败），并去掉可能的前导 BOM。
 function Read-HookStdin {
+    # 2026-08-06 合并入口（pre-*-gate.ps1）：同一事件多门禁改为单进程内依次执行，
+    # stdin 只读一次并缓存到全局，后续子脚本共享同一 payload（子脚本点源本文件后
+    # 仍会走此缓存，避免第二个门禁读到已耗尽的流）。
+    if ($null -ne $global:AI_GATES_HOOK_STDIN_CACHE) { return $global:AI_GATES_HOOK_STDIN_CACHE }
     $stream = [Console]::OpenStandardInput()
     try {
         $reader = New-Object System.IO.StreamReader($stream, (New-Object System.Text.UTF8Encoding($false)))
@@ -27,7 +31,8 @@ function Read-HookStdin {
         $stream.Dispose()
     }
     if ($null -eq $raw) { $raw = "" }
-    return $raw.TrimStart([char]0xFEFF)
+    $global:AI_GATES_HOOK_STDIN_CACHE = $raw.TrimStart([char]0xFEFF)
+    return $global:AI_GATES_HOOK_STDIN_CACHE
 }
 
 function Get-Property {
@@ -152,11 +157,14 @@ function Write-JsonAtomic {
     }
 }
 
-# ---- Codex hook 输出（契约见文件头注释；所有 exit 0 由 emit 函数负责） ----
+# ---- Codex hook 输出（契约见文件头注释） ----
+# 2026-08-06 语义调整：Emit-* 只返回 JSON 字符串，不再 Write-Output/exit。
+#   - 终态分支：把 Emit-X 作为脚本最后一条语句（返回值自动进成功流，进程自然 exit 0）。
+#   - 早退分支：调用方必须写 `Write-Output (Emit-X); exit 0`，保持与旧行为一致——
+#     exit 会终止整个进程，合并入口（pre-*-gate.ps1）正依赖此语义做 deny 短路。
 
 function Emit-PreToolUseAllow {
-    Write-Output '{"hookSpecificOutput":{"hookEventName":"PreToolUse"}}'
-    exit 0
+    return '{"hookSpecificOutput":{"hookEventName":"PreToolUse"}}'
 }
 
 function Emit-PreToolUseDeny {
@@ -169,8 +177,7 @@ function Emit-PreToolUseDeny {
             permissionDecisionReason = $reasonSafe
         }
     }
-    Write-Output ($obj | ConvertTo-Json -Compress -Depth 6)
-    exit 0
+    return ($obj | ConvertTo-Json -Compress -Depth 6)
 }
 
 function Emit-PreToolUseContext {
@@ -181,13 +188,11 @@ function Emit-PreToolUseContext {
             additionalContext = $Context
         }
     }
-    Write-Output ($obj | ConvertTo-Json -Compress -Depth 6)
-    exit 0
+    return ($obj | ConvertTo-Json -Compress -Depth 6)
 }
 
 function Emit-PostToolUseEmpty {
-    Write-Output '{"hookSpecificOutput":{"hookEventName":"PostToolUse"}}'
-    exit 0
+    return '{"hookSpecificOutput":{"hookEventName":"PostToolUse"}}'
 }
 
 function Emit-PostToolUseContext {
@@ -198,13 +203,11 @@ function Emit-PostToolUseContext {
             additionalContext = $Context
         }
     }
-    Write-Output ($obj | ConvertTo-Json -Compress -Depth 6)
-    exit 0
+    return ($obj | ConvertTo-Json -Compress -Depth 6)
 }
 
 function Emit-SessionStartEmpty {
-    Write-Output '{"hookSpecificOutput":{"hookEventName":"SessionStart"}}'
-    exit 0
+    return '{"hookSpecificOutput":{"hookEventName":"SessionStart"}}'
 }
 
 function Emit-SessionStartContext {
@@ -215,11 +218,9 @@ function Emit-SessionStartContext {
             additionalContext = $Context
         }
     }
-    Write-Output ($obj | ConvertTo-Json -Compress -Depth 6)
-    exit 0
+    return ($obj | ConvertTo-Json -Compress -Depth 6)
 }
 
 function Emit-StopEmpty {
-    Write-Output '{}'
-    exit 0
+    return '{}'
 }

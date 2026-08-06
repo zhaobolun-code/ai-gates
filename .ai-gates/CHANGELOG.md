@@ -127,6 +127,12 @@
 - README（中英）新增「定位：AI 编码的项目经理」：与多数聚焦「代码本身」的同类工具（补全/审查/扫描）错位，ai-gates 多管一层流程秩序——需求对齐→方案确认→执行→验收→复盘→止损，成可重复、可度量的闭环；失败过的地方自动升档，把过程数据变成智能规则。英文区纯英文镜像，不点名竞品。
 - METHODOLOGY「一句话」后新增「定位：AI 编码的项目经理」段：不是又一个补全/质检插件，而是流程秩序治理 + 机器强制门禁 + 自动升档 + 止损链闭环。
 
+### Included changes — 2026-08-06（Codex hooks 合并入口：同事件多门禁单进程执行 · 不 bump）
+
+- Codex 侧 PreToolUse/PostToolUse 同一事件的多门禁合并为单入口脚本：`pre-bash-gate.ps1`（git-safety-check + bash-write-gate）、`pre-apply-patch-gate.ps1`（audit-write + pm-gate-check）、`post-apply-patch-gate.ps1`（mark-changelog-write + check-unity-compile）；`codex/hooks.json` 相应减半进程 spawn（apply_patch 4→2、Bash 2→1），长会话省等待。
+- Emit 语义调整：`codex-hooks-common.ps1` 的 Emit-* 改为返回 JSON 字符串（终态直接输出、早退分支 `Write-Output (Emit-X); return`）；`Read-HookStdin` 增加全局缓存，合并入口预读一次、子脚本共享同一 payload。实测发现 PowerShell `&` 上下文里子脚本 `exit` 不终止宿主进程，因此合并入口显式捕获输出并检测 deny 短路，不依赖子脚本 exit。
+- 单脚本保留（独立可测）：`test-codex-hooks.ps1` 28/28、合并入口行为回归 12/12、`validate-pipeline -Strict` 全绿（含 69 项 Cursor 回归与 BOM 扫描）；`check-hooks-drift.ps1` 接线期望同步为合并入口。
+
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）

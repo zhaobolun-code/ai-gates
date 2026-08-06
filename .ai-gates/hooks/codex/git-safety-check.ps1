@@ -28,11 +28,13 @@ try {
     }
 } catch {
     # 解析异常 fail-open：不影响原命令执行
-    Emit-PreToolUseAllow
+    Write-Output (Emit-PreToolUseAllow)
+    return
 }
 
 if ([string]::IsNullOrWhiteSpace($cmd)) {
-    Emit-PreToolUseAllow
+    Write-Output (Emit-PreToolUseAllow)
+    return
 }
 
 $dangerousPatterns = @(
@@ -47,7 +49,8 @@ foreach ($rule in $dangerousPatterns) {
     if ($cmd -match $rule.Pattern) {
         Write-HookAudit -LogDir $LogDir -FileName 'git-safety-check.log' -Line ("DENY cmd={0} reason={1}" -f $cmd, $rule.Reason)
         $reason = "检测到高危 Git 命令：$cmd。原因：$($rule.Reason)。已被 Codex PreToolUse hook 拦截（deny）。逃生：若你确认安全，请在终端手动执行该命令；或临时移除 .codex/hooks.json 中本 hook 条目后重试；或调整命令规避误判。"
-        Emit-PreToolUseDeny -Reason $reason
+        Write-Output (Emit-PreToolUseDeny -Reason $reason)
+        return
     }
 }
 

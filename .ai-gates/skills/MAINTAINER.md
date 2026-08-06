@@ -226,12 +226,19 @@ Codex 侧机械层是 **Cursor 七个 hook 的等价映射**：技能单源在�
 | Codex hook | Codex 事件 / matcher | 行为（等价映射自 Cursor 版） | 文件 |
 | --- | --- | --- | --- |
 | 接线漂移检测 | `SessionStart` | 校验 `.codex/hooks.json` / `.codex/config.toml` / `hooks/codex/*.ps1` 齐套 + BOM；漂移 → 写 `.ai-gates/hooks-log/codex-hooks-drift.json` + 注入 `additionalContext`（端到端实测可达模型） | `check-hooks-drift.ps1` |
-| Git 高危命令确认 | `PreToolUse`（matcher `^Bash$`） | `tool_input.command` 命中 `git push --force`/`reset --hard`/`clean -f*`/`checkout --`/`branch -D` → `permissionDecision=deny` + reason（引擎呈现为 "Command blocked by PreToolUse hook: ..."，工具硬拦截） | `git-safety-check.ps1` |
-| 交付物改动审计 | `PreToolUse`（matcher `^apply_patch$`） | 从 patch 文本提取路径 → `write-audit.log` 一行；恒 allow | `audit-write.ps1` |
+| Git 高危命令确认 | `PreToolUse`（matcher `^Bash$`） | `tool_input.command` 命中 `git push --force`/`reset --hard`/`clean -f*`/`checkout --`/`branch -D` → `permissionDecision=deny` + reason（引擎呈现为 "Command blocked by PreToolUse hook: ..."，工具硬拦截） | `pre-bash-gate.ps1` |
+| 交付物改动审计 | `PreToolUse`（matcher `^apply_patch$`） | 从 patch 文本提取路径 → `write-audit.log` 一行；恒 allow | `pre-apply-patch-gate.ps1` |
 | PM 判定标记打点 | `Stop`（等价 Cursor `afterAgentResponse`） | `last_assistant_message` 命中 `[PM]` → 写 `pm-gate.json`（按 `session_id`） | `mark-pm-gate.ps1` |
-| PM 门禁机械检查（支柱 D） | `PreToolUse`（matcher `^apply_patch$`） | 业务路径无新鲜（120 分钟）`[PM]`（按 `session_id` 查 `pm-gate.json`）→ deny + 逃生提示；`.cursor/**` 分级豁免与 Cursor 版完全一致（Level 0 全豁免 / Level 1 查 changelog-writes.json / Level 2 兜底）；kill switch / parse fail-open 保留 | `pm-gate-check.ps1` |
-| 写后编译错误提示 | `PostToolUse`（matcher `^apply_patch$`） | 命中 `.cs`/`.lua` → 扫新鲜 Unity `Editor.log` 的 `error CS\d{4}` → 注入 `additionalContext`；恒 allow | `check-unity-compile.ps1` |
-| CHANGELOG 写打点 | `PostToolUse`（matcher `^apply_patch$`） | patch 命中 `CHANGELOG.md` → `changelog-writes.json`（按 `session_id`） | `mark-changelog-write.ps1` |
+| PM 门禁机械检查（支柱 D） | `PreToolUse`（matcher `^apply_patch$`） | 业务路径无新鲜（120 分钟）`[PM]`（按 `session_id` 查 `pm-gate.json`）→ deny + 逃生提示；`.cursor/**` 分级豁免与 Cursor 版完全一致（Level 0 全豁免 / Level 1 查 changelog-writes.json / Level 2 兜底）；kill switch / parse fail-open 保留 | `pre-apply-patch-gate.ps1` |
+| 写后编译错误提示 | `PostToolUse`（matcher `^apply_patch$`） | 命中 `.cs`/`.lua` → 扫新鲜 Unity `Editor.log` 的 `error CS\d{4}` → 注入 `additionalContext`；恒 allow | `post-apply-patch-gate.ps1` |
+| CHANGELOG 写打点 | `PostToolUse`（matcher `^apply_patch$`） | patch 命中 `CHANGELOG.md` → `changelog-writes.json`（按 `session_id`） | `post-apply-patch-gate.ps1` |
+
+**合并入口（2026-08-06 · 性能优化，语义不变）**：同事件多门禁已合成单入口脚本——
+`pre-bash-gate.ps1`（git-safety-check + bash-write-gate）、`pre-apply-patch-gate.ps1`
+（audit-write + pm-gate-check）、`post-apply-patch-gate.ps1`（mark-changelog-write +
+check-unity-compile）——单进程内依次执行原门禁脚本，stdin 预读共享；deny 短路语义与
+分开挂载一致，进程 spawn 减半（apply_patch 从 4 次降到 2 次，Bash 从 2 次降到 1 次）。
+原单门禁脚本保留（供测试与单独排查）。
 
 **Codex 契约与 Cursor 的差异（2026-08-04 在 codex-cli 0.146.0-alpha.9.2 实测，勿凭习惯猜）**：
 
