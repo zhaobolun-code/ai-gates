@@ -23,15 +23,15 @@
 动手前先列计划等我确认；失败或网络问题不要改文件，给出手动下载方案。
 ```
 
-**方式 C（一条命令 · 开发者/批量）**：在项目根打开 PowerShell，运行：
+**方式 B（一条命令 · 开发者/批量）**：在项目根打开 PowerShell，运行：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
 ```
 
-装完回到 Agent 窗口说 `项目经理 初始化` 填项目说明即可。**macOS/Linux**：暂无对应一键命令，用方式 A 提示词，或手动安装（下方方式 B）后运行 `bash .ai-gates/link-platform.sh`（无 git 时本命令会自动走 zip 下载）。
+装完回到 Agent 窗口说 `项目经理 初始化` 填项目说明即可。**macOS/Linux**：暂无对应一键命令，用方式 A 提示词，或手动安装（下方方式 C）后运行 `bash .ai-gates/link-platform.sh`（无 git 时本命令会自动走 zip 下载）。
 
-**方式 B（手动 · 备选）**：
+**方式 C（手动 · 备选）**：
 
 1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.3.1.7z`**
 2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
@@ -121,15 +121,15 @@ Install the ai-gates skill pack (AI development pipeline) into this project from
 Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
 ```
 
-**Option C (one command · developers/scripting):** at the project root, open PowerShell and run:
+**Option B (one command · developers/scripting):** at the project root, open PowerShell and run:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
 ```
 
-When it finishes, say `PM init` in an agent window to fill the project note. **macOS/Linux**: no one-command equivalent yet — use Option A (prompt) or manual install (Option B below, then `bash .ai-gates/link-platform.sh`); a git-less machine falls back to downloading the tag zip automatically.
+When it finishes, say `PM init` in an agent window to fill the project note. **macOS/Linux**: no one-command equivalent yet — use Option A (prompt) or manual install (Option C below, then `bash .ai-gates/link-platform.sh`); a git-less machine falls back to downloading the tag zip automatically.
 
-**Option B (manual · fallback):**
+**Option C (manual · fallback):**
 
 1. Download **`ai_dev_v3.3.1.7z`** from this repo’s **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)**.
 2. Extract **at** the target project’s root — the archive contains `.ai-gates/` (do **not** unzip into `.cursor/`).
