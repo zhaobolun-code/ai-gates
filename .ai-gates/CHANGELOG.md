@@ -109,6 +109,10 @@
 
 - METHODOLOGY「使用记录」新增效果数据快照（近 30 天：17 条任务、首过率 77%、平均返工轮 0.15、平均验收失败 0.15、stop_fail 2 条 + 多轮原因分布），附数据来源（summarize-pipeline-outcome.ps1）与「单仓、小样本、非严格对照实验」诚实边界。
 
+### Included changes — 2026-08-06（README 补单仓库边界说明 · 不 bump）
+
+- README（中英）平台段新增「单仓库边界」：门禁以当前仓库为界，跨仓库（多仓 / 微服务）改动不在机器强制覆盖内，跨仓部分仍靠团队约定。
+
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）
