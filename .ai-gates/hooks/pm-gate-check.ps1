@@ -33,6 +33,7 @@
 
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+. (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
 
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $logDir = Join-Path $repoRoot ".ai-gates\hooks-log"
@@ -119,7 +120,6 @@ function Emit-Allow {
     param([string]$Reason)
     Write-Audit "ALLOW reason=$Reason"
     Write-Output '{"permission":"allow"}'
-    exit 0
 }
 
 function Emit-Deny {
@@ -145,26 +145,27 @@ function Emit-Deny {
         agent_message = $agentMsg
     }
     Write-Output ($result | ConvertTo-Json -Compress)
-    exit 0
 }
 
 # kill switch first (no stdin parse needed)
 if (Test-Path -LiteralPath $killSwitch) {
     Emit-Allow "kill_switch_active"
+    return
 }
 
 $raw = ""
 try {
-    $raw = [Console]::In.ReadToEnd()
-    $raw = $raw.TrimStart([char]0xFEFF)
+    $raw = Read-HookStdin
     $json = $raw | ConvertFrom-Json -ErrorAction Stop
 } catch {
     $fallbackPath = Get-PathFromRaw -Raw $raw
     if (Test-CursorInfraPath -FilePath $fallbackPath) {
         Emit-Allow "cursor_infra_path_exempt_parse_fallback"
+        return
     }
     # fail-open：解析失败不硬拦（与 MAINTAINER 一致；避免 mark 落盘故障连环死路）
     Emit-Allow "parse_failed_fail_open"
+    return
 }
 
 $conversationId = if ($json.conversation_id) { [string]$json.conversation_id } else { "unknown" }
@@ -181,6 +182,7 @@ if (Test-CursorInfraPath -FilePath $filePath) {
     # Level 0 全豁免（kill switch 已最优先处理）
     if (Test-CursorLevel0Path -FilePath $filePath) {
         Emit-Allow "cursor_level0_exempt"
+        return
     }
     # Level 1 轻门禁：查 changelog-writes.json 会话内新鲜 CHANGELOG 写记录
     if (Test-CursorLevel1Path -FilePath $filePath) {
@@ -193,46 +195,55 @@ if (Test-CursorInfraPath -FilePath $filePath) {
         if (-not (Test-Path -LiteralPath $changelogFile)) {
             $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch，临时全放行）后重试；或手动编辑目标文件。"
             Emit-Deny -ConversationId $conversationId -Detail "changelog_writes_missing_level1" -UserHint $hint -BaseMsg $level1BaseMsg
+            return
         }
         try {
             $changelogRaw = [System.IO.File]::ReadAllText($changelogFile, [System.Text.Encoding]::UTF8)
             $changelog = $changelogRaw | ConvertFrom-Json -ErrorAction Stop
         } catch {
             Emit-Allow "changelog_writes_unreadable_fail_open"
+            return
         }
         # 语法合法但顶层非对象（数组/标量，如 [..] / ".." / null）时 ConvertFrom-Json
         # 不抛错，$changelog.$conversationId 恒为 $null 会误走 ask——与「JSON 损坏 →
         # fail-open allow」语义一致，此处同样按损坏处理直接放行。
         if (-not ($changelog -is [System.Management.Automation.PSCustomObject])) {
             Emit-Allow "changelog_writes_nonobject_fail_open"
+            return
         }
         $changelogEntry = $changelog.$conversationId
         if (-not $changelogEntry -or -not $changelogEntry.lastChangelogWriteAtUtc) {
             # 无 CHANGELOG 写记录 → deny（硬拦，Cursor 2.2+ ask 无效），提示逃生路径
             $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
             Emit-Deny -ConversationId $conversationId -Detail "no_changelog_write_for_conversation_level1" -UserHint $hint -BaseMsg $level1BaseMsg
+            return
         }
         try {
             $lastChangelogUtc = [DateTime]::Parse($changelogEntry.lastChangelogWriteAtUtc).ToUniversalTime()
         } catch {
             Emit-Allow "changelog_timestamp_unparseable_fail_open"
+            return
         }
         $changelogAgeMinutes = ([DateTime]::UtcNow - $lastChangelogUtc).TotalMinutes
         if ($changelogAgeMinutes -gt $FreshnessMinutes) {
             $hint = "逃生：重新写 .ai-gates/CHANGELOG.md（Included 条目）后再试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
             Emit-Deny -ConversationId $conversationId -Detail ("stale_changelog_write_age={0}min_level1" -f [Math]::Round($changelogAgeMinutes,1)) -UserHint $hint -BaseMsg $level1BaseMsg
+            return
         }
         Emit-Allow ("recent_changelog_write_age={0}min" -f [Math]::Round($changelogAgeMinutes,1))
+        return
     }
     # Level 2 兜底：其余 .cursor/**（package-release.ps1 / README.md / mcp.json / LICENSE /
     # ai_dev_*.7z / _release_staging/ 等）保持 allow——打包产物/临时文件无 CHANGELOG 流水
     Emit-Allow "cursor_level2_fallback"
+    return
 }
 
 # --- 业务路径：原 PM 标记新鲜度检查不变（ask→deny，Cursor 2.2+ ask 无效） ---
 if (-not (Test-Path -LiteralPath $gateFile)) {
     $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "gate_file_missing" -UserHint $hint
+    return
 }
 
 try {
@@ -241,12 +252,14 @@ try {
 } catch {
     $hint = "逃生：先在本会话回复中发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "gate_file_unreadable" -UserHint $hint
+    return
 }
 
 $entry = $gate.$conversationId
 if (-not $entry -or -not $entry.lastPmAtUtc) {
     $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "no_pm_marker_for_conversation" -UserHint $hint
+    return
 }
 
 try {
@@ -254,12 +267,14 @@ try {
 } catch {
     $hint = "逃生：先在本会话回复中重新发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "timestamp_unparseable" -UserHint $hint
+    return
 }
 
 $ageMinutes = ([DateTime]::UtcNow - $lastPmUtc).TotalMinutes
 if ($ageMinutes -gt $FreshnessMinutes) {
     $hint = "逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 $FreshnessMinutes 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail ("stale_pm_marker_age={0}min" -f [Math]::Round($ageMinutes,1)) -UserHint $hint
+    return
 }
 
 Emit-Allow ("fresh_pm_marker_age={0}min" -f [Math]::Round($ageMinutes,1))

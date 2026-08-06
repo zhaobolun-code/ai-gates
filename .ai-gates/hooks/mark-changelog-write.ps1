@@ -24,6 +24,7 @@
 
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+. (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
 
 $utf8Bom = New-Object System.Text.UTF8Encoding($true)
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -116,17 +117,9 @@ $isChangelog = $false
 $wrote = "none"
 
 try {
-    # 读取 stdin：OpenStandardInput + StreamReader 显式 UTF-8。
-    # PS5.1 Console.In.ReadToEnd 对超大 stdin（真实 ~81KB payload）解析失败（真演复现）。
-    $stdinStream = [Console]::OpenStandardInput()
-    try {
-        $reader = New-Object System.IO.StreamReader($stdinStream, (New-Object System.Text.UTF8Encoding($false)))
-        $raw = $reader.ReadToEnd()
-        $reader.Close()
-    } finally {
-        $stdinStream.Dispose()
-    }
-    $raw = $raw.TrimStart([char]0xFEFF)
+    # 读取 stdin：共享 Read-HookStdin（OpenStandardInput + StreamReader 显式 UTF-8 +
+    # 全局缓存，合并入口预读一次后子脚本共享同一 payload）。
+    $raw = Read-HookStdin
     $json = $raw | ConvertFrom-Json -ErrorAction Stop
 
     $conversationId = if ($json.conversation_id) { [string]$json.conversation_id } else { "unknown" }

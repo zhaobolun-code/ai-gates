@@ -18,6 +18,7 @@ param(
 
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+. (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
 
 # 新鲜度窗口：复用 verify-runtime-evidence 的新鲜度思路（日志最后写入距今 ≤ 该分钟数
 # 才视为"最近写入"，避免把几天前的旧编译错误误报成当前写入导致的问题）。
@@ -40,18 +41,17 @@ function Write-Audit {
 
 function Emit-Empty {
     Write-Output "{}"
-    exit 0
 }
 
 $raw = ""
 $json = $null
 try {
-    $raw = [Console]::In.ReadToEnd()
-    $raw = $raw.TrimStart([char]0xFEFF)
+    $raw = Read-HookStdin
     $json = $raw | ConvertFrom-Json -ErrorAction Stop
 } catch {
     # 解析异常 fail-open：不拦写操作（与 pm-gate-check.ps1 一致）
     Emit-Empty
+    return
 }
 
 $filePath = $null
@@ -64,11 +64,13 @@ if ($json.tool_input) {
 # matcher 是工具名过滤，路径过滤必须在脚本内做：仅 .cs/.lua 代码路径继续
 if (-not $filePath -or $filePath -notmatch '\.(cs|lua)$') {
     Emit-Empty
+    return
 }
 
 # 日志缺失 → 静默 allow（不阻塞写操作）
 if (-not (Test-Path -LiteralPath $EditorLogPath)) {
     Emit-Empty
+    return
 }
 
 $compileErrorLines = @()
@@ -84,11 +86,13 @@ try {
 } catch {
     # 读取/解析异常 fail-open
     Emit-Empty
+    return
 }
 
 if ($compileErrorLines.Count -eq 0) {
     Write-Audit "OK no_compile_error path=$filePath"
     Emit-Empty
+    return
 }
 
 Write-Audit ("HIT compile_error count={0} path={1} first={2}" -f $compileErrorLines.Count, $filePath, $compileErrorLines[0])
@@ -104,4 +108,3 @@ $result = [ordered]@{
     additionalContext  = $ctx
 }
 Write-Output ($result | ConvertTo-Json -Compress)
-exit 0

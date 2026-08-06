@@ -132,6 +132,7 @@
 - Codex 侧 PreToolUse/PostToolUse 同一事件的多门禁合并为单入口脚本：`pre-bash-gate.ps1`（git-safety-check + bash-write-gate）、`pre-apply-patch-gate.ps1`（audit-write + pm-gate-check）、`post-apply-patch-gate.ps1`（mark-changelog-write + check-unity-compile）；`codex/hooks.json` 相应减半进程 spawn（apply_patch 4→2、Bash 2→1），长会话省等待。
 - Emit 语义调整：`codex-hooks-common.ps1` 的 Emit-* 改为返回 JSON 字符串（终态直接输出、早退分支 `Write-Output (Emit-X); return`）；`Read-HookStdin` 增加全局缓存，合并入口预读一次、子脚本共享同一 payload。实测发现 PowerShell `&` 上下文里子脚本 `exit` 不终止宿主进程，因此合并入口显式捕获输出并检测 deny 短路，不依赖子脚本 exit。
 - 单脚本保留（独立可测）：`test-codex-hooks.ps1` 28/28、合并入口行为回归 12/12、`validate-pipeline -Strict` 全绿（含 69 项 Cursor 回归与 BOM 扫描）；`check-hooks-drift.ps1` 接线期望同步为合并入口。
+- **Cursor 侧对称合并（同日）**：新增 `cursor-hooks-common.ps1`（stdin 全局缓存）+ `pre-write-gate.ps1`（audit-write + pm-gate-check）+ `post-write-gate.ps1`（mark-changelog-write + check-unity-compile）；`hooks.json` preToolUse/postToolUse 各减为单条目（Write/StrReplace/EditNotebook 事件 spawn 2→1）；Cursor 版子脚本判定点改为输出后 `return` 终止（Emit-Allow/Emit-Deny/Emit-Empty 去 exit），单行 JSON 语义不变；`test-hooks.ps1` A6/A1.6 接线断言同步为合并入口；MAINTAINER Cursor 表文件列更新 + 合并说明。
 
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 

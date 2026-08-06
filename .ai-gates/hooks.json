@@ -17,13 +17,7 @@
     ],
     "preToolUse": [
       {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/audit-write.ps1",
-        "matcher": "Write|StrReplace|EditNotebook",
-        "failClosed": false,
-        "timeout": 10
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/pm-gate-check.ps1",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/pre-write-gate.ps1",
         "matcher": "Write|StrReplace|EditNotebook",
         "failClosed": false,
         "timeout": 10
@@ -31,13 +25,7 @@
     ],
     "postToolUse": [
       {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/check-unity-compile.ps1",
-        "matcher": "Write|StrReplace|EditNotebook",
-        "failClosed": false,
-        "timeout": 10
-      },
-      {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/mark-changelog-write.ps1",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/post-write-gate.ps1",
         "matcher": "Write|StrReplace|EditNotebook",
         "failClosed": false,
         "timeout": 10

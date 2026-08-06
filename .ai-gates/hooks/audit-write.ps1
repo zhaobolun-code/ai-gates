@@ -8,6 +8,7 @@
 
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+. (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
 
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 $logDir = Join-Path $repoRoot ".ai-gates\hooks-log"
@@ -22,9 +23,7 @@ $filePath = "unknown"
 $sessionId = "unknown"
 
 try {
-    $raw = [Console]::In.ReadToEnd()
-    # Cursor 有时会在 stdin JSON 前带一个 UTF-8 BOM 字符，ConvertFrom-Json 一般能容忍，这里再兜底 Trim 一次。
-    $raw = $raw.TrimStart([char]0xFEFF)
+    $raw = Read-HookStdin
     $json = $raw | ConvertFrom-Json -ErrorAction Stop
 
     if ($json.tool_name) { $toolName = [string]$json.tool_name }
@@ -48,4 +47,3 @@ try {
 }
 
 Write-Output '{"permission":"allow"}'
-exit 0
