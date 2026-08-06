@@ -23,30 +23,30 @@
 动手前先列计划等我确认；失败或网络问题不要改文件，给出手动下载方案。
 ```
 
-**方式 B（手动）**：
-
-1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.3.1.7z`**
-2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
-3. 在任一 AI 会话粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`），由 Agent 建好传送门（手动运行 `link-platform.ps1` / `.sh` 亦可，非必需）
-4. 装好后，在任一能改文件的 AI 会话粘贴：`项目经理` + 需求
-
 **方式 C（一条命令 · 开发者/批量）**：在项目根打开 PowerShell，运行：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
 ```
 
-装完回到 Agent 窗口说 `项目经理 初始化` 填项目说明即可。**macOS/Linux**：暂无对应一键命令，用方式 A 提示词，或方式 B 解压后运行 `bash .ai-gates/link-platform.sh`（无 git 时本命令会自动走 zip 下载）。
+装完回到 Agent 窗口说 `项目经理 初始化` 填项目说明即可。**macOS/Linux**：暂无对应一键命令，用方式 A 提示词，或手动安装（下方方式 B）后运行 `bash .ai-gates/link-platform.sh`（无 git 时本命令会自动走 zip 下载）。
 
-首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置；详细三步见 [USER-GUIDE.md](USER-GUIDE.md) §第一次接入。体检：`项目经理 检查健康` / `PM doctor`。
+**方式 B（手动 · 备选）**：
+
+1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.3.1.7z`**
+2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
+3. 在任一 AI 会话粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`），由 Agent 建好传送门（手动运行 `link-platform.ps1` / `.sh` 亦可，非必需）
+4. 装好后，在任一能改文件的 AI 会话粘贴：`项目经理` + 需求
+
+首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置；详细三步见 [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §第一次接入。体检：`项目经理 检查健康` / `PM doctor`。
 
 **已装用户升级**：直接说 **`项目经理 升级 ai-gates`**——Agent 默认联网比对官方源最新版本与本地版本，**有新版才下载并替换**库内容（项目状态文件保留），随后校验/补齐传送门；网络不可用时回退本地已解压包流程。
 
 若下载后 Windows 提示「无法运行，拒绝访问」：把报错原文粘贴给项目经理处理即可（Agent 会解除下载文件的网络标记并重新接线）。
 
-上手（约 3 分钟）：[USER-GUIDE.md](USER-GUIDE.md)。  
-这是什么、好不好用：[METHODOLOGY.md](METHODOLOGY.md)。  
-版本迭代与变更历史：[CHANGELOG.md](CHANGELOG.md)。
+上手（约 3 分钟）：[USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md)。  
+这是什么、好不好用：[METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)。  
+版本迭代与变更历史：[CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)。
 
 ## 里面有什么（机制表）
 
@@ -121,20 +121,20 @@ Install the ai-gates skill pack (AI development pipeline) into this project from
 Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
 ```
 
-**Option B (manual):**
-
-1. Download **`ai_dev_v3.3.1.7z`** from this repo’s **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)**.
-2. Extract **at** the target project’s root — the archive contains `.ai-gates/` (do **not** unzip into `.cursor/`).
-3. Paste **`PM upgrade ai-gates`** in any AI session (the agent runs `link-platform.ps1` / `.sh` for you; manual run is optional).
-4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae): `PM` + request.
-
 **Option C (one command · developers/scripting):** at the project root, open PowerShell and run:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
 ```
 
-When it finishes, say `PM init` in an agent window to fill the project note. **macOS/Linux**: no one-command equivalent yet — use Option A (prompt) or Option B (extract, then `bash .ai-gates/link-platform.sh`); a git-less machine falls back to downloading the tag zip automatically.
+When it finishes, say `PM init` in an agent window to fill the project note. **macOS/Linux**: no one-command equivalent yet — use Option A (prompt) or manual install (Option B below, then `bash .ai-gates/link-platform.sh`); a git-less machine falls back to downloading the tag zip automatically.
+
+**Option B (manual · fallback):**
+
+1. Download **`ai_dev_v3.3.1.7z`** from this repo’s **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)**.
+2. Extract **at** the target project’s root — the archive contains `.ai-gates/` (do **not** unzip into `.cursor/`).
+3. Paste **`PM upgrade ai-gates`** in any AI session (the agent runs `link-platform.ps1` / `.sh` for you; manual run is optional).
+4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae): `PM` + request.
 
 First time on a project? Say `PM init`, then fill a short project note (stack, careful paths, a few must-test cases). Detailed first-time steps: USER-GUIDE. Health check? Say `PM doctor`.
 
@@ -142,9 +142,9 @@ First time on a project? Say `PM init`, then fill a short project note (stack, c
 
 If Windows refuses to run the downloaded script ("access denied"), paste the error back into the same AI session — the agent unblocks the downloaded files and re-wires it for you.
 
-Quick start (3 min): [USER-GUIDE.md](USER-GUIDE.md).  
-What this is / isn’t: [METHODOLOGY.md](METHODOLOGY.md).  
-Version history: [CHANGELOG.md](CHANGELOG.md).
+Quick start (3 min): [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md).  
+What this is / isn’t: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).  
+Version history: [CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md).
 
 ### What's inside
 

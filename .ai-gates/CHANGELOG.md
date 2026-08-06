@@ -117,6 +117,11 @@
 
 - README（中英）平台段新增「单仓库边界」：门禁以当前仓库为界，跨仓库（多仓 / 微服务）改动不在机器强制覆盖内，跨仓部分仍靠团队约定。
 
+### Included changes — 2026-08-06（README 修复文档链接 404 + 安装方式重排 · 不 bump）
+
+- README 中 USER-GUIDE/METHODOLOGY/CHANGELOG 三个相对链接在 GitHub 仓库根（README 与文档不在同一目录）会 404，改为 GitHub 绝对地址（blob/main/.ai-gates/...），仓库根与包内两种位置均可打开。
+- 安装方式重排为 A（零手动提示词）→ C（一条命令）→ B（手动，放最后，标注"备选"），中英同步。
+
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）
