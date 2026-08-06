@@ -84,6 +84,31 @@ function Get-RemoteLatestTag {
     return $best
 }
 
+# 无 git / git 失败时的 tag 解析回退：仅支持 GitHub 形式 URL（releases/latest，退回 tags 列表）
+function Get-GitHubLatestTagApi {
+    param([string]$RepoUrl)
+    $m = [regex]::Match($RepoUrl, 'github\.com[:/]([^/]+)/([^/]+?)(?:\.git)?$')
+    if (-not $m.Success) { return '' }
+    $owner = $m.Groups[1].Value
+    $repo = $m.Groups[2].Value
+    $headers = @{ 'User-Agent' = 'ai-gates-installer' }
+    try {
+        $rel = Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/releases/latest" -Headers $headers -ErrorAction Stop
+        return [string]$rel.tag_name
+    } catch {
+        try {
+            $tags = Invoke-RestMethod -Uri "https://api.github.com/repos/$owner/$repo/tags?per_page=20" -Headers $headers -ErrorAction Stop
+            $best = $null; $bestVer = $null
+            foreach ($t in $tags) {
+                $v = Get-Semver -Version ([string]$t.name)
+                if ($null -eq $v) { continue }
+                if ($null -eq $bestVer -or (Compare-Semver $v $bestVer) -gt 0) { $best = $t.name; $bestVer = $v }
+            }
+            return $best
+        } catch { return '' }
+    }
+}
+
 # 源类型判定
 $isUrl = $Source -match '^(https?://|git@|ssh://)'
 $isLocalRepo = (-not $isUrl) -and (Test-Path -LiteralPath (Join-Path $Source '.git'))
@@ -91,7 +116,10 @@ $isLocalPack = (-not $isUrl) -and (-not $isLocalRepo) -and (Test-Path -LiteralPa
 
 # 最新 tag：URL 用 ls-remote，本地仓库用 describe/tag；本地已解压包无 tag
 $latestTag = ''
-if ($isUrl) { $latestTag = Get-RemoteLatestTag -RepoUrl $Source }
+if ($isUrl) {
+    if (Get-Command git -ErrorAction SilentlyContinue) { $latestTag = Get-RemoteLatestTag -RepoUrl $Source }
+    if (-not $latestTag) { $latestTag = Get-GitHubLatestTagApi -RepoUrl $Source }
+}
 elseif ($isLocalRepo) { $latestTag = Get-LatestTag -RepoDir $Source }
 
 $infoPath = Join-Path $TargetRoot ".ai-gates\install-info.json"
@@ -131,15 +159,40 @@ if ($isLocalRepo) {
     $cloneDir = Join-Path $UserCachePath ("src-" + $(if ($latestTag) { $latestTag } else { 'working' }))
     if (Test-Path -LiteralPath $cloneDir) { Remove-Item -LiteralPath $cloneDir -Recurse -Force }
     New-Item -ItemType Directory -Force -Path (Split-Path $cloneDir -Parent) | Out-Null
-    $prevEp = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    try {
-        if ($latestTag) { $gout = & git clone --depth 1 --branch $latestTag $Source $cloneDir 2>&1 | Out-String }
-        else { $gout = & git clone --depth 1 $Source $cloneDir 2>&1 | Out-String }
-    } finally {
-        $ErrorActionPreference = $prevEp
+    $hasGit = $null -ne (Get-Command git -ErrorAction SilentlyContinue)
+    if ($hasGit) {
+        $prevEp = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        try {
+            if ($latestTag) { $gout = & git clone --depth 1 --branch $latestTag $Source $cloneDir 2>&1 | Out-String }
+            else { $gout = & git clone --depth 1 $Source $cloneDir 2>&1 | Out-String }
+        } finally {
+            $ErrorActionPreference = $prevEp
+        }
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host ("WARN git clone failed, fallback to zip: {0}" -f $gout.Trim())
+            $hasGit = $false
+        }
     }
-    if ($LASTEXITCODE -ne 0) { throw "git clone failed: $Source`n$gout" }
+    if (-not $hasGit) {
+        # 无 git / clone 失败 → 下载 tag zip 解压（保证「一条命令」在无 git 机器可用）
+        if (-not $latestTag) { throw "cannot resolve latest tag without git for: $Source" }
+        $zipUrl = "$Source/archive/refs/tags/$latestTag.zip"
+        $zipFile = Join-Path $UserCachePath ("ai-gates-$latestTag.zip")
+        New-Item -ItemType Directory -Force -Path (Split-Path $zipFile -Parent) | Out-Null
+        Write-Host "downloading $zipUrl ..."
+        Invoke-WebRequest -Uri $zipUrl -OutFile $zipFile -UseBasicParsing
+        Expand-Archive -LiteralPath $zipFile -DestinationPath $cloneDir -Force
+        # zip 内顶层形如 ai-gates-<tag>/；把其中的 .ai-gates 提升到 $cloneDir 根
+        $inner = Get-ChildItem -LiteralPath $cloneDir -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
+        $innerAi = Join-Path $inner.FullName '.ai-gates'
+        if ($inner -and (Test-Path -LiteralPath $innerAi)) {
+            $finalAi = Join-Path $cloneDir '.ai-gates'
+            if (Test-Path -LiteralPath $finalAi) { Remove-Item -LiteralPath $finalAi -Recurse -Force }
+            Move-Item -LiteralPath $innerAi -Destination $finalAi
+        }
+        Remove-Item -LiteralPath $zipFile -Force -ErrorAction SilentlyContinue
+    }
     $workRepo = $cloneDir
 } elseif ($isLocalPack) {
     # 本地已解压包：直接使用（无 tag，Tag 落到 working-tree）

@@ -97,6 +97,10 @@
 
 - USER-GUIDE 常见问题 8 条精简为 6 条：角色/子窗类 4 条合并为 2 条，删除与机制重复的「经验总结要我手写吗」，新增「怎么安装 / 更新 / 查版本」入口（零手动安装 / 联网升级 / CHANGELOG / doctor）；USER-GUIDE 回到 ≤130 行。
 
+### Included changes — 2026-08-06（安装新增「方式 C：一条命令」· 不 bump）
+
+- README（中英）快速开始新增「方式 C」：`powershell -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"` 一条命令联网安装；`install-ai-gates.ps1` 增加无 git 时的 zip 下载回退（Invoke-WebRequest + Expand-Archive，自动把 zip 内 `.ai-gates` 提升到源根），保证命令在未装 git 的机器可用；脚本本身无 `$PSScriptRoot` 依赖，支持 `irm | iex` 直跑。
+
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）

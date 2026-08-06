@@ -30,6 +30,14 @@
 3. 在任一 AI 会话粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`），由 Agent 建好传送门（手动运行 `link-platform.ps1` / `.sh` 亦可，非必需）
 4. 装好后，在任一能改文件的 AI 会话粘贴：`项目经理` + 需求
 
+**方式 C（一条命令 · 开发者/批量）**：在项目根打开 PowerShell，运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
+```
+
+装完回到 Agent 窗口说 `项目经理 初始化` 填项目说明即可（Unix/macOS 暂无对应命令，用方式 A 或 B；无 git 会自动走 zip 下载）。
+
 首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置；详细三步见 [USER-GUIDE.md](USER-GUIDE.md) §第一次接入。体检：`项目经理 检查健康` / `PM doctor`。
 
 **已装用户升级**：直接说 **`项目经理 升级 ai-gates`**——Agent 默认联网比对官方源最新版本与本地版本，**有新版才下载并替换**库内容（项目状态文件保留），随后校验/补齐传送门；网络不可用时回退本地已解压包流程。
@@ -117,6 +125,14 @@ Before doing anything, present the plan and wait for my confirmation; on any fai
 2. Extract **at** the target project’s root — the archive contains `.ai-gates/` (do **not** unzip into `.cursor/`).
 3. Paste **`PM upgrade ai-gates`** in any AI session (the agent runs `link-platform.ps1` / `.sh` for you; manual run is optional).
 4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae): `PM` + request.
+
+**Option C (one command · developers/scripting):** at the project root, open PowerShell and run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
+```
+
+When it finishes, say `PM init` in an agent window to fill the project note (Unix/macOS: use Option A or B for now; a git-less machine falls back to downloading the tag zip automatically).
 
 First time on a project? Say `PM init`, then fill a short project note (stack, careful paths, a few must-test cases). Detailed first-time steps: USER-GUIDE. Health check? Say `PM doctor`.
 
