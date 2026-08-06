@@ -101,6 +101,14 @@
 
 - README（中英）快速开始新增「方式 C」：`powershell -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"` 一条命令联网安装；`install-ai-gates.ps1` 增加无 git 时的 zip 下载回退（Invoke-WebRequest + Expand-Archive，自动把 zip 内 `.ai-gates` 提升到源根），保证命令在未装 git 的机器可用；脚本本身无 `$PSScriptRoot` 依赖，支持 `irm | iex` 直跑。
 
+### Included changes — 2026-08-06（平台支持描述补全：.sh 宣传 + Windows / macOS-Linux 分层 · 不 bump）
+
+- README（中英）平台段重写为三层：全平台（规则/技能/传送门，明确宣传 `link-platform.sh` / `link-trae-skills.sh`）→ Windows 完整（机器强制 hooks + 方式 C）→ macOS/Linux（安装/规则/传送门全支持，hooks 暂为 .ps1 需 pwsh，如实标注）；前提段加操作系统支持行；方式 C 注明 macOS/Linux 用方式 A 或 B + `bash .ai-gates/link-platform.sh`。
+
+### Included changes — 2026-08-06（METHODOLOGY 补充真实量化数据 · 不 bump）
+
+- METHODOLOGY「使用记录」新增效果数据快照（近 30 天：17 条任务、首过率 77%、平均返工轮 0.15、平均验收失败 0.15、stop_fail 2 条 + 多轮原因分布），附数据来源（summarize-pipeline-outcome.ps1）与「单仓、小样本、非严格对照实验」诚实边界。
+
 ### Included changes — 2026-08-05（link-platform 老用户项目状态自动迁移 · 不 bump）
 
 ### Included changes — 2026-08-05（D3 体检语义修正：历史已收敛 vs 活退化 · 不 bump）

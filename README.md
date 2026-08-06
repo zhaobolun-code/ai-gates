@@ -36,7 +36,7 @@
 powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
 ```
 
-装完回到 Agent 窗口说 `项目经理 初始化` 填项目说明即可（Unix/macOS 暂无对应命令，用方式 A 或 B；无 git 会自动走 zip 下载）。
+装完回到 Agent 窗口说 `项目经理 初始化` 填项目说明即可。**macOS/Linux**：暂无对应一键命令，用方式 A 提示词，或方式 B 解压后运行 `bash .ai-gates/link-platform.sh`（无 git 时本命令会自动走 zip 下载）。
 
 首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置；详细三步见 [USER-GUIDE.md](USER-GUIDE.md) §第一次接入。体检：`项目经理 检查健康` / `PM doctor`。
 
@@ -75,15 +75,16 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 
 ## 平台
 
-- **Cursor / Codex / Trae 共用同一份库**：跑一次 `link-platform` 即建好 `.cursor/*`、`.codex`、`.trae/skills`、`.trae/rules` 传送门。
-- Cursor Hooks 在 `.cursor/hooks/`（传送门）；**Codex 经官方 hooks 机制接线**（`.ai-gates/codex/hooks.json` + `config.toml` → `.ai-gates/hooks/codex/*.ps1`；codex-cli 0.146/0.147 已实测 deny 拦截）。已知缺口：**Codex 桌面应用对 `apply_patch` 钩子可能不触发**（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
-- **机器强制层，不是提示词**：高危 git / 无 PM 判定写入直接 deny；Unity 编译错误提示；会话启动自动体检传送门漂移。
+- **全平台可用（规则 / 技能 / 传送门）**：规则是纯 Markdown，其他 Agent 也可自行适配；传送门脚本**双份**——Windows 用 `link-platform.ps1`，macOS/Linux 用 `link-platform.sh`（Trae 另备 `link-trae-skills.sh`），都建 `.cursor/*`、`.codex`、`.trae/skills`、`.trae/rules`。
+- **Cursor / Codex / Trae 共用同一份库**：跑一次 `link-platform` 即建好全部传送门。
+- **Windows：完整支持**。机器强制 hooks（PM 写门禁 / 高危 git deny / Unity 编译提示，全部 `.ps1`）在 Codex CLI 0.146/0.147 已实测 deny 拦截；一键安装见「快速开始」方式 C。已知缺口：Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
+- **macOS / Linux**：安装、规则、技能、传送门全支持；机器强制 hooks 暂为 PowerShell（`.ps1`）实现，需 pwsh 运行或暂以规则层生效（如实标注）。
 - **Trae 为软层**：规则 + 技能传送门齐全，但无机器 hooks——门禁以规则生效，机器强制暂不覆盖。
-- 规则是纯 Markdown，其他 Agent 也可自行适配。附带脚本以 **Windows PowerShell**（`.ps1`）为主。
 
 ## 前提
 
 - Cursor Agent / Codex / Trae 任一能改文件的会话
+- 支持 **Windows / macOS / Linux**（规则与传送门全平台；机器强制 hooks 目前以 Windows 为主）
 - 一次初始化 + 短 `project-context` / 测试清单（包**不含**别人的业务窗与 CHANGELOG）
 
 ## 日常怎么用（不用背机制表）
@@ -132,7 +133,7 @@ Before doing anything, present the plan and wait for my confirmation; on any fai
 powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
 ```
 
-When it finishes, say `PM init` in an agent window to fill the project note (Unix/macOS: use Option A or B for now; a git-less machine falls back to downloading the tag zip automatically).
+When it finishes, say `PM init` in an agent window to fill the project note. **macOS/Linux**: no one-command equivalent yet — use Option A (prompt) or Option B (extract, then `bash .ai-gates/link-platform.sh`); a git-less machine falls back to downloading the tag zip automatically.
 
 First time on a project? Say `PM init`, then fill a short project note (stack, careful paths, a few must-test cases). Detailed first-time steps: USER-GUIDE. Health check? Say `PM doctor`.
 
@@ -171,15 +172,16 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 ### Platform
 
-- **One `.ai-gates/` library for Cursor / Codex / Trae**; one `link-platform` run creates the portals (`.cursor/*`, `.codex`, `.trae/skills`, `.trae/rules`).
-- Cursor Hooks live under `.cursor/hooks/` (portal). **Codex is wired through its official hooks mechanism**: `.ai-gates/codex/hooks.json` + `config.toml` → `.ai-gates/hooks/codex/*.ps1` (deny actually blocks; verified on codex-cli 0.146/0.147). Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
-- **Machine layer, not prompt-only**: hooks deny high-risk git and unapproved writes, flag Unity compile errors, and re-check portal wiring at session start.
+- **Cross-platform (rules / skills / portals)**: rules are plain Markdown, other agents can adapt them; portal scripts ship in pairs — `link-platform.ps1` on Windows, `link-platform.sh` on macOS/Linux (plus `link-trae-skills.sh` for Trae) — all create `.cursor/*`, `.codex`, `.trae/skills`, `.trae/rules`.
+- **One `.ai-gates/` library for Cursor / Codex / Trae**; one `link-platform` run creates all the portals.
+- **Windows: full support.** The machine-enforced hooks (PM write gate, high-risk git deny, Unity compile hints — all PowerShell) are verified on codex-cli 0.146/0.147; one-command install = Option C. Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
+- **macOS / Linux**: install, rules, skills, and portals fully supported; the machine hooks are currently PowerShell (`.ps1`) — run via pwsh or rely on the rule layer for now (stated honestly).
 - **Trae runs soft-layer only** (rules + skills portals, no machine hooks) — the gates still apply as instructions there, but enforcement is not machine-backed.
-- Rules are plain Markdown—other agents can reuse them with adaptation. Bundled scripts are primarily **Windows PowerShell** (`.ps1`).
 
 ### Requirements
 
 - Cursor **Agent**, Codex desktop/CLI, or Trae — any session that can edit files
+- Supports **Windows / macOS / Linux** (rules and portals everywhere; machine hooks currently Windows-first)
 - One-time `PM init` + short `project-context.md` / test list (the pack does **not** ship another team’s business windows or CHANGELOG)
 
 ### Daily use (you do not memorize the table above)
