@@ -37,7 +37,7 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 
 **方式 C（手动 · 备选）**：
 
-1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v3.3.1.7z`**
+1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v4.0.0.7z`**
 2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
 3. 在任一 AI 会话粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`），由 Agent 建好传送门（手动运行 `link-platform.ps1` / `.sh` 亦可，非必需）
 4. 装好后，在任一能改文件的 AI 会话粘贴：`项目经理` + 需求
@@ -58,14 +58,14 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 
 | 机制 | 做什么 |
 | --- | --- |
-| **回归索引 + 热度** | 上次挂过的模块/文件再次改动 → 自动升档（最低 Standard + L1.5）；过去的失败自动抬高审核线，不靠人记 |
+| **回归索引 + 热度** | 上次挂过的模块/文件再次改动 → 自动升档（最低 Standard + L1.5；命中热度取较高档：方案审 L3 / 双轮 CR）；过去的失败自动抬高审核线，不靠人记 |
 | **机器强制层** | 高危 git（push --force 等）与无本轮 PM 判定的写入被 hooks 直接 deny——不是提示词（CLI 已实测；桌面端有已知缺口，自查 hooks-log） |
-| **三车道** | Express / Standard / Full 按任务自动判定（仍可用「完整流程」强制 Full）；过程中命中升级立即改判，不硬撑 |
+| **四车道** | Express / Direct / Standard / Full 按任务自动判定（Direct 直通不落盘；仍可用「完整流程」强制 Full）；过程中命中升级立即改判，不硬撑 |
 | **止损链** | 同一手法反复失败 → 强制重定界 / A# 复议，不无限小补丁 |
 | **切片先行** | 小改也先写切片（改什么 / 怎样算通过），一次一切片；超范围即停 |
-| **审查门禁（分档）** | 车道要求时：方案审不过不能开工；CR 有 blocker 不算定版（Express 可跳过方案审）。审核随风险升档：热文件/回归 L1.5、跨模块 L2、Full L3、高危可对抗审 |
+| **审查门禁（分档）** | 车道要求时：方案审不过不能开工；CR 有 blocker 不算定版（Express/Direct 可跳过方案审，Direct 须隔离 CR）。审核随风险升档：回归模块 L1.5、跨模块 L2、Full L3、热度命中方案审 L3 / 双轮 CR、高危可对抗审 |
 | **一轮确认** | 每个决策点一轮确认包（回「准」）；禁止静默开工改码/交审 |
-| **Harness + Auto** | 会话内门禁约束 Agent；Standard/Full 在「准」之后可连跑实现↔CR，硬停/待验才打断（Express 不启用 Auto） |
+| **Harness + Auto** | 会话内门禁约束 Agent；Standard/Full 在「准」之后可连跑实现↔CR，硬停/待验才打断（Express/Direct 不启用 Auto） |
 | **恢复口令** | 乱改/没按流程 →「按 CORE 重来」一键回流程；改错代码 →「方案推翻」走确认后撤销 |
 | **岗位** | 项目经理派策划 / 程序员 / CR / 文档；主对话尽量只当项目经理 |
 | **子窗** | 实现与审核优先独立子会话，主对话保持项目经理——少堆成一条超长线程 |
@@ -140,7 +140,7 @@ When it finishes, say `PM init` in an agent window to fill the project note. **m
 
 **Option C (manual · fallback):**
 
-1. Download **`ai_dev_v3.3.1.7z`** from this repo’s **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)**.
+1. Download **`ai_dev_v4.0.0.7z`** from this repo’s **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)**.
 2. Extract **at** the target project’s root — the archive contains `.ai-gates/` (do **not** unzip into `.cursor/`).
 3. Paste **`PM upgrade ai-gates`** in any AI session (the agent runs `link-platform.ps1` / `.sh` for you; manual run is optional).
 4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae): `PM` + request.
@@ -161,14 +161,14 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 | Mechanism | What it does |
 | --- | --- |
-| **Regression index + heat** | Modules/files that already failed are tracked; touching them again auto-escalates (minimum Standard + L1.5)—past failures raise the bar, not your memory |
+| **Regression index + heat** | Modules/files that already failed are tracked; touching them again auto-escalates (minimum Standard + L1.5; heat hit takes the higher tier: L3 plan review / double CR)—past failures raise the bar, not your memory |
 | **Machine-enforced gates** | Dangerous git (e.g. `push --force`) and writes without a fresh PM go-ahead are denied by hooks, not just discouraged (verified on Codex CLI; desktop Codex has a known gap—self-check `.ai-gates/hooks-log/`) |
-| **Three-lane routing** | Express / Standard / Full auto-picked from the task (you can still force Full); escalates mid-task if the scope grows beyond the lane |
+| **Four-lane routing** | Express / Direct / Standard / Full auto-picked from the task (Direct: straight through, no written plan window; you can still force Full); escalates mid-task if the scope grows beyond the lane |
 | **Stop-loss chain** | Repeated same-approach fails → forced reassessment / A# reopen—not endless micro-patches |
 | **Slice-first** | Even small edits start as a slice—what changes, what counts as passing; one slice at a time, over-scope stops |
-| **Mandatory review, tiered** | Where the lane requires it: no plan-review pass → no coding; CR blocker → not “done” (Express may skip plan review). Tiers escalate with risk: L1.5 for modules with past failures, L2 cross-module, L3 Full, adversarial CR for high-risk |
+| **Mandatory review, tiered** | Where the lane requires it: no plan-review pass → no coding; CR blocker → not “done” (Express/Direct may skip plan review; Direct still requires isolated CR). Tiers escalate with risk: L1.5 for modules with past failures, L2 cross-module, Full L3, heat hit → L3 plan review / double CR, adversarial CR for high-risk |
 | **Round confirmation** | One confirm package per decision (`approve`); no silent start of implement/CR |
-| **Harness + Auto** | In-session gates constrain the agent; after `approve`, Standard/Full may run implement↔CR until hard-stop or await-verify (Express: no Auto) |
+| **Harness + Auto** | In-session gates constrain the agent; after `approve`, Standard/Full may run implement↔CR until hard-stop or await-verify (Express/Direct: no Auto) |
 | **Recovery phrases** | A reset phrase snaps a derailed session back into process; a rollback phrase reverts code through a confirmed `git checkout` |
 | **Roles** | PM dispatches planner / developer / CR / docs; main chat stays PM when possible |
 | **Subagents** | Prefer isolated sub-sessions for implement/review so the main chat stays PM-only—not one mega-thread |
