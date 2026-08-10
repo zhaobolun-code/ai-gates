@@ -16,6 +16,8 @@ L3 第 1/2 轮用字段 `round`（1|2），**仍属 `mode=plan`**，不算独立
 
 `mode=verify`：**禁止**改任何仓库交付物（含 `.cursor/skills/**`、模板、`project-context`、本窗 A#/Mandatory/物理口径）；只读 + 可跑只读或临时目录剧本；须交通过/不通过 + 命令与退出码。模板 → [verify-dispatch.md](../templates/verify-dispatch.md)。**不可替代**隔离主 CR（`mode=code`）。
 
+派发 AFK 子代理的任务文件（委托书）按 [agent-brief.md](./agent-brief.md) 规范撰写（耐久 / 行为式 / 验收 / out-of-scope）；任务投递按 [model-routing.md](./model-routing.md) 实测（spawn 初始消息）。
+
 ## 2. 精确读权限
 
 - `证据/**` 默认禁读（见 doc-windowing）。

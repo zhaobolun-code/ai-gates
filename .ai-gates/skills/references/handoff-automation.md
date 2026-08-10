@@ -10,7 +10,7 @@
 
 | 决策点 | 唯一确认包 | 「准」/`approve` 后同条自动 |
 | --- | --- | --- |
-| 开始改码（含 Express） | §一次确认包（理解+选型+开始改码） | ready → in-progress → `[developer]` 改码 |
+| 开始改码（含 Express / Direct） | §一次确认包（理解+选型+开始改码） | ready → in-progress → `[developer]` 改码 |
 | 续链开下一窗 | §续链合并包（开窗+本步方案+开始改码） | 建窗 → 写 Mandatory → 方案审（若需）无 blocker → 改码 |
 | Verify 失败选型 | §0 多选（推荐+为什么） | 按推荐派 Discover/热修/止损/开窗 |
 | 需求歧义澄清 | ≤3 条追问（条件触发） | 按答或「你决定」判车道 |
@@ -34,7 +34,7 @@
 
 ## F. 一次确认包 → 定版并开始改码
 
-**前置**：Express 已有切片；或 Standard/Full 方案审无 blocker + 选型短表已写；且已发出一次确认包。
+**前置**：Express 已有一句话切片（PM 判定 + 一句话 A#）；或 Direct 已有对话内 A#/切片；或 Standard/Full 方案审无 blocker + 选型短表已写；且已发出一次确认包。
 
 **用户本轮（默认教）**：`准` / `按推荐`
 **退出 Auto（Standard/Full）**：`准, 不 Auto` / `不要 Auto` / `单步`（须显式；禁止把沉默当退出；兼容旧写「准但不 Auto」）
@@ -44,7 +44,7 @@
 
 1. `implementation-ready`，`可交给程序员`=是
 2. `in-progress`
-3. Standard/Full：默认启用 Auto（§H；`auto_steps_done=0`），除非用户用了退出句；Express：**不**启用 Auto
+3. Standard/Full：默认启用 Auto（§H；`auto_steps_done=0`），除非用户用了退出句；Express / Direct：**不**启用 Auto
 4. `[developer]` 立即改码（仅当前 Step / 登记窗）：**必须** Task 子窗，并按 [model-routing.md](./model-routing.md) 解析后的首选 slug **显式**传 `model=`（project-context §模型路由优先）
 
 ## G. 续链合并包 → 开窗并开始改码（禁止拆两轮）
@@ -118,11 +118,11 @@
 ## H. Auto 连跑（Loop Engineering）
 
 > 权威细则：[loop-engineering.md](./loop-engineering.md)。本节为 handoff 接线；**不**改写 §0 / §G / 一次确认包 / 上节经验提议正文职责。
-> Auto =「准」之后的执行模式，**不是**第四车道；Express **不启用**。
+> Auto =「准」之后的执行模式，**不是**第五车道；Express / Direct **不启用** Auto。
 
 ### 启动
 
-Standard/Full：确认包【推荐】「准」→ **默认本窗启用 Auto**（须附一句「不 Auto 会怎样」+ 退出口令）。用户回「准」即启动；回退出句则单步（无 Auto）。**禁止**「准」后再单独问一轮是否 Auto。Express **不**启用。启动时 `auto_steps_done=0`，`repair_rounds=0`。
+Standard/Full：确认包【推荐】「准」→ **默认本窗启用 Auto**（须附一句「不 Auto 会怎样」+ 退出口令）。用户回「准」即启动；回退出句则单步（无 Auto）。**禁止**「准」后再单独问一轮是否 Auto。Express / Direct **不**启用（Direct 默认单会话不落盘、不启用 Auto；需连跑 → 升 Standard 落盘后按 §H，交接载体 = plan-lite `未完成.md` + 八段 handover）。启动时 `auto_steps_done=0`，`repair_rounds=0`。
 
 ### 方案 A（每 Step）
 

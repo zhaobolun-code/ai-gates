@@ -16,14 +16,16 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 | 车道 | 本岗 |
 | --- | --- |
 | Express | 按 PM 的 [express-slice.md](../templates/express-slice.md) 实现；完成后 [express-self-check.md](../express-self-check.md) |
+| Direct | 按主窗对话内 A#/切片实现；完成后交隔离 CR（普通档）；单会话收口 |
 | Standard | 按 plan-lite Step；L1.5 → 完成后交 PM **提示**用户新开 Chat 做 CR；同 Chat 须标「非独立 CR」 |
 | Full | Step 串行；完成后交 `[CR]`；见 [references/](../references/) |
 
-命中 CORE §Express 升级 → 停扩 scope，交 PM 改判。
+命中 CORE §四车道判定 升级链（实改超机械范围 / 超 2 文件 / 跨模块）→ 停扩 scope，交 PM 改判升 Direct（再升 Standard/Full 按判定树）。
 
 ## 模型路由 + 子窗
 
 本岗**必须子窗**（主窗仅 PM 派发）：Task + **便宜快速**档（slug 按 [model-routing.md](../references/model-routing.md) 解析：project-context §模型路由 > Skill 默认表）；**必须**显式传 `model=`。禁止主窗切 `[developer]` 后直接改业务码；仅失败/用户要求主窗做时降级，标「主窗执行（未开子窗 · 非独立）」。
+AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)。
 
 ## Checklist（每次实现）
 
@@ -37,7 +39,8 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 2.4 **热路径批量回归结案**（读 **`.cursor/project-context.md`** §热路径批量回归，若存在）：本 Step Mandatory 触及该表「路径 glob」时，标 `step-completed` / `runtime-validated` **前**须跑表内「场景 ID」（默认 `run-unity-verify-golden.ps1`；跑前**须关本机 Unity Editor**；可 `-All` 但须点名表内各景 JSON；可用表内核对脚本 + `-RequireSceneIds`）；不跑/红不得标过。**无该节 = 不强制点名黄金景。****禁止**用批量回归绿冒充业务 A# 手测签收（≠有意义≠A#，见 [diagnosis-gates.md](../references/diagnosis-gates.md) §0.2.1）
 3. **只改说定的文件**；一次一个 Step/切片；**只为实现所引验收条款 A#**（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md)）；**Auto 下同样**一次一 Step、遵守微循环，未测签收不得进下一 Step（见 [loop-engineering.md](../references/loop-engineering.md)）
 4. **精简优先（YAGNI）**：只做需求所需的最小实现，不顺手加方案外抽象/配置项；改动路径上的废弃方法/字段/死代码顺手清理或交接说明未清理原因；本步神类只增不减须在交接说明是否建议抽离
-4.5 **Reflexion 微循环（P1.5）**：按「改一段 → 自检 → 修正 → 继续」推进，禁止攒到整 Step 结束才第一次检查。自检至少含：① 编译/明显语法（优先 [unity-editor-log.md](../references/unity-editor-log.md) §A）；② 本段语义三问（见 5.5）。业务 C# Step 交 CR 前的**最小验证**=编译或 Editor.log 无新增错误 + 可执行 Unity 验收步骤/预期关键词；Skill/文档用静态核对+假需求，不伪造 Unity。单个 Step 内 **≥50%** 小改动块须留自检痕迹。
+4.5 **Reflexion 微循环（P1.5）**：按「改一段 → 自检 → 修正 → 继续」推进，禁止攒到整 Step 结束才第一次检查。自检至少含：① **真编译**（`dotnet build` 相关 csproj，或 [unity-editor-log.md](../references/unity-editor-log.md) §A Editor.log 无新增错误；**新增/改动 `out` 参数必须在方法入口（任何早退之前）定值**，防 CS0177 definite-assignment）；② 本段语义三问（见 5.5）。业务 C# Step 交 CR 前的**最小验证**=**真编译零错误**（dotnet build 相关 csproj 或 Unity Editor.log 无新增错误）+ 可执行 Unity 验收步骤/预期关键词；**禁以静态 grep/括号平衡充当编译通过**；UNITY_EXE 未配置时用 dotnet build 兜底。Skill/文档用静态核对+假需求，不伪造 Unity。单个 Step 内 **≥50%** 小改动块须留自检痕迹。
+4.6 **test-first 可选**（方案点名或 PM 指定时）：先写最小可执行断言（EditMode/PlayMode 或脚本化验证）再实现至绿，见 [test-first.md](../references/test-first.md)；断言绿 ≠ 业务 A# 通过，golden/手测照常。
 5. 方案/切片与代码冲突 → 停，报差异，**禁止臆测**；越出 A# 范围同样停报
 5.5 **改完自我质疑三问**（微循环内每段 + 交自检/CR 前终检）：① 是否仅凭变量名、方法名或注释推断行为？② 是否核对了真实数据来源、回退分支、调用链与生命周期？③ 若自己的语义理解恰好相反，会破坏什么现有行为？有疑点继续读真实代码/测试查证；仍无法证实时停下交 PM，禁止带猜测交审
 6. Express → express-self-check；Standard/Full → 交代码审核前按 [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md) 生成/刷新 `证据/_Step{NN}-代码审核派发.md`（绑定当前 Step、Mandatory、最新 diff）；blocker 修复后更新 revision/diff + 上轮 blocker≤20 行再交复审；README 按 [readme-dispatch.md](../references/readme-dispatch.md)

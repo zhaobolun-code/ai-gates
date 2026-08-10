@@ -9,7 +9,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string] $Doc,
 
-    [ValidateSet('Express', 'Standard', 'Full', '')]
+    [ValidateSet('Express', 'Direct', 'Standard', 'Full', '')]
     [string] $Lane = '',
 
     [int] $Steps = 1,

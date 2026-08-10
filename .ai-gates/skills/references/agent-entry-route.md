@@ -29,10 +29,10 @@
 
 | 岗 | 子弹 |
 | --- | --- |
-| PM | 内部 YAML；白话「你下一步」；一轮确认硬律「准」；主窗仅 PM；子窗显式 `model=` |
-| planner | 窗齐套落盘；复用四问+选型；错题本必读节；A#+Delta；一轮确认包「准」 |
+| PM | 内部 YAML；白话「你下一步」；**Direct 判定（对话内 A#/切片）**；一轮确认硬律「准」；主窗仅 PM；子窗显式 `model=` |
+| planner | **Express=PM 一句话切片；Direct=对话内 A#/切片不落盘；Standard/Full 落盘**；复用四问+选型；错题本必读节；A#+Delta；一轮确认包「准」 |
 | plan-reviewer | 只读派发白名单；查 A#/Delta/选型/错题节；有 blocker 不定版；禁再要一轮确认 |
-| developer | 有「准」/恢复口令才改；只改本 Step A#；复用四问；微循环自检；刷新 CR 派发 |
-| CR | 只读派发+白名单+diff；优先 CRG；短表 findings；禁扫证据夹；Skill/Doc 可提示 verify |
+| developer | 有「准」/恢复口令才改；只改本 Step A#（**Direct=对话内切片**）；复用四问；微循环自检；**Direct 完成交隔离 CR（普通档）**；刷新 CR 派发 |
+| CR | 只读派发+白名单+diff；优先 CRG；短表 findings；禁扫证据夹；**Direct=普通档隔离复核**；Skill/Doc 可提示 verify |
 | docs | 无 blocker 才写；能一行不扩章；不夸大验证等级；新回归同步索引 |
 | weekly | 只出汇报正文；禁路径/黑话；不改代码；固定 `# 工作周报` 骨架 |

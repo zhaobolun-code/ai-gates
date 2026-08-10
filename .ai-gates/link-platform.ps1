@@ -1,14 +1,19 @@
 ﻿# link-platform.ps1 — 创建各 IDE 到中央技能库 .ai-gates/ 的传送门（软连接）。
 #
 # 单源约定（2026-08-04 起）：中央技能库 = 仓库根 .ai-gates/（git 跟踪），内含
-#   skills/（Skill 文件）、hooks/（Cursor 7 个 + codex/ 8 个）、scripts/、rules/、
-#   hooks.json（Cursor 接线）、codex/hooks.json + codex/config.toml（Codex 接线）、
-#   package-release.ps1、README.md、LICENSE。
+#   skills/（Skill 文件）、hooks/（Cursor 7 个 + codex/ 8 个 + claude/ 12 个）、scripts/、
+#   rules/、hooks.json（Cursor 接线）、codex/hooks.json + codex/config.toml（Codex 接线）、
+#   claude/settings.json + claude/agents/（Claude Code 接线）、package-release.ps1、
+#   README.md、LICENSE。
 # 各 IDE 只认自己的目录，因此建传送门：
 #   .cursor/skills|hooks|scripts|rules  → junction/符号链接 → .ai-gates/对应目录
 #   .cursor/hooks.json                  → 文件链接（Windows 优先硬链接，跨卷退符号链接）
 #   .codex                              → junction/符号链接 → .ai-gates/codex
 #   .trae/skills                        → junction/符号链接 → .ai-gates/skills（或 .cursor/skills）
+#   .claude/settings.json               → 文件链接 → .ai-gates/claude/settings.json
+#   .claude/agents                      → junction/符号链接 → .ai-gates/claude/agents
+#   .claude/skills                      → junction/符号链接 → .ai-gates/skills（Claude Code 技能）
+#   （.claude/settings.local.json 为机器本地文件，保持不动，不做传送门）
 # Windows 目录用 Junction（无需管理员；同卷）；Unix 用符号链接（link-platform.sh）。
 #
 # 用法（仓库根）：
@@ -112,6 +117,19 @@ function New-CodexPortal {
     }
     Write-Host "linked: .codex -> $target" -ForegroundColor Green
 }
+function New-ClaudePortal {
+    # Claude Code 侧传送门（2026-08-10）：
+    #   .claude/settings.json → 文件链接 → .ai-gates/claude/settings.json（hooks 接线）
+    #   .claude/agents        → junction → .ai-gates/claude/agents（岗位代理）
+    #   .claude/skills        → junction → .ai-gates/skills（Skill 内容零移植）
+    # 注意：.claude 目录本身**不做** junction——.claude/settings.local.json 是机器本地
+    # 权限文件（gitignore），必须留在真实目录里；只建子级传送门。
+    $centralClaude = Join-Path $central 'claude'
+    New-FilePortal -Link (Join-Path $repoRoot '.claude\settings.json') -Target (Join-Path $centralClaude 'settings.json') -Label '.claude/settings.json'
+    New-DirPortal -Link (Join-Path $repoRoot '.claude\agents') -Target (Join-Path $centralClaude 'agents') -Label '.claude/agents'
+    New-DirPortal -Link (Join-Path $repoRoot '.claude\skills') -Target (Join-Path $central 'skills') -Label '.claude/skills'
+}
+
 function New-TraePortal {
     $link = Join-Path $repoRoot '.trae\skills'
     $target = Join-Path $central 'skills'
@@ -119,19 +137,19 @@ function New-TraePortal {
         $it = Get-Item -LiteralPath $link -Force
         if ($it.Attributes -band [IO.FileAttributes]::ReparsePoint) {
             Write-Host "OK (linked): .trae/skills -> $($it.Target)" -ForegroundColor Green
-            return
+        } else {
+            $portalConflicts.Add(".trae/skills (real dir: $link)") | Out-Null
+            Write-Host "CONFLICT: .trae/skills occupied by a real directory (old-version layout) - $link" -ForegroundColor Yellow
         }
-        $portalConflicts.Add(".trae/skills (real dir: $link)") | Out-Null
-        Write-Host "CONFLICT: .trae/skills occupied by a real directory (old-version layout) - $link" -ForegroundColor Yellow
-        return
-    }
-    New-Item -ItemType Directory -Path (Split-Path $link -Parent) -Force | Out-Null
-    if ($isWindows) {
-        New-Item -ItemType Junction -Path $link -Target $target | Out-Null
     } else {
-        New-Item -ItemType SymbolicLink -Path $link -Target $target | Out-Null
+        New-Item -ItemType Directory -Path (Split-Path $link -Parent) -Force | Out-Null
+        if ($isWindows) {
+            New-Item -ItemType Junction -Path $link -Target $target | Out-Null
+        } else {
+            New-Item -ItemType SymbolicLink -Path $link -Target $target | Out-Null
+        }
+        Write-Host "linked: .trae/skills -> $target" -ForegroundColor Green
     }
-    Write-Host "linked: .trae/skills -> $target" -ForegroundColor Green
     # 2026-08-05：Trae 侧规则目录传送门（.trae/rules -> .ai-gates/rules），与 Cursor 侧对齐。
     $linkRules = Join-Path $repoRoot '.trae\rules'
     $targetRules = Join-Path $central 'rules'
@@ -197,6 +215,7 @@ foreach ($d in @('skills', 'hooks', 'scripts', 'rules')) {
 }
 New-FilePortal -Link (Join-Path $repoRoot '.cursor\hooks.json') -Target (Join-Path $central 'hooks.json') -Label '.cursor/hooks.json'
 New-CodexPortal
+New-ClaudePortal
 New-TraePortal
 if ($portalConflicts.Count -gt 0) {
     Write-Host ""

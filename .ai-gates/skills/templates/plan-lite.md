@@ -1,6 +1,7 @@
 # [功能名] 执行方案（lite）— 写入 `未完成.md`
 
 > **车道**：Standard（常道）默认模板。Full 车道见 [references/execution-doc-template.md](../references/execution-doc-template.md)。
+> **Direct（直通道）不使用本模板**——对话内 A#/切片不落盘；跨会话/改不完升 Standard 后才落盘本模板。
 > **路径**：用户指定 > project-context 文档根 > 默认 `Assets/Doc/{主题}/{方案短名}/未完成.md`（须同时有 `已完成/_索引.md`）。窗口化 → [doc-windowing.md](../references/doc-windowing.md)；闸门 → [diagnosis-gates.md](../references/diagnosis-gates.md)
 
 > **Delta-only**：只写相对当前代码的变更；模块原理以 README / `物理口径.md` 为准，禁止在本文重写系统说明。细则 → [acceptance-and-delta.md](../references/acceptance-and-delta.md)
@@ -72,6 +73,7 @@
   - **MODIFIED**：[本步修改的既有口径/行为；无则写「无」]
   - **REMOVED**：[本步废除的口径/行为/字段用法；无则写「无」]
 - **满足验收**：A1, A2
+- **阻塞边（blocking edges，可选）**：[本 Step 依赖的 Step/窗口/票（depends-on）；被谁依赖（blocks）；无或无需并行调度则省略/写「无（独立 Step）」——为并行窗口与调度铺路]
 - **Agent 易错语义**：[符号 + 实际语义 + 文件/类/方法证据；未发现则写「未发现；已检查 [关键符号]」]
 - **Unity 验证**：[Editor 操作步骤]
 - **Regression Validation**：[预期现象 + Console 关键词]
@@ -83,6 +85,7 @@
 - **Mandatory Code Changes**：
 - **Delta Spec**：ADDED / MODIFIED / REMOVED（同上；无变更写「无」）
 - **满足验收**：
+- **阻塞边（blocking edges，可选）**：
 - **Agent 易错语义**：
 - **Unity 验证**：
 - **Regression Validation**：

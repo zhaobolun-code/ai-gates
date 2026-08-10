@@ -16,6 +16,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 | 车道 | 本岗 |
 | --- | --- |
 | Express | **禁止** plan-lite — Express 切片由 **`[PM]`** 按 [express-slice.md](../templates/express-slice.md) 输出 |
+| Direct | 策划子窗在主窗对话内出 A#/切片，**不保存文档**（对话内切片 ≠ plan-lite 落盘，tmp 也不落）；跨会话/换窗/改不完自动升 Standard（落盘） |
 | Standard | 复制 [plan-lite.md](../templates/plan-lite.md) |
 | Full | 见 [references/execution-doc-template.md](../references/execution-doc-template.md) |
 
@@ -27,7 +28,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 
 1. Read `.cursor/project-context.md`（若存在）+ 范围内 README + 真实代码入口 + **先** `.ai-gates/lessons-outline.md`（若存在，按桶扫）**再** `.ai-gates/lessons-learned.md`（点名行：模块/症状/作用域；命中则 Pitfalls + 更新「最近命中」；近 6 月命中 → 至少 L1.5，见 [plan-review-tiers.md](../references/plan-review-tiers.md)；细则 [lessons-learned.md](../references/lessons-learned.md)）。**强制**在 `未完成.md` 写 **`## 错题本必读（给程序员）`**：大纲桶 + 主表锚点（日期/模块/关键词）≤5 条，或「无（已扫大纲·{桶}）」；条目须能落到错因/改正
 1.1 **复用四问**（写 Mandatory 前强制，见 [execution-discipline.md](../references/execution-discipline.md)）：已有吗→能复用吗→能少写/不写吗→能删吗；每 Step 落 ≤6 行短表（可并入选型短表）；未检索不得写新路径。若 project-context 有 **神类止血/补强三口**：Mandatory 须用**替换句式**，超净增阈/方法预算须 Service·拆分·REMOVED 或豁免句
-2. **Standard / Full 落盘**：用户指定 > project-context 文档根 > `Assets/Doc/{主题}/执行中/{方案短名}/`（见 [doc-path-defaults.md](../references/doc-path-defaults.md)）；**必须**文件夹 + `未完成.md` + `已完成/_索引.md`（见 [doc-windowing.md](../references/doc-windowing.md)）；默认进 **执行中/**；空闲/结案同条迁 **签收/**；失败/回退/停写/换层按 doc-windowing（**失败含止损**，方案夹不加前缀）；**禁止**新建无窗口单文件长方案；活跃正文只写在 `未完成.md`
+2. **Standard / Full 落盘（Direct 除外：对话内 A#/切片，不落盘）**：用户指定 > project-context 文档根 > `Assets/Doc/{主题}/执行中/{方案短名}/`（见 [doc-path-defaults.md](../references/doc-path-defaults.md)）；**必须**文件夹 + `未完成.md` + `已完成/_索引.md`（见 [doc-windowing.md](../references/doc-windowing.md)）；默认进 **执行中/**；空闲/结案同条迁 **签收/**；失败/回退/停写/换层按 doc-windowing（**失败含止损**，方案夹不加前缀）；**禁止**新建无窗口单文件长方案；活跃正文只写在 `未完成.md`
 2.1 **诊断闸门**：止损（含热修失败计入）/ 热修上限 / 放行合取 / 热修双轨一句 / 双轨收敛 / **Verify→Discover** → [diagnosis-gates.md](../references/diagnosis-gates.md)；违反则不得定版
 2.1.1 **Discover 全路径预扫**：Mandatory 触及 §0.8 信号枚举（最低集：放行、早 return、`allow_*`、`redirect`、`handover`、Ready/Register、`*_not_ready`/`upstream_not_ready`/`terminal_not_ready`、增改通路改道）→ 须写预扫链：**「跳」= 门闸/调用边（≠ CG 条数）**；CG 覆盖 ≥2 跳 → 读码复核 ≥1 跳（或 CG 未覆盖→已读码 `path:symbol`）；列扫过符号；≥2 挡点一次策略；BMAD 自包含；正文扩写点名 `ShouldBypass*` / `force*`·`suppress*` / `TryAdvance*` 改道；**禁只开第一道门**
 2.2 **完成即迁移** + **首段=状态** + Discover≤15 行（超出进 `证据/`）
@@ -36,6 +37,8 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 2.5 **档位单选 + 空闲枢纽**（见 [doc-windowing.md](../references/doc-windowing.md) §状态分类夹）：**禁止**占位空壳新开/长期停 `执行中/`；无活跃 Mandatory 的空闲枢纽同条迁 **签收/** 或 **停写/**；文档状态「方案审核档位」须单选（禁 `L1 / L1.5 / …` 未决串）；`.cursor/skills/**` 改动默认 **L1.5**
 2.6 **主动找 Agent 易错语义**：读代码入口时检查命名/注释是否可能掩盖真实数据来源、回退分支、调用链或生命周期；找到则按「符号 + 实际语义 + 文件/类/方法证据」写入 Standard 每 Step 的「Agent 易错语义」或 Full 的 Pitfalls（行号仅辅助）；不得为凑数编造，未发现则写「未发现；已检查 [关键符号]」
 2.7 **物理口径落盘前自检**（有 `.kit-v1` 或新建/大改 `物理口径.md` 时）：**硬句**≥1（须可观察现象或点名符号/门闸/Console，禁纯口号）；**负面**≥1（「不允许」类可证伪约束）；**失败标准**≥1（表格或编号判据）；热修/旁路短窗须一句「**与上游差异**」（相对主窗/上游窗改了什么边界）
+2.8 **共享语言 + 架构体检（可选）**：方案内术语歧义/同义异名 → 按 [shared-language.md](../references/shared-language.md) 登记或改判，禁止两套叫法并行；Full 策划前可选跑 [architecture-health-check.md](../references/architecture-health-check.md)（CRG 只读概览）并入方案
+2.9 **先原型后定案（可选）**：设计问题纸上难定案时，可「先原型后定案」（引用 [references/prototype.md](../references/prototype.md)），不改变策划主流程
 3. 每 Step 必有 **DO NOT TOUCH（冻结表）**（README 版本段+点名 API/文件；空=「无（已扫）」；见 [plan-lite.md](../templates/plan-lite.md)）、Mandatory Code Changes、**Delta Spec（ADDED/MODIFIED/REMOVED）**、**满足验收：A#**、验证、Regression Validation
 3.5 **验收条款 + Delta-only + Delta Spec**（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md)）：须有可证伪 `A1…`；只写相对现状变更，禁止复述整模块原理；每 Step 三段 Delta Spec（无则写「无」）；签收后提示物理口径/A# 同步句
 3.6 **结案收敛**：准备 `completed` 时生成一页内「结案变更摘要」（ADDED/MODIFIED/REMOVED/归并到）；有 MODIFIED/REMOVED 须实际更新物理口径/A#，禁“待同步”结案

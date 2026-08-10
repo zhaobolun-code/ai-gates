@@ -79,7 +79,8 @@ try {
     $yamlPath = Join-Path $repoRoot ".ai-gates\regression-index.yaml"
     $regressionModules = @(Get-PipelineRegressionModulesFromYaml -YamlPath $yamlPath)
 
-    # 2026-08-05：lessons-learned 热度（CORE §三车道判定 第3步 的机器层；
+    # 2026-08-05：lessons-learned 热度（CORE §四车道判定 步骤 3/4 的机器层；
+    # 热度命中 → Standard 属车道；取较高档 L3/双轮 CR 属审核档位，不混写；
     # pipeline-outcome.log 的失败已由「准全自动」沉淀进 lessons，此处直接读 lessons 作用域/模块）
     $lessonHot = New-Object System.Collections.Generic.List[string]
     $lessonsPath = Join-Path $repoRoot ".ai-gates\lessons-learned.md"
@@ -129,10 +130,14 @@ try {
         $diffHint = "Standard"
         if ($fileCount -gt 3) {
             $diffHint = "Full"
-            $reasons += "core/regression/hotspot + scale over threshold (>3 files) -> consider Full (CORE 2.4)"
+            $reasons += "core/regression/hotspot + scale over threshold (>3 files) -> consider Full (CORE §四车道判定 步骤 4)"
         }
-    } elseif ($fileCount -le 3) {
+    } elseif ($fileCount -le 2) {
         $diffHint = "Express"
+        $reasons += "mechanical candidate: <=2 files; still requires 仅文本/数字/常量、无 API/持久/跨模块 (advisory, CORE §四车道判定 步骤 1)"
+    } elseif ($fileCount -le 3) {
+        $diffHint = "Direct"
+        $reasons += "default small change: <=3 files, 无 API/持久/跨模块 (advisory, CORE §四车道判定 步骤 2)"
     } else {
         $diffHint = "Standard"
     }
@@ -161,7 +166,7 @@ try {
         hits_lesson_hotspot = $hitsLessonHot
         diff_hint = $diffHint
         reasons = @($uniqueReasons)
-        advisory = "PM applies CORE section 3-lane rules; diff_hint does not auto-set lane"
+        advisory = "PM applies CORE section four-lane rules; diff_hint does not auto-set lane"
     }
 
     if ($JsonOnly) {

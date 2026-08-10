@@ -6,13 +6,13 @@
 ## 稳定版本（LTS）
 
 - **当前版本值**：[VERSION](./VERSION)（唯一来源）；发布状态与历史见 [CHANGELOG.md](../CHANGELOG.md)
-- **争议/recovery/按 CORE 重来 权威**：[CORE.md](./CORE.md)（≤200 行；三车道 + PM 输出 + 硬门禁 + 冷启动 + 恢复）；**日常入口**：[agent-entry-route.md](./references/agent-entry-route.md)
+- **争议/recovery/按 CORE 重来 权威**：[CORE.md](./CORE.md)（≤200 行；四车道 + PM 输出 + 硬门禁 + 冷启动 + 恢复）；**日常入口**：[agent-entry-route.md](./references/agent-entry-route.md)
 - **Skill 母本**：本仓库 `.cursor/skills/`（Trae 经 `.trae/skills/` 联接；**建议纳入 Git**）
 - **版本历史**：[CHANGELOG.md](../CHANGELOG.md)
 
 ### RC 转正条件（v3.1.3 → 已关闭）
 
-v3.1.3 观察期已于 **2026-07-16** 由 TL「bump / 转正」关闭；当前 LTS 为 **v3.1.4 定版**。历史勾选状态：
+v3.1.3 观察期已于 **2026-07-16** 由 TL「bump / 转正」关闭；当前 LTS 为 **v3.1.4 定版**（v3.1.4 为 2026-07 历史定版，当前 LTS 以 [CHANGELOG.md](../CHANGELOG.md) 顶行为准）。历史勾选状态：
 
 - [x] 1 个真实 **Express** 需求走完整闭环（切片 → 改代码 → 自检 → Unity 测试）— 证据：`Assets/Doc/_examples/express-closed-loop-console-log-mirror/`（Console Log Mirror · 2026-07-17 runtime-validated）
 - [x] 1 个真实 **Standard + L1.5** 需求走完整闭环（plan-lite → 方案审核 → 程序员 → CR → README）— 证据：`Assets/Doc/_examples/standard-l15-closed-loop-console-log-mirror-toolbar/`（去顶部工具栏 · 2026-07-17 runtime-validated）
@@ -114,6 +114,13 @@ Cursor/Trae 传送门），**不表示要求安装 Cursor**；Codex-only 团队�
 | 团队五态映射 | [user-visible-states.md](./references/user-visible-states.md) |
 | 复盘与恢复度量 | [retrospective-metrics.md](./references/retrospective-metrics.md)（含效果轻量版 outcome） |
 | 效果轻量日志 | [pipeline-outcome-log.md](./templates/pipeline-outcome-log.md) + `append-pipeline-outcome.ps1` / `summarize-pipeline-outcome.ps1` |
+| 共享语言 / 活词汇表 | [shared-language.md](./references/shared-language.md) |
+| CR 双轴模式（规范轴 + 规格轴） | [dual-axis-review.md](./references/dual-axis-review.md) |
+| test-first 切片（可选） | [test-first.md](./references/test-first.md) |
+| 架构体检（CRG 支撑） | [architecture-health-check.md](./references/architecture-health-check.md) |
+| 外部调研子代理任务（可选） | [research-task.md](./references/research-task.md) |
+| 人机交互向导（可选） | [human-wizard.md](./references/human-wizard.md) |
+| 决策点地图 / wayfinder（可选） | [decision-map.md](./references/decision-map.md) |
 | Full 车道决策树（TL） | [full-lane-decision-tree.md](./references/full-lane-decision-tree.md) |
 | PM 工具脚本 | [pm-tooling.md](./references/pm-tooling.md) |
 | README 派岗 | [readme-dispatch.md](./references/readme-dispatch.md) |
@@ -123,7 +130,18 @@ Cursor/Trae 传送门），**不表示要求安装 Cursor**；Codex-only 团队�
 | Loop Engineering / Auto 外环 | [loop-engineering.md](./references/loop-engineering.md) |
 | 复核派发工件生命周期 | [review-dispatch-lifecycle.md](./references/review-dispatch-lifecycle.md) |
 | 经验沉淀 / 错题本（准全自动） | [lessons-learned.md](./references/lessons-learned.md)；模板 [lesson-pending.md](./templates/lesson-pending.md)；落表脚本 `.cursor/scripts/commit-lesson-pending.ps1` |
+| 被拒需求归档 / 去重（out-of-scope） | [out-of-scope.md](./references/out-of-scope.md) |
+| 深模块设计语言（codebase-design） | [codebase-design.md](./references/codebase-design.md) |
+| 并行接口设计（design-it-twice） | [design-it-twice.md](./references/design-it-twice.md) |
 修改 reference 后：检查 CORE 翻车表、anti-patterns、`.mdc` / `.trae/rules` 引用是否需同步。
+
+## 技能元数据规范
+
+- 每个岗位 SKILL 目录（`skills/<岗>/`）必须带 `agents/openai.yaml`：`interface.display_name` 与 `interface.short_description` 非空（中文，short_description 与 SKILL.md frontmatter description 一致，不新增触发词），`policy.allow_implicit_invocation: false`；新增/修改后须用真实解析器做 YAML 解析校验，解析失败视为设施缺陷。
+- **双轨调用**（调用权限维度；与 [dual-axis-review.md](./references/dual-axis-review.md) 的 CR「双轴（规范轴/规格轴）」是不同维度，术语登记见 [shared-language.md](./references/shared-language.md)）：
+  - 岗位 SKILL = **user-invoked**：口令触发（「策划」「程序员」等），模型**不得**自动以岗位身份执行；`allow_implicit_invocation: false` 即此语义的机器可读声明。
+  - references = **model-invoked**：按 [reference-routing.md](./references/reference-routing.md)「模型自动触发」小表的触发语义由模型自动加载，无需用户点名。
+- 不同步 = **设施漂移**：新增/修改岗位 SKILL、触发表行或元数据字段时，须同步 openai.yaml + 触发表 + 本规范，并运行 `.cursor/scripts/validate-pipeline.ps1 -Strict`。
 
 ### 错题本落表（用户「准」后）
 

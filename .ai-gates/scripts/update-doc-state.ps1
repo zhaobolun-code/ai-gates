@@ -29,7 +29,7 @@
   目标 doc_status。合法迁移表见脚本内 $LegalTransitions；非法迁移退出码 3。
 
 .PARAMETER SetLane
-  Express|Standard|Full。
+  Express|Direct|Standard|Full。
 
 .PARAMETER SetCurrentStep
   记录当前 Step 名称/编号（自由文本）。
@@ -79,7 +79,7 @@ param(
     [ValidateSet("draft", "review-pending", "implementation-ready", "in-progress", "step-completed", "runtime-validated", "completed", "blocked")]
     [string]$Transition,
 
-    [ValidateSet("Express", "Standard", "Full")]
+    [ValidateSet("Express", "Direct", "Standard", "Full")]
     [string]$SetLane,
 
     [string]$SetCurrentStep,

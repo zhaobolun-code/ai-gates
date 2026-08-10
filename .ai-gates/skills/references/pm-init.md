@@ -27,18 +27,18 @@
 - 已有 `.codegraph/` 或 `codegraph` CLI 可用 → 记「已就绪」，提示必要时重载 Cursor（Codex 用户重开会话）。
    - 未安装 → **先征得用户同意**，再执行 `codegraph install --platform cursor` 与 `codegraph init`；失败则给出手动命令与 [codegraph-probe.md](./codegraph-probe.md)。
 5. 输出白话汇总：**已完成 / 跳过 / 失败 / 仍须你填**。
-6. **你下一步**：引导用户编辑 project-context（技术栈、Express 升级表、至少 1～2 条回归索引），填完后跑 `sync-regression-index.ps1`；然后可用 `PM + 需求` 开工。
+6. **你下一步**：引导用户编辑 project-context（技术栈、车道升级表、至少 1～2 条回归索引），填完后跑 `sync-regression-index.ps1`；然后可用 `PM + 需求` 开工。**车道升级表四车道语义**（与 CORE §四车道判定 / 冷启动句同步）：未初始化前行为小改默认 Direct（≤3 业务源文件、无 API）；Express 仅机械清单 ≤2 业务源文件；行为小改 → Direct，不再误路由 Express。
 
 ## 用户可见输出（强制）
 
-初始化轮**不做**三车道派岗；仍须首行内部 `[PM]`，面向用户只输出白话：
+初始化轮**不做**四车道派岗；仍须首行内部 `[PM]`，面向用户只输出白话：
 
 | 块 | 内容 |
 | --- | --- |
 | 探测结果 | project-context / 文档根 / CodeGraph 各一行：已有 / 已创建 / 待装 / 失败 |
 | 已执行 | 实际跑过的脚本与创建的路径 |
 | 下一步清单（引导式） | `-Apply` 后按序输出：① init-project-context（自动，不覆盖）② rules 对齐（link-trae-skills 命令 + `.mdc ↔ .trae` 复制提示）③ CodeGraph 安装命令（可选，须同意）④ 人工填写项目专属项 |
-| 仍须你填 | 技术栈、回归索引（至少 1～2 条）、Express 升级表（可选） |
+| 仍须你填 | 技术栈、回归索引（至少 1～2 条）、车道升级表（可选） |
 | **你下一步** | 明确下一动作（改配置 / 同意装 CodeGraph / 重载 Cursor 或 Codex 重开会话 / 用 `PM + 需求` 开工） |
 
 ## 脚本入口

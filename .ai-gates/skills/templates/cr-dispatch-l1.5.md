@@ -27,6 +27,7 @@ Mandatory 规格：【同目录 Mandatory-StepN.md 或未完成.md 内 Mandatory
 当前 Step：【Step N — 名称】
 dimensions: quality+integration
 （Full/高风险可写 dimensions: quality+integration+security；安全维按需）
+axis（可选）：standards+spec（双轴模式，规范轴/规格轴分开扫；细则 [dual-axis-review.md](../references/dual-axis-review.md)）
 错题本必读路径：【未完成.md##错题本必读 → 点名大纲/主表行】
 黑板证据：【证据/_repair-blackboard.md 最近≤3「禁止再做」】或【无黑板（已查路径）】
 冻结表扫描：【本 Step DO NOT TOUCH / 冻结符号清单；空=无（已扫）】

@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | 1 | 一人顶全队 | 单用户、单 Chat；`项目经理` 内部自动派岗 |
 | 2 | 会用 Unity + AI 助手 | **会用 Unity** 与 **AI 助手基本操作**（Cursor Agent / Codex / Trae：新开会话、粘贴需求、能改文件）；代码由 Agent 写 |
-| 3 | 三车道自适应 | Express / Standard / Full；命中升级启发式须立即升级 |
+| 3 | 四车道自适应 | Express / Direct / Standard / Full；命中升级链（Express→Direct→Standard→Full）须立即升级 |
 | 4 | 无差错 | **不漂移、不臆测**；缺事实则停，不 silent default |
 | 5 | 精简优先 | **不过度设计**；只实现需求所需最小功能，不留残留/废弃代码 |
 
@@ -85,7 +85,7 @@
 | 信号 | 动作 |
 | --- | --- |
 | 超出当前 Step / Mandatory Code Changes | 停止实现 → `代码审核` 或回 `程序员` 收窄 |
-| 命中 CORE §Express 升级 或 project-context §Express 车道升级 | 立即升级车道并告知用户 |
+| 命中 CORE §四车道判定 升级链（Express→Direct→Standard→Full）或 project-context §车道升级（禁入 Express / Direct） | 立即升级车道并告知用户 |
 | 证据等级被夸大 | 降回如实等级；无运行证据不得 `runtime-validated` |
 | 无执行文档做大功能 | 回 `策划`；不得维持「想到哪改到哪」 |
 | 同一 Step/切片内连续 ≥3 次 `static-checked` 修复仍无 Unity 验证 | 停止继续叠加修复 → 提示用户先做一次真实回归，确认现象后再继续（防止无法定位是哪次改动引发新问题） |

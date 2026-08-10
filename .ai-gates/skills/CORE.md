@@ -17,15 +17,15 @@
 
 ```yaml
 pm:
-  lane: Express | Standard | Full
-  lane_rules_hit: "步骤N"          # 如 "4/4"、"3→Standard"、"2→Full"
+  lane: Express | Direct | Standard | Full
+  lane_rules_hit: "步骤N"          # 如 "4/4"、"2→Direct"、"3→Standard"、"4→Full"
   review_tier: skip | L1 | L1.5 | L2 | L3
   next_role: planner | plan-reviewer | developer | CR | docs | none
   readme: skip | dev-one-liner | docs   # 见 readme-dispatch.md
   user_state: 进行中 | 待你确认 | 待 Unity 测试 | 已定版 | 已阻塞
   blockers: []                     # 有则列字符串，无写 []
   project_context: loaded | missing-coldstart
-  diff_hint: Express | Standard | Full | unknown
+  diff_hint: Express | Direct | Standard | Full | unknown
   snapshot: ok | manual | n/a      # 见 pm-tooling.md；不得伪造 ok
 ```
 
@@ -39,7 +39,7 @@ pm:
 - 非 recovery / `按 CORE 重来` 恢复轮
 - 本轮**无**车道升级（`lane_rules_hit` 不含 `→`）
 
-**你下一步**（可 1～2 句，禁只写「等待」）：车道理由 · 下一岗 · 五态 · 用户动作（确认切片 / 等改完 / Unity 测 / 回是否通过）。二选一/多选一另加 **推荐 + 为什么**（≤3 句）→ [demand-clarification.md](references/demand-clarification.md)。缺任一项或推荐 → **缺 PM 结构化判定**。Express 判定**必须**附一句**风险复述 + 升道出口**：「我判定为小改动，走快车道；若你认为涉及架构 / 核心路径 / 跨模块变更，请回『走标准道』（或『完整流程』）。」
+**你下一步**（可 1～2 句，禁只写「等待」）：车道理由 · 下一岗 · 五态 · 用户动作（确认切片 / 等改完 / Unity 测 / 回是否通过）。二选一/多选一另加 **推荐 + 为什么**（≤3 句）→ [demand-clarification.md](references/demand-clarification.md)。缺任一项或推荐 → **缺 PM 结构化判定**。Express 判定**必须**附一句**风险复述 + 升道出口**：「我判定为机械微改，走快车道；若你认为涉及行为变化，请回『直通道』；涉及架构 / 核心路径 / 跨模块变更，请回『走标准道』（或『完整流程』）。」
 
 **Verify / Unity 失败**：「你下一步」走 [diagnosis-gates.md](references/diagnosis-gates.md) §0（含有意义评审）；禁默认开 Step N+1、静默代选、「新切片」清零止损。
 
@@ -49,7 +49,7 @@ pm:
 
 | 字段 | 用户可见摘要（一行白话） |
 | --- | --- |
-| 车道 | [Express/Standard/Full] — [命中理由] |
+| 车道 | [Express/Direct/Standard/Full] — [命中理由] |
 | 下一岗 | [岗位名] 或「等你确认」/「等你 Unity 测试」/「隔离审核进行中」 |
 | README | [skip / 程序员一行 / 文档岗] — [理由] |
 | 进度 | [五态] |
@@ -71,39 +71,46 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 ### Full 强制 — 用户可见（强制）
 
-命中 §三车道判定 第 2 步 Full 强制（`lane: Full` 或 `lane_rules_hit` 含 `2→Full` / 步骤2）时，**你下一步**须含一句白话：
+命中 §四车道判定 步骤 4 Full 强制（`lane: Full` 或 `lane_rules_hit` 含 `4→Full` / 步骤4）时，**你下一步**须含一句白话：
 「此项改动涉及 [简述理由]，建议启用**完整流程（Full）**；请 TL 确认，或回复「完整流程」继续。」缺此句 → 视为 **缺 PM 结构化判定**。
 
 **非 `[PM]` 岗位**（策划/程序员/CR 等）：**不展开 PM 内部字段**；交接用各岗 SKILL 格式 + 白话下一步。
 
 **PM 脚本与 Git**（advisory）→ [references/pm-tooling.md](references/pm-tooling.md)。`readme` 判定 → [references/readme-dispatch.md](references/readme-dispatch.md)。
 
-## 三车道判定（顺序固定）
+## 四车道判定（顺序固定）
 
 **判定前**：需求存在 ≥2 种合理解释且影响车道/范围（如"改顺畅点"无验收标准）→ 先追问 ≤3 个关键问题（最多 1 轮，答不全按默认决策继续），细则 → [demand-clarification.md](references/demand-clarification.md)。
 
+**判定实现顺序（单一优先级，M1）**：**先查步骤 4 Full 强制条**——命中任一即 `lane: Full`；**未命中再按步骤 1 → 步骤 2 → 步骤 3 判定**（等效「取最高命中车道」）；升级链 `Express → Direct → Standard → Full`，过程中命中升级立即改判。决策树 → [references/full-lane-decision-tree.md](references/full-lane-decision-tree.md)。
+
 ```
 0. 纯问答 / 只读咨询（不涉及落盘改动——「怎么改」「能不能改」「解释现象」「查代码/文档/接口」）→ **主窗直接答**：不判车道、不建窗、不生成文档、不派岗、不写快照（`snapshot: n/a`）。仅当用户要求或隐含要**落盘改动**（改代码/文档/配置）才进入车道判定。
-1. 用户已给 plan-lite/执行文档 且 可交给程序员=是 → 按文档车道派程序员
-1.5 严格非功能微改旁路（仅旁路回归索引/热度）：用户未要求 Full；仅1个已跟踪文本业务文件；无 API/持久/跨模块/生成文件；只改注释或既有日志字符串（不增删调用，不改参数求值/节流/条件/控制流）；slice 预计且改后 `git diff --numstat HEAD -- <path>` 新增+删除≤20、恰一行整数且 name-status 非R/C → Express；untracked、二进制（`-`）、R/C或超量 → Standard（命中回归/热度则L1.5）
-2. Full 强制（以下 4 条**各自独立触发**，命中任一即 Full；决策树 → [references/full-lane-decision-tree.md](references/full-lane-decision-tree.md)）
+1. Express（快捷道 · 机械清单，准入条件**全部**满足）→ Express
+   · 仅字符串/注释/日志文本、编译错误修复（缺符号/类型不匹配，不重设计）、数字/常量/阈值 ≤3 行
+   · ≤2 **业务源文件**（如 `.cs`）；`.meta`、同批 prefab 配套资源**不计入**
+   · 无 API/持久/跨模块/生成文件；一句话说清；一句话 A# 可证伪
+   · 未命中热度/回归索引/止损链（见步骤 3）
+   · 判定须含一句话 A# + 风险复述/升道出口（见 §Express 简略）；过程中命中升级立即改判
+1.5 严格非功能微改旁路（**独立 1.5 例外**，位置=步骤 1 之后、步骤 2 之前；仅旁路回归索引/热度，细则以本小节全文为准）：用户未要求 Full；仅 1 个已跟踪文本业务文件；无 API/持久/跨模块/生成文件；只改注释或既有日志字符串（不增删调用，不改参数求值/节流/条件/控制流）；slice 预计且改后 `git diff --numstat HEAD -- <path>` 新增+删除≤20、恰一行整数且 name-status 非R/C → Express；untracked、二进制（`-`）、R/C或超量 → Standard（命中回归/热度则 L1.5）
+2. Direct（直通道 · 默认小改）→ Direct
+   · 有**行为变化**（不属于步骤 1 Express 机械清单）
+   · ≤3 业务源文件；无 API/持久/跨模块
+   · 策划子窗对话内出 A#/切片，**不落盘**；默认单会话完成，跨会话/改不完自动升 Standard
+   · 判定须含一句话 A# + 升道出口（涉及行为变化→「直通道」，涉及架构/核心路径/跨模块→「走标准道」）
+3. Standard（难任务）→ Standard（最低；并按下方注记取较高档）
+   · >3 文件 / 跨 2+ 模块 / public API / 裸状态机（无持久化/序列化）/ 说不清
+   · 命中 project-context §车道升级（原 §Express 车道升级）禁入路径
+   · 回归索引模块小规模功能改动（**→ Standard+L1.5，不取较高档**；与文件/机器热度双命中 → 按热度入口取较高档：方案审 L3 / 双轮 CR，M2 双命中优先级）
+   · 文件/机器热度命中（`.ai-gates/lessons-learned.md` 近 6 个月 / `regression-heat.yaml` heat≥medium / last_fail_ts）且 Standard 规模小改（**→ Standard + 方案审 L3 / 双轮 CR，热度命中取较高档**，不整条升 Full）
+   · 机械微改碰热度（无行为变化，Express 准入含「未命中热度」）→ 升道终点 Standard
+4. Full（完整道 · 强制条，以下任一**各自独立触发**，命中即 Full；决策树 → [references/full-lane-decision-tree.md](references/full-lane-decision-tree.md)）
+   · 止损链
+   · 热度（heat≥medium 或 lessons 近 6 个月命中）且大改（>3 文件 / 单文件净增删 >~150 行 / 跨模块·API·持久）
+   · 回归索引模块（或 §车道升级 禁入路径）且大改（判据同上）——与 project-context「小规模 Standard+L1.5 / 大规模 Full」闭合
    · 跨 3+ 独立业务模块 / 预计 >8 业务文件
-   · 状态机·持久·序列化
+   · 状态机涉及持久化或序列化任一
    · 用户说「完整流程」
-   · 功能性改动 且（路径命中 project-context §Express 车道升级 或 改动涉及 project-context「运行回归索引」表中的模块）——**规模门槛**：仅规模较大（>3 个业务源文件，或单文件净增删 >~150 行，或跨模块/API/持久/生成文件）→ Full；小规模功能性改动（≤3 文件、单文件净增删 ≤~150 行、无跨模块/API/持久/生成文件）→ 不触发本条，走第 3 步最低 Standard+L1.5
-   仅本步**第 4 条**的例外（不触发第 4 条，走第 3/5 步；不影响前 3 条独立判定）：
-   · 非功能性改动（仅 Debug 日志字符串/注释、无行为变化）
-   · 纯注释/文档且 TL 书面确认
-   · 回归模块内纯数值/阈值微调（≤3 行+书面依据，无结构改动）→ 降 Standard+L1.5，不强制 Full
-   · 核心/回归模块内小规模功能性改动（≤3 文件、单文件净增删 ≤~150 行、无跨模块/API/持久/生成文件）→ 不触发第 4 条，走第 3 步最低 Standard+L1.5
-3. project-context §Express 车道升级 命中，或改动涉及 `.ai-gates/lessons-learned.md` 近 6 个月内有记录的文件/模块（文件热度）→ 最低 Standard
-4. 小改默认 Express（准入条件全部满足）→ Express
-   · ≤3 **业务源文件**（如 `.cs`）；`.meta`、同批 prefab 配套资源**不计入**
-   · 无 public API/持久、不跨模块、一句话说清（含单文件改动量可控，非整体重写/新增删改 >~150 行）
-   · 含仅 prefab/asset 微调（无脚本改动）
-   · 未命中第 2、3 步禁入/升级规则
-   · **小功能改动同样适用**（不再要求"仅注释/日志"）；A# 验收 + Express 自检兜底，过程中命中升级立即改判
-5. 其余（>3 文件 / 跨模块 / 命中第 2、3 步升级 / 说不清）→ Standard
 ```
 
 ### Express 升级（过程中立即改判）
@@ -114,13 +121,14 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 | 单文件改动规模超出预期（整体重写/新增删改 >~150 行） | Standard |
 | 跨模块 / public API / 持久 | Standard 或 Full |
 | 命中 Full 强制条 | Full |
-| project-context §Express 升级，或命中 `lessons-learned.md` 文件热度 | Standard（最低，热度触发随即升 L1.5） |
+| project-context §车道升级 禁入路径，或文件/机器热度命中（`lessons-learned.md` 近 6 个月 / `regression-heat.yaml` heat≥medium / last_fail_ts） | Standard（最低）；且按新规则取较高档——文件/机器热度命中 Standard 规模 → 方案审 L3 / 双轮 CR；回归索引模块小规模维持 Standard+L1.5 不取较高档；回归索引模块小规模 + 文件/机器热度双命中 → 按热度入口取较高档（方案审 L3 / 双轮 CR，M2） |
 
-## 三车道 → 派岗
+## 四车道 → 派岗
 
 | 车道 | 流程 | 文档 |
 | --- | --- | --- |
-| **Express** | 切片 → **一轮确认** → `[developer]` → 自检 → Unity 测 | Chat 切片；须含验收 A# |
+| **Express** | 一句话切片 → **一轮确认** → 子窗程序员 → 一行自检 → Unity 测；无 CR；默认不落盘、不建窗；如需落盘仍走 `未完成.md`（现状保留） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
+| **Direct** | PM → 子窗策划（对话内 A#/切片，不落盘）→ **一轮确认** → 子窗程序员 → 隔离 CR（普通档）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
 | **Standard** | plan-lite → L1/L1.5/L2 → **一轮确认** → `[developer]` → `[CR]` → README | plan-lite；A# + delta-only |
 | **Full** | TL 显式启用；见 [references/](references/) | 执行文档；须含验收 A# |
 
@@ -128,11 +136,11 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 Express 完成后 **不得**再派独立「代码审核」。Standard：方案审无 blocker → 发一次确认包；「准」同条开始改码。普通 CR 无 blocker 后，Full 或热文件反复修复/运行仍异常 → PM **优先**可选 Subagent `代码审核 模式：对抗`；失败再提示手动新开；用户可跳过。细则 → [isolated-review.md](references/isolated-review.md)。
 
-**一轮确认硬律** → [handoff-automation.md](references/handoff-automation.md) §0；白话包 → [demand-clarification.md](references/demand-clarification.md)。每决策点 1 条确认包；「准」同条定版/开窗/改码；续链用**合并包**。禁口令门、先改再补理由、零用户句改码。Standard/Full「准」**默认 Auto**（非第四车道；Express 不启用；退出「准, 不 Auto」）→ [loop-engineering.md](references/loop-engineering.md) + handoff §H：连跑实现→CR→待测；测挂默认同条跟可自动跟推荐（硬停除外，见 diagnosis §0）；用户停点=待测/AI 验/硬停；每 Step 仍要测（禁攒批）；口令「本窗 Auto」「继续 Auto」。Auto 链受 [loop-engineering.md](references/loop-engineering.md) §4 预算护栏约束（max_auto_steps / max_repair_rounds / 停滞 fuse / 超时硬停 / 可选 token 预算）。
+**一轮确认硬律** → [handoff-automation.md](references/handoff-automation.md) §0；白话包 → [demand-clarification.md](references/demand-clarification.md)。每决策点 1 条确认包；「准」同条定版/开窗/改码；续链用**合并包**。禁口令门、先改再补理由、零用户句改码。Standard/Full「准」**默认 Auto**（非车道；Express / Direct 不启用；退出「准, 不 Auto」）→ [loop-engineering.md](references/loop-engineering.md) + handoff §H：连跑实现→CR→待测；测挂默认同条跟可自动跟推荐（硬停除外，见 diagnosis §0）；用户停点=待测/AI 验/硬停；每 Step 仍要测（禁攒批）；口令「本窗 Auto」「继续 Auto」。Auto 链受 [loop-engineering.md](references/loop-engineering.md) §4 预算护栏约束（max_auto_steps / max_repair_rounds / 停滞 fuse / 超时硬停 / 可选 token 预算）。
 
 ## Standard 加强审核（L1.5）
 
-第 2 步**未**触 Full 且 Mandatory Code Changes 命中 project-context 回归索引**模块**，或命中 `.ai-gates/lessons-learned.md` 近 6 个月记录（文件热度），或 `.ai-gates/regression-heat.yaml` 该模块 heat≥medium（机器热度，自动生成）→ L1.5（热度细则 → [plan-review-tiers.md](references/plan-review-tiers.md)）。
+步骤 4 **未**触 Full 且 Mandatory Code Changes 命中 project-context 回归索引**模块**（**小规模 → 维持 Standard+L1.5，不取较高档**），或命中 `.ai-gates/lessons-learned.md` 近 6 个月记录（文件热度），或 `.ai-gates/regression-heat.yaml` 该模块 heat≥medium（机器热度，自动生成）→ L1.5；**文件/机器热度命中取较高档：L1.5 之上 → 方案审 L3 / 双轮 CR（不整条升 Full）**；**回归索引模块小规模 + 文件/机器热度双命中 → 按热度入口取较高档（方案审 L3 / 双轮 CR，M2）**（热度细则 → [plan-review-tiers.md](references/plan-review-tiers.md)）。
 
 - **方案审核**：L1 同 Chat；plan-lite 档位 **L1.5**；Regression Validation **须引用**索引行
 - **代码审核**：**优先** Subagent 隔离 + [cr-dispatch-l1.5.md](./templates/cr-dispatch-l1.5.md)；失败再提示手动新开；同 Chat 须标 **「非独立 CR」**
@@ -140,7 +148,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 ## Standard 交叉审核（L2）
 
-第 2 步**未**触 Full，且 Mandatory Code Changes **跨 2 个及以上业务模块** → 方案审核档位 **L2**（与 L1.5 可叠加，取较高档）。
+步骤 4 **未**触 Full，且 Mandatory Code Changes **跨 2 个及以上业务模块** → 方案审核档位 **L2**（与 L1.5 可叠加，取较高档）。
 
 - **方案审核**：**优先** Subagent 隔离；失败再提示手动新开；同 Chat 须标 **「L2 非独立复核」**
 - **代码审核**：默认同 Chat；可升隔离
@@ -153,8 +161,8 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 ## 硬门禁（7 条）
 
 1. **没读真实代码不改** — 代码与仓库文件（有 git 时辅以 diff）> README > 文档/Express 切片 > 对话推断
-2. **Express 先有切片再改** — **无 express-slice 不得 `[developer]`**；一次一切片；超 scope 停
-3. **Standard 须 L1/L1.5** — 未经方案审核无 blocker，不得 `implementation-ready` / 派程序员
+2. **Express 先有一句话切片（PM 判定+一句话 A#）、Direct 先有对话内 A#/切片再改** — 无切片不得 `[developer]`；一次一切片；实改超范围立即升道
+3. **Standard 须方案审；Direct 无方案审但须隔离 CR** — 未过方案审 / 未隔离 CR，不得 `implementation-ready` / 派程序员
 4. **CR 有 blocker 不写最终 README**
 5. **Unity 未测不得标「已通过」** — 例外：Skill/Doc AI 验收通过可抬升（见 [handoff-automation.md](references/handoff-automation.md) / [loop-engineering.md](references/loop-engineering.md)；非可不测）
 6. **PM 不替岗** — 不写 Step 规格、不改代码、不替 CR 宣布无 blocker
@@ -169,7 +177,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 ## 无 project-context 冷启动
 
 1. 只读咨询 → **不阻塞**。
-2. **改代码** → `missing-coldstart`；**你下一步**须含「未初始化，保守 Standard」+ 建议 **`项目经理 初始化`**；Express 仅 ≤3 业务源文件且无 API。细则 → [pm-init.md](references/pm-init.md)。
+2. **改代码** → `missing-coldstart`；**你下一步**须含「未初始化，保守 Standard」+ 建议 **`项目经理 初始化`**；未初始化前行为小改默认 Direct（≤3 业务源文件、无 API/持久/跨模块）；Express 仅机械清单 ≤2 业务源文件；行为小改 → Direct，不再误路由 Express。细则 → [pm-init.md](references/pm-init.md)。
 
 ## 进阶指针（lazy load）
 

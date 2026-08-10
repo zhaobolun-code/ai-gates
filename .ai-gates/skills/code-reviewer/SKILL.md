@@ -16,12 +16,13 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 | 车道 | 本岗 |
 | --- | --- |
 | Express | **不启用** — 见 [express-self-check.md](../express-self-check.md) |
+| Direct | ✓ 必审；本岗**必须子窗**；普通档隔离复核（Subagent/新 Chat）；同 Chat 降级须标 **「非独立 CR」** |
 | Standard | ✓；本岗**必须子窗**；L1.5 隔离 CR + 异模型优先（高质量档，见 [isolated-review.md](../references/isolated-review.md) / [model-routing.md](../references/model-routing.md)）；同 Chat 降级须标 **「非独立 CR」**；高风险可追加对抗模式 |
 | Full | ✓ 必审；本岗**必须子窗**；普通 CR 无 blocker 后 **优先**可选对抗隔离会话；业务 C#：无 **CRG 且无 CodeGraph** = hard blocker（见 [codegraph-probe.md](../references/codegraph-probe.md)）；**Skill/Doc-only**（无业务 Runtime/Editor C#）无图谱 → **soft risk**，不挡无-blocker 收口（见 [loop-engineering.md](../references/loop-engineering.md)） |
 
 ## 模型路由 + 子窗
 
-本岗**必须子窗**：Task + **高质量**档（slug 按 [model-routing.md](../references/model-routing.md) 解析）。禁止主窗切 `[CR]` 后直接出 findings。
+本岗**必须子窗**：Task + 按档位选模型（slug 按 [model-routing.md](../references/model-routing.md) 解析）。**CR 档位接线**：Direct CR=普通档（程序员档）；Standard/Full CR=高级档；热度命中 Direct CR 升高级档（`deepseek-v4-pro` 未开放 → `flash+max` 顶替并标注「未按模型路由」）。禁止主窗切 `[CR]` 后直接出 findings。
 
 ## Checklist
 
@@ -41,6 +42,10 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 8. 不把风格偏好当 blocker
 9. 用户仅咨询时不读 diff
 10. 存在 `Mandatory-Step*.md` 仍去读历史全文 → **major**
+
+## 双轴模式（可选）
+
+规范轴（standards）+ 规格轴（spec）分开扫、结论分组防污染；PM 可选用（与对抗模式并列，不替代）。派发加 `axis: standards+spec`；findings 按轴标 `[规范轴]` / `[规格轴]`。细则 → [dual-axis-review.md](../references/dual-axis-review.md)。
 
 ## 审查维度
 

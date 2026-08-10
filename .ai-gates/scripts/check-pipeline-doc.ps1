@@ -123,16 +123,17 @@ if ($content -match '(?ms)^##\s+文档状态\s*$') {
     $canDev = Normalize-CanDev $canDevRaw
 
     if ($block -match '(?m)^[\s\-]*\*\*流水线模式\*\*') {
-        Add-Issue "warning" "Deprecated field **流水线模式** — use **车道** (Express / Standard / Full); see lane-glossary.md"
+        Add-Issue "warning" "Deprecated field **流水线模式** — use **车道** (Express / Direct / Standard / Full); see lane-glossary.md"
     }
 
     if ($block -match '(?m)^[\s\-]*\*\*车道\*\*[：:]\s*`?([^`\r\n]+?)`?\s*$') {
         $lane = $Matches[1].Trim()
-        if ($lane -notmatch 'Express|Standard|Full') {
-            Add-Issue "warning" "Unknown 车道=$lane (expected Express / Standard / Full)"
+        if ($lane -notmatch 'Express|Direct|Standard|Full') {
+            Add-Issue "warning" "Unknown 车道=$lane (expected Express / Direct / Standard / Full)"
         }
+        if ($lane -eq 'Direct') { Add-Issue "warning" "Direct 车道不落盘：出现执行文档应升 Standard（对话内切片不落盘）" }
     } else {
-        Add-Issue "warning" "Missing required field: **车道** (Express / Standard / Full)"
+        Add-Issue "warning" "Missing required field: **车道** (Express / Direct / Standard / Full)"
     }
 
     if ($block -match '(?m)^[\s\-]*\*\*当前 Step\(步骤\)\*\*[：:]\s*`?([^`\r\n]+?)`?\s*$') {
@@ -180,7 +181,7 @@ elseif ($content -match '(?m)\*\*文档状态\*\*[：:]') {
         Add-Issue "warning" "Legacy format: could not parse **可交给程序员** (是/否)"
     }
     if ($content -notmatch '(?m)\*\*车道\*\*' -and $content -notmatch '(?m)\*\*流水线模式\*\*') {
-        Add-Issue "warning" "Legacy format: missing **车道** (Express / Standard / Full)"
+        Add-Issue "warning" "Legacy format: missing **车道** (Express / Direct / Standard / Full)"
     }
 }
 else {

@@ -20,14 +20,42 @@
 | 测挂 L0 / 签收待准错题 / 错题大纲 | `lessons-learned.md`（含 §错题大纲）；项目文件 `.ai-gates/lessons-outline.md` |
 | 签收效果一行 / 月末汇总 | `retrospective-metrics.md` §效果轻量版 |
 | 写方案/改码前精简 / 复用 | `execution-discipline.md` §复用四问；项目硬阈见 `.cursor/project-context.md`（若有神类止血） |
+| 方案/CR 术语歧义、同义异名 | `shared-language.md`（活词汇表） |
+| CR 双轴（规范轴 + 规格轴） | `dual-axis-review.md` |
+| Full 策划前 / 架构概览体检 | `architecture-health-check.md`（CRG 只读） |
+| test-first 切片（方案点名时） | `test-first.md` |
+| 外部事实 / API / 文档调研（开子窗） | `research-task.md`（只读调研 + 引用证据） |
+| 只能人做的步骤（凭证 / 授权 / 后台） | `human-wizard.md`（交互向导） |
+| 超大任务决策点地图 | `decision-map.md`（配合阻塞边字段） |
 | 派发哈希 stale / 路径排序 | `review-dispatch-lifecycle.md`（须 Ordinal 升序） |
 | 新窗齐套 kit 标记 / 短名链接纠错 | `doc-windowing.md`（点名新窗齐套标记节；纠错脚本见迁移动作） |
 
+## 模型自动触发（model-invoked references）
+
+> 本表为既有「日常按触发加载」行的**调用维度注解**，不改既有触发行为。调用权限维度（**双轨调用**；与 [dual-axis-review.md](./dual-axis-review.md) 的 CR「双轴（规范轴/规格轴）」是不同维度，术语登记见 [shared-language.md](./shared-language.md)）：岗位 SKILL = **user-invoked**（口令触发，模型不得自动执行岗，机器可读声明见各岗 `agents/openai.yaml` 的 `policy.allow_implicit_invocation: false`）；下表 references = **model-invoked**——满足触发语义时由模型**自动加载**，无需用户点名。既有 8 行与「日常按触发加载」对应；**新增行按 agent-brief / out-of-scope 先例仅入本表**（模型自动触发），不进「日常按触发加载」表；新增行仍须同步 [MAINTAINER.md](../MAINTAINER.md)「技能元数据规范」，否则视为设施漂移。
+
+| 触发语义（模型自动加载） | 点名 reference |
+| --- | --- |
+| 诊断 / 止损 / 热修自动加载放行规则 | `diagnosis-gates.md` |
+| 术语歧义 / 同义异名 | `shared-language.md` |
+| 方案点名 test-first 切片时 | `test-first.md` |
+| 超大任务决策点地图 | `decision-map.md` |
+| 只能人做的步骤（凭证 / 授权 / 后台） | `human-wizard.md` |
+| 外部事实 / API / 文档调研（开子窗） | `research-task.md` |
+| AFK 子代理委托书 / 耐久契约 | `agent-brief.md` |
+| 需求评估 / 被拒需求去重 | `out-of-scope.md` |
+| 设计模块形状 / 找 seam / 接口方案对比（与 `architecture-health-check`「体检找候选」互补；并行接口设计见 `design-it-twice.md`，共用本行） | `codebase-design.md` |
+| 进行中的 merge / rebase 冲突时 | `resolving-merge-conflicts.md` |
+| 方案阶段状态 / UI 设计问题需运行验证时 | `prototype.md` |
+| 临时交接 / 轻量传话时 | `handoff-lite.md` |
+| 沟通未落地（用户「没听懂 / 再说一遍」）时 | `wait-what.md` |
+| 用户点名教学（「教我 X / 带我学 X」）时 | `teach.md` |
+
 ## 按岗加载
 
-- **策划/方案审**：当前缺口优先在 `acceptance-and-delta`、`doc-windowing`、`diagnosis-gates`、`execution-discipline`（复用四问）中点名 1～2 份。
-- **程序员**：优先 `unity-editor-log`；Auto/修复计数需要时加 `loop-engineering`；精简/净增加 `execution-discipline`（或 project-context 止血节）。
-- **代码审核**：优先 `codegraph-probe`；派发或隔离问题时二选一加载 `review-dispatch-lifecycle` / `isolated-review`。
+- **策划/方案审**：当前缺口优先在 `acceptance-and-delta`、`doc-windowing`、`diagnosis-gates`、`execution-discipline`（复用四问）中点名 1～2 份；术语歧义加 `shared-language`；Full 策划前可加 `architecture-health-check`；接口设计 / 找 seam / 方案对比加 `codebase-design`；超大任务可加 `decision-map`。主窗派调研子窗加 `research-task`；有「只能人做」的步骤加 `human-wizard`。
+- **程序员**：优先 `unity-editor-log`；Auto/修复计数需要时加 `loop-engineering`；精简/净增加 `execution-discipline`（或 project-context 止血节）；test-first 可选加 `test-first`。
+- **代码审核**：优先 `codegraph-probe`；派发或隔离问题时二选一加载 `review-dispatch-lifecycle` / `isolated-review`；双轴模式加 `dual-axis-review`；seam / 设计相关评审加 `codebase-design`。
 - **文档/周报**：只读岗位 SKILL 点名的 README/周报规则，不因“参考完整”扫目录。
 
 ## 维护者专用

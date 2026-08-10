@@ -137,6 +137,11 @@ try {
         Write-Host "workflow consistency: FAILED (F1b Auto default/exit regression)" -ForegroundColor Red
         $workflowOk = $false
     }
+    if ($readmeRaw -notmatch '(?s)(?=.*Express)(?=.*Direct)(?=.*Standard)(?=.*Full)' -or
+        $readmeRaw -match '三车道') {
+        Write-Host "workflow consistency: FAILED (USER-GUIDE four-lane wording)" -ForegroundColor Red
+        $workflowOk = $false
+    }
     if ($maintainerRaw -match 'CORE\.md.*≈120|USER-GUIDE\.md.*≤120|README\.md.*≤90') {
         Write-Host "workflow consistency: FAILED (stale line targets)" -ForegroundColor Red
         $workflowOk = $false

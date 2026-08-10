@@ -69,7 +69,7 @@
 | CR 无 blocker 后不提示 README/Unity、或直接标 runtime-validated | 漏收口或夸大证据 | §C：迁 step-completed + README 一行 + 请用户测 |
 | 同一 Chat 内连续多轮 **L3 方案审核** | 独立性弱 | **提示**用户新开 Chat；L3 **只读不写** |
 | L3 Chat **直接修改**执行文档 | 多 Chat 结论冲突、状态被覆盖 | L3 只输出审查结论；定稿由项目经理/策划 **单 Agent** 写入 |
-| 未「准」就连跑 / 把 Auto 当第四车道 / Express 开 Auto | 绕过确认或打乱 PM 判定 | Standard/Full「准」默认 Auto；Express 禁；见 [loop-engineering.md](./loop-engineering.md) |
+| 未「准」就连跑 / 把 Auto 当第五车道 / Express / Direct 开 Auto | 绕过确认或打乱 PM 判定 | Standard/Full「准」默认 Auto；Express / Direct 禁；见 [loop-engineering.md](./loop-engineering.md) |
 | 用户已「准, 不 Auto」仍按 Auto 连跑后续 Step | 无视退出 | 单步模式：测签后须「做 Step N」等口令 |
 | 测挂后绕过 diagnosis-gates 乱开热修/Step（或硬停仍自动跟） | 假收敛、止损被掏空 | 「测试不通过」→ diagnosis §0；仅 `auto_follow: yes` 可同条跟；硬停须「准」 |
 | 验挂红无脑 `git reset --hard` / 整库硬回滚 | 毁掉诊断现场与无关改动 | 有意义评审后**定向撤**本 Step Mandatory 业务 diff（diagnosis §0.2.1） |
@@ -119,6 +119,7 @@
 | 拿「预授权 N」豁免改判定逻辑/新增状态/跨模块的 Step；或方案外新 Step 也算已预授权 | 越权改动跳过确认包，等同零确认改码 | 预授权仅限方案里已逐条列出的同物理口径参数级微调；出现漂移/新 Step 立即失效，回到逐 Step 确认（见 [loop-engineering.md](./loop-engineering.md) §1.6） |
 | 交 CR 无错题本必读/黑板证据路径（或缺「无黑板（已查路径）」） | 失忆式重犯；CR 无法核对证据硬挡 | 派发/自检摘要须引用路径；缺路径 → CR **major** |
 | Mandatory 触及 project-context §热路径批量回归之路径 glob，却未跑表内场景 ID（或红）仍标 `step-completed`/`runtime-validated` | 假绿结案、回归面裸奔 | 结案前按表跑批量回归 exit 0 + JSON；禁场景绿冒充 A#；无该节则本行不适用 |
+| 子代理越权直落（缺 plan-lite/方案审/确认包/CR 即落盘，或超授权范围改设施） | 跳过确认包改码，等同零确认交付；授权边界失守 | 策划只出方案；落盘必经 方案审 → 确认包「准」→ 程序员 → CR；子代理派发失败回退主窗补审（标非独立）或提示手动新开 Chat；越权内容由 PM 处置（降级/撤销）并记 recovery |
 
 ## 文档、回归与归档
 

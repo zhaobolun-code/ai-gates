@@ -16,6 +16,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 | 车道 | 本岗 |
 | --- | --- |
 | Express | **跳过** |
+| Direct | 跳过（无方案审；CR 隔离见 [code-reviewer/SKILL.md](../code-reviewer/SKILL.md)） |
 | Standard | L1 同 Chat；L1.5 回归索引模块；**跨 2+ 业务模块 → L2**（CORE §Standard 交叉审核）；L1.5 与 L2 取较高档 |
 | Full | L2/L3 → [references/plan-review-tiers.md](../references/plan-review-tiers.md)；本岗**必须子窗** + **高质量**档（[model-routing.md](../references/model-routing.md)）；隔离见 [isolated-review.md](../references/isolated-review.md) |
 
@@ -31,6 +32,8 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 2. **独立找 blocker**；不得只复述上一轮
 3. 每 Step 查：Mandatory Code Changes、**DO NOT TOUCH（冻结表）**、**Delta Spec（ADDED/MODIFIED/REMOVED）**、**满足验收：A#**、验证、Prerequisites
 3.05 **DO NOT TOUCH（冻结表）**：每 Step 须有该节（README 版本段 + 点名 API/文件，或「无（已扫）」）；缺节 → **major**。窗级「不要动什么」≠ Step 冻结表，不可用窗级替代
+3.06 **阻塞边（blocking edges，可选）**：Step 声明依赖/被依赖（depends-on / blocks；无则「无（独立 Step）」）；缺失不硬拦（并行窗口或跨 Step 依赖场景建议声明），但与 Step 顺序矛盾 → **major**
+3.07 **共享语言**：方案两套叫法并存或术语未登记而歧义 → **major**（细则 [shared-language.md](../references/shared-language.md)）
 3.5 **验收条款 + Delta-only + Delta Spec**（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md)）：无 `A1…`、条款不可证伪、Step 未引用 A#、文档复述整模块原理、或缺 Delta Spec 三段 → **blocker**，不得定版
 3.55 **Analyze 对表（P2）**：交审时核对三表——A# ↔ Mandatory（Code Changes / Delta）↔ 预期 Console 关键词（回归索引 / 验收信号）；缺任一或对不上 → **major**（缺 A# 直接 blocker，见 3.5）。细则 → [acceptance-and-delta.md](../references/acceptance-and-delta.md) §Analyze 对表
 3.6 **Agent 易错语义**：每 Step 须有该字段（Full 在 Pitfalls）；有记录则核对符号、实际语义及代码证据，写「未发现」时须列已检查的关键符号；缺字段、无证据或为凑数编造 → **blocker**

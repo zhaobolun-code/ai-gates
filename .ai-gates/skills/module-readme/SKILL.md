@@ -16,6 +16,7 @@ description: 维护模块 README 与版本记录。用户说「文档」「更�
 | 车道 | 本岗 |
 | --- | --- |
 | Express | 通常 skip；可选程序员一行版本 |
+| Direct | 通常 `dev-one-liner`（程序员一行）；≥2 文件或结构改动 → `readme: docs` 本岗 |
 | Standard/Full | PM 标 `readme: docs` 时**须**本岗；`dev-one-liner` 由程序员一行完成 |
 
 ## 模型路由 + 子窗

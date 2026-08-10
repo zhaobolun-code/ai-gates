@@ -106,6 +106,9 @@ Goal:
 Prerequisites:
 - 无 / [前置 Step 或条件]
 
+阻塞边（blocking edges，可选）:
+- 无 / [本 Step 依赖的 Step/窗口/票（depends-on）；被谁依赖（blocks）——为并行窗口与调度铺路；无或无需并行调度可省略]
+
 Requirements:
 - [功能要求]
 - [必须保留的约束]

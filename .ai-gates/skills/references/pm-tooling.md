@@ -6,7 +6,7 @@
 ## Git（可选）
 
 - **有 Git**：`suggest-pipeline-lane.ps1` 可统计 diff；`diff_hint` 写入 PM 内部字段（**不得**仅凭 diff_hint 定 `lane`）。
-- **无 Git**：不阻塞流水线；`diff_hint` 按 Mandatory / express-slice 文件数 + CORE §三车道手工填，无法确认则 `unknown`。
+- **无 Git**：不阻塞流水线；`diff_hint` 按 Mandatory / express-slice 文件数 + CORE §四车道判定手工填，无法确认则 `unknown`。
 - 审查派发块写「变更文件列表」；有 git 时可附加 diff，**非必须**。
 
 ## diff 辅助（advisory）
@@ -79,6 +79,6 @@ YAML 标 **`snapshot: manual`**。
 ## PM 自检（脚本相关）
 
 - [ ] 有 plan-lite → `suggest-pipeline-lane.ps1 -DocPath`；无 git 仍可用 DocPath
-- [ ] YAML 含 `diff_hint`、`readme`；`lane` 按 CORE §三车道判定
+- [ ] YAML 含 `diff_hint`、`readme`；`lane` 按 CORE §四车道判定
 - [ ] 快照：`ok` → 或 Write JSONL → `manual` → 或 `n/a`（不得伪造 `ok`）
 - [ ] L1.5 程序员完成 → 派发块 + **提示**用户新开 Chat

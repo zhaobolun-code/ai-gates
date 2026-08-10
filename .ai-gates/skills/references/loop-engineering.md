@@ -12,7 +12,7 @@
 | **Harness** | 单次会话内规则与岗位（CORE / skills） |
 | **Loop Engineering** | 外环：何时连跑、如何独立验证、何时整圈停止 |
 | **Agent loop（内环）** | Cursor/模型 tool 循环；**不改**产品内环 |
-| **Auto 执行模式** | Standard/Full 在「准」之后，允许在停机条件前连续推进**当前 Step 的实现与 CR**；**不是**第四条需求判定车道；**Express 不启用 Auto** |
+| **Auto 执行模式** | Standard/Full 在「准」之后，允许在停机条件前连续推进**当前 Step 的实现与 CR**；**不是**第五条需求判定车道；**Express / Direct 不启用 Auto** |
 
 **启动前仍须「准」**（一轮确认包）。Standard/Full：「准」**默认** Auto；显式「准, 不 Auto」则单步。`lane: Full` ≠ `execution_mode: Auto`（正交）。
 
@@ -95,7 +95,7 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 | 验通过，无剩余 Step | `→ runtime-validated → completed` |
 | `fuse reason=max_repair_rounds` | `blocked` → diagnosis §0.7 **A#/口径复议**确认包 →「准」后改口径/A#（若需）→ `review-pending → 按**当前车道**重审无 blocker`（**Standard 保持 Standard，禁止误升 Full/L3**；**仅 Full** 要最新版 L3 两轮）→ 重新「准」→ `repair_rounds=0`（同条留据）→ `implementation-ready → in-progress`（原 Step 或复议后新 Step）。「本窗 Auto」/新会话/口头解除**不得**重置，**不得**跳过 A# 复议直接再修 |
 | `blocker_kind=implementation` | 解除后 `blocked → in-progress(原 Step)`；修后重做隔离主 CR |
-| `blocker_kind=plan` 或 discover/replan/scope/lane | `blocked → review-pending → 按车道重审（Standard 不升 Full）→ 重新「准」→ implementation-ready → in-progress` |
+| `blocker_kind=plan` 或 discover/replan/scope/lane | `blocked → review-pending → 按车道重审（Direct 已升 Standard 的按 Standard 重审；Standard 不升 Full；Full 才 L3 两轮）→ 重新「准」→ implementation-ready → in-progress` |
 | 测试不通过 / AI 验收不通过 | `step-completed → blocked` → diagnosis-gates §0 |
 
 合法迁移：`runtime-validated → in-progress(下一已批准 Step)` 前提为文档**已是** `runtime-validated` 且仍有已批准 Step。
@@ -106,6 +106,7 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 - `max_repair_rounds`：**2**（交审级修复；微循环不计）
 - 停滞：同一失败标签 / 同一 Mandatory 无实质 diff 连续 **2** 轮 → `fuse`
 - **超时硬停（2026-08-05）**：同一 Step 连续 **60 分钟**无新 diff / 无新证据 / 无子窗返回 → `fuse reason=stall_timeout`；Auto 子窗无响应 **15 分钟** → 主窗接管（不再干等），按 §3 恢复路径处理。
+- **子窗确认（2026-08-07）**：执行期每 **5 分钟**一次短 wait + `list_agents` / 产物 mtime 确认；连续 3 轮（约 15 分钟）零活动 → 主窗接管；首轮 ACK 收紧为 **1 分钟** + 内容握手 → 细则见 [model-routing.md](./model-routing.md) §子窗健康检查与有界等待。
 - **token 预算（可选）**：project-context 或方案夹 `.state.json` 配置 `budget_tokens`；Auto 链累计估算超限 → `fuse reason=budget_exhausted`，须 TL 确认续额（不自动续）。
 - **审计打点**：`mark-pm-gate.ps1` 记录 `auto_active` / `auto_rounds` / `auto_startedAt`（pm-gate.json），供诊断与预算审计；机器层不改门禁语义。
 

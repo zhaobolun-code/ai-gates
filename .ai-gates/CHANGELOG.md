@@ -2,11 +2,52 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v3.3.1（2026-08-05 · **发布**；前版 v3.3.0 于 2026-08-05 定版）
+**当前 LTS**：v4.0.0（发布当日 · **发布**；四车道重构 · 破坏性门禁语义变更；前版 v3.3.1 于 2026-08-05 定版）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 
 ---
+
+## [4.0.0] - 发布当日（四车道重构 · 破坏性门禁语义变更 · 发布）
+
+### Changed
+
+- **四车道判定与升级链**：PM 每轮 `lane` 枚举由 Express / Standard / Full 扩展为 **Express → Direct → Standard → Full**；判定先查 Full 强制条，未命中再按 Express（步骤 1）→ Direct（步骤 2）→ Standard（步骤 3）判定，等效「取最高命中车道」；过程中命中升级立即改判（同步位：CORE / lane-glossary / full-lane-decision-tree）。
+- **Express 机械清单收窄**：仅字符串/注释/日志文本、编译错误修复（缺符号/类型不匹配，不重设计）、数字/常量/阈值 ≤3 行；**≤2 业务源文件**；无 API/持久/跨模块/生成文件；一句话说清 + 一句话 A# 可证伪；未命中热度/回归索引/止损链。
+- **Direct（新增直通道）**：有行为变化的小改（≤3 文件、无 API/持久/跨模块）→ Direct——策划子窗对话内出 A#/切片**不落盘**，默认单会话完成，跨会话/改不完自动升 Standard（同步位：doc-windowing Direct 无窗豁免 / express-slice 机械清单+Direct 对话内切片）。
+- **热度改强度升级**：热度命中不再整条升 Full——文件/机器热度命中（lessons 近 6 个月 / heat≥medium / last_fail_ts）且 Standard 规模小改 → 方案审 **L3 / 双轮 CR（热度命中取较高档：L1.5 之上 → L3/双轮 CR）**；回归索引模块小规模维持 Standard+L1.5 不取较高档；回归索引小规模 + 热度双命中按热度入口取较高档（同步位：plan-review-tiers / CORE §Standard 加强审核）。
+- **审核一律隔离**：Express 无 CR（程序员一行自检）；Direct 必隔离 CR（Subagent / 新 Chat，普通档，标「隔离复核」）；Standard 方案审（L1/L1.5/L2，隔离优先）+ 隔离 CR；Full 双轮升模型方案审 + 双轮升模型代码审。CR 模型档接线：Direct=普通档；Standard/Full=高级档；热度命中 Direct CR 升高级档。
+- **Express / Direct 不启用 Auto**：Auto 仅 Standard / Full「准」默认启用（退出句「准, 不 Auto」）；Direct 不落盘无跨会话交接载体，需要连跑即升 Standard（同步位：handoff-automation / loop-engineering / state-machine Express/Direct 例外）。
+- **机器校验同步**：`check-pipeline-doc.ps1` 车道枚举含 Direct（Direct 落盘文档给 advisory）；`update-doc-state.ps1` / `append-pipeline-outcome.ps1` ValidateSet 含 Direct；`validate-pipeline.ps1` 新增 USER-GUIDE 四车道一致性检查；`suggest-pipeline-lane.ps1` diff_hint 四车道（同步位：5 脚本）。
+- **VERSION 同步位清单**：CORE / lane-glossary / full-lane-decision-tree / state-machine / 6 岗位 SKILL / plan-review-tiers / doc-windowing / handoff-automation / loop-engineering / skill-eval-checklist / 5 脚本 / README / USER-GUIDE / MAINTAINER / `.mdc` / `.trae` / AGENTS——**CHANGELOG 顶部「当前 LTS」行 v3.3.1 → 4.0.0**；**MAINTAINER.md L15「当前 LTS 为 v3.1.4 定版」历史段：保留并注明（v3.1.4 为 2026-07 历史定版，当前 LTS 以 CHANGELOG 顶行为准）（n1）**。
+- **破坏性变更**：门禁语义（车道判定 / Direct 不落盘 / 热度改强度 / Auto 映射 / 审核隔离）为破坏性规则变更 → major 版本 **4.0.0**（对应 MAINTAINER「破坏性变更 → v4.0」策略）；入口只指向 VERSION，不写死版本字面量（发布产物除外）。
+
+### Included changes — 2026-08-10（Claude Code 适配 · 不 bump）
+
+- **Claude Code 侧接线**：新增 `.ai-gates/hooks/claude/` 12 个 hook 脚本（从 codex/ 同源复制改写）——`claude-hooks-common.ps1`（协议公共层：snake_case `hook_event_name`、显式 `permissionDecision:"allow"`、deny 必带 `permissionDecisionReason`、Get-TargetPaths 支持 `file_path`/`notebook_path`、Get-LogDir 三级父级解析）、`pre-bash-gate.ps1`/`pre-write-gate.ps1`/`post-write-gate.ps1`（合并入口）、`git-safety-check.ps1`、`audit-write.ps1`、`bash-write-gate.ps1`、`pm-gate-check.ps1`（.claude/** 升为 Level 1 接线设施、`.claude/settings.local.json` Level 0 豁免）、`mark-pm-gate.ps1`（Stop hook 改为解析 `transcript_path` JSONL——Claude 无 `last_assistant_message` 字段；assistant 行 content 字符串/数组两形兼容；session_id 兜底取 transcript 文件名）、`mark-changelog-write.ps1`、`check-unity-compile.ps1`、`check-hooks-drift.ps1`（SessionStart 接线自检：settings.json 解析、expected 映射、脚本 BOM、portal 健康）。所有脚本带 UTF-8 BOM。
+- **接线文件**：新增 `.ai-gates/claude/settings.json`（SessionStart/PreToolUse `^Bash$`/PreToolUse `^(Write|Edit|MultiEdit|NotebookEdit)$`/PostToolUse 同 matcher/Stop 五事件）与 `.ai-gates/claude/agents/` 6 个岗位代理 .md（pm / planner / plan-reviewer / developer / code-reviewer / module-readme，thin adapter 指向现有 SKILL.md，零内容迁移）。
+- **link-platform.ps1**：新增 `New-ClaudePortal`（`.claude/settings.json` 文件传送门 + `.claude/agents`、`.claude/skills` junction；`.claude` 目录本身不做 junction——`settings.local.json` 机器本地文件须留在真实目录）。
+- **自检**：新增 `scripts/test-claude-hooks.ps1`（33 断言注入式回归：deny 语义、[PM] 新鲜度、Level 0/1/2 分类、transcript JSONL 打点、编译错误提示、合并入口 fallback）；13 脚本 `ParseFile` 0 语法错误 + BOM 全保。
+- **真机验证点（3 项，待真实 Claude Code 会话确认后从 claude-hooks-common.ps1 头部契约清单摘除）**：① Claude Stop hook 的 `transcript_path` JSONL 行结构（type/message.content 两形）；② PreToolUse 输入中 `session_id` 可用性；③ PostToolUse `additionalContext` 投递与 Stop hook 退出码 0 的 stdout JSON 解析。适配期（settings.json 未链接）本仓库 hooks 不触发，硬门禁 #7 仍靠 CLAUDE.md 自觉。
+
+### Included changes — 2026-08-07（R20 CS0177 修复 + 编译门禁固化 · 不 bump）
+
+- **CS0177 修复**：R20 S1 `TryCascadePressurizedLiquidUpstream` 新增 `out bool forwardAdvanced` 未在方法入口定值导致 definite-assignment 编译错误；修复=置顶入口赋值（语义零改动），`dotnet build Assembly-CSharp.csproj` 0 错误验证。
+- **编译门禁固化（developer SKILL）**：新增/改动 `out` 参数必须在方法入口/所有返回路径前定值（防 CS0177）；业务 C# 交 CR 前最小验证=**真编译零错误**（`dotnet build` 相关 csproj 或 Unity Editor.log 无新增错误），禁以静态 grep/括号平衡充当编译通过。
+- **错题本**：lessons-learned.md 新增「out 参数入口定值 + 交 CR 前真编译」行（2026-08-07 · 用户「准」）。
+
+### Included changes — 2026-08-07（mattpocock 第二批机制 1-6 落地 · 不 bump）
+
+- **Step 1 · codebase-design（深模块设计语言 + design-it-twice + deepening）**：新 `references/codebase-design.md`（8 词词汇表逐词禁止漂移词 + 四原则 + 可测性三式 + deepening 四依赖分类 + replace-don't-layer + 被拒框架，与 architecture-health-check 互补）；新 `references/design-it-twice.md`（3+ 并行子代理 radically different 接口设计，四约束 + depth/locality/seam placement 对比 + 有观点推荐）；`reference-routing.md` 模型自动触发小表 + 按岗加载接线；`MAINTAINER.md` 规则索引加 codebase-design / design-it-twice 两行。
+- **Step 2 · resolving-merge-conflicts（按意图解 merge/rebase 冲突）**：新 `references/resolving-merge-conflicts.md`（5 步流程 + 禁止 `--abort` + 与 rollback.md / git-safety hook 边界句）；`reference-routing.md` 模型自动触发小表加行。
+- **Step 3 · prototype（先原型后定案 · Unity 本地化）**：新 `references/prototype.md`（LOGIC/UI 两分支 + 6 条通用规则 + 反模式；一次性产物落 `.ai-gates/tmp/` 或 OS tmp，不引入 Web 工具链）；`planner/SKILL.md` §2.9 加「先原型后定案」可选指针一行；`reference-routing.md` 模型自动触发小表加行。
+- **Step 4 · handoff-lite（临时交接轻量版）**：新 `references/handoff-lite.md`（9 字段一页纸 + 规则：按引用不复制、redact 敏感信息、临时交接落 `.ai-gates/tmp/` 或 OS tmp + 与 handoff-template / session-handover / agent-brief 用途区分句）；`reference-routing.md` 模型自动触发小表加行。
+- **Step 5 · wait-what（消息未落地重讲）**：新 `references/wait-what.md`（≤20 行：触发条件 + 重讲规则——shared-language 词汇 + STE100 简化技术英语思路，不引入完整规范）；`reference-routing.md` 模型自动触发小表加行。
+- **Step 6 · teach（多会话教学）**：新 `references/teach.md`（仅用户点名教学时启用；工作区结构 + 三要素 + 记忆机制 + ZPD + assets 复用默认；教学态独立于 Unity 工程；教学文档同过写作三律）；`reference-routing.md` 模型自动触发小表加行。
+
+### Included changes — 2026-08-10（skill-eval-v4 正式评分 · 不 bump）
+
+- **skill-eval-v4 窗（假需求真演六剧本 + 评分记录）**：对 v4.0.0 增量变更剧本（A1 三态 / D1 / D7 / D8 / F1n / H1 三角）假需求真演 10 场景，**9/10 Pass** + Fail 标签 `Direct未隔离CR`（S6 伪称隔离 CR，如实判 Fail，I2b 先例扩展，事后补派不追溯改判 Pass；真演 10 · 走读 0；Y=可触发数，N/A 排除，N/A=0）；`skill-eval-checklist.md` 评测记录表追加 v4.0.0 行（剧本正文 / 失败标签枚举 / §评分草表 / F1b 字面零改动）；夹具 `Assets/Doc/_examples/skill-eval-v4/`（假需求 ×6 + `_fixture.md` + `_评分表.md` + .meta 齐套）；VERSION 与 CHANGELOG「当前 LTS」行零触碰。
 
 ## [3.3.1] - 2026-08-05（升级流程联网化 + 零手动安装 · 发布）
 
@@ -16,6 +57,84 @@
 - **install-ai-gates.ps1 增强**：`-Source` 默认官方 GitHub URL；`-CheckUpdate` 以本地 VERSION 为基准的语义化比对且不克隆源（URL 走 `git ls-remote`）；URL 取最新 tag 后浅克隆；替换前校验源含 `.ai-gates/` + `skills/VERSION` 语义化版本；修复 git stderr 在 `$ErrorActionPreference=Stop` 下误判终止错误。
 - **README 零手动安装**：新增「零手动安装」段落（中英），新用户把自包含提示词整段粘贴给任一 Agent 即可联网安装 + 建传送门 + 引导初始化；提示词不依赖已装 skill（不要求先认识「项目经理」口令），精简为要点式（校验来源 / 保留项目状态 / 先确认 / 失败不落盘）。
 - **CORE/SKILLS 接线**：入口路由补 `升级 ai-gates` 联网更新语义；SKILLS 升级段改写（联网优先、本地回退）。
+
+### Included changes — 2026-08-07（mattpocock/skills 对照落地 5 项 · 不 bump）
+
+- 落地 5 项可借鉴实践（对照 [mattpocock/skills](https://github.com/mattpocock/skills) 84fdeff；逐条对照为一次性分析产物，已于收尾清理）：
+  1. **共享语言 / 活词汇表**：新 `references/shared-language.md`（术语以可观察现象/代码符号为准、登记格式、争议处理）+ `project-context.template.md` 新增「领域词汇表」节（对应 grill-with-docs / domain-modeling）。
+  2. **CR 双轴模式**：新 `references/dual-axis-review.md`（规范轴 + 规格轴分开扫、findings 分组、并行子代理可选；与既有对抗模式并列）；`cr-dispatch-l1.5.md` 派发块可加 `axis: standards+spec`。
+  3. **blocking edges**：`plan-lite.md` Step 模板与 `execution-doc-template.md`（Full）新增「阻塞边（依赖/被依赖）」可选字段；plan-reviewer 检查项为建议级（缺失不硬拦、与 Step 顺序矛盾 → major）（对应 to-tickets；收口按用户确认包由「必填」降回「可选」）。
+  4. **test-first 切片可选**：新 `references/test-first.md`（先最小断言后实现，断言绿 ≠ 业务 A# 通过）；developer 微循环增可选「test-first」条（对应 tdd）。
+  5. **架构体检**：新 `references/architecture-health-check.md`（CRG 只读概览：hub / bridge / knowledge-gaps / surprising-connections；Full 策划前可选，对应 improve-codebase-architecture）。
+- 接线：`reference-routing.md` 触发表 / MAINTAINER 规则索引同步；各岗 SKILL 指针 1～3 行；不 bump（VERSION 不变，仍 3.3.1）。
+- **顺带修复（Trae 规则文件不齐套）**：中央 `rules/` 补 `ai-dev-pipeline.md`（与 `.mdc` 内容对齐），`validate-pipeline -Strict` 的 Trae rule 版本一致性检查恢复（3.3.1 起中央只随包发 `.mdc`，`.trae/rules` 改 junction 后 `.md` 缺失导致校验红）。
+- 未落地候选（留档，需再立项）：research 子代理 / to-questionnaire 异步问卷 / wizard 人机向导 / wayfinder 决策票地图 / prototype 先原型——性价比低于前 5 项。
+
+### Included changes — 2026-08-07（link-platform 早退修复 + install-info 补写 · 不 bump）
+
+- **修复 `link-platform.ps1` `New-TraePortal` 早退 bug**：`.trae/skills` 已是有效链接时提前 `return`，导致其后 `.trae/rules` 建链代码被跳过（3.3.1 升级后 `.trae/rules` 残留旧真实目录的根因）；改为无早退结构，`.trae/rules` 传送门无论 `.trae/skills` 状态如何都会校验/补建。
+- **补写 `.ai-gates/install-info.json`**：本仓库非 install-ai-gates 安装流引入（此前缺失，不影响功能）；按 install-ai-gates 输出格式补写（source / tag=3.3.1 / installedAtUtc / targetRoot），供 `-CheckUpdate` 与 SessionStart 本地校验使用。
+
+### Included changes — 2026-08-07（子窗健康机制收紧 + 第二批借鉴落地 4 项 · 不 bump）
+
+- **子窗健康检查收紧（model-routing §子窗健康检查与有界等待）**：首轮 ACK 由 5 分钟收紧为 **1 分钟**；执行期每 **5 分钟**短 wait + `list_agents` / 产物 mtime 确认（连续 3 轮零活动 → 接管，与 loop-engineering §4 对齐）；ACK 升级为「内容握手」（回显岗位 + 任务摘要 + 不越权声明）；interrupt 后**级联清理**存活子树；无 ACK / 握手失败重启上限 2 次 → 主窗执行标非独立；执行中越权立即接管并记 recovery。
+- **第二批借鉴落地 4 项（对照 mattpocock/skills 84fdeff）**：
+  1. **research 子代理**：新 `references/research-task.md`（只读调研 + 引用证据 Markdown，禁止改交付物）；
+  2. **异步问卷**：`references/demand-clarification.md` 新增 §异步问卷（可选，决策留给别人时）；
+  3. **人机交互向导**：新 `references/human-wizard.md`（只能人做的步骤：凭证/授权/后台/物理操作）；
+  4. **决策点地图**：新 `references/decision-map.md`（超大任务 wayfinder，配合阻塞边字段）。
+  接线：reference-routing 触发表 / MAINTAINER 规则索引同步；未落地候选剩 prototype、handoff 轻量版、writing-for-agents 双轴、resolving-merge-conflicts（留档待立项）。
+
+### Included changes — 2026-08-07（mattpocock-batch1 Step 1：双轨调用 + 6 岗位 agents/openai.yaml · 不 bump）
+
+- **双轨调用元数据（mattpocock-batch1 Step 1/4）**：新增 6 岗位 `skills/<岗>/agents/openai.yaml`
+  （planner / plan-reviewer / developer / code-reviewer / module-readme / weekly-report），
+  `interface.display_name` / `interface.short_description` 非空（中文，short_description 与
+  SKILL.md frontmatter description 一致，不新增触发词）、`policy.allow_implicit_invocation: false`——
+  岗位=user-invoked（口令触发，模型不得自动执行岗）；字段结构对齐上游 openai.yaml 样例，
+  不引入 Claude Code 侧 `disable-model-invocation`。
+- **模型自动触发小表**：`references/reference-routing.md`「日常按触发加载」表后新增
+  「模型自动触发（model-invoked references）」小表（Step 1 落 diagnosis-gates / shared-language /
+  test-first / decision-map / human-wizard / research-task 6 行；agent-brief / out-of-scope
+  两行随 Step 3/4 补齐，窗级 A2 最终态 8 行）。
+- **MAINTAINER 技能元数据规范**：新增小节——每 SKILL 目录须带 `agents/openai.yaml`；
+  双轨调用语义（岗位=user-invoked vs references=model-invoked）；两者不同步=设施漂移。
+- **shared-language 登记**：「双轨调用」术语（调用权限维度）落活词汇表，并注明与
+  「双轴（CR 规范轴/规格轴，dual-axis-review.md）」是不同维度，禁止混用。
+- 不 bump VERSION；Skill/Doc-only，不涉 Unity golden。
+
+### Included changes — 2026-08-07（mattpocock-batch1 Step 2：写作三律 · 不 bump）
+
+- **写作三律**：`references/skill-eval-checklist.md` 新增「写作三律（写文档给 Agent 时）」节——
+  leading words（一个既有词优于一句描述）、否定句禁令（给正向目标；机器层 hooks 硬律/deny
+  语义除外且须配正向目标）、no-op 句测试（删掉该句若模型默认行为不变则整句删）——每条带判据；
+  适用范围=文档层新写/改写技能文档（SKILL.md/references/templates/AGENTS.md 类），渐进式，
+  不批量改写既有文档。本地化自 mattpocock/skills writing-for-agents，不引入其 context pointer
+  术语体系（本仓路由见 reference-routing）。
+- 不 bump VERSION；Skill/Doc-only。
+
+### Included changes — 2026-08-07（mattpocock-batch1 Step 3：AGENT-BRIEF 耐久契约 · 不 bump）
+
+- **agent-brief.md**：新增 `references/agent-brief.md`——四原则（耐久性优于精确，不写文件路径/
+  行号；行为式不过程式；验收标准可独立验证；显式 out of scope）+ 7 字段模板（Category / Summary /
+  Current behavior / Desired behavior / Key interfaces / Acceptance criteria / Out of scope）+
+  好/坏反例各 ≥1 + 本仓接线（Codex 桌面派发任务随 spawn 初始消息；长任务落
+  `.ai-gates/tmp/{窗口}-{岗}-task.md` 唯一来源文件惯例）。
+- **指针接线**：`review-dispatch-lifecycle.md` §1 加 AFK 委托书指针（按 agent-brief 规范撰写 +
+  投递按 model-routing 实测）；`developer/SKILL.md` 模型路由节加一行指针；
+  `reference-routing.md` 模型自动触发小表补 agent-brief 行（6→7 行）。
+- 不 bump VERSION；Skill/Doc-only。
+
+### Included changes — 2026-08-07（mattpocock-batch1 Step 4：OUT-OF-SCOPE 被拒需求归档 · 不 bump）
+
+- **out-of-scope.md**：新增 `references/out-of-scope.md`——一概念一文件（`# 概念名` + 决策 +
+  durable 理由 + Prior requests 列表，kebab-case 文件名）；理由禁临时借口（「太忙」= deferral）；
+  反查去重三步（确认/重议/区分）；仅 enhancement 被拒需求归档，「已实现」不归档；落盘约定
+  `.ai-gates/out-of-scope/`（不入 git，与 lessons-learned/pipeline-* 并列）；PM 判「不做」时
+  「你下一步」提示「已记入 out-of-scope/<概念>」。
+- **指针接线**：`reference-routing.md` 模型自动触发小表补 out-of-scope 行（7→8 行，A2 最终态）；
+  `MAINTAINER.md` 流程稳定性规则索引加 out-of-scope 行（与 lessons-learned 并列）。
+- 不 bump VERSION；Skill/Doc-only。
 
 ## [3.3.0] - 2026-08-05（README 宣传 + 设施改造 6 项 · 发布）
 
