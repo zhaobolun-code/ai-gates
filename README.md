@@ -6,8 +6,8 @@
 
 - **真门禁，不是建议稿**：无本轮 PM 判定的写入、高危 git（push --force 等）会被 hooks 直接 deny（CLI 已实测），门禁真的拦。
 - **失败过的地方自动加严**：回归热度 + 错题本命中 → 车道与审核档位自动升级（最低 Standard + L1.5），不靠人记。
-- **3 分钟接入、跨平台**：Cursor / Codex / Trae / Claude Code 共用同一份 `.ai-gates/` 库；新用户贴一段提示词即可装好。
-- **免费（MIT）、非银弹**：每步仍要你验收——省的是空转，不是人的判断。
+- **3 分钟接入、跨平台**：Cursor / Codex / Trae / Claude Code 共用同一份 `.ai-gates/` 库；新用户贴一段提示词即可装好——装好即用，四车道等概念日常不必学。
+- **免费（MIT）、非银弹——验收权在你**：AI 能改代码，但不能替你看软件里的现象是否真修好——日志出了关键词 ≠ 修好；每步以你亲测验收为准，省的是空转，不是人的判断。
 
 ## 定位：AI 编码的项目经理
 
@@ -60,7 +60,7 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 | **Standard**（跨模块 / API / 说不清） | 先写 plan-lite 方案 → 方案审 → 确认 → 改 → 隔离 CR |
 | **Full**（止损链 / 热度大改 / 「完整流程」） | 执行文档 → 方案审 → 确认 → 改 → 双轮升模型审核 |
 
-每步都要验收——A# 事先写清「怎样算通过」，以你亲眼所见为准。过程中命中升级（改动超范围、碰热度、跨模块）立即改判车道，不硬撑。
+每步都要验收——A# 事先写清「怎样算通过」，以你亲眼所见为准。过程中命中升级（改动超范围、碰热度、跨模块）立即改判车道，不硬撑。简单/紧急小改走 Express / Direct 快通道（一句话切片、不落盘、无冗余步骤）——门禁按风险升降，不为小改设卡。
 
 ## 方法论：为什么这样设计
 
@@ -129,8 +129,8 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 
 - **Real gates, not prompt suggestions.** Writes without a fresh PM go-ahead, and dangerous git commands (e.g. `push --force`), are denied by hooks (verified on Codex CLI).
 - **Past failures raise the bar.** Modules that already broke are tracked; touching them again auto-escalates the lane and review tier (minimum Standard + L1.5).
-- **3-minute setup, cross-platform.** One `.ai-gates/` library shared by Cursor / Codex / Trae / Claude Code; new users can paste one prompt to install.
-- **Free (MIT), not a silver bullet.** Every step still needs your acceptance — it removes busywork, not human judgment.
+- **3-minute setup, cross-platform.** One `.ai-gates/` library shared by Cursor / Codex / Trae / Claude Code; new users can paste one prompt to install and start using — no need to learn lane concepts for daily use.
+- **Free (MIT), not a silver bullet — acceptance is yours.** AI can change code, but it cannot see whether the software actually behaves correctly — a log keyword ≠ fixed; every step passes your hands-on acceptance — it removes busywork, not human judgment.
 
 ### Positioning: the project manager for AI coding
 
@@ -183,7 +183,7 @@ Every request follows one main line; the lane only decides how heavy each step i
 | **Standard** (cross-module / API / unclear) | plan-lite first → plan review → confirm → edit → isolated CR |
 | **Full** (stop-loss / heat big change / "full process") | execution doc → plan review → confirm → edit → two-round escalated-model review |
 
-Every step needs acceptance — A# states "what counts as done" up front, judged by what you actually see. If scope grows mid-task (over-scope, heat hit, cross-module), the lane re-judges immediately — no forcing through.
+Every step needs acceptance — A# states "what counts as done" up front, judged by what you actually see. If scope grows mid-task (over-scope, heat hit, cross-module), the lane re-judges immediately — no forcing through. Simple/urgent small edits take the Express / Direct fast lane (one-sentence slice, no written window, no redundant steps) — gates scale with risk, not a hurdle for small changes.
 
 ### Methodology: why it is designed this way
 
