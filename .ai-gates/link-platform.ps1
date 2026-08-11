@@ -13,6 +13,7 @@
 #   .claude/settings.json               → 文件链接 → .ai-gates/claude/settings.json
 #   .claude/agents                      → junction/符号链接 → .ai-gates/claude/agents
 #   .claude/skills                      → junction/符号链接 → .ai-gates/skills（Claude Code 技能）
+#   .mcp.json（项目根）                 → 文件链接 → .ai-gates/claude/mcp.json（Claude Code MCP 接线；.claude/mcp.json 不被读取，不建）
 #   （.claude/settings.local.json 为机器本地文件，保持不动，不做传送门）
 # Windows 目录用 Junction（无需管理员；同卷）；Unix 用符号链接（link-platform.sh）。
 #

@@ -54,7 +54,7 @@
 - **接线点实测修正**：Claude Code（2.1.226）**不读取 `.claude/mcp.json`**——项目级 MCP 配置正确位置是**项目根 `.mcp.json`**（实测 `claude mcp list` 生效）；此前的 `.claude/mcp.json` 方案作废。
 - **真源随库走**：新增 `.ai-gates/claude/mcp.json`（顶层键 `mcpServers`，codegraph = `codegraph serve --mcp`、code-review-graph = `uvx code-review-graph serve`，裸命令与 `.ai-gates/codex/config.toml` 语义同构；Windows 裸名 .cmd 解析实测通过）。
 - **link-platform.ps1**：`New-ClaudePortal` 新增 `.mcp.json`（项目根）→ `.ai-gates/claude/mcp.json` 文件传送门；头注释同步。
-- **项目 .gitignore**：`/mcp.json`（机器级接线产物，与 `.cursor/` `.claude/` `.codex/` 同类不入仓）。
+- **项目 .gitignore**：`/.mcp.json`（机器级接线产物，与 `.cursor/` `.claude/` `.codex/` 同类不入仓）。
 - **首用须知**：Claude Code 首次使用 MCP 显示 ⏸ Pending approval，会话内批准一次即可；`claude mcp list` 可查状态。
 
 ### Included changes — 2026-08-11（README 链接模式重构 + USER-GUIDE 安装方式补全 · 不 bump）
