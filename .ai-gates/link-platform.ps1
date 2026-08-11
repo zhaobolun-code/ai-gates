@@ -118,14 +118,17 @@ function New-CodexPortal {
     Write-Host "linked: .codex -> $target" -ForegroundColor Green
 }
 function New-ClaudePortal {
-    # Claude Code 侧传送门（2026-08-10）：
+    # Claude Code 侧传送门（2026-08-10；mcp.json 2026-08-11）：
     #   .claude/settings.json → 文件链接 → .ai-gates/claude/settings.json（hooks 接线）
     #   .claude/agents        → junction → .ai-gates/claude/agents（岗位代理）
     #   .claude/skills        → junction → .ai-gates/skills（Skill 内容零移植）
+    #   .mcp.json（项目根）   → 文件链接 → .ai-gates/claude/mcp.json（Claude Code MCP 接线；
+    #                           注：Claude Code 不读取 .claude/mcp.json，不建该路径）
     # 注意：.claude 目录本身**不做** junction——.claude/settings.local.json 是机器本地
     # 权限文件（gitignore），必须留在真实目录里；只建子级传送门。
     $centralClaude = Join-Path $central 'claude'
     New-FilePortal -Link (Join-Path $repoRoot '.claude\settings.json') -Target (Join-Path $centralClaude 'settings.json') -Label '.claude/settings.json'
+    New-FilePortal -Link (Join-Path $repoRoot '.mcp.json') -Target (Join-Path $centralClaude 'mcp.json') -Label '.mcp.json'
     New-DirPortal -Link (Join-Path $repoRoot '.claude\agents') -Target (Join-Path $centralClaude 'agents') -Label '.claude/agents'
     New-DirPortal -Link (Join-Path $repoRoot '.claude\skills') -Target (Join-Path $central 'skills') -Label '.claude/skills'
 }

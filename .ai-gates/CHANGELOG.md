@@ -49,6 +49,14 @@
 
 - **skill-eval-v4 窗（假需求真演六剧本 + 评分记录）**：对 v4.0.0 增量变更剧本（A1 三态 / D1 / D7 / D8 / F1n / H1 三角）假需求真演 10 场景，**9/10 Pass** + Fail 标签 `Direct未隔离CR`（S6 伪称隔离 CR，如实判 Fail，I2b 先例扩展，事后补派不追溯改判 Pass；真演 10 · 走读 0；Y=可触发数，N/A 排除，N/A=0）；`skill-eval-checklist.md` 评测记录表追加 v4.0.0 行（剧本正文 / 失败标签枚举 / §评分草表 / F1b 字面零改动）；夹具 `Assets/Doc/_examples/skill-eval-v4/`（假需求 ×6 + `_fixture.md` + `_评分表.md` + .meta 齐套）；VERSION 与 CHANGELOG「当前 LTS」行零触碰。
 
+### Included changes — 2026-08-11（Claude Code MCP 接线随库走 · 不 bump）
+
+- **接线点实测修正**：Claude Code（2.1.226）**不读取 `.claude/mcp.json`**——项目级 MCP 配置正确位置是**项目根 `.mcp.json`**（实测 `claude mcp list` 生效）；此前的 `.claude/mcp.json` 方案作废。
+- **真源随库走**：新增 `.ai-gates/claude/mcp.json`（顶层键 `mcpServers`，codegraph = `codegraph serve --mcp`、code-review-graph = `uvx code-review-graph serve`，裸命令与 `.ai-gates/codex/config.toml` 语义同构；Windows 裸名 .cmd 解析实测通过）。
+- **link-platform.ps1**：`New-ClaudePortal` 新增 `.mcp.json`（项目根）→ `.ai-gates/claude/mcp.json` 文件传送门；头注释同步。
+- **项目 .gitignore**：`/mcp.json`（机器级接线产物，与 `.cursor/` `.claude/` `.codex/` 同类不入仓）。
+- **首用须知**：Claude Code 首次使用 MCP 显示 ⏸ Pending approval，会话内批准一次即可；`claude mcp list` 可查状态。
+
 ### Included changes — 2026-08-11（README 链接模式重构 + USER-GUIDE 安装方式补全 · 不 bump）
 
 - **README 链接模式**：快速开始只留方式 A（零手动提示词）；方式 B/C、升级、报错处理移出正文 → USER-GUIDE 锚点链接（README 从「全量手册」转「速读 + 导航」）；方法论段保留 4 条 + 深挖链接；迭代提及（当前 v4.0.0 · 四车道重构）→ CHANGELOG 链接
