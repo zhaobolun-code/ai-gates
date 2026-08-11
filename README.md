@@ -27,30 +27,13 @@ ai-gates 不是又一个代码补全 / 质检插件：多数工具聚焦「代�
 动手前先列计划等我确认；失败或网络问题不要改文件，给出手动下载方案。
 ```
 
-**方式 B（一条命令 · 开发者/批量）**：在项目根打开 PowerShell，运行：
+**接入成本**：填一份短项目说明（技术栈、要小心的目录、几条必测）——不是长期运维配置；详细三步见 [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §第一次接入。体检：`项目经理 检查健康` / `PM doctor`。
 
-```powershell
-powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
-```
-
-装完回到 Agent 窗口说 `项目经理 初始化` 填项目说明即可。**macOS/Linux**：暂无对应一键命令，用方式 A 提示词，或手动安装（下方方式 C）后运行 `bash .ai-gates/link-platform.sh`（无 git 时本命令会自动走 zip 下载）。
-
-**方式 C（手动 · 备选）**：
-
-1. 从本仓库 **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)** 下载 **`ai_dev_v4.0.0.7z`**
-2. **解压到目标项目根**（包内是 `.ai-gates/`，不要解进 `.cursor/`）
-3. 在任一 AI 会话粘贴 **`项目经理 升级 ai-gates`**（=`PM upgrade ai-gates`），由 Agent 建好传送门（手动运行 `link-platform.ps1` / `.sh` 亦可，非必需）
-4. 装好后，在任一能改文件的 AI 会话粘贴：`项目经理` + 需求
-
-首次：`项目经理 初始化`，再填一份短项目说明（技术栈、要小心的目录、几条必测）。**这就是接入成本**——不是长期运维配置；详细三步见 [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §第一次接入。体检：`项目经理 检查健康` / `PM doctor`。
-
-**已装用户升级**：直接说 **`项目经理 升级 ai-gates`**——Agent 默认联网比对官方源最新版本与本地版本，**有新版才下载并替换**库内容（项目状态文件保留），随后校验/补齐传送门；网络不可用时回退本地已解压包流程。
-
-若下载后 Windows 提示「无法运行，拒绝访问」：把报错原文粘贴给项目经理处理即可（Agent 会解除下载文件的网络标记并重新接线）。
+**其他安装与维护**（开发者一条命令 / 手动 7z / 已装升级 / 下载报错处理）→ [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §怎么安装、更新、查版本；被门禁拦了 → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §被拦了怎么办（速查）。
 
 上手（约 3 分钟）：[USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md)。  
 这是什么、好不好用：[METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)。  
-版本迭代与变更历史：[CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)。
+版本迭代与变更历史（当前 v4.0.0 · 四车道重构）：[CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)。
 
 ## 工作流：一个需求怎么走完
 
@@ -105,7 +88,7 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 
 - **全平台可用（规则 / 技能 / 传送门）**：规则是纯 Markdown，其他 Agent 也可自行适配；传送门脚本**双份**——Windows 用 `link-platform.ps1`，macOS/Linux 用 `link-platform.sh`（Trae 另备 `link-trae-skills.sh`），都建 `.cursor/*`、`.codex`、`.claude`、`.trae/skills`、`.trae/rules`。
 - **Cursor / Codex / Trae / Claude Code 共用同一份库**：跑一次 `link-platform` 即建好全部传送门。
-- **Windows：完整支持**。机器强制 hooks（PM 写门禁 / 高危 git deny / Unity 编译提示，全部 `.ps1`）在 Codex CLI 0.146/0.147 与 Claude Code（2026-08-10 全链路真机确证）已实测 deny 拦截；一键安装见「快速开始」方式 C。已知缺口：Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
+- **Windows：完整支持**。机器强制 hooks（PM 写门禁 / 高危 git deny / Unity 编译提示，全部 `.ps1`）在 Codex CLI 0.146/0.147 与 Claude Code（2026-08-10 全链路真机确证）已实测 deny 拦截；一键安装见「快速开始」。已知缺口：Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
 - **macOS / Linux**：安装、规则、技能、传送门全支持；机器强制 hooks 暂为 PowerShell（`.ps1`）实现，需 pwsh 运行或暂以规则层生效（如实标注）。
 - **Trae 为软层**：规则 + 技能传送门齐全，但无机器 hooks——门禁以规则生效，机器强制暂不覆盖。
 - **单仓库边界**：门禁以当前仓库为界——跨仓库（多仓 / 微服务）改动不在机器强制覆盖内，跨仓部分仍靠团队约定。
@@ -154,30 +137,13 @@ Install the ai-gates skill pack (AI development pipeline) into this project from
 Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
 ```
 
-**Option B (one command · developers/scripting):** at the project root, open PowerShell and run:
+**The whole setup cost**: a short project note (stack, careful paths, a few must-test cases) — not an ongoing maintenance config; detailed first-time steps: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §第一次接入. Health check? Say `PM doctor`.
 
-```powershell
-powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"
-```
-
-When it finishes, say `PM init` in an agent window to fill the project note. **macOS/Linux**: no one-command equivalent yet — use Option A (prompt) or manual install (Option C below, then `bash .ai-gates/link-platform.sh`); a git-less machine falls back to downloading the tag zip automatically.
-
-**Option C (manual · fallback):**
-
-1. Download **`ai_dev_v4.0.0.7z`** from this repo’s **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)**.
-2. Extract **at** the target project’s root — the archive contains `.ai-gates/` (do **not** unzip into `.cursor/`).
-3. Paste **`PM upgrade ai-gates`** in any AI session (the agent runs `link-platform.ps1` / `.sh` for you; manual run is optional).
-4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae, or Claude Code): `PM` + request.
-
-First time on a project? Say `PM init`, then fill a short project note (stack, careful paths, a few must-test cases). Detailed first-time steps: USER-GUIDE. Health check? Say `PM doctor`.
-
-**Already installed?** Say `PM upgrade ai-gates` — the agent compares the official GitHub source's latest tag with your installed version, downloads and replaces the library only when a newer version exists (project files are preserved), then re-checks/creates the portals. No manual download needed. If the network is unavailable, extract the new pack at the project root and say the same phrase — the agent falls back to rewiring the portals from the local pack.
-
-If Windows refuses to run the downloaded script ("access denied"), paste the error back into the same AI session — the agent unblocks the downloaded files and re-wires it for you.
+**Other install & maintenance** (one-command install, manual 7z, upgrade, "access denied" download errors) → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §怎么安装、更新、查版本; blocked by a gate? → USER-GUIDE §被拦了怎么办（速查）.
 
 Quick start (3 min): [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md).  
 What this is / isn’t: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).  
-Version history: [CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md).
+Version history (current v4.0.0 · four-lane): [CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md).
 
 ### Workflow: how one request goes through
 
@@ -232,7 +198,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 - **Cross-platform (rules / skills / portals)**: rules are plain Markdown, other agents can adapt them; portal scripts ship in pairs — `link-platform.ps1` on Windows, `link-platform.sh` on macOS/Linux (plus `link-trae-skills.sh` for Trae) — all create `.cursor/*`, `.codex`, `.claude`, `.trae/skills`, `.trae/rules`.
 - **One `.ai-gates/` library for Cursor / Codex / Trae / Claude Code**; one `link-platform` run creates all the portals.
-- **Windows: full support.** The machine-enforced hooks (PM write gate, high-risk git deny, Unity compile hints — all PowerShell) are verified on codex-cli 0.146/0.147 and Claude Code (end-to-end machine-verified 2026-08-10); one-command install = Option C. Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
+- **Windows: full support.** The machine-enforced hooks (PM write gate, high-risk git deny, Unity compile hints — all PowerShell) are verified on codex-cli 0.146/0.147 and Claude Code (end-to-end machine-verified 2026-08-10); one-command install = Quick Start. Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
 - **macOS / Linux**: install, rules, skills, and portals fully supported; the machine hooks are currently PowerShell (`.ps1`) — run via pwsh or rely on the rule layer for now (stated honestly).
 - **Trae runs soft-layer only** (rules + skills portals, no machine hooks) — the gates still apply as instructions there, but enforcement is not machine-backed.
 - **Single-repo boundary**: gates are scoped to the current repository — cross-repo (multi-repo / microservices) changes are not covered by the machine layer; rely on team discipline there.

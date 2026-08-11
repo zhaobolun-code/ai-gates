@@ -49,6 +49,11 @@
 
 - **skill-eval-v4 窗（假需求真演六剧本 + 评分记录）**：对 v4.0.0 增量变更剧本（A1 三态 / D1 / D7 / D8 / F1n / H1 三角）假需求真演 10 场景，**9/10 Pass** + Fail 标签 `Direct未隔离CR`（S6 伪称隔离 CR，如实判 Fail，I2b 先例扩展，事后补派不追溯改判 Pass；真演 10 · 走读 0；Y=可触发数，N/A 排除，N/A=0）；`skill-eval-checklist.md` 评测记录表追加 v4.0.0 行（剧本正文 / 失败标签枚举 / §评分草表 / F1b 字面零改动）；夹具 `Assets/Doc/_examples/skill-eval-v4/`（假需求 ×6 + `_fixture.md` + `_评分表.md` + .meta 齐套）；VERSION 与 CHANGELOG「当前 LTS」行零触碰。
 
+### Included changes — 2026-08-11（README 链接模式重构 + USER-GUIDE 安装方式补全 · 不 bump）
+
+- **README 链接模式**：快速开始只留方式 A（零手动提示词）；方式 B/C、升级、报错处理移出正文 → USER-GUIDE 锚点链接（README 从「全量手册」转「速读 + 导航」）；方法论段保留 4 条 + 深挖链接；迭代提及（当前 v4.0.0 · 四车道重构）→ CHANGELOG 链接
+- **USER-GUIDE §常见问题**：「怎么安装/更新/查版本」展开方式 B（一键命令）/ 方式 C（手动 7z）/ 报错处理，承接 README 移出内容
+
 ## [3.3.1] - 2026-08-05（升级流程联网化 + 零手动安装 · 发布）
 
 ### Changed
