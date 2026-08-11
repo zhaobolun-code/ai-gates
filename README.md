@@ -1,6 +1,6 @@
 # ai-gates
 
-**AI 几秒就能改出一堆坏代码。这套东西不是又一个补全插件，而是一套在代码落地前强制把关的质量门禁。**
+**AI 几秒就能改出一堆坏代码。ai-gates 不是又一个补全插件，而是一套完整的开发流水线：你只提需求，它走完判定 → 切片 → 方案 → 实现 → 审查 → 验收全程，最后把一份测试方案交到你手上——你测过，才算完。**
 
 ## 为什么值得下载（30 秒看懂）
 
@@ -8,6 +8,7 @@
 - **失败过的地方自动加严**：回归热度 + 错题本命中 → 车道与审核档位自动升级（最低 Standard + L1.5），不靠人记。
 - **3 分钟接入、跨平台**：Cursor / Codex / Trae / Claude Code 共用同一份 `.ai-gates/` 库；新用户贴一段提示词即可装好——装好即用，四车道等概念日常不必学。
 - **免费（MIT）、非银弹——验收权在你**：AI 能改代码，但不能替你看软件里的现象是否真修好——日志出了关键词 ≠ 修好；每步以你亲测验收为准，省的是空转，不是人的判断。
+- **完整的流程，不是监工**：planner 写方案 → developer 写代码 → code-reviewer 审查 → 你验收——代码是流水线写出来的，它不只是拦着你。
 
 ## 定位：AI 编码的项目经理
 
@@ -49,7 +50,7 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 
 ## 工作流：一个需求怎么走完
 
-需求进来只有一条主线，车道只决定每步的粗细：
+需求进来只有一条主线，车道只决定每步的粗细。你只需说清要什么，剩余环节由流水线按岗位接力走完：
 
 **需求 → `[PM]` 判定车道 → 切片（改什么 / 怎样算通过）→ 一轮确认（回「准」）→ 实现 → 隔离代码审查 → 验收 → 复盘（失败入错题本）→ 收尾**
 
@@ -66,7 +67,7 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 
 它不提供编码技巧，也不替你判断业务——它保证流程秩序：每一轮改动有据可查、可停可撤、做完能收尾。四个核心设计（深挖见 [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)）：
 
-1. **管流程，不替写码**：多数工具聚焦代码本身（补全/审查/扫描）；ai-gates 多管一层——需求对齐 → 方案确认 → 执行 → 验收 → 复盘 → 止损，串成可重复、可度量的闭环
+1. **管流程，带出好代码**：多数工具聚焦代码本身（补全/审查/扫描）；ai-gates 管整个流程——代码由 developer 岗位按方案写，流程保证它写对、可复查、能收尾；不替你判断业务
 2. **失败驱动升档**：失败热度自动把过程数据变成规则——同一手法反复失败就停、换思路、记下此路不通（止损链），不做无限小补丁；不靠人记
 3. **一轮确认防静默**：回「准」= 理解 + 方案 + 开工一次确认，不反复问「你理解了吗」；禁止静默开工/静默交审——原因不只留在聊天里，下一轮按旧判断改
 4. **可停可撤、做完能收尾**：每个需求一个文件夹，结束时必须离开「进行中」；验收不过先看上一轮有用进展，再决定保留或撤掉——不是装上就自动变强的万能药
@@ -117,13 +118,25 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 2. **确认**：看「你下一步」，回「准」（= `approve`）
 3. **验收**：按提示测一遍，回通过/不通过
 
+其余环节全部由流水线按岗位接力完成。它能干什么、你只看到什么：
+
+| 流水线内部在做什么 | 你只看到什么 |
+| --- | --- |
+| 判定改动规模、选车道 | 一条「你下一步」 |
+| 写方案 / 执行文档（planner） | 确认说明，回「准」 |
+| 按方案实现代码（developer） | 进度提示 |
+| 隔离代码审查（code-reviewer） | 审查结果摘要 |
+| 自动验证 + 证据归集 | 一份测试方案 |
+| 复盘、失败入错题本 | 自动起草，需要时回「准」 |
+| 收尾：签收、挪文件夹 | 你说「通过」即完事 |
+
 机制表是**护栏说明**，不是开工前必背清单；门禁由助手执行。被拦了？deny 提示自带逃生路径；完整速查见 [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §被拦了怎么办。
 
 ---
 
 ## English
 
-**AI can ship bad code in seconds. This is not another autocomplete—it is an enforceable gate system that checks every change before you accept it.**
+**AI can ship bad code in seconds. This is not another autocomplete—it is a complete development pipeline: you just state the need, it runs the whole chain (judge → slice → plan → implement → review → accept) and hands you a test plan — you test it, and only then is it done.**
 
 ### Why download it (30-second read)
 
@@ -131,6 +144,7 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 - **Past failures raise the bar.** Modules that already broke are tracked; touching them again auto-escalates the lane and review tier (minimum Standard + L1.5).
 - **3-minute setup, cross-platform.** One `.ai-gates/` library shared by Cursor / Codex / Trae / Claude Code; new users can paste one prompt to install and start using — no need to learn lane concepts for daily use.
 - **Free (MIT), not a silver bullet — acceptance is yours.** AI can change code, but it cannot see whether the software actually behaves correctly — a log keyword ≠ fixed; every step passes your hands-on acceptance — it removes busywork, not human judgment.
+- **A full pipeline, not a gatekeeper.** planner writes the plan → developer writes the code → code-reviewer reviews → you accept — the pipeline produces the code, it does not just block you.
 
 ### Positioning: the project manager for AI coding
 
@@ -172,7 +186,7 @@ Version history (current v4.0.0 · four-lane): [CHANGELOG.md](https://github.com
 
 ### Workflow: how one request goes through
 
-Every request follows one main line; the lane only decides how heavy each step is:
+Every request follows one main line; the lane only decides how heavy each step is. You only state what you need — the pipeline carries the rest through by role:
 
 **Request → `[PM]` judges the lane → slice (what changes / what counts as done) → one-round confirmation (`approve`) → implement → isolated code review → acceptance → retrospective (failures go to the lessons book) → close-out**
 
@@ -189,7 +203,7 @@ Every step needs acceptance — A# states "what counts as done" up front, judged
 
 It offers no coding tricks and does not judge your business — it enforces process order: every round of changes is traceable, stoppable/reversible, and finishes with a close-out. Four core design choices (deep dive: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)):
 
-1. **Manage process, not code for you**: most tools focus on the code itself (autocomplete/review/scan); ai-gates adds one more layer — requirement alignment → plan confirmation → execution → acceptance → retrospective → stop-loss, as a repeatable, measurable loop
+1. **Manage process, deliver good code**: most tools focus on the code itself (autocomplete/review/scan); ai-gates manages the whole process — the developer role writes the code per the plan, the process ensures it is correct, reviewable, and closable; it does not judge your business
 2. **Failures raise the bar**: failure heat auto-converts process data into rules — the same approach failing repeatedly stops, switches path, and records the dead end (stop-loss chain), no endless micro-patches; not relying on memory
 3. **One-round confirmation, no silent moves**: one `approve` = understanding + plan + go in a single confirmation, no repeated "did you understand?" loops; no silent start of implementation/review — reasons do not stay only in chat to be re-guessed next round
 4. **Stoppable, reversible, closeable**: one folder per request; it must leave "in progress" when done; failed acceptance first reuses any useful progress from the last round before deciding keep/revert — not a magic pill that makes AI strong on install
@@ -239,6 +253,18 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 1. **Request**: say `PM` + your need (`PM` = project manager)
 2. **Confirm**: read "your next step", reply `approve`
 3. **Accept**: test as prompted, reply pass/fail
+
+Everything else runs through the pipeline by role. What it does inside vs. what you see:
+
+| Inside the pipeline | What you see |
+| --- | --- |
+| Judges the change scope, picks a lane | one line: "your next step" |
+| Writes plan / execution doc (planner) | a confirmation note — reply "approve" |
+| Implements code per the plan (developer) | progress notes |
+| Isolated code review (code-reviewer) | review summary |
+| Auto-verification + evidence collection | a test plan |
+| Retrospective, failures into the error book | draft auto; reply "approve" when asked |
+| Close-out: sign off, move the folder | you say "pass" and it is done |
 
 The mechanism table is **guardrail reference**, not a checklist to memorize before coding; the assistant runs the gates. Blocked? The deny message carries its own escape steps; full quick-reference: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (troubleshooting quick-ref section).
 
