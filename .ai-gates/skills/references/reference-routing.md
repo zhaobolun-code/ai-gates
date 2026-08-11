@@ -38,6 +38,7 @@
 | --- | --- |
 | 诊断 / 止损 / 热修自动加载放行规则 | `diagnosis-gates.md` |
 | 术语歧义 / 同义异名 | `shared-language.md` |
+| 典故词被点名（提词即唤起既定共识，不必复述） | `shared-language.md` |
 | 方案点名 test-first 切片时 | `test-first.md` |
 | 超大任务决策点地图 | `decision-map.md` |
 | 只能人做的步骤（凭证 / 授权 / 后台） | `human-wizard.md` |

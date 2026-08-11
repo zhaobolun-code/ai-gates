@@ -84,7 +84,7 @@ Standard / Full 每个 Step（Express 切片可极简）须相对**当前** `物
 4. 定版后可选：向模块 README 版本记录或 `.ai-gates/lessons-learned.md` **归档一行**（人工确认，非自动）。
 5. **窗口化**：活跃正文只在 `未完成.md`；已完成 Step 迁 `已完成/`（见 [doc-windowing.md](./doc-windowing.md)），禁止在未完成窗口堆历史长文。
 6. **Mandatory 可打开**：当前 Step 须有 `Mandatory-Step{NN}.md` 或完整写入未完成窗；禁止只活在历史全文。
-7. **诊断闸门**：止损 / 热修旁路 / 双轨收敛 → [diagnosis-gates.md](./diagnosis-gates.md)。
+7. **诊断闸门**：止损 / 热修旁路 / 并行实现收敛 → [diagnosis-gates.md](./diagnosis-gates.md)。
 8. **证据外置**：长 Console 进 `证据/`；交接短表。
 
 ## 岗位要点

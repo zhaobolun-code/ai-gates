@@ -14,7 +14,7 @@
 
 
 
-> 止损/热修/双轨/结案 → [diagnosis-gates.md](./diagnosis-gates.md)。
+> 止损/热修/并行实现/结案 → [diagnosis-gates.md](./diagnosis-gates.md)。
 
 
 

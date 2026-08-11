@@ -141,6 +141,7 @@ Cursor/Trae 传送门），**不表示要求安装 Cursor**；Codex-only 团队�
 - **双轨调用**（调用权限维度；与 [dual-axis-review.md](./references/dual-axis-review.md) 的 CR「双轴（规范轴/规格轴）」是不同维度，术语登记见 [shared-language.md](./references/shared-language.md)）：
   - 岗位 SKILL = **user-invoked**：口令触发（「策划」「程序员」等），模型**不得**自动以岗位身份执行；`allow_implicit_invocation: false` 即此语义的机器可读声明。
   - references = **model-invoked**：按 [reference-routing.md](./references/reference-routing.md)「模型自动触发」小表的触发语义由模型自动加载，无需用户点名。
+- 典故 / 术语被点名（提词即唤起既定共识）同样按 [reference-routing.md](./references/reference-routing.md)「模型自动触发」小表由模型自动加载 shared-language.md（model-invoked）；触发表新增行的同步义务遵循本节既有「不同步 = 设施漂移」句，不重复其校验内容。
 - 不同步 = **设施漂移**：新增/修改岗位 SKILL、触发表行或元数据字段时，须同步 openai.yaml + 触发表 + 本规范，并运行 `.cursor/scripts/validate-pipeline.ps1 -Strict`。
 
 ### 错题本落表（用户「准」后）

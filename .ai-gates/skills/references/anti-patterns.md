@@ -110,7 +110,7 @@
 | 实现者自审并宣布「无 blocker」 | 实现偏差未被发现 | 交 `代码审核`（高风险另开 Agent） |
 | Full 车道改**业务 C#**（Runtime/Editor）无 CodeGraph/CRG 仍宣布 CR 通过 | 影响面未知、回归遗漏 | **hard blocker**；安装图谱或降级车道并声明范围。**Skill/Doc-only**（无业务 C#）无图谱 → soft risk，不挡无-blocker 收口（见 [loop-engineering.md](./loop-engineering.md)） |
 | 为「以后可能用到」预先加抽象层/配置项/通用化参数，本次需求不需要 | 理解成本上升、无人验证的代码路径堆积 | **YAGNI**：只实现当前需求；真正复用场景出现再重构 |
-| 未检索 README/代码/同主题方案就写 Mandatory 或新开并行实现 | 重复造轮、双轨、神类只增不减 | **复用四问**（已有→复用→少写/不写→能删）；方案审缺表/可复用却新轨 → blocker；见 [execution-discipline.md](./execution-discipline.md) |
+| 未检索 README/代码/同主题方案就写 Mandatory 或新开并行实现 | 重复造轮、并行实现、神类只增不减 | **复用四问**（已有→复用→少写/不写→能删）；方案审缺表/可复用却并行实现 → blocker；见 [execution-discipline.md](./execution-discipline.md) |
 | 派发 `review_input_revision` 用文化敏感路径排序（如 PS `Sort-Object` 默认）或 L3 转场改了非排除节却不重生 | 假 `stale_dispatch`、审不进内容 | 路径 **Ordinal** 升序；转场只改排除三节；见 [review-dispatch-lifecycle.md](./review-dispatch-lifecycle.md) §3/§5 |
 | 改动路径遗留废弃方法/字段/`using`/注释掉的死代码未清理 | 类文件越滚越大，可读性与合并冲突风险上升 | 顺手清理；不确定则在交接说明「未清理原因」 |
 | 单个类/文件长期只增不减、职责混杂无人评估拆分 | 最终形成数千行"神类"，改动与审查成本集中失控 | CR 发现明显膨胀信号时标记 `major`，建议策划评估拆分方案 |
@@ -150,8 +150,8 @@
 | 向 Subagent 塞主对话长讨论或第二份长方案 | 隔离名存实亡 | 最短派发包（见 [isolated-review.md](./isolated-review.md)） |
 | 诊断连续 3 次推翻仍堆 Step N+1 | 步骤爆炸 | [diagnosis-gates.md](./diagnosis-gates.md) 止损线（含热修累计） |
 | 热修并入 10+ Step 主 Full 窗 | 主窗永不收敛 | 热修旁路短窗；失败仍计入止损 |
-| 热修改执行面不写与另一路径关系 | 双轨补丁永续 | §2.3 双轨一句 |
-| 双轨并存却无「删哪条」完成定义 | 补丁循环 | 双轨收敛闸门 |
+| 热修改执行面不写与另一路径关系 | 并行实现补丁永续 | §2.3 并行实现一句 |
+| 并行实现并存却无「删哪条」完成定义 | 补丁循环 | 并行实现收敛闸门 |
 | 为谨慎全目录 Read PressureManager | 源码 token 暴涨 | 日常先 `codegraph_explore`；审核岗先 CRG（LabSDK 子模块图） |
 | 交接默认贴大段代码/Console | 对话上下文膨胀 | 短表 + 证据外置 |
 | 把 CodeGraph soft budget 说成「额度已用尽」并整轮弃用 | 误导用户；退回全量 Read/Grep | 本地无付费额度；收窄 query 继续 explore（见 [codegraph-probe.md](./codegraph-probe.md)） |
@@ -194,7 +194,7 @@
 | 把微循环自检算进 §7「连续 3 次 static-checked」 | 过早逼停正当改码 | 中间自检不计；仅交审/交自检整轮累计 |
 | Unity 通过后不自动落 `_lesson-pending.md` / 或未「准」静默写 lessons 主表 | 成功路径不沉淀；或污染经验库 | 准全自动：自动 pending + 问「准」；`commit-lesson-pending.ps1 -Apply`（[lessons-learned.md](./lessons-learned.md)） |
 | 测挂不写 L0 却直接写 pending/主表 | 噪声进主表；根因未证 | 测挂只自动 L0；根因验证后再自动 pending |
-| Discover/Mandatory 只开第一道门，等失败再开第二道 | 漏扫 ≥2 跳；R6/R8 类双门闸只改一处 | diagnosis §0.8：CG ≥2 跳 + 读码 ≥1 跳；≥2 挡点一次策略；禁只开第一道门 |
+| Discover/Mandatory 只开第一道门，等失败再开第二道 | 漏扫 ≥2 跳；R6/R8 类双门闸只改一处 | diagnosis §0.8：CG ≥2 跳 + 读码 ≥1 跳；≥2 门闸一次策略；禁只开第一道门 |
 | 止损 0→1 后缺点名反思就再改码 | 重复只开第一道门；下一刀未证伪「为何上一轮不是最后一门」 | diagnosis §1.4：Mandatory/Discover 须点名门闸/调用边；空话 → major |
 
 

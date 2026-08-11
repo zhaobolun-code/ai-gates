@@ -29,8 +29,8 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 1. Read `.cursor/project-context.md`（若存在）+ 范围内 README + 真实代码入口 + **先** `.ai-gates/lessons-outline.md`（若存在，按桶扫）**再** `.ai-gates/lessons-learned.md`（点名行：模块/症状/作用域；命中则 Pitfalls + 更新「最近命中」；近 6 月命中 → 至少 L1.5，见 [plan-review-tiers.md](../references/plan-review-tiers.md)；细则 [lessons-learned.md](../references/lessons-learned.md)）。**强制**在 `未完成.md` 写 **`## 错题本必读（给程序员）`**：大纲桶 + 主表锚点（日期/模块/关键词）≤5 条，或「无（已扫大纲·{桶}）」；条目须能落到错因/改正
 1.1 **复用四问**（写 Mandatory 前强制，见 [execution-discipline.md](../references/execution-discipline.md)）：已有吗→能复用吗→能少写/不写吗→能删吗；每 Step 落 ≤6 行短表（可并入选型短表）；未检索不得写新路径。若 project-context 有 **神类止血/补强三口**：Mandatory 须用**替换句式**，超净增阈/方法预算须 Service·拆分·REMOVED 或豁免句
 2. **Standard / Full 落盘（Direct 除外：对话内 A#/切片，不落盘）**：用户指定 > project-context 文档根 > `Assets/Doc/{主题}/执行中/{方案短名}/`（见 [doc-path-defaults.md](../references/doc-path-defaults.md)）；**必须**文件夹 + `未完成.md` + `已完成/_索引.md`（见 [doc-windowing.md](../references/doc-windowing.md)）；默认进 **执行中/**；空闲/结案同条迁 **签收/**；失败/回退/停写/换层按 doc-windowing（**失败含止损**，方案夹不加前缀）；**禁止**新建无窗口单文件长方案；活跃正文只写在 `未完成.md`
-2.1 **诊断闸门**：止损（含热修失败计入）/ 热修上限 / 放行合取 / 热修双轨一句 / 双轨收敛 / **Verify→Discover** → [diagnosis-gates.md](../references/diagnosis-gates.md)；违反则不得定版
-2.1.1 **Discover 全路径预扫**：Mandatory 触及 §0.8 信号枚举（最低集：放行、早 return、`allow_*`、`redirect`、`handover`、Ready/Register、`*_not_ready`/`upstream_not_ready`/`terminal_not_ready`、增改通路改道）→ 须写预扫链：**「跳」= 门闸/调用边（≠ CG 条数）**；CG 覆盖 ≥2 跳 → 读码复核 ≥1 跳（或 CG 未覆盖→已读码 `path:symbol`）；列扫过符号；≥2 挡点一次策略；BMAD 自包含；正文扩写点名 `ShouldBypass*` / `force*`·`suppress*` / `TryAdvance*` 改道；**禁只开第一道门**
+2.1 **诊断闸门**：止损（含热修失败计入）/ 热修上限 / 放行合取 / 热修并行实现一句 / 并行实现收敛 / **Verify→Discover** → [diagnosis-gates.md](../references/diagnosis-gates.md)；违反则不得定版
+2.1.1 **Discover 全路径预扫**：Mandatory 触及 §0.8 信号枚举（最低集：放行、早 return、`allow_*`、`redirect`、`handover`、Ready/Register、`*_not_ready`/`upstream_not_ready`/`terminal_not_ready`、增改通路改道）→ 须写预扫链：**「跳」= 门闸/调用边（≠ CG 条数）**；CG 覆盖 ≥2 跳 → 读码复核 ≥1 跳（或 CG 未覆盖→已读码 `path:symbol`）；列扫过符号；≥2 门闸一次策略；BMAD 自包含；正文扩写点名 `ShouldBypass*` / `force*`·`suppress*` / `TryAdvance*` 改道；**禁只开第一道门**
 2.2 **完成即迁移** + **首段=状态** + Discover≤15 行（超出进 `证据/`）
 2.3 **证据外置**：长日志进 `证据/`，未完成窗一行摘要
 2.4 **活跃可改码窗**：多窗并存时主窗写 `当前唯一可改码窗：…`（见 doc-windowing）
@@ -47,7 +47,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 5. 「文档状态」：`draft` → `review-pending` → 过审发确认包 →「准」后 ready 并同条开始改码（[handoff-automation.md](../references/handoff-automation.md) §0/§F）
 6. 禁止「考虑」「待定」— 转默认决策或 blocker
 7. 代码/README 未读过不得写 Mandatory Code Changes
-8. **精简优先（YAGNI）+ 复用四问**：Mandatory 只写最小改动；优先复用/少写/不写/删除；禁止默认在神类上新开并行轨
+8. **精简优先（YAGNI）+ 复用四问**：Mandatory 只写最小改动；优先复用/少写/不写/删除；禁止默认在神类上新开并行实现
 9. 用户仅咨询时不创建文件
 
 

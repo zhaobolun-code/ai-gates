@@ -41,12 +41,12 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 3.7.1 **窗口关系摘要**（跨窗 plan-lite / Full）：须有 `## 窗口关系摘要` **四列表**（主题短名 + Beads 关系枚举 + 状态 + 关键结论一句）；缺表 → **major**；用散文段落替代四列表 → **blocker**
 3.7.2 **档位单选 + 空闲枢纽**：「方案审核档位」保留未决串（如 `L1 / L1.5 / L2 / L3 / 跳过`）→ **major**；无活跃 Mandatory 的占位空壳长期停 `执行中/` → **major**（指针 [doc-windowing.md](../references/doc-windowing.md) §状态分类夹）
 3.7.3 **终态须迁夹**：文档状态已是 `completed`/签收结案/失败·止损放弃/回退，或空闲须离执行中，但方案夹仍在 `执行中/`（未 `migrate-pipeline-window.ps1` 或同等）→ **blocker**（handoff §E 结案检查单硬项；未迁夹=未结案）
-3.8 **诊断闸门**（见 [diagnosis-gates.md](../references/diagnosis-gates.md)）：命中止损（含热修累计）未停车 / 热修超上限仍定版 / 放行无合取 / 热修无双轨一句 / 双轨无收敛 / Verify 后无 Discover → **blocker**
-3.8.1 **止损 0→1 反思句**（§1.4）：同一主现象止损计数 **0→1** 后，下一刀 Mandatory/Discover 须含「**为什么上一轮不是最后一门**」点名反思（至少 1 个门闸/调用边 `path:symbol`）；缺句或空话（如「已考虑路径」未点名挡点）→ **major**
+3.8 **诊断闸门**（见 [diagnosis-gates.md](../references/diagnosis-gates.md)）：命中止损（含热修累计）未停车 / 热修超上限仍定版 / 放行无合取 / 热修无并行实现一句 / 并行实现无收敛 / Verify 后无 Discover → **blocker**
+3.8.1 **止损 0→1 反思句**（§1.4）：同一主现象止损计数 **0→1** 后，下一刀 Mandatory/Discover 须含「**为什么上一轮不是最后一门**」点名反思（至少 1 个门闸/调用边 `path:symbol`）；缺句或空话（如「已考虑路径」未点名门闸）→ **major**
 3.9 **改前选型短表**：交审/定版前须有「本步方案 + 为什么选 + 不选的缺点」；缺 → **major**；先改码后补理由 → **blocker**
 3.9.1 **错题本必读**（[lessons-learned.md](../references/lessons-learned.md) §错题大纲）：缺 `## 错题本必读（给程序员）` → **major**（纯咨询窗除外）；热模块/压力窗写「无」但大纲同桶有明显命中 → **major**；只列锚点无错因/改正可追溯（大纲或主表）→ **major**
 3.9.2 **物理口径三件套**：`物理口径.md` 缺**硬句**≥1 / **负面**≥1 / **失败标准**≥1 任一项，或硬句为纯口号（无可观察信号/点名对象/可证伪判据）→ **major**
-3.10 **复用四问**（[execution-discipline.md](../references/execution-discipline.md)）：每 Step 缺「已有/复用/少写或不写/能删」短表 → **blocker**；明显可复用既有 helper/Service/门闸却新开并行轨或新抽象 → **blocker**；REMOVED 恒为「无」且 Mandatory 只往神类堆逻辑、无抽离说明 → **major**
+3.10 **复用四问**（[execution-discipline.md](../references/execution-discipline.md)）：每 Step 缺「已有/复用/少写或不写/能删」短表 → **blocker**；明显可复用既有 helper/Service/门闸却新开并行实现或新抽象 → **blocker**；REMOVED 恒为「无」且 Mandatory 只往神类堆逻辑、无抽离说明 → **major**
 3.11 **项目神类止血/补强三口**（若 `.cursor/project-context.md` 有该节）：Mandatory 仅「追加」口吻无下沉/REMOVED → **major**；超净增阈无 Service/REMOVED/用户确认收敛债 → **blocker**；新方法体超预算无豁免句 → **major**
 4. 有 blocker → 不得 `implementation-ready` / 可交给程序员=是；策划正确响应后可提醒提议 lessons 类型=`方案blocker`（须「准」，见 [lessons-learned.md](../references/lessons-learned.md)）
 5. **L1.5 触发**（CORE §Standard 加强审核）：每 Step 的 Regression Validation 须引用 project-context 回归索引对应行；plan-lite「方案审核档位」记 **L1.5**

@@ -123,7 +123,7 @@
 | G1e | 读权限 | 只开放点名 `_…派发.md`；扫描其它 `证据/**` → **Fail**，标签 `整读归档` |
 | G1f | revision / 集合 | target/review_input SHA-256 不匹配或 `target_files` ⊄ whitelist 仍继续审或复用旧结论 → **Fail**，标签 `Auto越权` 或记 `stale_dispatch` |
 
-## H. v3.2 收敛与瘦身
+## H. v3.2 收敛与精简
 
 | ID | 剧本 | Pass 标准 |
 | --- | --- | --- |
@@ -175,7 +175,7 @@
 
 | ID | 剧本 | Pass 标准 | 缺则判级 |
 | --- | --- | --- | --- |
-| J1 | Discover/Mandatory 触及 §0.8 信号枚举 | 须有预扫链：「跳」=门闸/调用边；CG≥2跳→读码≥1跳；扫过符号；≥2挡点一次策略；BMAD；禁只开第一道门 | **blocker** |
+| J1 | Discover/Mandatory 触及 §0.8 信号枚举 | 须有预扫链：「跳」=门闸/调用边；CG≥2跳→读码≥1跳；扫过符号；≥2门闸一次策略；BMAD；禁只开第一道门 | **blocker** |
 | J2 | 止损 0→1 后下一刀 | Mandatory/Discover 含「**为什么上一轮不是最后一门**」点名反思（≥1 门闸/调用边）；禁空话 | **major** |
 | J3 | 跨窗 plan-lite / Full | 须有 `## 窗口关系摘要` 四列表（主题短名+Beads+状态+结论）；禁散文替代 | 缺表 **blocker**；散文 **major** |
 | J4 | 方案审核档位 | 须单选其一；禁未决串 `L1 / L1.5 / L2 / L3 / 跳过` | **major** |

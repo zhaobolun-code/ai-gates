@@ -37,7 +37,7 @@
 
 | Top `why_multi` | 优先改 |
 | --- | --- |
-| `dual_track` | 双轨一句 / 方案审必检 |
+| `dual_track` | 并行实现一句 / 方案审必检 |
 | `semantic` | 易错语义 + CR 反推 |
 | `spec_drift` | diagnosis §0.5 先改口径 |
 | `scope` | `diagnosis-gates` §0.3 异现象行（已落地）：挂起+另开短窗，禁并修/误烧止损 |
