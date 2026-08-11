@@ -52,6 +52,30 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 这是什么、好不好用：[METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)。  
 版本迭代与变更历史：[CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)。
 
+## 工作流：一个需求怎么走完
+
+需求进来只有一条主线，车道只决定每步的粗细：
+
+**需求 → `[PM]` 判定车道 → 切片（改什么 / 怎样算通过）→ 一轮确认（回「准」）→ 实现 → 隔离代码审查 → 验收 → 复盘（失败入错题本）→ 收尾**
+
+| 车道 | 流程中的样子 |
+| --- | --- |
+| **Express**（一行注释/文案/常量） | 一句话切片 → 确认 → 改 → 一行自检；不派独立 CR |
+| **Direct**（有行为变化的小改） | 对话内 A#/切片（不落盘）→ 确认 → 改 → 隔离 CR |
+| **Standard**（跨模块 / API / 说不清） | 先写 plan-lite 方案 → 方案审 → 确认 → 改 → 隔离 CR |
+| **Full**（止损链 / 热度大改 / 「完整流程」） | 执行文档 → 方案审 → 确认 → 改 → 双轮升模型审核 |
+
+每步都要验收——A# 事先写清「怎样算通过」，以你亲眼所见为准。过程中命中升级（改动超范围、碰热度、跨模块）立即改判车道，不硬撑。
+
+## 方法论：为什么这样设计
+
+它不提供编码技巧，也不替你判断业务——它保证流程秩序：每一轮改动有据可查、可停可撤、做完能收尾。四个核心设计（深挖见 [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)）：
+
+1. **管流程，不替写码**：多数工具聚焦代码本身（补全/审查/扫描）；ai-gates 多管一层——需求对齐 → 方案确认 → 执行 → 验收 → 复盘 → 止损，串成可重复、可度量的闭环
+2. **失败驱动升档**：失败热度自动把过程数据变成规则——同一手法反复失败就停、换思路、记下此路不通（止损链），不做无限小补丁；不靠人记
+3. **一轮确认防静默**：回「准」= 理解 + 方案 + 开工一次确认，不反复问「你理解了吗」；禁止静默开工/静默交审——原因不只留在聊天里，下一轮按旧判断改
+4. **可停可撤、做完能收尾**：每个需求一个文件夹，结束时必须离开「进行中」；验收不过先看上一轮有用进展，再决定保留或撤掉——不是装上就自动变强的万能药
+
 ## 里面有什么（机制表）
 
 这些不是功能清单，是护栏——每一条都对应真实改码里已经踩过的失败模式。**日常使用不必背这张表。**
@@ -154,6 +178,30 @@ If Windows refuses to run the downloaded script ("access denied"), paste the err
 Quick start (3 min): [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md).  
 What this is / isn’t: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).  
 Version history: [CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md).
+
+### Workflow: how one request goes through
+
+Every request follows one main line; the lane only decides how heavy each step is:
+
+**Request → `[PM]` judges the lane → slice (what changes / what counts as done) → one-round confirmation (`approve`) → implement → isolated code review → acceptance → retrospective (failures go to the lessons book) → close-out**
+
+| Lane | Shape in the workflow |
+| --- | --- |
+| **Express** (one-line comment/text/constant) | one-sentence slice → confirm → edit → one-line self-check; no isolated CR |
+| **Direct** (small change with behavior change) | in-chat A#/slice (no written window) → confirm → edit → isolated CR |
+| **Standard** (cross-module / API / unclear) | plan-lite first → plan review → confirm → edit → isolated CR |
+| **Full** (stop-loss / heat big change / "full process") | execution doc → plan review → confirm → edit → two-round escalated-model review |
+
+Every step needs acceptance — A# states "what counts as done" up front, judged by what you actually see. If scope grows mid-task (over-scope, heat hit, cross-module), the lane re-judges immediately — no forcing through.
+
+### Methodology: why it is designed this way
+
+It offers no coding tricks and does not judge your business — it enforces process order: every round of changes is traceable, stoppable/reversible, and finishes with a close-out. Four core design choices (deep dive: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)):
+
+1. **Manage process, not code for you**: most tools focus on the code itself (autocomplete/review/scan); ai-gates adds one more layer — requirement alignment → plan confirmation → execution → acceptance → retrospective → stop-loss, as a repeatable, measurable loop
+2. **Failures raise the bar**: failure heat auto-converts process data into rules — the same approach failing repeatedly stops, switches path, and records the dead end (stop-loss chain), no endless micro-patches; not relying on memory
+3. **One-round confirmation, no silent moves**: one `approve` = understanding + plan + go in a single confirmation, no repeated "did you understand?" loops; no silent start of implementation/review — reasons do not stay only in chat to be re-guessed next round
+4. **Stoppable, reversible, closeable**: one folder per request; it must leave "in progress" when done; failed acceptance first reuses any useful progress from the last round before deciding keep/revert — not a magic pill that makes AI strong on install
 
 ### What's inside
 
