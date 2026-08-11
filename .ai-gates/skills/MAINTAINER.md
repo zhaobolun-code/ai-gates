@@ -133,6 +133,7 @@ Cursor/Trae 传送门），**不表示要求安装 Cursor**；Codex-only 团队�
 | 被拒需求归档 / 去重（out-of-scope） | [out-of-scope.md](./references/out-of-scope.md) |
 | 深模块设计语言（codebase-design） | [codebase-design.md](./references/codebase-design.md) |
 | 并行接口设计（design-it-twice） | [design-it-twice.md](./references/design-it-twice.md) |
+| 需求澄清与确认（一轮确认 / 三问 / 异步问卷 / grill 访谈） | [demand-clarification.md](./references/demand-clarification.md) |
 修改 reference 后：检查 CORE 翻车表、anti-patterns、`.mdc` / `.trae/rules` 引用是否需同步。
 
 ## 技能元数据规范

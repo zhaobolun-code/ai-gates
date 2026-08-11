@@ -51,6 +51,7 @@
 | 临时交接 / 轻量传话时 | `handoff-lite.md` |
 | 沟通未落地（用户「没听懂 / 再说一遍」）时 | `wait-what.md` |
 | 用户点名教学（「教我 X / 带我学 X」）时 | `teach.md` |
+| 需求模糊 / 访谈 / grill（需求切片未定、澄清仍分歧时） | `demand-clarification.md`（§grill 访谈） |
 
 ## 按岗加载
 

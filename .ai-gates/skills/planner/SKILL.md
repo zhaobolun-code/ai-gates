@@ -59,7 +59,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 4. 「准」→ 同条定版并开始改码；写入 `未完成.md`。  
 5. **禁止**先改码再补理由；**禁止**单独先问「理解正确」再发包。
 
-细则 → [demand-clarification.md](../references/demand-clarification.md)
+细则 → [demand-clarification.md](../references/demand-clarification.md)；需求未定 / 大需求 / 多次澄清仍分歧 → 先按其中 **grill 访谈** 节一次一问澄清，分支穷尽再写切片；「准」确认仍只 1 轮
 
 ## 禁止
 

@@ -8,6 +8,21 @@
 
 ---
 
+## 最近迭代（最新在上）
+
+- 2026-08-11：TDD 落地 Step 1（外部 dotnet NUnit 测试工程 · 161 用例首测）
+- 2026-08-11：grill 访谈机制落地（mattpocock 第三批）
+- 2026-08-11：README 中英拆分（中英镜像 + 中文链接句）
+- 2026-08-11：说明文档瘦身（README 定位压缩 / USER-GUIDE·METHODOLOGY 对齐 / PACKAGE-INFO 同步）
+- 2026-08-11：shared-language 典故节（典故词典 + 漂移防护 + 触发接线）
+- 2026-08-11：README 链接模式重构 + USER-GUIDE 安装方式补全
+- 2026-08-11：Claude Code MCP 接线随库走（.mcp.json 传送门）
+- 2026-08-10：Claude Code 适配（12 hook 脚本 + 接线文件 + link-platform）
+- 2026-08-10：skill-eval-v4 正式评分（假需求真演六剧本 9/10 Pass）
+- 2026-08-07：R20 CS0177 修复 + 编译门禁固化
+- 2026-08-07：mattpocock 第二批机制 1-6 落地
+- 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
 ## [4.0.0] - 发布当日（四车道重构 · 破坏性门禁语义变更 · 发布）
 
 ### Changed
@@ -22,32 +37,21 @@
 - **VERSION 同步位清单**：CORE / lane-glossary / full-lane-decision-tree / state-machine / 6 岗位 SKILL / plan-review-tiers / doc-windowing / handoff-automation / loop-engineering / skill-eval-checklist / 5 脚本 / README / USER-GUIDE / MAINTAINER / `.mdc` / `.trae` / AGENTS——**CHANGELOG 顶部「当前 LTS」行 v3.3.1 → 4.0.0**；**MAINTAINER.md L15「当前 LTS 为 v3.1.4 定版」历史段：保留并注明（v3.1.4 为 2026-07 历史定版，当前 LTS 以 CHANGELOG 顶行为准）（n1）**。
 - **破坏性变更**：门禁语义（车道判定 / Direct 不落盘 / 热度改强度 / Auto 映射 / 审核隔离）为破坏性规则变更 → major 版本 **4.0.0**（对应 MAINTAINER「破坏性变更 → v4.0」策略）；入口只指向 VERSION，不写死版本字面量（发布产物除外）。
 
-### Included changes — 2026-08-10（Claude Code 适配 · 不 bump）
+### Included changes — 2026-08-11（TDD 落地 Step 1 · 不 bump）
 
-- **Claude Code 侧接线**：新增 `.ai-gates/hooks/claude/` 12 个 hook 脚本（从 codex/ 同源复制改写）——`claude-hooks-common.ps1`（协议公共层：snake_case `hook_event_name`、显式 `permissionDecision:"allow"`、deny 必带 `permissionDecisionReason`、Get-TargetPaths 支持 `file_path`/`notebook_path`、Get-LogDir 三级父级解析）、`pre-bash-gate.ps1`/`pre-write-gate.ps1`/`post-write-gate.ps1`（合并入口）、`git-safety-check.ps1`、`audit-write.ps1`、`bash-write-gate.ps1`、`pm-gate-check.ps1`（.claude/** 升为 Level 1 接线设施、`.claude/settings.local.json` Level 0 豁免）、`mark-pm-gate.ps1`（Stop hook 改为解析 `transcript_path` JSONL——Claude 无 `last_assistant_message` 字段；assistant 行 content 字符串/数组两形兼容；session_id 兜底取 transcript 文件名）、`mark-changelog-write.ps1`、`check-unity-compile.ps1`、`check-hooks-drift.ps1`（SessionStart 接线自检：settings.json 解析、expected 映射、脚本 BOM、portal 健康）。所有脚本带 UTF-8 BOM。
-- **接线文件**：新增 `.ai-gates/claude/settings.json`（SessionStart/PreToolUse `^Bash$`/PreToolUse `^(Write|Edit|MultiEdit|NotebookEdit)$`/PostToolUse 同 matcher/Stop 五事件）与 `.ai-gates/claude/agents/` 6 个岗位代理 .md（pm / planner / plan-reviewer / developer / code-reviewer / module-readme，thin adapter 指向现有 SKILL.md，零内容迁移）。
-- **link-platform.ps1**：新增 `New-ClaudePortal`（`.claude/settings.json` 文件传送门 + `.claude/agents`、`.claude/skills` junction；`.claude` 目录本身不做 junction——`settings.local.json` 机器本地文件须留在真实目录）。
-- **自检**：新增 `scripts/test-claude-hooks.ps1`（33 断言注入式回归：deny 语义、[PM] 新鲜度、Level 0/1/2 分类、transcript JSONL 打点、编译错误提示、合并入口 fallback）；13 脚本 `ParseFile` 0 语法错误 + BOM 全保。
-- **真机验证点（3 项，待真实 Claude Code 会话确认后从 claude-hooks-common.ps1 头部契约清单摘除）**：① Claude Stop hook 的 `transcript_path` JSONL 行结构（type/message.content 两形）；② PreToolUse 输入中 `session_id` 可用性；③ PostToolUse `additionalContext` 投递与 Stop hook 退出码 0 的 stdout JSON 解析。适配期（settings.json 未链接）本仓库 hooks 不触发，硬门禁 #7 仍靠 CLAUDE.md 自觉。
+- **测试设施（外部 dotnet NUnit 工程）**：新增仓库根 `Tests/EditMode/EditMode.Tests.csproj`（Assets 外，Unity 不编译；SDK 风格 + `<EnableDefaultCompileItems>false</EnableDefaultCompileItems>` + 420 `<Compile Include>` 业务文件/依赖闭包/测试文件 + UnityEngine 全模块 dll 引用 + NUnit 3.13 / Microsoft.NET.Test.Sdk / NUnit3TestAdapter + LangVersion 9.0 + DefineConstants 复用 Assembly-CSharp 关键项）。**载体依据**：asmdef 程序集不能引用预定义程序集 Assembly-CSharp（实测 `-r:` 无 Assembly-CSharp.dll → CS0246；[Unity Discussions](https://discussions.unity.com/t/how-to-add-assembly-csharp-reference-to-asmdef/764539)），故废弃 asmdef 走外部 csproj 直编源文件。
+- **首批测试（3 模块 161 用例）**：`Tests/EditMode/{ToolsTests,PressureRuntimeStateTests,PipeSegmentHandoverServiceTests}.cs`（81+47+33 个 `[Test]`；Tools 物理量守恒/单位换算、PressureRuntimeState 帧窗口/滞回/节流/记账、PipeSegmentHandoverService 键构建确定性/ε 分支/记账扣减路径）；测试侧 4 个桩（NoloSDKCute / ExtendLuaUtil / ExtendNetworkHttpClient / UnityVisualScripting）承载 Unity 特有依赖。**如实覆盖缺口（12 项 [Ignore]，非业务缺陷）**：ECall 约束 8 项（记账读取经 `GetInstanceID()` 键路径 7 项 + `ConnectionManager.Instance` 单例 1 项，Unity 外不可执行，留 Unity 内回归；记账层语义已由 Prime_* 系列 int 键测试全覆盖）+ Tools 无效输入路径 4 项（`Debug.LogWarning` 为 InternalCall）。业务代码零改动凑测试。
+- **跑法与防伪绿**：删除失效 `.ai-gates/scripts/run-unity-editmode-tests.ps1`；新增 `run-dotnet-editmode-tests.ps1`（`dotnet restore` + `dotnet test` → trx 落 `.ai-gates/verify/`，解析 `<ResultSummary>`：outcome=Passed/Completed ∧ failed=0 ∧ total≥70 → exit 0；restore 失败/trx 缺失/解析失败/failed>0/total<70 → exit 1/2，防伪绿实测两条红路）。
+- **业务 seam（唯一业务改动 · 纯提取）**：`PipeSegmentHandoverService.cs` 新增 `BuildSourceSideConduitPairKey(int, int)` 原始键重载（`(sourceId*397)^conduitId`），原 `(PressureController, PressureController)` 重载改一行委托（null→0 映射保留）；`PressureController*.cs` 神类零 diff；净增 6 行。
+- **验证**：`dotnet build EditMode.Tests.csproj` 与 `Assembly-CSharp.csproj` 双 0 错误；trx `outcome=Completed total=161 passed=149 failed=0`（12 [Ignore]）；黄金回归 G1/G2/G5 存量绿档引用（本步改动全在 Assets 外，不触业务代码）；`git -C Assets/LabSDK status --porcelain` 基线比对增量仅 M4 文件；不 bump VERSION。
 
-### Included changes — 2026-08-07（R20 CS0177 修复 + 编译门禁固化 · 不 bump）
+### Included changes — 2026-08-11（mattpocock 第三批：grill 访谈机制落地 · 不 bump）
 
-- **CS0177 修复**：R20 S1 `TryCascadePressurizedLiquidUpstream` 新增 `out bool forwardAdvanced` 未在方法入口定值导致 definite-assignment 编译错误；修复=置顶入口赋值（语义零改动），`dotnet build Assembly-CSharp.csproj` 0 错误验证。
-- **编译门禁固化（developer SKILL）**：新增/改动 `out` 参数必须在方法入口/所有返回路径前定值（防 CS0177）；业务 C# 交 CR 前最小验证=**真编译零错误**（`dotnet build` 相关 csproj 或 Unity Editor.log 无新增错误），禁以静态 grep/括号平衡充当编译通过。
-- **错题本**：lessons-learned.md 新增「out 参数入口定值 + 交 CR 前真编译」行（2026-08-07 · 用户「准」）。
-
-### Included changes — 2026-08-07（mattpocock 第二批机制 1-6 落地 · 不 bump）
-
-- **Step 1 · codebase-design（深模块设计语言 + design-it-twice + deepening）**：新 `references/codebase-design.md`（8 词词汇表逐词禁止漂移词 + 四原则 + 可测性三式 + deepening 四依赖分类 + replace-don't-layer + 被拒框架，与 architecture-health-check 互补）；新 `references/design-it-twice.md`（3+ 并行子代理 radically different 接口设计，四约束 + depth/locality/seam placement 对比 + 有观点推荐）；`reference-routing.md` 模型自动触发小表 + 按岗加载接线；`MAINTAINER.md` 规则索引加 codebase-design / design-it-twice 两行。
-- **Step 2 · resolving-merge-conflicts（按意图解 merge/rebase 冲突）**：新 `references/resolving-merge-conflicts.md`（5 步流程 + 禁止 `--abort` + 与 rollback.md / git-safety hook 边界句）；`reference-routing.md` 模型自动触发小表加行。
-- **Step 3 · prototype（先原型后定案 · Unity 本地化）**：新 `references/prototype.md`（LOGIC/UI 两分支 + 6 条通用规则 + 反模式；一次性产物落 `.ai-gates/tmp/` 或 OS tmp，不引入 Web 工具链）；`planner/SKILL.md` §2.9 加「先原型后定案」可选指针一行；`reference-routing.md` 模型自动触发小表加行。
-- **Step 4 · handoff-lite（临时交接轻量版）**：新 `references/handoff-lite.md`（9 字段一页纸 + 规则：按引用不复制、redact 敏感信息、临时交接落 `.ai-gates/tmp/` 或 OS tmp + 与 handoff-template / session-handover / agent-brief 用途区分句）；`reference-routing.md` 模型自动触发小表加行。
-- **Step 5 · wait-what（消息未落地重讲）**：新 `references/wait-what.md`（≤20 行：触发条件 + 重讲规则——shared-language 词汇 + STE100 简化技术英语思路，不引入完整规范）；`reference-routing.md` 模型自动触发小表加行。
-- **Step 6 · teach（多会话教学）**：新 `references/teach.md`（仅用户点名教学时启用；工作区结构 + 三要素 + 记忆机制 + ZPD + assets 复用默认；教学态独立于 Unity 工程；教学文档同过写作三律）；`reference-routing.md` 模型自动触发小表加行。
-
-### Included changes — 2026-08-10（skill-eval-v4 正式评分 · 不 bump）
-
-- **skill-eval-v4 窗（假需求真演六剧本 + 评分记录）**：对 v4.0.0 增量变更剧本（A1 三态 / D1 / D7 / D8 / F1n / H1 三角）假需求真演 10 场景，**9/10 Pass** + Fail 标签 `Direct未隔离CR`（S6 伪称隔离 CR，如实判 Fail，I2b 先例扩展，事后补派不追溯改判 Pass；真演 10 · 走读 0；Y=可触发数，N/A 排除，N/A=0）；`skill-eval-checklist.md` 评测记录表追加 v4.0.0 行（剧本正文 / 失败标签枚举 / §评分草表 / F1b 字面零改动）；夹具 `Assets/Doc/_examples/skill-eval-v4/`（假需求 ×6 + `_fixture.md` + `_评分表.md` + .meta 齐套）；VERSION 与 CHANGELOG「当前 LTS」行零触碰。
+- **grill 访谈节**：`references/demand-clarification.md` 在「## 异步问卷」节后新增「## grill 访谈（可选 · 需求未定的深度澄清）」节（对照 mattpocock/skills grill-me / grilling 落地）：需求切片**未定**时的深度澄清通道——一次一问 / 分支穷尽才动笔 / 问题须证据支撑且带推荐答案 / 产出（澄清结论进物理口径·A#，领域词登记 shared-language）/ 与「一轮确认」「异步问卷」分工边界句；既有节逐字零改动（diff 仅 ADDED）。
+- **触发接线**：`reference-routing.md`「模型自动触发」小表新增 1 行（需求模糊 / 访谈 / grill → `demand-clarification.md` §grill 访谈，teach.md 行之后）；「日常按触发加载」表零改动。
+- **规则索引**：`MAINTAINER.md`「流程稳定性规则（references 索引）」表新增 1 行（需求澄清与确认：一轮确认 / 三问 / 异步问卷 / grill 访谈 → demand-clarification.md）。
+- **策划指针**：`planner/SKILL.md` §需求确认 细则句追加 grill 指针（需求未定 / 大需求 / 多次澄清仍分歧 → 先按其中 grill 访谈 节一次一问澄清，分支穷尽再写切片；「准」确认仍只 1 轮）。
+- **验证**：`validate-pipeline.ps1 -Strict` 全绿；不 bump VERSION（「当前 LTS」行与既有条目零 diff）。
 
 ### Included changes — 2026-08-11（Claude Code MCP 接线随库走 · 不 bump）
 
@@ -80,6 +84,33 @@
 ### Included changes — 2026-08-11（README 中英拆分 · 不 bump）
 
 - **README 中英拆分**：`.ai-gates/README.md`（真源）改为纯中文文档；仓库根 `README.md` 改为纯英文文档，文首一行中文链接句指向中文文档（`https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md`）。中英 9 节镜像一一对应，机制表含「典故护栏 / Allusion guardrails」行；打包（package-release.ps1 复制 `.ai-gates/README.md` 入 7z）后包内 README 为中文。不 bump VERSION。
+
+### Included changes — 2026-08-10（Claude Code 适配 · 不 bump）
+
+- **Claude Code 侧接线**：新增 `.ai-gates/hooks/claude/` 12 个 hook 脚本（从 codex/ 同源复制改写）——`claude-hooks-common.ps1`（协议公共层：snake_case `hook_event_name`、显式 `permissionDecision:"allow"`、deny 必带 `permissionDecisionReason`、Get-TargetPaths 支持 `file_path`/`notebook_path`、Get-LogDir 三级父级解析）、`pre-bash-gate.ps1`/`pre-write-gate.ps1`/`post-write-gate.ps1`（合并入口）、`git-safety-check.ps1`、`audit-write.ps1`、`bash-write-gate.ps1`、`pm-gate-check.ps1`（.claude/** 升为 Level 1 接线设施、`.claude/settings.local.json` Level 0 豁免）、`mark-pm-gate.ps1`（Stop hook 改为解析 `transcript_path` JSONL——Claude 无 `last_assistant_message` 字段；assistant 行 content 字符串/数组两形兼容；session_id 兜底取 transcript 文件名）、`mark-changelog-write.ps1`、`check-unity-compile.ps1`、`check-hooks-drift.ps1`（SessionStart 接线自检：settings.json 解析、expected 映射、脚本 BOM、portal 健康）。所有脚本带 UTF-8 BOM。
+- **接线文件**：新增 `.ai-gates/claude/settings.json`（SessionStart/PreToolUse `^Bash$`/PreToolUse `^(Write|Edit|MultiEdit|NotebookEdit)$`/PostToolUse 同 matcher/Stop 五事件）与 `.ai-gates/claude/agents/` 6 个岗位代理 .md（pm / planner / plan-reviewer / developer / code-reviewer / module-readme，thin adapter 指向现有 SKILL.md，零内容迁移）。
+- **link-platform.ps1**：新增 `New-ClaudePortal`（`.claude/settings.json` 文件传送门 + `.claude/agents`、`.claude/skills` junction；`.claude` 目录本身不做 junction——`settings.local.json` 机器本地文件须留在真实目录）。
+- **自检**：新增 `scripts/test-claude-hooks.ps1`（33 断言注入式回归：deny 语义、[PM] 新鲜度、Level 0/1/2 分类、transcript JSONL 打点、编译错误提示、合并入口 fallback）；13 脚本 `ParseFile` 0 语法错误 + BOM 全保。
+- **真机验证点（3 项，待真实 Claude Code 会话确认后从 claude-hooks-common.ps1 头部契约清单摘除）**：① Claude Stop hook 的 `transcript_path` JSONL 行结构（type/message.content 两形）；② PreToolUse 输入中 `session_id` 可用性；③ PostToolUse `additionalContext` 投递与 Stop hook 退出码 0 的 stdout JSON 解析。适配期（settings.json 未链接）本仓库 hooks 不触发，硬门禁 #7 仍靠 CLAUDE.md 自觉。
+
+### Included changes — 2026-08-10（skill-eval-v4 正式评分 · 不 bump）
+
+- **skill-eval-v4 窗（假需求真演六剧本 + 评分记录）**：对 v4.0.0 增量变更剧本（A1 三态 / D1 / D7 / D8 / F1n / H1 三角）假需求真演 10 场景，**9/10 Pass** + Fail 标签 `Direct未隔离CR`（S6 伪称隔离 CR，如实判 Fail，I2b 先例扩展，事后补派不追溯改判 Pass；真演 10 · 走读 0；Y=可触发数，N/A 排除，N/A=0）；`skill-eval-checklist.md` 评测记录表追加 v4.0.0 行（剧本正文 / 失败标签枚举 / §评分草表 / F1b 字面零改动）；夹具 `Assets/Doc/_examples/skill-eval-v4/`（假需求 ×6 + `_fixture.md` + `_评分表.md` + .meta 齐套）；VERSION 与 CHANGELOG「当前 LTS」行零触碰。
+
+### Included changes — 2026-08-07（R20 CS0177 修复 + 编译门禁固化 · 不 bump）
+
+- **CS0177 修复**：R20 S1 `TryCascadePressurizedLiquidUpstream` 新增 `out bool forwardAdvanced` 未在方法入口定值导致 definite-assignment 编译错误；修复=置顶入口赋值（语义零改动），`dotnet build Assembly-CSharp.csproj` 0 错误验证。
+- **编译门禁固化（developer SKILL）**：新增/改动 `out` 参数必须在方法入口/所有返回路径前定值（防 CS0177）；业务 C# 交 CR 前最小验证=**真编译零错误**（`dotnet build` 相关 csproj 或 Unity Editor.log 无新增错误），禁以静态 grep/括号平衡充当编译通过。
+- **错题本**：lessons-learned.md 新增「out 参数入口定值 + 交 CR 前真编译」行（2026-08-07 · 用户「准」）。
+
+### Included changes — 2026-08-07（mattpocock 第二批机制 1-6 落地 · 不 bump）
+
+- **Step 1 · codebase-design（深模块设计语言 + design-it-twice + deepening）**：新 `references/codebase-design.md`（8 词词汇表逐词禁止漂移词 + 四原则 + 可测性三式 + deepening 四依赖分类 + replace-don't-layer + 被拒框架，与 architecture-health-check 互补）；新 `references/design-it-twice.md`（3+ 并行子代理 radically different 接口设计，四约束 + depth/locality/seam placement 对比 + 有观点推荐）；`reference-routing.md` 模型自动触发小表 + 按岗加载接线；`MAINTAINER.md` 规则索引加 codebase-design / design-it-twice 两行。
+- **Step 2 · resolving-merge-conflicts（按意图解 merge/rebase 冲突）**：新 `references/resolving-merge-conflicts.md`（5 步流程 + 禁止 `--abort` + 与 rollback.md / git-safety hook 边界句）；`reference-routing.md` 模型自动触发小表加行。
+- **Step 3 · prototype（先原型后定案 · Unity 本地化）**：新 `references/prototype.md`（LOGIC/UI 两分支 + 6 条通用规则 + 反模式；一次性产物落 `.ai-gates/tmp/` 或 OS tmp，不引入 Web 工具链）；`planner/SKILL.md` §2.9 加「先原型后定案」可选指针一行；`reference-routing.md` 模型自动触发小表加行。
+- **Step 4 · handoff-lite（临时交接轻量版）**：新 `references/handoff-lite.md`（9 字段一页纸 + 规则：按引用不复制、redact 敏感信息、临时交接落 `.ai-gates/tmp/` 或 OS tmp + 与 handoff-template / session-handover / agent-brief 用途区分句）；`reference-routing.md` 模型自动触发小表加行。
+- **Step 5 · wait-what（消息未落地重讲）**：新 `references/wait-what.md`（≤20 行：触发条件 + 重讲规则——shared-language 词汇 + STE100 简化技术英语思路，不引入完整规范）；`reference-routing.md` 模型自动触发小表加行。
+- **Step 6 · teach（多会话教学）**：新 `references/teach.md`（仅用户点名教学时启用；工作区结构 + 三要素 + 记忆机制 + ZPD + assets 复用默认；教学态独立于 Unity 工程；教学文档同过写作三律）；`reference-routing.md` 模型自动触发小表加行。
 
 ## [3.3.1] - 2026-08-05（升级流程联网化 + 零手动安装 · 发布）
 
