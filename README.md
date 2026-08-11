@@ -6,7 +6,7 @@
 
 - **真门禁，不是建议稿**：无本轮 PM 判定的写入、高危 git（push --force 等）会被 hooks 直接 deny（CLI 已实测），门禁真的拦。
 - **失败过的地方自动加严**：回归热度 + 错题本命中 → 车道与审核档位自动升级（最低 Standard + L1.5），不靠人记。
-- **3 分钟接入、跨平台**：Cursor / Codex / Trae 共用同一份 `.ai-gates/` 库；新用户贴一段提示词即可装好。
+- **3 分钟接入、跨平台**：Cursor / Codex / Trae / Claude Code 共用同一份 `.ai-gates/` 库；新用户贴一段提示词即可装好。
 - **免费（MIT）、非银弹**：每步仍要你验收——省的是空转，不是人的判断。
 
 ## 定位：AI 编码的项目经理
@@ -15,7 +15,7 @@ ai-gates 不是又一个代码补全 / 质检插件：多数工具聚焦「代�
 
 ## 快速开始（3 分钟）
 
-**方式 A（推荐 · 零手动）**：把下面这段**整段**粘贴给任一能改文件的 Agent 窗口（Cursor Agent / Codex / Trae），Agent 会联网获取最新版、安装库、建好传送门并引导初始化：
+**方式 A（推荐 · 零手动）**：把下面这段**整段**粘贴给任一能改文件的 Agent 窗口（Cursor Agent / Codex / Trae / Claude Code），Agent 会联网获取最新版、安装库、建好传送门并引导初始化：
 
 ```text
 请把 ai-gates（AI 开发流水线技能包）从 https://github.com/zhaobolun-code/ai-gates 安装到当前项目，替代手动下载、解压和初始化：
@@ -83,7 +83,7 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 | 机制 | 做什么 |
 | --- | --- |
 | **回归索引 + 热度** | 上次挂过的模块/文件再次改动 → 自动升档（最低 Standard + L1.5；命中热度取较高档：方案审 L3 / 双轮 CR）；过去的失败自动抬高审核线，不靠人记 |
-| **机器强制层** | 高危 git（push --force 等）与无本轮 PM 判定的写入被 hooks 直接 deny——不是提示词（CLI 已实测；桌面端有已知缺口，自查 hooks-log） |
+| **机器强制层** | 高危 git（push --force 等）与无本轮 PM 判定的写入被 hooks 直接 deny——不是提示词（Codex CLI 与 Claude Code 已实测；Codex 桌面有已知缺口，自查 hooks-log） |
 | **四车道** | Express / Direct / Standard / Full 按任务自动判定（Direct 直通不落盘；仍可用「完整流程」强制 Full）；过程中命中升级立即改判，不硬撑 |
 | **止损链** | 同一手法反复失败 → 强制重定界 / A# 复议，不无限小补丁 |
 | **切片先行** | 小改也先写切片（改什么 / 怎样算通过），一次一切片；超范围即停 |
@@ -103,16 +103,16 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 
 ## 平台
 
-- **全平台可用（规则 / 技能 / 传送门）**：规则是纯 Markdown，其他 Agent 也可自行适配；传送门脚本**双份**——Windows 用 `link-platform.ps1`，macOS/Linux 用 `link-platform.sh`（Trae 另备 `link-trae-skills.sh`），都建 `.cursor/*`、`.codex`、`.trae/skills`、`.trae/rules`。
-- **Cursor / Codex / Trae 共用同一份库**：跑一次 `link-platform` 即建好全部传送门。
-- **Windows：完整支持**。机器强制 hooks（PM 写门禁 / 高危 git deny / Unity 编译提示，全部 `.ps1`）在 Codex CLI 0.146/0.147 已实测 deny 拦截；一键安装见「快速开始」方式 C。已知缺口：Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
+- **全平台可用（规则 / 技能 / 传送门）**：规则是纯 Markdown，其他 Agent 也可自行适配；传送门脚本**双份**——Windows 用 `link-platform.ps1`，macOS/Linux 用 `link-platform.sh`（Trae 另备 `link-trae-skills.sh`），都建 `.cursor/*`、`.codex`、`.claude`、`.trae/skills`、`.trae/rules`。
+- **Cursor / Codex / Trae / Claude Code 共用同一份库**：跑一次 `link-platform` 即建好全部传送门。
+- **Windows：完整支持**。机器强制 hooks（PM 写门禁 / 高危 git deny / Unity 编译提示，全部 `.ps1`）在 Codex CLI 0.146/0.147 与 Claude Code（2026-08-10 全链路真机确证）已实测 deny 拦截；一键安装见「快速开始」方式 C。已知缺口：Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
 - **macOS / Linux**：安装、规则、技能、传送门全支持；机器强制 hooks 暂为 PowerShell（`.ps1`）实现，需 pwsh 运行或暂以规则层生效（如实标注）。
 - **Trae 为软层**：规则 + 技能传送门齐全，但无机器 hooks——门禁以规则生效，机器强制暂不覆盖。
 - **单仓库边界**：门禁以当前仓库为界——跨仓库（多仓 / 微服务）改动不在机器强制覆盖内，跨仓部分仍靠团队约定。
 
 ## 前提
 
-- Cursor Agent / Codex / Trae 任一能改文件的会话
+- Cursor Agent / Codex / Trae / Claude Code 任一能改文件的会话
 - 支持 **Windows / macOS / Linux**（规则与传送门全平台；机器强制 hooks 目前以 Windows 为主）
 - 一次初始化 + 短 `project-context` / 测试清单（包**不含**别人的业务窗与 CHANGELOG）
 
@@ -133,7 +133,7 @@ powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zha
 
 - **Real gates, not prompt suggestions.** Writes without a fresh PM go-ahead, and dangerous git commands (e.g. `push --force`), are denied by hooks (verified on Codex CLI).
 - **Past failures raise the bar.** Modules that already broke are tracked; touching them again auto-escalates the lane and review tier (minimum Standard + L1.5).
-- **3-minute setup, cross-platform.** One `.ai-gates/` library shared by Cursor / Codex / Trae; new users can paste one prompt to install.
+- **3-minute setup, cross-platform.** One `.ai-gates/` library shared by Cursor / Codex / Trae / Claude Code; new users can paste one prompt to install.
 - **Free (MIT), not a silver bullet.** Every step still needs your acceptance — it removes busywork, not human judgment.
 
 ### Positioning: the project manager for AI coding
@@ -142,7 +142,7 @@ ai-gates is not another autocomplete or quality-check plugin: most tools focus o
 
 ### Get it (3 minutes)
 
-**Option A (recommended, zero manual steps):** paste the whole block below into any file-editing agent window (Cursor **Agent** / Codex / Trae):
+**Option A (recommended, zero manual steps):** paste the whole block below into any file-editing agent window (Cursor **Agent** / Codex / Trae / Claude Code):
 
 ```text
 Install the ai-gates skill pack (AI development pipeline) into this project from https://github.com/zhaobolun-code/ai-gates, replacing manual download, extraction, and initialization:
@@ -167,7 +167,7 @@ When it finishes, say `PM init` in an agent window to fill the project note. **m
 1. Download **`ai_dev_v4.0.0.7z`** from this repo’s **[Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest)**.
 2. Extract **at** the target project’s root — the archive contains `.ai-gates/` (do **not** unzip into `.cursor/`).
 3. Paste **`PM upgrade ai-gates`** in any AI session (the agent runs `link-platform.ps1` / `.sh` for you; manual run is optional).
-4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae): `PM` + request.
+4. In any file-editing AI session (Cursor **Agent**, Codex desktop/CLI, Trae, or Claude Code): `PM` + request.
 
 First time on a project? Say `PM init`, then fill a short project note (stack, careful paths, a few must-test cases). Detailed first-time steps: USER-GUIDE. Health check? Say `PM doctor`.
 
@@ -210,7 +210,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | Mechanism | What it does |
 | --- | --- |
 | **Regression index + heat** | Modules/files that already failed are tracked; touching them again auto-escalates (minimum Standard + L1.5; heat hit takes the higher tier: L3 plan review / double CR)—past failures raise the bar, not your memory |
-| **Machine-enforced gates** | Dangerous git (e.g. `push --force`) and writes without a fresh PM go-ahead are denied by hooks, not just discouraged (verified on Codex CLI; desktop Codex has a known gap—self-check `.ai-gates/hooks-log/`) |
+| **Machine-enforced gates** | Dangerous git (e.g. `push --force`) and writes without a fresh PM go-ahead are denied by hooks, not just discouraged (verified on Codex CLI and Claude Code; desktop Codex has a known gap—self-check `.ai-gates/hooks-log/`) |
 | **Four-lane routing** | Express / Direct / Standard / Full auto-picked from the task (Direct: straight through, no written plan window; you can still force Full); escalates mid-task if the scope grows beyond the lane |
 | **Stop-loss chain** | Repeated same-approach fails → forced reassessment / A# reopen—not endless micro-patches |
 | **Slice-first** | Even small edits start as a slice—what changes, what counts as passing; one slice at a time, over-scope stops |
@@ -230,16 +230,16 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 ### Platform
 
-- **Cross-platform (rules / skills / portals)**: rules are plain Markdown, other agents can adapt them; portal scripts ship in pairs — `link-platform.ps1` on Windows, `link-platform.sh` on macOS/Linux (plus `link-trae-skills.sh` for Trae) — all create `.cursor/*`, `.codex`, `.trae/skills`, `.trae/rules`.
-- **One `.ai-gates/` library for Cursor / Codex / Trae**; one `link-platform` run creates all the portals.
-- **Windows: full support.** The machine-enforced hooks (PM write gate, high-risk git deny, Unity compile hints — all PowerShell) are verified on codex-cli 0.146/0.147; one-command install = Option C. Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
+- **Cross-platform (rules / skills / portals)**: rules are plain Markdown, other agents can adapt them; portal scripts ship in pairs — `link-platform.ps1` on Windows, `link-platform.sh` on macOS/Linux (plus `link-trae-skills.sh` for Trae) — all create `.cursor/*`, `.codex`, `.claude`, `.trae/skills`, `.trae/rules`.
+- **One `.ai-gates/` library for Cursor / Codex / Trae / Claude Code**; one `link-platform` run creates all the portals.
+- **Windows: full support.** The machine-enforced hooks (PM write gate, high-risk git deny, Unity compile hints — all PowerShell) are verified on codex-cli 0.146/0.147 and Claude Code (end-to-end machine-verified 2026-08-10); one-command install = Option C. Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
 - **macOS / Linux**: install, rules, skills, and portals fully supported; the machine hooks are currently PowerShell (`.ps1`) — run via pwsh or rely on the rule layer for now (stated honestly).
 - **Trae runs soft-layer only** (rules + skills portals, no machine hooks) — the gates still apply as instructions there, but enforcement is not machine-backed.
 - **Single-repo boundary**: gates are scoped to the current repository — cross-repo (multi-repo / microservices) changes are not covered by the machine layer; rely on team discipline there.
 
 ### Requirements
 
-- Cursor **Agent**, Codex desktop/CLI, or Trae — any session that can edit files
+- Cursor **Agent**, Codex desktop/CLI, Trae, or Claude Code — any session that can edit files
 - Supports **Windows / macOS / Linux** (rules and portals everywhere; machine hooks currently Windows-first)
 - One-time `PM init` + short `project-context.md` / test list (the pack does **not** ship another team’s business windows or CHANGELOG)
 
