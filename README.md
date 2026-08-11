@@ -13,6 +13,18 @@
 
 ai-gates 不是又一个代码补全 / 质检插件：多数工具聚焦「代码本身」，它多管一层——整个开发流程的秩序（需求对齐 → 方案确认 → 执行 → 验收 → 复盘 → 止损），并把失败过的地方自动升档成规则。为什么这样设计、真实效果数据见 [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)。
 
+## 它治什么（为什么好用）
+
+AI 直接改复杂系统的典型困境，以及对应的机制：
+
+| 困境 | 对应机制 |
+| --- | --- |
+| 没看代码按别的项目习惯改，对不上接口 | 硬门禁 #1：没读真实代码不改 |
+| 原因只留在聊天里，下一轮仍按旧判断改 | 一轮确认 + 文档窗（原因落盘） |
+| 日志出了关键词就当修好了 | 验收 A#（可证伪条款） |
+| 同一问题连续多轮小改，越改越乱 | 止损链（强制重定界，禁再同路） |
+| 为过当前场景写下特例 | 物理口径（禁针对特定场景特化） |
+
 ## 快速开始（3 分钟）
 
 **方式 A（推荐 · 零手动）**：把下面这段**整段**粘贴给任一能改文件的 Agent 窗口（Cursor Agent / Codex / Trae / Claude Code），Agent 会联网获取最新版、安装库、建好传送门并引导初始化：
@@ -99,12 +111,13 @@ ai-gates 不是又一个代码补全 / 质检插件：多数工具聚焦「代�
 - 支持 **Windows / macOS / Linux**（规则与传送门全平台；机器强制 hooks 目前以 Windows 为主）
 - 一次初始化 + 短 `project-context` / 测试清单（包**不含**别人的业务窗与 CHANGELOG）
 
-## 日常怎么用（不用背机制表）
+## 你只需要做三件事
 
-- 开口：`项目经理` + 需求；确认回「准」。
-- 机制表是**护栏说明**，不是开工前必背清单。
-- 门禁由助手执行；你负责确认、验收、回是否通过。
-- 被拦了？deny 提示自带逃生路径；完整速查见 [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §被拦了怎么办。
+1. **提需求**：说「项目经理 + 需求」（`项目经理` = `PM`）
+2. **确认**：看「你下一步」，回「准」（= `approve`）
+3. **验收**：按提示测一遍，回通过/不通过
+
+机制表是**护栏说明**，不是开工前必背清单；门禁由助手执行。被拦了？deny 提示自带逃生路径；完整速查见 [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §被拦了怎么办。
 
 ---
 
@@ -123,6 +136,18 @@ ai-gates 不是又一个代码补全 / 质检插件：多数工具聚焦「代�
 
 ai-gates is not another autocomplete or quality-check plugin: most tools focus on the code itself, ai-gates adds one more layer — the order of the whole development process (requirement alignment → plan approval → execution → acceptance → retrospective → stop-loss), and places that already failed auto-escalate into smart rules. Why it is designed this way, plus real usage data: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).
 
+### What it treats (why it works)
+
+Typical failure modes when AI edits complex systems directly, and the mechanism for each:
+
+| Failure mode | Mechanism |
+| --- | --- |
+| Editing without reading the actual code, following habits from other projects — APIs don't line up | Hard gate #1: no changes without reading the real code |
+| Reasons live only in chat; next round re-guesses with old judgments | One-round confirmation + windowed docs (reasons persist to disk) |
+| A log keyword appears, so it counts as "fixed" | Acceptance A# (falsifiable criteria) |
+| The same issue patched over and over, getting messier | Stop-loss chain (forced re-scoping, no same path again) |
+| Special-casing to pass the current demo | Physical constraints (no special-casing for specific scenarios) |
+
 ### Get it (3 minutes)
 
 **Option A (recommended, zero manual steps):** paste the whole block below into any file-editing agent window (Cursor **Agent** / Codex / Trae / Claude Code):
@@ -137,9 +162,9 @@ Install the ai-gates skill pack (AI development pipeline) into this project from
 Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
 ```
 
-**The whole setup cost**: a short project note (stack, careful paths, a few must-test cases) — not an ongoing maintenance config; detailed first-time steps: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §第一次接入. Health check? Say `PM doctor`.
+**The whole setup cost**: a short project note (stack, careful paths, a few must-test cases) — not an ongoing maintenance config; detailed first-time steps: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (first-time setup section). Health check? Say `PM doctor`.
 
-**Other install & maintenance** (one-command install, manual 7z, upgrade, "access denied" download errors) → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §怎么安装、更新、查版本; blocked by a gate? → USER-GUIDE §被拦了怎么办（速查）.
+**Other install & maintenance** (one-command install, manual 7z, upgrade, "access denied" download errors) → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (how to install / update / check version section); blocked by a gate? → USER-GUIDE (troubleshooting quick-ref section).
 
 Quick start (3 min): [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md).  
 What this is / isn’t: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).  
@@ -209,12 +234,13 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 - Supports **Windows / macOS / Linux** (rules and portals everywhere; machine hooks currently Windows-first)
 - One-time `PM init` + short `project-context.md` / test list (the pack does **not** ship another team’s business windows or CHANGELOG)
 
-### Daily use (you do not memorize the table above)
+### You only do three things
 
-- Start with `PM` + need; confirm decisions with `approve`.
-- The mechanism list is **guardrail documentation**, not a checklist you must learn before coding.
-- The agent follows the gates; you accept / reject / retest.
-- Blocked? The deny message itself carries escape steps; full quick-reference: USER-GUIDE (troubleshooting quick-ref section).
+1. **Request**: say `PM` + your need (`PM` = project manager)
+2. **Confirm**: read "your next step", reply `approve`
+3. **Accept**: test as prompted, reply pass/fail
+
+The mechanism table is **guardrail reference**, not a checklist to memorize before coding; the assistant runs the gates. Blocked? The deny message carries its own escape steps; full quick-reference: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (troubleshooting quick-ref section).
 
 ---
 
