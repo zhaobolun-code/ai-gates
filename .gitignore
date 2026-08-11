@@ -1,0 +1,3 @@
+# runtime hook evidence / temp artifacts — never publish
+.ai-gates/hooks-log/
+.ai-gates/tmp/

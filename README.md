@@ -1,6 +1,6 @@
 # ai-gates
 
-**AI 几秒就能改出一堆坏代码。ai-gates 不是又一个补全插件，而是一套完整的开发流水线：你只提需求，它走完判定 → 切片 → 方案 → 实现 → 审查 → 验收全程，最后把一份测试方案交到你手上——你测过，才算完。**
+**AI 几秒就能改出一堆坏代码。ai-gates 是一套完整的开发流水线：你只提需求，它走完判定 → 切片 → 方案 → 实现 → 审查 → 验收全程，最后把一份测试方案交到你手上——你测过，才算完。**
 
 ## 为什么值得下载（30 秒看懂）
 
@@ -12,7 +12,7 @@
 
 ## 定位：AI 编码的项目经理
 
-ai-gates 不是又一个代码补全 / 质检插件：多数工具聚焦「代码本身」，它多管一层——整个开发流程的秩序（需求对齐 → 方案确认 → 执行 → 验收 → 复盘 → 止损），并把失败过的地方自动升档成规则。为什么这样设计、真实效果数据见 [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)。
+多数工具聚焦「代码本身」（补全 / 审查 / 扫描）；ai-gates 多管一层——整个开发流程的秩序（需求对齐 → 方案确认 → 执行 → 验收 → 复盘 → 止损），并把失败过的地方自动升档成规则。为什么这样设计、真实效果数据见 [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)。
 
 ## 它治什么（为什么好用）
 
@@ -136,7 +136,7 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 
 ## English
 
-**AI can ship bad code in seconds. This is not another autocomplete—it is a complete development pipeline: you just state the need, it runs the whole chain (judge → slice → plan → implement → review → accept) and hands you a test plan — you test it, and only then is it done.**
+**AI can ship bad code in seconds. ai-gates is a complete development pipeline: you just state the need, it runs the whole chain (judge → slice → plan → implement → review → accept) and hands you a test plan — you test it, and only then is it done.**
 
 ### Why download it (30-second read)
 
@@ -148,7 +148,7 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 
 ### Positioning: the project manager for AI coding
 
-ai-gates is not another autocomplete or quality-check plugin: most tools focus on the code itself, ai-gates adds one more layer — the order of the whole development process (requirement alignment → plan approval → execution → acceptance → retrospective → stop-loss), and places that already failed auto-escalate into smart rules. Why it is designed this way, plus real usage data: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).
+Most tools focus on the code itself (autocomplete / review / scan); ai-gates adds one more layer — the order of the whole development process (requirement alignment → plan approval → execution → acceptance → retrospective → stop-loss), and places that already failed auto-escalate into smart rules. Why it is designed this way, plus real usage data: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).
 
 ### What it treats (why it works)
 
