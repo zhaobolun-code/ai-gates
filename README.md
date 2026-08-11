@@ -1,140 +1,4 @@
-# ai-gates
-
-**AI 几秒就能改出一堆坏代码。ai-gates 是一套完整的开发流水线：你只提需求，它走完判定 → 切片 → 方案 → 实现 → 审查 → 验收全程，最后把一份测试方案交到你手上——你测过，才算完。**
-
-## 为什么值得下载（30 秒看懂）
-
-- **真门禁，不是建议稿**：无本轮 PM 判定的写入、高危 git（push --force 等）会被 hooks 直接 deny（CLI 已实测），门禁真的拦。
-- **失败过的地方自动加严**：回归热度 + 错题本命中 → 车道与审核档位自动升级（最低 Standard + L1.5），不靠人记。
-- **3 分钟接入、跨平台**：Cursor / Codex / Trae / Claude Code 共用同一份 `.ai-gates/` 库；新用户贴一段提示词即可装好——装好即用，四车道等概念日常不必学。
-- **免费（MIT）、非银弹——验收权在你**：AI 能改代码，但不能替你看软件里的现象是否真修好——日志出了关键词 ≠ 修好；每步以你亲测验收为准，省的是空转，不是人的判断。
-- **完整的流程，不是监工**：planner 写方案 → developer 写代码 → code-reviewer 审查 → 你验收——代码是流水线写出来的，它不只是拦着你。
-
-## 定位：AI 编码的项目经理
-
-多数工具聚焦「代码本身」（补全 / 审查 / 扫描）；ai-gates 多管一层——整个开发流程的秩序（需求对齐 → 方案确认 → 执行 → 验收 → 复盘 → 止损），并把失败过的地方自动升档成规则。为什么这样设计、真实效果数据见 [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)。
-
-## 它治什么（为什么好用）
-
-AI 直接改复杂系统的典型困境，以及对应的机制：
-
-| 困境 | 对应机制 |
-| --- | --- |
-| 没看代码按别的项目习惯改，对不上接口 | 硬门禁 #1：没读真实代码不改 |
-| 原因只留在聊天里，下一轮仍按旧判断改 | 一轮确认 + 文档窗（原因落盘） |
-| 日志出了关键词就当修好了 | 验收 A#（可证伪条款） |
-| 同一问题连续多轮小改，越改越乱 | 止损链（强制重定界，禁再同路） |
-| 为过当前场景写下特例 | 物理口径（禁针对特定场景特化） |
-
-## 快速开始（3 分钟）
-
-**方式 A（推荐 · 零手动）**：把下面这段**整段**粘贴给任一能改文件的 Agent 窗口（Cursor Agent / Codex / Trae / Claude Code），Agent 会联网获取最新版、安装库、建好传送门并引导初始化：
-
-```text
-请把 ai-gates（AI 开发流水线技能包）从 https://github.com/zhaobolun-code/ai-gates 安装到当前项目，替代手动下载、解压和初始化：
-- 取最新 release tag，克隆/下载到临时目录；校验根目录有 .ai-gates/ 且 skills/VERSION 是合法 x.y.z 并等于该 tag，不符就停下。
-- 把临时 .ai-gates/ 的 skills/hooks/scripts/rules/codex、根文档、hooks.json、link-platform.*、LICENSE 复制到项目根 .ai-gates/；若已装过，先比对版本，仅更新时替换，保留 project-context、mcp.json、hooks-log、tmp、verify、regression-*、pipeline-* 等项目状态。
-- 运行 link-platform.ps1（Unix 用 .sh）建传送门，写 install-info.json。
-- 运行 pm-init.ps1 引导我填项目说明（技术栈、要小心的目录、必测场景），生成 .cursor/project-context.md。
-- 完成后报告版本与传送门状态，并告诉我以后用「项目经理 + 需求」入口。
-动手前先列计划等我确认；失败或网络问题不要改文件，给出手动下载方案。
-```
-
-**接入成本**：填一份短项目说明（技术栈、要小心的目录、几条必测）——不是长期运维配置；详细三步见 [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §第一次接入。体检：`项目经理 检查健康` / `PM doctor`。
-
-**其他安装与维护**（开发者一条命令 / 手动 7z / 已装升级 / 下载报错处理）→ [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §怎么安装、更新、查版本；被门禁拦了 → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §被拦了怎么办（速查）。
-
-上手（约 3 分钟）：[USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md)。  
-这是什么、好不好用：[METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)。  
-版本迭代与变更历史（当前 v4.0.0 · 四车道重构）：[CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)。
-
-## 工作流：一个需求怎么走完
-
-需求进来只有一条主线，车道只决定每步的粗细。你只需说清要什么，剩余环节由流水线按岗位接力走完：
-
-**需求 → `[PM]` 判定车道 → 切片（改什么 / 怎样算通过）→ 一轮确认（回「准」）→ 实现 → 隔离代码审查 → 验收 → 复盘（失败入错题本）→ 收尾**
-
-| 车道 | 流程中的样子 |
-| --- | --- |
-| **Express**（一行注释/文案/常量） | 一句话切片 → 确认 → 改 → 一行自检；不派独立 CR |
-| **Direct**（有行为变化的小改） | 对话内 A#/切片（不落盘）→ 确认 → 改 → 隔离 CR |
-| **Standard**（跨模块 / API / 说不清） | 先写 plan-lite 方案 → 方案审 → 确认 → 改 → 隔离 CR |
-| **Full**（止损链 / 热度大改 / 「完整流程」） | 执行文档 → 方案审 → 确认 → 改 → 双轮升模型审核 |
-
-每步都要验收——A# 事先写清「怎样算通过」，以你亲眼所见为准。过程中命中升级（改动超范围、碰热度、跨模块）立即改判车道，不硬撑。简单/紧急小改走 Express / Direct 快通道（一句话切片、不落盘、无冗余步骤）——门禁按风险升降，不为小改设卡。
-
-## 方法论：为什么这样设计
-
-它不提供编码技巧，也不替你判断业务——它保证流程秩序：每一轮改动有据可查、可停可撤、做完能收尾。四个核心设计（深挖见 [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)）：
-
-1. **管流程，带出好代码**：多数工具聚焦代码本身（补全/审查/扫描）；ai-gates 管整个流程——代码由 developer 岗位按方案写，流程保证它写对、可复查、能收尾；不替你判断业务
-2. **失败驱动升档**：失败热度自动把过程数据变成规则——同一手法反复失败就停、换思路、记下此路不通（止损链），不做无限小补丁；不靠人记
-3. **一轮确认防静默**：回「准」= 理解 + 方案 + 开工一次确认，不反复问「你理解了吗」；禁止静默开工/静默交审——原因不只留在聊天里，下一轮按旧判断改
-4. **可停可撤、做完能收尾**：每个需求一个文件夹，结束时必须离开「进行中」；验收不过先看上一轮有用进展，再决定保留或撤掉——不是装上就自动变强的万能药
-
-## 里面有什么（机制表）
-
-这些不是功能清单，是护栏——每一条都对应真实改码里已经踩过的失败模式。**日常使用不必背这张表。**
-
-| 机制 | 做什么 |
-| --- | --- |
-| **回归索引 + 热度** | 上次挂过的模块/文件再次改动 → 自动升档（最低 Standard + L1.5；命中热度取较高档：方案审 L3 / 双轮 CR）；过去的失败自动抬高审核线，不靠人记 |
-| **机器强制层** | 高危 git（push --force 等）与无本轮 PM 判定的写入被 hooks 直接 deny——不是提示词（Codex CLI 与 Claude Code 已实测；Codex 桌面有已知缺口，自查 hooks-log） |
-| **四车道** | Express / Direct / Standard / Full 按任务自动判定（Direct 直通不落盘；仍可用「完整流程」强制 Full）；过程中命中升级立即改判，不硬撑 |
-| **止损链** | 同一手法反复失败 → 强制重定界 / A# 复议，不无限小补丁 |
-| **切片先行** | 小改也先写切片（改什么 / 怎样算通过），一次一切片；超范围即停 |
-| **审查门禁（分档）** | 车道要求时：方案审不过不能开工；CR 有 blocker 不算定版（Express/Direct 可跳过方案审，Direct 须隔离 CR）。审核随风险升档：回归模块 L1.5、跨模块 L2、Full L3、热度命中方案审 L3 / 双轮 CR、高危可对抗审 |
-| **一轮确认** | 每个决策点一轮确认包（回「准」）；禁止静默开工改码/交审 |
-| **Harness + Auto** | 会话内门禁约束 Agent；Standard/Full 在「准」之后可连跑实现↔CR，硬停/待验才打断（Express/Direct 不启用 Auto） |
-| **恢复口令** | 乱改/没按流程 →「按 CORE 重来」一键回流程；改错代码 →「方案推翻」走确认后撤销 |
-| **岗位** | 项目经理派策划 / 程序员 / CR / 文档；主对话尽量只当项目经理 |
-| **子窗** | 实现与审核优先独立子会话，主对话保持项目经理——少堆成一条超长线程 |
-| **切模型审核** | 审核可用比实现更强的模型（项目可配）——别实现和审核共用一个便宜模型糊弄 |
-| **文档窗** | 一任务一文件夹（方案/物理口径/证据/已完成），按状态分类 |
-| **物理口径** | 硬约束 + 负面约束 + 失败标准（Standard/Full 任务窗） |
-| **黑板** | 本窗修挂日志：改了什么 → 为何失败 → 禁止再做 |
-| **错题本** | 跨窗教训；自动起草，**须你回「准」**才写入项目主表 |
-| **Delta Spec** | 每步跟踪 ADDED / MODIFIED / REMOVED，防无声扩大范围 |
-| **验收 A#** | 每步可证伪验收条款。「日志出了关键词」≠ 修好了。命中回归模块时自动跑冒烟 + 归集日志/截图/测试报告入证据——自动验证 ≠ 手测签收 |
-
-## 平台
-
-- **全平台可用（规则 / 技能 / 传送门）**：规则是纯 Markdown，其他 Agent 也可自行适配；传送门脚本**双份**——Windows 用 `link-platform.ps1`，macOS/Linux 用 `link-platform.sh`（Trae 另备 `link-trae-skills.sh`），都建 `.cursor/*`、`.codex`、`.claude`、`.trae/skills`、`.trae/rules`。
-- **Cursor / Codex / Trae / Claude Code 共用同一份库**：跑一次 `link-platform` 即建好全部传送门。
-- **Windows：完整支持**。机器强制 hooks（PM 写门禁 / 高危 git deny / Unity 编译提示，全部 `.ps1`）在 Codex CLI 0.146/0.147 与 Claude Code（2026-08-10 全链路真机确证）已实测 deny 拦截；一键安装见「快速开始」。已知缺口：Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
-- **macOS / Linux**：安装、规则、技能、传送门全支持；机器强制 hooks 暂为 PowerShell（`.ps1`）实现，需 pwsh 运行或暂以规则层生效（如实标注）。
-- **Trae 为软层**：规则 + 技能传送门齐全，但无机器 hooks——门禁以规则生效，机器强制暂不覆盖。
-- **单仓库边界**：门禁以当前仓库为界——跨仓库（多仓 / 微服务）改动不在机器强制覆盖内，跨仓部分仍靠团队约定。
-
-## 前提
-
-- Cursor Agent / Codex / Trae / Claude Code 任一能改文件的会话
-- 支持 **Windows / macOS / Linux**（规则与传送门全平台；机器强制 hooks 目前以 Windows 为主）
-- 一次初始化 + 短 `project-context` / 测试清单（包**不含**别人的业务窗与 CHANGELOG）
-
-## 你只需要做三件事
-
-1. **提需求**：说「项目经理 + 需求」（`项目经理` = `PM`）
-2. **确认**：看「你下一步」，回「准」（= `approve`）
-3. **验收**：按提示测一遍，回通过/不通过
-
-其余环节全部由流水线按岗位接力完成。它能干什么、你只看到什么：
-
-| 流水线内部在做什么 | 你只看到什么 |
-| --- | --- |
-| 判定改动规模、选车道 | 一条「你下一步」 |
-| 写方案 / 执行文档（planner） | 确认说明，回「准」 |
-| 按方案实现代码（developer） | 进度提示 |
-| 隔离代码审查（code-reviewer） | 审查结果摘要 |
-| 自动验证 + 证据归集 | 一份测试方案 |
-| 复盘、失败入错题本 | 自动起草，需要时回「准」 |
-| 收尾：签收、挪文件夹 | 你说「通过」即完事 |
-
-机制表是**护栏说明**，不是开工前必背清单；门禁由助手执行。被拦了？deny 提示自带逃生路径；完整速查见 [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) §被拦了怎么办。
-
----
-
-## English
+中文文档链接：[https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md)
 
 **AI can ship bad code in seconds. ai-gates is a complete development pipeline: you just state the need, it runs the whole chain (judge → slice → plan → implement → review → accept) and hands you a test plan — you test it, and only then is it done.**
 
@@ -148,7 +12,7 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 
 ### Positioning: the project manager for AI coding
 
-Most tools focus on the code itself (autocomplete / review / scan); ai-gates adds one more layer — the order of the whole development process (requirement alignment → plan approval → execution → acceptance → retrospective → stop-loss), and places that already failed auto-escalate into smart rules. Why it is designed this way, plus real usage data: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).
+Most tools focus on the code itself; ai-gates adds one more layer — the order of the whole development process (requirement alignment → plan approval → execution → acceptance → retrospective → stop-loss), with past failures auto-escalating into smart rules. Why it is designed this way, plus real usage data: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).
 
 ### What it treats (why it works)
 
@@ -176,17 +40,12 @@ Install the ai-gates skill pack (AI development pipeline) into this project from
 Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
 ```
 
-**The whole setup cost**: a short project note (stack, careful paths, a few must-test cases) — not an ongoing maintenance config; detailed first-time steps: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (first-time setup section). Health check? Say `PM doctor`.
-
-**Other install & maintenance** (one-command install, manual 7z, upgrade, "access denied" download errors) → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (how to install / update / check version section); blocked by a gate? → USER-GUIDE (troubleshooting quick-ref section).
-
-Quick start (3 min): [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md).  
-What this is / isn’t: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).  
-Version history (current v4.0.0 · four-lane): [CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md).
+**The whole setup cost**: a short project note (stack, careful paths, a few must-test cases) — not an ongoing maintenance config; first-time setup / install & update / blocked-by-a-gate quick-ref: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (sectioned). Health check? Say `PM doctor`.
+What this is / why it is designed this way: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md); version and changes (current version per skills/VERSION): [CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md).
 
 ### Workflow: how one request goes through
 
-Every request follows one main line; the lane only decides how heavy each step is. You only state what you need — the pipeline carries the rest through by role:
+ai-gates governs process order: judge → slice → plan → implement → review → accept — every round is traceable, stoppable/reversible, and finishes with a close-out. Every request follows one main line; the lane only decides how heavy each step is. You only state what you need — the pipeline carries the rest through by role:
 
 **Request → `[PM]` judges the lane → slice (what changes / what counts as done) → one-round confirmation (`approve`) → implement → isolated code review → acceptance → retrospective (failures go to the lessons book) → close-out**
 
@@ -198,15 +57,6 @@ Every request follows one main line; the lane only decides how heavy each step i
 | **Full** (stop-loss / heat big change / "full process") | execution doc → plan review → confirm → edit → two-round escalated-model review |
 
 Every step needs acceptance — A# states "what counts as done" up front, judged by what you actually see. If scope grows mid-task (over-scope, heat hit, cross-module), the lane re-judges immediately — no forcing through. Simple/urgent small edits take the Express / Direct fast lane (one-sentence slice, no written window, no redundant steps) — gates scale with risk, not a hurdle for small changes.
-
-### Methodology: why it is designed this way
-
-It offers no coding tricks and does not judge your business — it enforces process order: every round of changes is traceable, stoppable/reversible, and finishes with a close-out. Four core design choices (deep dive: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)):
-
-1. **Manage process, deliver good code**: most tools focus on the code itself (autocomplete/review/scan); ai-gates manages the whole process — the developer role writes the code per the plan, the process ensures it is correct, reviewable, and closable; it does not judge your business
-2. **Failures raise the bar**: failure heat auto-converts process data into rules — the same approach failing repeatedly stops, switches path, and records the dead end (stop-loss chain), no endless micro-patches; not relying on memory
-3. **One-round confirmation, no silent moves**: one `approve` = understanding + plan + go in a single confirmation, no repeated "did you understand?" loops; no silent start of implementation/review — reasons do not stay only in chat to be re-guessed next round
-4. **Stoppable, reversible, closeable**: one folder per request; it must leave "in progress" when done; failed acceptance first reuses any useful progress from the last round before deciding keep/revert — not a magic pill that makes AI strong on install
 
 ### What's inside
 
@@ -230,6 +80,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Physical spec** | Hard constraints + negative constraints + failure criteria (Standard/Full windows) |
 | **Blackboard** | Per-window repair log: what changed → why failed → do not repeat |
 | **Lessons** | Cross-window error book; drafts auto, **your `approve`** required before the project table |
+| **Allusion guardrails** | An agreed allusion term instantly recalls a whole shared consensus (registered in the shared-language allusion dictionary; silent redefinition forbidden); survives model or person switches |
 | **Delta Spec** | ADDED / MODIFIED / REMOVED tracked per step; no silent scope creep |
 | **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done. Hot-path regression modules auto-run a smoke check and collect logs/screenshots/test reports as evidence — auto-verification ≠ manual acceptance |
 
@@ -244,9 +95,8 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 ### Requirements
 
-- Cursor **Agent**, Codex desktop/CLI, Trae, or Claude Code — any session that can edit files
-- Supports **Windows / macOS / Linux** (rules and portals everywhere; machine hooks currently Windows-first)
-- One-time `PM init` + short `project-context.md` / test list (the pack does **not** ship another team’s business windows or CHANGELOG)
+- Any agent session that can edit files (agent and platform coverage: see "Platform" above)
+- One-time `PM init` + short `project-context.md` / test list (the pack does **not** ship another team's business windows or CHANGELOG)
 
 ### You only do three things
 
@@ -266,7 +116,7 @@ Everything else runs through the pipeline by role. What it does inside vs. what 
 | Retrospective, failures into the error book | draft auto; reply "approve" when asked |
 | Close-out: sign off, move the folder | you say "pass" and it is done |
 
-The mechanism table is **guardrail reference**, not a checklist to memorize before coding; the assistant runs the gates. Blocked? The deny message carries its own escape steps; full quick-reference: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (troubleshooting quick-ref section).
+The mechanism table is **guardrail reference**, not a checklist to memorize before coding; the assistant runs the gates. Blocked? The deny message carries its own escape steps; full quick-reference: the USER-GUIDE link in "Get it" above.
 
 ---
 

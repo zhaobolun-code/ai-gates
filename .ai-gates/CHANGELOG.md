@@ -70,6 +70,17 @@
 - **USER-GUIDE**：「常见问题」前新增「典故：一提即唤起」小节（4 点好处：换模型/换人不失传、省复述、验证智慧沉淀、与辨析表分工）。
 - **验证**：`validate-pipeline.ps1 -Strict` 全绿；A10 统一判据 4 条 Grep 零命中（范围 `.ai-gates/skills/**`）；不 bump VERSION。
 
+### Included changes — 2026-08-11（说明文档瘦身 · 不 bump）
+
+- **README 定位压缩 + 方法论节删除**：「## 方法论」整节删除（中英镜像同步，4 条设计选择不另设节——语义由新增的工作流定位句与机制表承接）；「工作流」节首段加定位句（ai-gates 管的是流程秩序：判定→切片→方案→实现→审查→验收，每轮有据可查、可停可撤、做完能收尾）；§定位「AI 编码的项目经理」压为 2 行并指向 METHODOLOGY（A1：`多数工具` 命中==1）；机制表新增「典故护栏」行（错题本行后，中英行数同步 18→19）；「当前 v4.0.0 · 四车道重构」字面量 → 「当前版本以 skills/VERSION 为准，变更见 CHANGELOG」（中英各 1）；快速开始导航合并（README 全文档 `USER-GUIDE.md` 链接 10→2：中英导航各 1，文末速查链接改为文字指路）；§前提与 §平台重复的平台支持范围合并（任一能改文件的会话 / Win-macOS-Linux / 四个 Agent 名各保留一处）。
+- **USER-GUIDE / METHODOLOGY / tl-onboarding 对齐**：USER-GUIDE §常见问题「下载 `ai_dev_v4.0.0.7z`」→「下载 `ai_dev_<版本号>.7z`（版本以 skills/VERSION 为准）」；「解压后粘贴 `项目经理 升级 ai-gates` 由 Agent 建好传送门」→「解压后说 `项目经理 检查健康`」（手动 link-platform.ps1/.sh 兜底保留）；§对你意味着什么 首行压为一句引用 README「你只需要做三件事」。METHODOLOGY 阅读顺序统一为「README→USER-GUIDE→（深挖再）本文」（头部自相矛盾改写 + §新人建议阅读顺序同步）；§怎么做（概要）瘦身为只讲「为什么这么走」，删与 README 工作流重复的操作细节展开；效果数据「2026-08-06 截取」加时效句「最近一次截取：2026-08-06；实时口径以 pipeline-outcome.log 为准」。tl-onboarding 冷启动「仅当 ≤3 业务源文件…可能 Express」→「≤2 业务源文件」（v4 Express 机械清单已收窄）。
+- **PACKAGE-INFO（publish 仓分发物 + 生成器同步）**：publish 仓 PACKAGE-INFO.md 首次接入阅读顺序第 3 步对齐「README→USER-GUIDE→METHODOLOGY」；同步 `package-release.ps1` 内嵌 PACKAGE-INFO 文案 L195（生成器不改则下次打包会回滚该行）。
+- **验证**：`validate-pipeline.ps1 -Strict` 全绿；A1-A9 判据 Grep 实跑（`多数工具`==1、`## 方法论`==0、`USER-GUIDE.md` 链接≤2、`ai_dev_v\d+\.\d+\.\d+\.7z`==0、`≤3 业务源文件`==0、`当前 v4.0.0`==0；English 段 CJK 零命中）；不 bump VERSION。
+
+### Included changes — 2026-08-11（README 中英拆分 · 不 bump）
+
+- **README 中英拆分**：`.ai-gates/README.md`（真源）改为纯中文文档；仓库根 `README.md` 改为纯英文文档，文首一行中文链接句指向中文文档（`https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md`）。中英 9 节镜像一一对应，机制表含「典故护栏 / Allusion guardrails」行；打包（package-release.ps1 复制 `.ai-gates/README.md` 入 7z）后包内 README 为中文。不 bump VERSION。
+
 ## [3.3.1] - 2026-08-05（升级流程联网化 + 零手动安装 · 发布）
 
 ### Changed

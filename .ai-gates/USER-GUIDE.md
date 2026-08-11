@@ -41,7 +41,7 @@
 
 ## 对你意味着什么
 
-- **你要做的**：提需求、看确认说明回「准」（=`approve`）、按提示测一遍、说通过或不通过。  
+- **你要做的**：README「你只需要做三件事」——提需求、回「准」（=`approve`）、按提示验收。  
 - **你不用做的**：自己改一堆流程文档、自己挪文件夹、背很多角色名。  
 - **它自动做的**：机器能验的（编译错误、回归模块冒烟、证据归集）会自动验并留下证据——但「通过了」这最后一句仍要你说。  
 - **它不会做的**：不测就保证已经修好；不配置项目就一直好用。
@@ -124,7 +124,7 @@
 **怎么安装 / 更新 / 查版本？**
 - 零手动（推荐）：新项目贴 README「快速开始」方式 A 提示词（Agent 联网获取最新版、装库、建传送门）
 - 一条命令（开发者/批量）：项目根 PowerShell 运行 `powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"`（macOS/Linux 暂无对应命令，用方式 A 或手动；无 git 时本命令会自动走 zip 下载）
-- 手动（备选）：从 GitHub [Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest) 下载 `ai_dev_v4.0.0.7z`，解压到项目根（包内是 `.ai-gates/`，不要解进 `.cursor/`）；解压后粘贴 `项目经理 升级 ai-gates` 由 Agent 建好传送门（手动运行 `link-platform.ps1` / `.sh` 亦可，非必需）
+- 手动（备选）：从 GitHub [Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest) 下载 `ai_dev_<版本号>.7z`（版本以 skills/VERSION 为准），解压到项目根（包内是 `.ai-gates/`，不要解进 `.cursor/`）；解压后说 `项目经理 检查健康` 由 Agent 建好传送门（手动运行 `link-platform.ps1` / `.sh` 亦可，非必需）
 - 已装升级：说 `项目经理 升级 ai-gates`（联网比对、有新版才替换）；下载后 Windows 提示「无法运行，拒绝访问」→ 把报错原文粘贴给项目经理处理
 - 版本历史见 `.ai-gates/CHANGELOG.md`；体检说 `项目经理 检查健康`
 
