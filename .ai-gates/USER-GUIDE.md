@@ -55,6 +55,7 @@
 | 让它能改文件 | 模式选 Agent，不要选只读 |
 | 单独再审一轮 | 它提示时，新开一个对话，粘贴它给的文字 |
 | 在 Unity 里测 | 点播放 → 按步骤操作 → 看控制台 → 停播放 → 回复通过/不通过 |
+| 跑自动化测试（TDD 单测） | 仓库根有 `Tests/EditMode/` 时：项目根 PowerShell 跑 `powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/run-dotnet-editmode-tests.ps1`（trx 判定：total≥70 且 failed=0 方绿；秒级、不占 Unity） |
 | 它说本步不用开编辑器 | 看它给的核对结论，再回通过/不通过 |
 
 ## 三步走完
