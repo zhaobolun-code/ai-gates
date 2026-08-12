@@ -116,7 +116,7 @@ Cursor/Trae 传送门），**不表示要求安装 Cursor**；Codex-only 团队�
 | 效果轻量日志 | [pipeline-outcome-log.md](./templates/pipeline-outcome-log.md) + `append-pipeline-outcome.ps1` / `summarize-pipeline-outcome.ps1` |
 | 共享语言 / 活词汇表 | [shared-language.md](./references/shared-language.md) |
 | CR 双轴模式（规范轴 + 规格轴） | [dual-axis-review.md](./references/dual-axis-review.md) |
-| test-first 切片（可选） | [test-first.md](./references/test-first.md) |
+| test-first 切片（含可机械验证项时默认启用） | [test-first.md](./references/test-first.md) |
 | 架构体检（CRG 支撑） | [architecture-health-check.md](./references/architecture-health-check.md) |
 | 外部调研子代理任务（可选） | [research-task.md](./references/research-task.md) |
 | 人机交互向导（可选） | [human-wizard.md](./references/human-wizard.md) |

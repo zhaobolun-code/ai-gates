@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.0.0（发布当日 · **发布**；四车道重构 · 破坏性门禁语义变更；前版 v3.3.1 于 2026-08-05 定版）
+**当前 LTS**：v4.1.0（发布 · test-first 默认化 · minor；前版 4.0.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 
@@ -10,6 +10,7 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-12：test-first 默认化（本 Step 验收含可机械验证项 → 默认先写断言再实现；方案点名 / PM 指定仍强制；断言绿 ≠ 业务 A# 通过，golden/手测照常；不 bump VERSION，随发布窗同步）
 - 2026-08-11：TDD 落地 Step 1（外部 dotnet NUnit 测试工程 · 161 用例首测）
 - 2026-08-11：grill 访谈机制落地（mattpocock 第三批）
 - 2026-08-11：README 中英拆分（中英镜像 + 中文链接句）
@@ -23,19 +24,13 @@
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
 
-## [4.0.0] - 发布当日（四车道重构 · 破坏性门禁语义变更 · 发布）
+## [4.1.0] - 2026-08-12（test-first 默认化 · minor · 发布）
 
-### Changed
+### Included changes — 2026-08-12（test-first 默认化）
 
-- **四车道判定与升级链**：PM 每轮 `lane` 枚举由 Express / Standard / Full 扩展为 **Express → Direct → Standard → Full**；判定先查 Full 强制条，未命中再按 Express（步骤 1）→ Direct（步骤 2）→ Standard（步骤 3）判定，等效「取最高命中车道」；过程中命中升级立即改判（同步位：CORE / lane-glossary / full-lane-decision-tree）。
-- **Express 机械清单收窄**：仅字符串/注释/日志文本、编译错误修复（缺符号/类型不匹配，不重设计）、数字/常量/阈值 ≤3 行；**≤2 业务源文件**；无 API/持久/跨模块/生成文件；一句话说清 + 一句话 A# 可证伪；未命中热度/回归索引/止损链。
-- **Direct（新增直通道）**：有行为变化的小改（≤3 文件、无 API/持久/跨模块）→ Direct——策划子窗对话内出 A#/切片**不落盘**，默认单会话完成，跨会话/改不完自动升 Standard（同步位：doc-windowing Direct 无窗豁免 / express-slice 机械清单+Direct 对话内切片）。
-- **热度改强度升级**：热度命中不再整条升 Full——文件/机器热度命中（lessons 近 6 个月 / heat≥medium / last_fail_ts）且 Standard 规模小改 → 方案审 **L3 / 双轮 CR（热度命中取较高档：L1.5 之上 → L3/双轮 CR）**；回归索引模块小规模维持 Standard+L1.5 不取较高档；回归索引小规模 + 热度双命中按热度入口取较高档（同步位：plan-review-tiers / CORE §Standard 加强审核）。
-- **审核一律隔离**：Express 无 CR（程序员一行自检）；Direct 必隔离 CR（Subagent / 新 Chat，普通档，标「隔离复核」）；Standard 方案审（L1/L1.5/L2，隔离优先）+ 隔离 CR；Full 双轮升模型方案审 + 双轮升模型代码审。CR 模型档接线：Direct=普通档；Standard/Full=高级档；热度命中 Direct CR 升高级档。
-- **Express / Direct 不启用 Auto**：Auto 仅 Standard / Full「准」默认启用（退出句「准, 不 Auto」）；Direct 不落盘无跨会话交接载体，需要连跑即升 Standard（同步位：handoff-automation / loop-engineering / state-machine Express/Direct 例外）。
-- **机器校验同步**：`check-pipeline-doc.ps1` 车道枚举含 Direct（Direct 落盘文档给 advisory）；`update-doc-state.ps1` / `append-pipeline-outcome.ps1` ValidateSet 含 Direct；`validate-pipeline.ps1` 新增 USER-GUIDE 四车道一致性检查；`suggest-pipeline-lane.ps1` diff_hint 四车道（同步位：5 脚本）。
-- **VERSION 同步位清单**：CORE / lane-glossary / full-lane-decision-tree / state-machine / 6 岗位 SKILL / plan-review-tiers / doc-windowing / handoff-automation / loop-engineering / skill-eval-checklist / 5 脚本 / README / USER-GUIDE / MAINTAINER / `.mdc` / `.trae` / AGENTS——**CHANGELOG 顶部「当前 LTS」行 v3.3.1 → 4.0.0**；**MAINTAINER.md L15「当前 LTS 为 v3.1.4 定版」历史段：保留并注明（v3.1.4 为 2026-07 历史定版，当前 LTS 以 CHANGELOG 顶行为准）（n1）**。
-- **破坏性变更**：门禁语义（车道判定 / Direct 不落盘 / 热度改强度 / Auto 映射 / 审核隔离）为破坏性规则变更 → major 版本 **4.0.0**（对应 MAINTAINER「破坏性变更 → v4.0」策略）；入口只指向 VERSION，不写死版本字面量（发布产物除外）。
+- **test-first 默认化**：本 Step 验收含可机械验证项（纯逻辑 / 状态机 / 确定性算法，可写成 EditMode / PlayMode 或脚本化断言）→ 默认先写最小可执行断言再实现至绿（developer SKILL §4.6）；方案点名 / PM 指定仍强制；断言绿 ≠ 业务 A# 通过，golden/手测照常。
+- **同步位**：test-first.md 三态触发措辞 / reference-routing 触发表 ×2 与按岗加载 ×1 / MAINTAINER 规则索引行 / README 机制表 TDD 行与文件传送门行（中英各 22 行）/ VERSION / CHANGELOG LTS 行 / PACKAGE-INFO（v4.1.0 · 2026-08-12）。
+- **验证**：A1 旧措辞清零 grep 零命中；validate-pipeline.ps1 -Strict 全绿（发布闸 · lessons 2026-08-03 强制）。
 
 ### Included changes — 2026-08-11（TDD 落地 Step 1 · 不 bump）
 
@@ -96,6 +91,20 @@
 ### Included changes — 2026-08-10（skill-eval-v4 正式评分 · 不 bump）
 
 - **skill-eval-v4 窗（假需求真演六剧本 + 评分记录）**：对 v4.0.0 增量变更剧本（A1 三态 / D1 / D7 / D8 / F1n / H1 三角）假需求真演 10 场景，**9/10 Pass** + Fail 标签 `Direct未隔离CR`（S6 伪称隔离 CR，如实判 Fail，I2b 先例扩展，事后补派不追溯改判 Pass；真演 10 · 走读 0；Y=可触发数，N/A 排除，N/A=0）；`skill-eval-checklist.md` 评测记录表追加 v4.0.0 行（剧本正文 / 失败标签枚举 / §评分草表 / F1b 字面零改动）；夹具 `Assets/Doc/_examples/skill-eval-v4/`（假需求 ×6 + `_fixture.md` + `_评分表.md` + .meta 齐套）；VERSION 与 CHANGELOG「当前 LTS」行零触碰。
+
+## [4.0.0] - 发布当日（四车道重构 · 破坏性门禁语义变更 · 发布）
+
+### Changed
+
+- **四车道判定与升级链**：PM 每轮 `lane` 枚举由 Express / Standard / Full 扩展为 **Express → Direct → Standard → Full**；判定先查 Full 强制条，未命中再按 Express（步骤 1）→ Direct（步骤 2）→ Standard（步骤 3）判定，等效「取最高命中车道」；过程中命中升级立即改判（同步位：CORE / lane-glossary / full-lane-decision-tree）。
+- **Express 机械清单收窄**：仅字符串/注释/日志文本、编译错误修复（缺符号/类型不匹配，不重设计）、数字/常量/阈值 ≤3 行；**≤2 业务源文件**；无 API/持久/跨模块/生成文件；一句话说清 + 一句话 A# 可证伪；未命中热度/回归索引/止损链。
+- **Direct（新增直通道）**：有行为变化的小改（≤3 文件、无 API/持久/跨模块）→ Direct——策划子窗对话内出 A#/切片**不落盘**，默认单会话完成，跨会话/改不完自动升 Standard（同步位：doc-windowing Direct 无窗豁免 / express-slice 机械清单+Direct 对话内切片）。
+- **热度改强度升级**：热度命中不再整条升 Full——文件/机器热度命中（lessons 近 6 个月 / heat≥medium / last_fail_ts）且 Standard 规模小改 → 方案审 **L3 / 双轮 CR（热度命中取较高档：L1.5 之上 → L3/双轮 CR）**；回归索引模块小规模维持 Standard+L1.5 不取较高档；回归索引小规模 + 热度双命中按热度入口取较高档（同步位：plan-review-tiers / CORE §Standard 加强审核）。
+- **审核一律隔离**：Express 无 CR（程序员一行自检）；Direct 必隔离 CR（Subagent / 新 Chat，普通档，标「隔离复核」）；Standard 方案审（L1/L1.5/L2，隔离优先）+ 隔离 CR；Full 双轮升模型方案审 + 双轮升模型代码审。CR 模型档接线：Direct=普通档；Standard/Full=高级档；热度命中 Direct CR 升高级档。
+- **Express / Direct 不启用 Auto**：Auto 仅 Standard / Full「准」默认启用（退出句「准, 不 Auto」）；Direct 不落盘无跨会话交接载体，需要连跑即升 Standard（同步位：handoff-automation / loop-engineering / state-machine Express/Direct 例外）。
+- **机器校验同步**：`check-pipeline-doc.ps1` 车道枚举含 Direct（Direct 落盘文档给 advisory）；`update-doc-state.ps1` / `append-pipeline-outcome.ps1` ValidateSet 含 Direct；`validate-pipeline.ps1` 新增 USER-GUIDE 四车道一致性检查；`suggest-pipeline-lane.ps1` diff_hint 四车道（同步位：5 脚本）。
+- **VERSION 同步位清单**：CORE / lane-glossary / full-lane-decision-tree / state-machine / 6 岗位 SKILL / plan-review-tiers / doc-windowing / handoff-automation / loop-engineering / skill-eval-checklist / 5 脚本 / README / USER-GUIDE / MAINTAINER / `.mdc` / `.trae` / AGENTS——**CHANGELOG 顶部「当前 LTS」行 v3.3.1 → 4.0.0**；**MAINTAINER.md L15「当前 LTS 为 v3.1.4 定版」历史段：保留并注明（v3.1.4 为 2026-07 历史定版，当前 LTS 以 CHANGELOG 顶行为准）（n1）**。
+- **破坏性变更**：门禁语义（车道判定 / Direct 不落盘 / 热度改强度 / Auto 映射 / 审核隔离）为破坏性规则变更 → major 版本 **4.0.0**（对应 MAINTAINER「破坏性变更 → v4.0」策略）；入口只指向 VERSION，不写死版本字面量（发布产物除外）。
 
 ### Included changes — 2026-08-07（R20 CS0177 修复 + 编译门禁固化 · 不 bump）
 

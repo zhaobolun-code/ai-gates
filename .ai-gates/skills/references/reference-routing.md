@@ -23,7 +23,7 @@
 | 方案/CR 术语歧义、同义异名 | `shared-language.md`（活词汇表） |
 | CR 双轴（规范轴 + 规格轴） | `dual-axis-review.md` |
 | Full 策划前 / 架构概览体检 | `architecture-health-check.md`（CRG 只读） |
-| test-first 切片（方案点名时） | `test-first.md` |
+| test-first 切片（本 Step 验收含可机械验证项时默认启用；方案点名/PM 指定强制） | `test-first.md` |
 | 外部事实 / API / 文档调研（开子窗） | `research-task.md`（只读调研 + 引用证据） |
 | 只能人做的步骤（凭证 / 授权 / 后台） | `human-wizard.md`（交互向导） |
 | 超大任务决策点地图 | `decision-map.md`（配合阻塞边字段） |
@@ -39,7 +39,7 @@
 | 诊断 / 止损 / 热修自动加载放行规则 | `diagnosis-gates.md` |
 | 术语歧义 / 同义异名 | `shared-language.md` |
 | 典故词被点名（提词即唤起既定共识，不必复述） | `shared-language.md` |
-| 方案点名 test-first 切片时 | `test-first.md` |
+| 本 Step 验收含可机械验证项 / 方案点名 `test-first` 时 | `test-first.md` |
 | 超大任务决策点地图 | `decision-map.md` |
 | 只能人做的步骤（凭证 / 授权 / 后台） | `human-wizard.md` |
 | 外部事实 / API / 文档调研（开子窗） | `research-task.md` |
@@ -56,7 +56,7 @@
 ## 按岗加载
 
 - **策划/方案审**：当前缺口优先在 `acceptance-and-delta`、`doc-windowing`、`diagnosis-gates`、`execution-discipline`（复用四问）中点名 1～2 份；术语歧义加 `shared-language`；Full 策划前可加 `architecture-health-check`；接口设计 / 找 seam / 方案对比加 `codebase-design`；超大任务可加 `decision-map`。主窗派调研子窗加 `research-task`；有「只能人做」的步骤加 `human-wizard`。
-- **程序员**：优先 `unity-editor-log`；Auto/修复计数需要时加 `loop-engineering`；精简/净增加 `execution-discipline`（或 project-context 止血节）；test-first 可选加 `test-first`。
+- **程序员**：优先 `unity-editor-log`；Auto/修复计数需要时加 `loop-engineering`；精简/净增加 `execution-discipline`（或 project-context 止血节）；test-first（含可机械验证项默认启用；方案点名强制）。
 - **代码审核**：优先 `codegraph-probe`；派发或隔离问题时二选一加载 `review-dispatch-lifecycle` / `isolated-review`；双轴模式加 `dual-axis-review`；seam / 设计相关评审加 `codebase-design`。
 - **文档/周报**：只读岗位 SKILL 点名的 README/周报规则，不因“参考完整”扫目录。
 

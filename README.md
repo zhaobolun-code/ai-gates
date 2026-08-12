@@ -84,7 +84,8 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Allusion guardrails** | An agreed allusion term instantly recalls a whole shared consensus (registered in the shared-language allusion dictionary; silent redefinition forbidden); survives model or person switches |
 | **Delta Spec** | ADDED / MODIFIED / REMOVED tracked per step; no silent scope creep |
 | **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done. Hot-path regression modules auto-run a smoke check and collect logs/screenshots/test reports as evidence — auto-verification ≠ manual acceptance |
-| **Repeatable assertions (TDD)** | An external dotnet NUnit test project at the repo root (e.g. `Tests/EditMode/`) is a repeatable regression guard: run it after business changes, green trx required (total≥70, failed=0); assertions green ≠ business accepted — manual testing still applies |
+| **Repeatable assertions (TDD)** | An external dotnet NUnit test project at the repo root (e.g. `Tests/EditMode/`) is a repeatable regression guard: run it after business changes, green trx required (total≥70, failed=0); assertions green ≠ business accepted — manual testing still applies. Steps with mechanically verifiable acceptance default to writing assertions first (test-first on by default; forced when the plan/PM names it) |
+| **File portals** | One `.ai-gates/` library shared via link-platform portals by Cursor/Codex/Trae/Claude Code — one edit applies everywhere, no four drifting copies |
 
 ### Platform
 

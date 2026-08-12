@@ -84,7 +84,8 @@ ai-gates 管的是流程秩序：判定 → 切片 → 方案 → 实现 → 审
 | **典故护栏** | 约定好的典故词一提即唤起整段共识（shared-language 典故词典登记、禁静默改义）；换模型/换人不失传 |
 | **Delta Spec** | 每步跟踪 ADDED / MODIFIED / REMOVED，防无声扩大范围 |
 | **验收 A#** | 每步可证伪验收条款。「日志出了关键词」≠ 修好了。命中回归模块时自动跑冒烟 + 归集日志/截图/测试报告入证据——自动验证 ≠ 手测签收 |
-| **可重跑断言（TDD）** | 仓库根外部 dotnet NUnit 测试工程（如 `Tests/EditMode/`）为回归防线：业务改动后跑 trx 全绿（total≥70 且 failed=0）方过；断言绿 ≠ 业务通过，手测照常 |
+| **可重跑断言（TDD）** | 仓库根外部 dotnet NUnit 测试工程（如 `Tests/EditMode/`）为回归防线：业务改动后跑 trx 全绿（total≥70 且 failed=0）方过；断言绿 ≠ 业务通过，手测照常；本 Step 验收含可机械验证项 → 默认先写断言（test-first 默认启用，方案点名/PM 指定强制） |
+| **文件传送门** | Cursor / Codex / Trae / Claude Code 经传送门（link-platform）共用同一份中央库，一处修改全平台生效——防四份各自漂移 |
 
 ## 平台
 
