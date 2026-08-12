@@ -134,6 +134,7 @@ Cursor/Trae 传送门），**不表示要求安装 Cursor**；Codex-only 团队�
 | 深模块设计语言（codebase-design） | [codebase-design.md](./references/codebase-design.md) |
 | 并行接口设计（design-it-twice） | [design-it-twice.md](./references/design-it-twice.md) |
 | 需求澄清与确认（一轮确认 / 三问 / 异步问卷 / grill 访谈） | [demand-clarification.md](./references/demand-clarification.md) |
+| 知识缺口队列（不确定分级 / 入队 / 确认包清队） | [knowledge-gap.md](./references/knowledge-gap.md)；模板 [knowledge-gap.md](./templates/knowledge-gap.md) |
 修改 reference 后：检查 CORE 翻车表、anti-patterns、`.mdc` / `.trae/rules` 引用是否需同步。
 
 ## 技能元数据规范

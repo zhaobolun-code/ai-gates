@@ -52,6 +52,7 @@
 | 沟通未落地（用户「没听懂 / 再说一遍」）时 | `wait-what.md` |
 | 用户点名教学（「教我 X / 带我学 X」）时 | `teach.md` |
 | 需求模糊 / 访谈 / grill（需求切片未定、澄清仍分歧时） | `demand-clarification.md`（§grill 访谈） |
+| 仍无法证实时 / 不确定则停时 / 确认包·转场前读 open 知识缺口条目 | `knowledge-gap.md` |
 
 ## 按岗加载
 
