@@ -71,6 +71,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Slice-first** | Even small edits start as a slice—what changes, what counts as passing; one slice at a time, over-scope stops |
 | **Mandatory review, tiered** | Where the lane requires it: no plan-review pass → no coding; CR blocker → not “done” (Express/Direct may skip plan review; Direct still requires isolated CR). Tiers escalate with risk: L1.5 for modules with past failures, L2 cross-module, Full L3, heat hit → L3 plan review / double CR, adversarial CR for high-risk |
 | **Round confirmation** | One confirm package per decision (`approve`); no silent start of implement/CR |
+| **grill clarification** | Requirements undecided (vague / large / still split after repeated clarification)? One question at a time until the decision tree is exhausted before writing anything; each question carries a recommended answer; approval stays a single round (`approve`) |
 | **Harness + Auto** | In-session gates constrain the agent; after `approve`, Standard/Full may run implement↔CR until hard-stop or await-verify (Express/Direct: no Auto) |
 | **Recovery phrases** | A reset phrase snaps a derailed session back into process; a rollback phrase reverts code through a confirmed `git checkout` |
 | **Roles** | PM dispatches planner / developer / CR / docs; main chat stays PM when possible |
@@ -83,6 +84,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Allusion guardrails** | An agreed allusion term instantly recalls a whole shared consensus (registered in the shared-language allusion dictionary; silent redefinition forbidden); survives model or person switches |
 | **Delta Spec** | ADDED / MODIFIED / REMOVED tracked per step; no silent scope creep |
 | **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done. Hot-path regression modules auto-run a smoke check and collect logs/screenshots/test reports as evidence — auto-verification ≠ manual acceptance |
+| **Repeatable assertions (TDD)** | An external dotnet NUnit test project at the repo root (e.g. `Tests/EditMode/`) is a repeatable regression guard: run it after business changes, green trx required (total≥70, failed=0); assertions green ≠ business accepted — manual testing still applies |
 
 ### Platform
 
