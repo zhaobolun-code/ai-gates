@@ -6,11 +6,11 @@
 
 - **项目经理 / 各岗位**：CORE 翻车索引优先；派岗或交接前扫本表是否命中其他反模式。
 - **与 hard blocker 关系**：命中反模式通常对应 **hard blocker** 或须立即 **升级模式**；详见 [evidence-levels.md](./evidence-levels.md)。
-- **复盘写回（P2）**：连续同类 blocker（≥2 次复现）→ CR / 方案审 提议补写本表或 lessons；**用户「准」后才改 Skill**（改前 CHANGELOG）；静默改规则 = **major**（评测 E2）。
+- **复盘写回（P2）**：连续同类 blocker，或错题主表行满足升级资格（**近 90 天 ≥2 次命中 且 最近命中 ≤30 天**；机器候选见 `scripts/compute-evolution-candidates.ps1`，另须人工确认留痕——同族错误不重复计数、机器候选≠已确认）→ CR / 方案审 提议补写本表或 lessons；**用户「准」后才改 Skill**（改前 CHANGELOG）；静默改规则 = **major**（评测 E2）。
 
 ## CORE 翻车索引（v3.1.3 · 命中驱动维护）
 
-> **索引维护规则**：只列**近 90 天有真实命中**的反模式；上限 **15 条**。新增条目须带命中证据（lessons/窗口/发布闸记录）并在完整表留反模式行；超上限时最低命中条目降级回完整表（CORE 引用仅留指针）——防索引无限膨胀（2026-08-03 机制减负）。
+> **索引维护规则**：只列**近 90 天有真实命中**的反模式；上限 **15 条**。新增条目须带命中证据（lessons/窗口/发布闸记录）并在完整表留反模式行；超上限时最低命中条目降级回完整表（CORE 引用仅留指针）；**近 90 天无命中 = 低触发 → 降级回完整表**（索引层窗口按既有 90 天，与错题/典故三态同判据）——防索引无限膨胀（2026-08-03 机制减负）。
 
 | # | 反模式 | 近90天命中证据 | 见本文件章节 |
 | --- | --- | --- | --- |
@@ -129,7 +129,7 @@
 | 改完 `.cursor/project-context.md` 回归表未运行 `sync-regression-index.ps1 -Apply` | 脚本/pre-commit 读到旧 YAML；双写漂移 | v2.1.0 起 YAML 由脚本从 MD **自动生成**，改表后跑一次 `-Apply` 即可，不再手工誊抄 |
 | 无运行证据（业务 C#）或无合法 AI 验收通过（Skill/Doc）仍迁 `runtime-validated` | 功能未验即归档 | 业务 C#：用户场景证据；Skill/Doc：高规格 `mode=verify` 通过亦可 |
 | 程序员小改 README 含新回归场景，却未同步索引 | 索引与 README 分叉 | 同步 `.cursor/project-context.md` 或交 `文档` |
-| 用户已指定文档路径，或 project-context 已覆盖文档根，策划/周报仍擅自改到通用 `Assets/Doc/` | 文档散落、用户找不到产出 | **用户指定 > project-context > 默认**（见 [doc-path-defaults.md](./doc-path-defaults.md)） |
+| 用户已指定文档路径，或 project-context 已覆盖文档根，策划/周报仍擅自改到通用 `.ai-gates/Doc/` | 文档散落、用户找不到产出 | **用户指定 > project-context > 默认**（见 [doc-path-defaults.md](./doc-path-defaults.md)） |
 | 未填 **交接时间** 的多 Agent 写同一执行文档 | 冲突无法裁决 | 每份交接块必填时间（见 [handoff-template.md](./handoff-template.md)） |
 | 一次性中间产物（revision/hash 计算、压力测试、批量迁移脚本等）散落在 `.cursor/` 根或 `hooks-log/` | 工作区被垃圾淹没；运行时证据与中间产物混淆，发布闸证据不可信；清理需逐文件甄别 | 只放 **`.ai-gates/tmp/`**（不入库）；环节收尾整目录清空；hooks-log/ 只留运行时证据（2026-08-04 实证：98 个散落中间产物约 260 KB 需逐文件甄别；见 [execution-discipline.md](./execution-discipline.md) §工作区卫生） |
 | 新建执行中窗无 `.kit-v1` / `物理口径.md` 仍定版 | 齐套门禁失效，历史豁免被误用 | 有 kit 必须同目录物理口径；缺则方案审 **blocker**（见 [doc-windowing.md](./doc-windowing.md) §新窗齐套标记） |

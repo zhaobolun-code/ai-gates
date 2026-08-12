@@ -10,6 +10,8 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-12：自进化三机制落地（①置信标注三档：`确定[有代码证据]`/`推断[有间接证据]`/`猜测[无证据]`，接线方案审 3.56 / CR 1.26 / developer §5.5；②连续触发晋升：新增 `scripts/compute-evolution-candidates.ps1` + 升级候选流程，anti-patterns/code-reviewer「≥2 次复现」旧判据替换；③活跃度三态降级：lessons/shared-language/anti-patterns 三表统一判据+分表动作；Skill/Doc-only，不 bump VERSION）
+- 2026-08-12：[文档根迁移] 默认产出文档根 Assets/Doc → .ai-gates/Doc（2026-08-12，不入 git）
 - 2026-08-12：test-first 默认化（本 Step 验收含可机械验证项 → 默认先写断言再实现；方案点名 / PM 指定仍强制；断言绿 ≠ 业务 A# 通过，golden/手测照常；不 bump VERSION，随发布窗同步）
 - 2026-08-11：TDD 落地 Step 1（外部 dotnet NUnit 测试工程 · 161 用例首测）
 - 2026-08-11：grill 访谈机制落地（mattpocock 第三批）

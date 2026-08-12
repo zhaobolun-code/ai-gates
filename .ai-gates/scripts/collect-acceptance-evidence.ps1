@@ -12,7 +12,7 @@
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/collect-acceptance-evidence.ps1 `
-    -DocFolder "Assets/Doc/xxx/执行中/方案" -Aids "A1,A2" -LogFile "C:/logs/Editor.log"
+    -DocFolder ".ai-gates/Doc/xxx/执行中/方案" -Aids "A1,A2" -LogFile "C:/logs/Editor.log"
 #>
 
 [CmdletBinding()]

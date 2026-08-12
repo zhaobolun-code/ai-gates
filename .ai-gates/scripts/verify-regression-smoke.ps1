@@ -12,7 +12,7 @@
   - 诚实边界：auto-run 绿色 ≠ 业务手测签收；golden 绿 ≠ A# 过（与 run-unity-verify-golden 同约定）
 
 .EXAMPLE
-  powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/verify-regression-smoke.ps1 -Module PressureManager -OutputDir "Assets/Doc/xxx/证据"
+  powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/verify-regression-smoke.ps1 -Module PressureManager -OutputDir ".ai-gates/Doc/xxx/证据"
 #>
 
 [CmdletBinding()]

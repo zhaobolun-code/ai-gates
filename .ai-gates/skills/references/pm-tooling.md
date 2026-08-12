@@ -14,7 +14,7 @@
 有 plan-lite 时**优先**带 `-DocPath`（不依赖 git）：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .cursor/scripts/suggest-pipeline-lane.ps1 -DocPath "Assets/Doc/.../方案.md"
+powershell -ExecutionPolicy Bypass -File .cursor/scripts/suggest-pipeline-lane.ps1 -DocPath ".ai-gates/Doc/.../方案.md"
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/suggest-pipeline-lane.ps1 -DocPath "..." -Step "Step 1"
 ```
 

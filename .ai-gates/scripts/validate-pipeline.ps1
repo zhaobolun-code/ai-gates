@@ -293,7 +293,7 @@ try {
         $parsePath = Join-Path $scriptDir "pipeline-doc-parse.ps1"
         try {
             . $parsePath
-            $sampleDoc = "Assets/Doc/_examples/plan-lite-pressure-debug-log.md"
+            $sampleDoc = ".ai-gates/Doc/_examples/plan-lite-pressure-debug-log.md"
             $content = Read-PipelineDocContent -RepoRoot $repoRoot -DocPath $sampleDoc
             if (-not $content) {
                 Write-Host "parse probe: skip (sample doc missing)" -ForegroundColor DarkYellow

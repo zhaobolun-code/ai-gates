@@ -46,7 +46,7 @@
 
 
 
-| **3** | 以上皆无 | **`Assets/Doc/`**（通用 Skill 默认） |
+| **3** | 以上皆无 | **`.ai-gates/Doc/`**（通用 Skill 默认） |
 
 
 
@@ -74,7 +74,7 @@
 
 
 
-Assets/Doc/{主题}/{方案短名}/
+.ai-gates/Doc/{主题}/{方案短名}/
 
 
 
@@ -145,7 +145,7 @@ Assets/LabSDK/Runtime/Pennon/ExplorationLab/化学文档/压力系统/
 
 
 
-- **周报**：`Assets/Doc/Weekly/` 或方案文件夹内（除非 project-context 另写）。
+- **周报**：`.ai-gates/Doc/Weekly/` 或方案文件夹内（除非 project-context 另写）。
 
 
 
@@ -173,11 +173,11 @@ Assets/LabSDK/Runtime/Pennon/ExplorationLab/化学文档/压力系统/
 
 
 
-| **策划** | 新建：用户路径 > project-context 根 > `Assets/Doc/{主题}/执行中/{方案短名}/未完成.md`；完成 Step 后迁入 `已完成/` |
+| **策划** | 新建：用户路径 > project-context 根 > `.ai-gates/Doc/{主题}/执行中/{方案短名}/未完成.md`；完成 Step 后迁入 `已完成/` |
 
 
 
-| **周报** | 用户路径 > 方案目录 > `Assets/Doc/Weekly/` |
+| **周报** | 用户路径 > 方案目录 > `.ai-gates/Doc/Weekly/` |
 
 
 
@@ -233,7 +233,7 @@ Assets/LabSDK/Runtime/Pennon/ExplorationLab/化学文档/压力系统/
 
 
 
-- 把岗位 Skill 移到 `Assets/Doc/`
+- 把岗位 Skill 移到 `.ai-gates/Doc/`
 
 
 
@@ -241,7 +241,7 @@ Assets/LabSDK/Runtime/Pennon/ExplorationLab/化学文档/压力系统/
 
 
 
-- 有 project-context 覆盖时仍默认落到 `Assets/Doc/{主题}/`（压力系统方案）
+- 有 project-context 覆盖时仍默认落到 `.ai-gates/Doc/{主题}/`（压力系统方案）
 
 
 

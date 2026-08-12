@@ -14,12 +14,12 @@
 
 v3.1.3 观察期已于 **2026-07-16** 由 TL「bump / 转正」关闭；当前 LTS 为 **v3.1.4 定版**（v3.1.4 为 2026-07 历史定版，当前 LTS 以 [CHANGELOG.md](../CHANGELOG.md) 顶行为准）。历史勾选状态：
 
-- [x] 1 个真实 **Express** 需求走完整闭环（切片 → 改代码 → 自检 → Unity 测试）— 证据：`Assets/Doc/_examples/express-closed-loop-console-log-mirror/`（Console Log Mirror · 2026-07-17 runtime-validated）
-- [x] 1 个真实 **Standard + L1.5** 需求走完整闭环（plan-lite → 方案审核 → 程序员 → CR → README）— 证据：`Assets/Doc/_examples/standard-l15-closed-loop-console-log-mirror-toolbar/`（去顶部工具栏 · 2026-07-17 runtime-validated）
+- [x] 1 个真实 **Express** 需求走完整闭环（切片 → 改代码 → 自检 → Unity 测试）— 证据：`.ai-gates/Doc/_examples/express-closed-loop-console-log-mirror/`（Console Log Mirror · 2026-07-17 runtime-validated）
+- [x] 1 个真实 **Standard + L1.5** 需求走完整闭环（plan-lite → 方案审核 → 程序员 → CR → README）— 证据：`.ai-gates/Doc/_examples/standard-l15-closed-loop-console-log-mirror-toolbar/`（去顶部工具栏 · 2026-07-17 runtime-validated）
 - [ ] 期间无需触发 `按 CORE 重来`，或触发后已按 §Agent 失败模式与恢复 收口
 - [ ] 上述过程中未发现 CORE / SKILL 规则冲突
 - [ ] 2026-07-08 审计新增规则在真实闭环中至少各触发验证一次
-- [x] 跑 [skill-eval-checklist.md](./references/skill-eval-checklist.md) §A~D 剧本，Pass 率 ≥90%（**21/21 真演**，见 `Assets/Doc/_examples/skill-eval-ad/_评分表.md`）
+- [x] 跑 [skill-eval-checklist.md](./references/skill-eval-checklist.md) §A~D 剧本，Pass 率 ≥90%（**21/21 真演**，见 `.ai-gates/Doc/_examples/skill-eval-ad/_评分表.md`）
 
 **2026-07-09 审计进度（历史）**：Full 车道 L3 多轮纠错已有真实证据。
 **2026-07-17**：真实 **Express** 与 **Standard+L1.5** 闭环均已补（见上勾选项）。
@@ -151,6 +151,18 @@ Cursor/Trae 传送门），**不表示要求安装 Cursor**；Codex-only 团队�
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/commit-lesson-pending.ps1 `
   -PendingPath "{方案夹}/证据/_lesson-pending.md" -Apply
 ```
+
+### 升级候选落表（连续触发晋升 · 机制 B）
+
+```powershell
+# dry-run（只列出候选，不落盘；真实主表默认路径无需参数）
+powershell -ExecutionPolicy Bypass -File .cursor/scripts/compute-evolution-candidates.ps1 -DryRun
+# 落盘（输出 .ai-gates/evolution-candidates.yaml，自动生成勿手工编辑；幂等可重跑）
+powershell -ExecutionPolicy Bypass -File .cursor/scripts/compute-evolution-candidates.ps1
+```
+
+判据（保守近似）：近 90 天 ≥2 次命中 且 最近命中 ≤30 天 且「晋升」列为空（日期 < 最近命中 = ≥2 独立时间戳留痕）。
+**候选≠已确认**：机器候选须人工确认留痕（同族错误不重复计数）后，按 lessons-learned §时效归档 升级候选流程 → 用户「准」→ 升 skill 级 → 主表「晋升」列标记。
 
 ## 维护约定
 

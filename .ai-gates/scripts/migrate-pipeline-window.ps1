@@ -1,6 +1,6 @@
 ﻿# migrate-pipeline-window.ps1 — 方案夹在状态分类夹间迁移（Move + 改链）
 # Usage (repo root):
-#   powershell -NoProfile -File .cursor/scripts/migrate-pipeline-window.ps1 -DocFolder "Assets/Doc/.../执行中/foo" -ToCategory 签收
+#   powershell -NoProfile -File .cursor/scripts/migrate-pipeline-window.ps1 -DocFolder ".ai-gates/Doc/.../执行中/foo" -ToCategory 签收
 #   powershell -NoProfile -File .cursor/scripts/migrate-pipeline-window.ps1 -DocFolder "..." -ToCategory 失败 -DryRun
 #
 # 行为：创建目标分类夹 → Move 方案夹（及同名 .meta）→ 改写夹内 **方案文件夹** →
@@ -35,7 +35,7 @@ $CategoryAlt = ($Categories | ForEach-Object { [regex]::Escape($_) }) -join "|"
 
 function Resolve-DefaultDocRoot {
     param([string]$RepoRoot)
-    $fallback = "Assets/Doc"
+    $fallback = ".ai-gates/Doc"
     $pc = Join-Path $RepoRoot ".cursor/project-context.md"
     if (-not (Test-Path -LiteralPath $pc)) { return $fallback }
     $raw = Get-Content -LiteralPath $pc -Raw -Encoding UTF8
@@ -54,7 +54,7 @@ function Resolve-DefaultDocRoot {
 function Get-DocRoots {
     param([string]$RepoRoot)
     $roots = @()
-    $assetsDoc = Join-Path $RepoRoot "Assets/Doc"
+    $assetsDoc = Join-Path $RepoRoot ".ai-gates/Doc"
     if (Test-Path -LiteralPath $assetsDoc) { $roots += , ((Resolve-Path -LiteralPath $assetsDoc).Path) }
     $overrideRel = Resolve-DefaultDocRoot -RepoRoot $RepoRoot
     $overrideAbs = Join-Path $RepoRoot ($overrideRel.Replace('/', [string][IO.Path]::DirectorySeparatorChar))

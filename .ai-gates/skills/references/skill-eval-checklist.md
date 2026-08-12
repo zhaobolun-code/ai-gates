@@ -91,7 +91,7 @@
 
 ## F. Auto / Loop 外环
 
-> 权威：[loop-engineering.md](./loop-engineering.md)、handoff §H。假需求即可（不必真 Unity）。夹具：`Assets/Doc/_examples/skill-eval-auto/`。
+> 权威：[loop-engineering.md](./loop-engineering.md)、handoff §H。假需求即可（不必真 Unity）。夹具：`.ai-gates/Doc/_examples/skill-eval-auto/`。
 
 | ID | 剧本 | Pass 标准 |
 | --- | --- | --- |
@@ -112,7 +112,7 @@
 
 ## G. 复核派发工件
 
-> 假需求即可；夹具 `Assets/Doc/_examples/skill-eval-review-dispatch/`。算法见 [review-dispatch-lifecycle.md](./review-dispatch-lifecycle.md)。
+> 假需求即可；夹具 `.ai-gates/Doc/_examples/skill-eval-review-dispatch/`。算法见 [review-dispatch-lifecycle.md](./review-dispatch-lifecycle.md)。
 
 | ID | 剧本 | Pass 标准 |
 | --- | --- | --- |
@@ -193,7 +193,7 @@
 | Delta Spec 覆盖 | C7/C7b/C7c | 三段齐全且非幻觉；结案口径收敛 |
 | v3.2 收敛 | H1～H6 | 旁路、验证、摘要、窗口、路由、版本均通过三角走读 |
 
-**已补（P1.5 · 2026-07-17）**：Delta Spec → C7/C7b/C7c；微循环 → D5（启用 ≥50%）；经验提议 → E4（去超前标记）。规则见 `acceptance-and-delta.md` §Delta Spec、`developer/SKILL.md` §4.5/§8.5、`handoff-automation.md` §F。假需求夹具：`Assets/Doc/_examples/skill-eval-p15/`。**已补（Loop/Auto · 2026-07-20）**：F1～F1m；夹具 `Assets/Doc/_examples/skill-eval-auto/`。**已补（Review Dispatch · 2026-07-20）**：G1～G1f；夹具 `Assets/Doc/_examples/skill-eval-review-dispatch/`。**已补（错题本 · 2026-07-20）**：E5/E5b/E6；夹具 `Assets/Doc/_examples/skill-eval-errorbook/`。**已补（机械化 Harness A/B/C/D + 预授权 · 2026-07-21）**：I1～I4；本会话内走读 7/8 Pass（I2b Fail，如实入账，非隐瞒绕过但仍按字面判 Fail），暂无独立夹具，待补真实 Full 车道案例。**已补（P2 · 2026-08-05）**：Analyze 对表 → C4（规则见 `acceptance-and-delta.md` §Analyze 对表、`plan-reviewer/SKILL.md` §3.55、`developer/SKILL.md` 回复须含）；复盘写回规则接线 → E2（规则见 `code-reviewer/SKILL.md` §1.25、`anti-patterns.md` §复盘写回）。**待补**：I 系列真实项目夹具。P1（C5/C5b/C5c/C6）仍见 `skill-eval-c5/`。
+**已补（P1.5 · 2026-07-17）**：Delta Spec → C7/C7b/C7c；微循环 → D5（启用 ≥50%）；经验提议 → E4（去超前标记）。规则见 `acceptance-and-delta.md` §Delta Spec、`developer/SKILL.md` §4.5/§8.5、`handoff-automation.md` §F。假需求夹具：`.ai-gates/Doc/_examples/skill-eval-p15/`。**已补（Loop/Auto · 2026-07-20）**：F1～F1m；夹具 `.ai-gates/Doc/_examples/skill-eval-auto/`。**已补（Review Dispatch · 2026-07-20）**：G1～G1f；夹具 `.ai-gates/Doc/_examples/skill-eval-review-dispatch/`。**已补（错题本 · 2026-07-20）**：E5/E5b/E6；夹具 `.ai-gates/Doc/_examples/skill-eval-errorbook/`。**已补（机械化 Harness A/B/C/D + 预授权 · 2026-07-21）**：I1～I4；本会话内走读 7/8 Pass（I2b Fail，如实入账，非隐瞒绕过但仍按字面判 Fail），暂无独立夹具，待补真实 Full 车道案例。**已补（P2 · 2026-08-05）**：Analyze 对表 → C4（规则见 `acceptance-and-delta.md` §Analyze 对表、`plan-reviewer/SKILL.md` §3.55、`developer/SKILL.md` 回复须含）；复盘写回规则接线 → E2（规则见 `code-reviewer/SKILL.md` §1.25、`anti-patterns.md` §复盘写回）。**待补**：I 系列真实项目夹具。P1（C5/C5b/C5c/C6）仍见 `skill-eval-c5/`。
 
 **滥用预案**：任何新规则落地后，须同步追加对应的**滥用反例**剧本（如 C5b「Agent 把所有窗标 archived」）与**过度保守反例**（如 C5c「该归档不归档、拖延开窗」），确保优化不被 Agent 机械执行扭曲、也不从"散落"走向另一个极端；C5/C5b/C5c 即为该模式的落地示例，"正→负→反"三角验证，后续 P1.5/P2 新规则落地时照此补齐。微循环自检不增加 Developer Checklist §7 的修复计数（详见分析记录文档 §3.1.3）。
 
@@ -202,16 +202,16 @@
 | 日期 | Skill 版本 | 执行人 | A–D Pass 率 | N/A 率 | Fail 标签摘要 | 结论 |
 | --- | --- | --- | --- | --- | --- | --- |
 | （例）2026-07-16 | v3.1.3 | | — | — | | 草稿入库，尚未跑满 |
-| 2026-07-16 | v3.1.3 | 人工+Agent | C5/C5b/C5c/C6 全 Pass；A/B/D 本轮未跑 | — | 无 | P1 剧本验收通过；夹具 `Assets/Doc/_examples/skill-eval-c5/`；RC 转正仍须补 A～D 全量 + Express/Standard 闭环 |
+| 2026-07-16 | v3.1.3 | 人工+Agent | C5/C5b/C5c/C6 全 Pass；A/B/D 本轮未跑 | — | 无 | P1 剧本验收通过；夹具 `.ai-gates/Doc/_examples/skill-eval-c5/`；RC 转正仍须补 A～D 全量 + Express/Standard 闭环 |
 | 2026-07-16 | v3.1.3 | 人工+Agent | **18/21 ≈ 85.7%**（手填记分 · **作废**） | 0% | 手填 Fail 标签不计 | 用户确认首轮 A～D **全部手填**，本行不作为 RC 证据 |
 | 2026-07-16 | v3.1.3 | 人工+Agent | **21/21 = 100%**（含手填 Pass · **作废**） | 0% | — | 同上；已撤回 |
-| 2026-07-16 | v3.1.3 | 人工+Agent | **有效 7/21 ≈ 33.3%**（未达 ≥90%） | 0% | 无 | **仅真演计分**：A4/B2/D2 重跑 Pass + C5/C5b/C5c/C6 Pass；其余 14 条待重跑。明细见 `Assets/Doc/_examples/skill-eval-ad/_评分表.md`。**暂缓 RC/bump** |
-| 2026-07-16 | v3.1.3 | 人工+Agent | **21/21 = 100%**（真演） | 0% | 无 | 补跑 14 条全 Pass；跳过项 A4/B2/D2/C5～C6 沿用既有真演。明细见 `Assets/Doc/_examples/skill-eval-ad/_评分表.md`。**可冲 RC**（须 TL 确认 bump） |
+| 2026-07-16 | v3.1.3 | 人工+Agent | **有效 7/21 ≈ 33.3%**（未达 ≥90%） | 0% | 无 | **仅真演计分**：A4/B2/D2 重跑 Pass + C5/C5b/C5c/C6 Pass；其余 14 条待重跑。明细见 `.ai-gates/Doc/_examples/skill-eval-ad/_评分表.md`。**暂缓 RC/bump** |
+| 2026-07-16 | v3.1.3 | 人工+Agent | **21/21 = 100%**（真演） | 0% | 无 | 补跑 14 条全 Pass；跳过项 A4/B2/D2/C5～C6 沿用既有真演。明细见 `.ai-gates/Doc/_examples/skill-eval-ad/_评分表.md`。**可冲 RC**（须 TL 确认 bump） |
 | 2026-07-16 | **v3.1.4** | 人工+Agent | **21/21 = 100%**（真演） | 0% | 无 | TL「bump / 转正」→ **定版**；CHANGELOG `[3.1.4]`；LTS 八处已同步 |
-| 2026-07-17 | v3.1.4 | 人工+Agent | P1.5：C7/C7b/C7c/D5/E4 **全 Pass**（假需求） | — | 无 | 规则落地 + 夹具 `Assets/Doc/_examples/skill-eval-p15/`；不 bump |
-| 2026-07-20 | v3.1.4 | 人工+Agent | F1～F1m **全 Pass**（假需求/走读） | — | 无 | Loop/Auto 剧本入库；夹具 `Assets/Doc/_examples/skill-eval-auto/`；不 bump |
-| 2026-07-20 | v3.1.4 | 人工+Agent | G1～G1f **全 Pass**（假需求/走读） | — | 无 | 复核派发剧本入库；夹具 `Assets/Doc/_examples/skill-eval-review-dispatch/`；不 bump |
-| 2026-07-20 | v3.1.4 | 人工+Agent | E5/E5b/E6 **全 Pass**（假需求/走读） | — | 无 | 错题本剧本入库；夹具 `Assets/Doc/_examples/skill-eval-errorbook/`；不 bump |
+| 2026-07-17 | v3.1.4 | 人工+Agent | P1.5：C7/C7b/C7c/D5/E4 **全 Pass**（假需求） | — | 无 | 规则落地 + 夹具 `.ai-gates/Doc/_examples/skill-eval-p15/`；不 bump |
+| 2026-07-20 | v3.1.4 | 人工+Agent | F1～F1m **全 Pass**（假需求/走读） | — | 无 | Loop/Auto 剧本入库；夹具 `.ai-gates/Doc/_examples/skill-eval-auto/`；不 bump |
+| 2026-07-20 | v3.1.4 | 人工+Agent | G1～G1f **全 Pass**（假需求/走读） | — | 无 | 复核派发剧本入库；夹具 `.ai-gates/Doc/_examples/skill-eval-review-dispatch/`；不 bump |
+| 2026-07-20 | v3.1.4 | 人工+Agent | E5/E5b/E6 **全 Pass**（假需求/走读） | — | 无 | 错题本剧本入库；夹具 `.ai-gates/Doc/_examples/skill-eval-errorbook/`；不 bump |
 | 2026-07-21 | v3.1.4（v3.2发布前） | Agent隔离 | H1～H6a + A1～A5/B1～B4/D2/F1/F1l/F1m **27/27 Pass** | 0% | 无 | Strict 退出0；H6最终版本单源闸留待Step10/11 |
 | 2026-07-21 | v3.2.0（+支柱A/B/C/D+预授权，本会话追加，不 bump） | 人工+Agent（本会话内走读，非新开 Chat 真演） | I1～I4 **7/8 Pass**（I2b Fail） | 0% | `机械门禁自绕过`（I2b） | I2b 如实记录本会话内 Agent 曾手动重放 `mark-pm-gate.ps1` 诊断（全程向用户公开，非隐瞒绕过），仍按字面标准判 Fail，不因动机豁免；I1/I1b/I1c 尚缺真实 Full 车道项目案例，留待补真演；`pm-gate-check.ps1` 已由 `deny` 降级为 `ask`，降低此类死锁复发概率 |
-| 2026-08-10 | v4.0.0 | 人工+Agent | A1三态/D1/D7/D8/F1n/H1(+反例) **9/10 Pass**（真演 10 · 走读 0；Y=可触发数，N/A 排除） | 0%（0/10） | `Direct未隔离CR`（S6） | 增量聚焦 v4.0.0 变更剧本 + 关联回归（A2/A3/F1b 字面/validate 四车道检查）；S6 伪称隔离 CR 如实判 Fail（I2b 先例扩展，事后补派不追溯改判 Pass）；隔离 CR 由 PM 补派；夹具 `Assets/Doc/_examples/skill-eval-v4/`；不 bump |
+| 2026-08-10 | v4.0.0 | 人工+Agent | A1三态/D1/D7/D8/F1n/H1(+反例) **9/10 Pass**（真演 10 · 走读 0；Y=可触发数，N/A 排除） | 0%（0/10） | `Direct未隔离CR`（S6） | 增量聚焦 v4.0.0 变更剧本 + 关联回归（A2/A3/F1b 字面/validate 四车道检查）；S6 伪称隔离 CR 如实判 Fail（I2b 先例扩展，事后补派不追溯改判 Pass）；隔离 CR 由 PM 补派；夹具 `.ai-gates/Doc/_examples/skill-eval-v4/`；不 bump |

@@ -2,7 +2,7 @@
 
 > **车道**：Standard（常道）默认模板。Full 车道见 [references/execution-doc-template.md](../references/execution-doc-template.md)。
 > **Direct（直通道）不使用本模板**——对话内 A#/切片不落盘；跨会话/改不完升 Standard 后才落盘本模板。
-> **路径**：用户指定 > project-context 文档根 > 默认 `Assets/Doc/{主题}/{方案短名}/未完成.md`（须同时有 `已完成/_索引.md`）。窗口化 → [doc-windowing.md](../references/doc-windowing.md)；闸门 → [diagnosis-gates.md](../references/diagnosis-gates.md)
+> **路径**：用户指定 > project-context 文档根 > 默认 `.ai-gates/Doc/{主题}/{方案短名}/未完成.md`（须同时有 `已完成/_索引.md`）。窗口化 → [doc-windowing.md](../references/doc-windowing.md)；闸门 → [diagnosis-gates.md](../references/diagnosis-gates.md)
 
 > **Delta-only**：只写相对当前代码的变更；模块原理以 README / `物理口径.md` 为准，禁止在本文重写系统说明。细则 → [acceptance-and-delta.md](../references/acceptance-and-delta.md)
 
@@ -101,7 +101,7 @@
 - **方案审核档位**：L1.5
 - **证据等级**：claimed(已声称)
 - **可交给程序员**：否
-- **方案文件夹**：`Assets/Doc/{主题}/{方案短名}/`
+- **方案文件夹**：`.ai-gates/Doc/{主题}/{方案短名}/`
 
 ## 给程序员的说明
 

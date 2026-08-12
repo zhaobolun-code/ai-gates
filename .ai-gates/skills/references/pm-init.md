@@ -10,7 +10,7 @@
 一次对话内完成「能跑流水线」的最小接入：
 
 1. 生成/确认 `.cursor/project-context.md` + `regression-index.yaml`
-2. 确认并创建**执行文档根目录**（默认 `Assets/Doc/`，可覆盖）
+2. 确认并创建**执行文档根目录**（默认 `.ai-gates/Doc/`，可覆盖）
 3. 探测并引导安装 **CodeGraph**（征得同意后再装）
 4. 列出仍须人工填写的项目专属项（技术栈、回归索引等）
 
@@ -20,9 +20,9 @@
 
 1. **Read** 本文件 + 探测仓库状态（优先跑脚本，见下）。
 2. 若无 `.cursor/project-context.md` → 运行 `init-project-context.ps1`（或 `pm-init.ps1` 的 CreateContext）。
-3. **文档根**：默认 `Assets/Doc/`（见 [doc-path-defaults.md](./doc-path-defaults.md)）。
+3. **文档根**：默认 `.ai-gates/Doc/`（见 [doc-path-defaults.md](./doc-path-defaults.md)）。
    - 用户本轮指定路径 → 用用户路径，并在 project-context「执行文档存放约定」写覆盖表。
-   - 未指定 → 创建默认 `Assets/Doc/` 与 `Assets/Doc/Weekly/`（已存在则跳过）。
+   - 未指定 → 创建默认 `.ai-gates/Doc/` 与 `.ai-gates/Doc/Weekly/`（已存在则跳过）。
 4. **CodeGraph**：
 - 已有 `.codegraph/` 或 `codegraph` CLI 可用 → 记「已就绪」，提示必要时重载 Cursor（Codex 用户重开会话）。
    - 未安装 → **先征得用户同意**，再执行 `codegraph install --platform cursor` 与 `codegraph init`；失败则给出手动命令与 [codegraph-probe.md](./codegraph-probe.md)。

@@ -1,7 +1,7 @@
 # 执行文档模板（AI 可执行）
 
 > **用法**：`策划` 新建时先建方案文件夹，将本模板写入 **`未完成.md`**（见 [doc-windowing.md](./doc-windowing.md)）。
-> **路径**：用户指定 > 默认 **`Assets/Doc/{主题}/{方案短名}/未完成.md`**（见 [doc-path-defaults.md](./doc-path-defaults.md)）。
+> **路径**：用户指定 > 默认 **`.ai-gates/Doc/{主题}/{方案短名}/未完成.md`**（见 [doc-path-defaults.md](./doc-path-defaults.md)）。
 > **结构参考**：[执行文档黄金样例.md](./执行文档黄金样例.md)（v1.7.7，Skill 通用）。
 > 章节不可删；标题可微调，内容类别必须保留。状态迁移见 [state-machine.md](./state-machine.md)。已完成 Step 迁入同目录 `已完成/`，禁止在本文件堆积历史长文。
 > **活跃窗软上限**：`未完成.md` ≤150行；超限写原因/压缩时点并外置历史、证据或当前 Mandatory，禁止删除 A#/Mandatory 压行。

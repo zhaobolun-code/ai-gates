@@ -139,7 +139,7 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 - 方案 L3 ≠ Step CR；互不替代。
 - 每个实现 Step：**至少 1 轮**非 Maker 的隔离主 CR，且针对**最新版 diff**无 blocker（优先 Subagent）；同 Chat / 普通文档审 / 方案 L3 / 可选对抗 CR **均不得替代**。
 - CR 有 blocker → 修复后重新隔离 CR；交审级修复受 `max_repair_rounds=2` 约束。
-- **Skill/Doc-only 图谱例外**：本 Step Mandatory **仅**改 `.cursor/skills/**`、`Assets/Doc/**` 等、**无**业务 Runtime/Editor C# 时，无 CodeGraph（或探测失败）→ **soft risk / 验证缺口**，不得单独据此 blocker，不得阻止无业务 blocker 收口。覆盖现行 Full「无图谱=hard blocker」对本类 Step 的适用；业务 C# Step 仍按原规则。
+- **Skill/Doc-only 图谱例外**：本 Step Mandatory **仅**改 `.cursor/skills/**`、`.ai-gates/Doc/**` 等、**无**业务 Runtime/Editor C# 时，无 CodeGraph（或探测失败）→ **soft risk / 验证缺口**，不得单独据此 blocker，不得阻止无业务 blocker 收口。覆盖现行 Full「无图谱=hard blocker」对本类 Step 的适用；业务 C# Step 仍按原规则。
   - **实现期默认决策（至 `code-reviewer/SKILL.md` 接线前）**：本方案 Step 的隔离主 CR 以本文件 + 执行文档共同 Exit Gate 为准；与 CR 车道表冲突时，**Skill/Doc-only 取 soft risk**。
 
 ## 7. 口令

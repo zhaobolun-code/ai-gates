@@ -2,7 +2,7 @@
 # Usage (repo root):
 #   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1
 #   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply
-#   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply -DocRoot "Assets/Doc"
+#   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply -DocRoot ".ai-gates/Doc"
 #   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply -InstallCodeGraph
 #
 # Default is probe-only (zero side effects). -Apply runs guided init:
@@ -13,7 +13,7 @@
 
 param(
     [switch]$Apply,
-    [string]$DocRoot = "Assets/Doc",
+    [string]$DocRoot = ".ai-gates/Doc",
     [switch]$InstallCodeGraph
 )
 
@@ -106,8 +106,8 @@ if (-not (Test-Path -LiteralPath $weeklyAbs)) {
     Write-Host "Created: $DocRoot/Weekly" -ForegroundColor Green
 }
 
-if ($DocRoot -ne "Assets/Doc" -and $DocRoot -ne "Assets\Doc") {
-    Write-Host "NOTE: DocRoot='$DocRoot' differs from default Assets/Doc — Agent must update project-context doc path section." -ForegroundColor Yellow
+if ($DocRoot -ne ".ai-gates/Doc" -and $DocRoot -ne ".ai-gates\Doc") {
+    Write-Host "NOTE: DocRoot='$DocRoot' differs from default .ai-gates/Doc — Agent must update project-context doc path section." -ForegroundColor Yellow
 }
 
 if ($InstallCodeGraph) {

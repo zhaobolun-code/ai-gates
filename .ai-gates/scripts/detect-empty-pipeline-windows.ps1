@@ -3,7 +3,7 @@
 #   powershell -NoProfile -File .cursor/scripts/detect-empty-pipeline-windows.ps1
 #   powershell -NoProfile -File .cursor/scripts/detect-empty-pipeline-windows.ps1 -Apply
 #
-# 扫描 Assets/Doc + project-context 压力文档根下 执行中/*。
+# 扫描 .ai-gates/Doc + project-context 压力文档根下 执行中/*。
 # 合取判据：isEmptyShell = hasTemplatePlaceholder && !hasRealStepTitle && !hasEvidenceJson && !hasLiveState
 # -Apply：归档到 {docRoot}/签收/_空壳清扫-YYYYMMDD/{短名}/（Move，不 Delete）。
 
@@ -35,7 +35,7 @@ $LiveStates = @(
 
 function Resolve-DefaultDocRoot {
     param([string]$RepoRoot)
-    $fallback = "Assets/Doc"
+    $fallback = ".ai-gates/Doc"
     $pc = Join-Path $RepoRoot ".cursor/project-context.md"
     if (-not (Test-Path -LiteralPath $pc)) { return $fallback }
     $raw = Get-Content -LiteralPath $pc -Raw -Encoding UTF8
@@ -54,7 +54,7 @@ function Resolve-DefaultDocRoot {
 function Get-DocRoots {
     param([string]$RepoRoot)
     $roots = @()
-    $assetsDoc = Join-Path $RepoRoot "Assets/Doc"
+    $assetsDoc = Join-Path $RepoRoot ".ai-gates/Doc"
     if (Test-Path -LiteralPath $assetsDoc) { $roots += , ((Resolve-Path -LiteralPath $assetsDoc).Path) }
     $overrideRel = Resolve-DefaultDocRoot -RepoRoot $RepoRoot
     $overrideAbs = Join-Path $RepoRoot ($overrideRel.Replace('/', [string][IO.Path]::DirectorySeparatorChar))

@@ -1,7 +1,7 @@
 ﻿# suggest-pipeline-lane.ps1 - git diff lane hint (advisory; does not set lane)
 # Usage:
 #   .\suggest-pipeline-lane.ps1
-#   .\suggest-pipeline-lane.ps1 -DocPath "Assets/Doc/.../plan.md"
+#   .\suggest-pipeline-lane.ps1 -DocPath ".ai-gates/Doc/.../plan.md"
 #   .\suggest-pipeline-lane.ps1 -DocPath "..." -Step "Step 1" -JsonOnly
 param(
     [string]$DocPath,

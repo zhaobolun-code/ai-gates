@@ -10,7 +10,7 @@
 > 6. 运行 `.cursor/scripts/sync-regression-index.ps1`（若使用 YAML 副本）
 >
 > **Skill 包内不含已填好的 `project-context.md`** — 勿把具体模块名/路径写进 `.cursor/skills/` 下的通用 Skill。
-> 文档默认根：**用户指定 > `Assets/Doc/`**（见 [doc-path-defaults.md](./references/doc-path-defaults.md)；非 Unity 项目可在下文覆盖）。
+> 文档默认根：**用户指定 > `.ai-gates/Doc/`**（见 [doc-path-defaults.md](./references/doc-path-defaults.md)；非 Unity 项目可在下文覆盖）。
 
 ## 技术栈
 
@@ -62,13 +62,13 @@
 
 ## 执行文档存放约定（可选覆盖）
 
-> 默认遵守 [doc-path-defaults.md](./references/doc-path-defaults.md)：**用户指定路径 > `Assets/Doc/`**。
+> 默认遵守 [doc-path-defaults.md](./references/doc-path-defaults.md)：**用户指定路径 > `.ai-gates/Doc/`**。
 > 非 Unity 或需改默认根时，在此表覆盖；否则**删除本节**。
 
 | 类型 | 默认路径 | 说明 |
 | --- | --- | --- |
-| 执行方案 | `Assets/Doc/{主题}/` | 用户指定则以用户为准 |
-| 周报 | `Assets/Doc/Weekly/` | 保存为文件时 |
+| 执行方案 | `.ai-gates/Doc/{主题}/` | 用户指定则以用户为准 |
+| 周报 | `.ai-gates/Doc/Weekly/` | 保存为文件时 |
 
 ### 活跃可改码窗（可选短表）
 

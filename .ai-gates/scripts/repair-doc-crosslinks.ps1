@@ -1,11 +1,11 @@
 ﻿# repair-doc-crosslinks.ps1 — 跨窗短名分类夹路径纠错（默认只读）
 # Usage (repo root):
 #   powershell -NoProfile -File .cursor/scripts/repair-doc-crosslinks.ps1
-#   powershell -NoProfile -File .cursor/scripts/repair-doc-crosslinks.ps1 -Path "Assets/Doc/.../未完成.md"
-#   powershell -NoProfile -File .cursor/scripts/repair-doc-crosslinks.ps1 -Path "Assets/Doc/.../未完成.md" -Apply
+#   powershell -NoProfile -File .cursor/scripts/repair-doc-crosslinks.ps1 -Path ".ai-gates/Doc/.../未完成.md"
+#   powershell -NoProfile -File .cursor/scripts/repair-doc-crosslinks.ps1 -Path ".ai-gates/Doc/.../未完成.md" -Apply
 #   powershell -NoProfile -File .cursor/scripts/repair-doc-crosslinks.ps1 -ForceRepo -Apply   # 显式全仓 Apply
 #
-# Scans Assets/Doc/** and project-context 文档根下 *.md（跳过 已完成/**、证据/**）。
+# Scans .ai-gates/Doc/** and project-context 文档根下 *.md（跳过 已完成/**、证据/**）。
 # 提取 Markdown 链接 [text](url) 与反引号路径；只改分类夹段（CatShortRe），不造全仓相对路径重写器。
 # -Apply: 改写 **md-link**；普通反引号路径 REPORT-ONLY（永不 Apply）。
 #         例外：含 **方案文件夹** 的行内反引号路径，唯一短名命中时可 Apply。
@@ -42,7 +42,7 @@ $CatShortRe = [regex]::new("(?:^|[\\/])(?<cat>$CategoryAlt)[\\/](?<name>[^\\/#?\
 
 function Resolve-DefaultDocRoot {
     param([string]$RepoRoot)
-    $fallback = "Assets/Doc"
+    $fallback = ".ai-gates/Doc"
     $pc = Join-Path $RepoRoot ".cursor/project-context.md"
     if (-not (Test-Path -LiteralPath $pc)) { return $fallback }
     $raw = Get-Content -LiteralPath $pc -Raw -Encoding UTF8
@@ -61,7 +61,7 @@ function Resolve-DefaultDocRoot {
 function Get-DocRoots {
     param([string]$RepoRoot)
     $roots = @()
-    $assetsDoc = Join-Path $RepoRoot "Assets/Doc"
+    $assetsDoc = Join-Path $RepoRoot ".ai-gates/Doc"
     if (Test-Path -LiteralPath $assetsDoc) { $roots += , ((Resolve-Path -LiteralPath $assetsDoc).Path) }
     $overrideRel = Resolve-DefaultDocRoot -RepoRoot $RepoRoot
     $overrideAbs = Join-Path $RepoRoot ($overrideRel.Replace('/', [string][IO.Path]::DirectorySeparatorChar))

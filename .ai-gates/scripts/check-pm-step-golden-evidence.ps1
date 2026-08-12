@@ -18,7 +18,7 @@
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File .cursor/scripts/check-pm-step-golden-evidence.ps1 `
-    -EvidenceDir "Assets/Doc/.../证据" -RequireSceneIds "G1,G2,G5"
+    -EvidenceDir ".ai-gates/Doc/.../证据" -RequireSceneIds "G1,G2,G5"
 #>
 
 [CmdletBinding()]

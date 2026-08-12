@@ -58,7 +58,7 @@
 
 
 
-用户未指定路径时：根目录 = **project-context 覆盖**（若有）> 通用 `Assets/Doc/`（见 [doc-path-defaults.md](./doc-path-defaults.md)）。  
+用户未指定路径时：根目录 = **project-context 覆盖**（若有）> 通用 `.ai-gates/Doc/`（见 [doc-path-defaults.md](./doc-path-defaults.md)）。  
 
 
 

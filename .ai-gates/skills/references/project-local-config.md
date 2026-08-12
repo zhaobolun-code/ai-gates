@@ -7,7 +7,7 @@
 | 内容 | 权威位置 | 是否随 Skill 复制到其他项目 |
 | --- | --- | --- |
 | 技术栈、注释/日志约定 | **`.cursor/project-context.md`** | **否** — 从 `project-context.template.md` 生成 |
-| 执行文档**存放路径** | [doc-path-defaults.md](./doc-path-defaults.md)（默认 `Assets/Doc/`） | **否** — project-context 仅可选覆盖 |
+| 执行文档**存放路径** | [doc-path-defaults.md](./doc-path-defaults.md)（默认 `.ai-gates/Doc/`） | **否** — project-context 仅可选覆盖 |
 | 运行回归索引（MD 表） | **`.cursor/project-context.md`** §运行回归索引 | **否** |
 | **热路径批量回归**（路径 glob → 场景 ID） | **`.cursor/project-context.md`** §热路径批量回归 | **否** — Skill 只写「若存在该节则按表跑」；禁止在 Skill 正文写死 G1/G2/G5 等场景 ID |
 | 回归索引 YAML 副本 | **`.ai-gates/regression-index.yaml`** | **否** — 从 `regression-index.template.yaml` 复制 |
@@ -21,8 +21,8 @@
 ## 通用 Skill 里只允许
 
 - 写「若存在 **`.cursor/project-context.md`** 则读取」
-- 占位符：`[ModuleName]`、`Assets/Doc/{主题}/`
-- 文档默认根：**用户指定 > `Assets/Doc/`**（见 [doc-path-defaults.md](./doc-path-defaults.md)）
+- 占位符：`[ModuleName]`、`.ai-gates/Doc/{主题}/`
+- 文档默认根：**用户指定 > `.ai-gates/Doc/`**（见 [doc-path-defaults.md](./doc-path-defaults.md)）
 - 引擎**类型**的泛化表述，不绑定具体产品模块
 
 ## 禁止出现在通用 Skill 中

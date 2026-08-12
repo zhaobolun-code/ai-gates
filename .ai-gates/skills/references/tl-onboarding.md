@@ -12,7 +12,7 @@
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply
-# 等价于 init-project-context.ps1 + 创建默认 Assets/Doc/
+# 等价于 init-project-context.ps1 + 创建默认 .ai-gates/Doc/
 ```
 
 2. 编辑 **`.cursor/project-context.md`** — 技术栈、§Express 车道升级、§运行回归索引（至少 1～2 条 Unity 场景）。填完 MD 表后运行 sync 脚本保持一致。

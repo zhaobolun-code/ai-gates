@@ -174,7 +174,7 @@ function Get-EditableDeclarationSources {
     $sources = New-Object System.Collections.Generic.List[string]
     foreach ($rel in $Changed) {
         $norm = $rel -replace '\\', '/'
-        if ($norm -like 'Assets/Doc/_examples/*') { continue }
+        if ($norm -like '.ai-gates/Doc/_examples/*') { continue }
         if (-not (Test-IsExecutionDocPath -NormPath $norm -Roots $ExecDocRoots)) { continue }
         $full = Join-Path $RepoRoot ($norm -replace '/', [IO.Path]::DirectorySeparatorChar)
         if (-not (Test-Path -LiteralPath $full)) { continue }
@@ -299,7 +299,7 @@ try {
 
     $execDocRoots = Get-ExecutionDocRootsFromProjectContext -ProjectContextPath $projectContext
     if ($execDocRoots.Count -eq 0) {
-        $execDocRoots = @('Assets/Doc')
+        $execDocRoots = @('.ai-gates/Doc')
     }
 
     if (-not (Test-Path -LiteralPath $checkScript)) {
@@ -308,7 +308,7 @@ try {
     } else {
         $docPaths = @($changed | Where-Object {
             $norm = $_ -replace '\\', '/'
-            if ($norm -like 'Assets/Doc/_examples/*') { return $false }
+            if ($norm -like '.ai-gates/Doc/_examples/*') { return $false }
             Test-IsExecutionDocPath -NormPath $norm -Roots $execDocRoots
         })
 

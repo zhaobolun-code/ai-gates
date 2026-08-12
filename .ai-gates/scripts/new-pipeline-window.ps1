@@ -1,10 +1,10 @@
 ﻿# new-pipeline-window.ps1 — 新建执行中窗齐套（未完成/物理口径/已完成索引/证据/.kit-v1）
 # Usage (repo root):
 #   powershell -NoProfile -File .cursor/scripts/new-pipeline-window.ps1 -Name foo
-#   powershell -NoProfile -File .cursor/scripts/new-pipeline-window.ps1 -DocRoot "Assets/Doc/AI流水线" -Name foo
+#   powershell -NoProfile -File .cursor/scripts/new-pipeline-window.ps1 -DocRoot ".ai-gates/Doc/AI流水线" -Name foo
 #   powershell -NoProfile -File .cursor/scripts/new-pipeline-window.ps1 -Name foo -Category "执行中"
 #
-# Defaults: -DocRoot from project-context §执行文档存放约定（否则 Assets/Doc）；-Category 执行中
+# Defaults: -DocRoot from project-context §执行文档存放约定（否则 .ai-gates/Doc）；-Category 执行中
 # Fail-closed: existing window folder → error, no overwrite.
 
 param(
@@ -40,7 +40,7 @@ function Write-Utf8NoBomFile {
 
 function Resolve-DefaultDocRoot {
     param([string]$RepoRoot)
-    $fallback = "Assets/Doc"
+    $fallback = ".ai-gates/Doc"
     $pc = Join-Path $RepoRoot ".cursor/project-context.md"
     if (-not (Test-Path -LiteralPath $pc)) { return $fallback }
     $raw = Get-Content -LiteralPath $pc -Raw -Encoding UTF8
@@ -102,7 +102,7 @@ New-Item -ItemType Directory -Force -Path $evidenceDir | Out-Null
 $plan = Get-Content -LiteralPath $planLite -Raw -Encoding UTF8
 $plan = $plan -replace '\[功能名\]', $Name
 $plan = $plan -replace '\{方案短名\}', $Name
-$plan = $plan -replace 'Assets/Doc/\{主题\}/', "$DocRoot/$Category/"
+$plan = $plan -replace '.ai-gates/Doc/\{主题\}/', "$DocRoot/$Category/"
 $plan = $plan -replace '\[3 行以内：要做什么、解决什么现象\]', "[填写目标；创建于 $created]"
 # A6：注入黄金场景子集占位（与 plan-lite 链接节措辞对齐；无则写无）
 $goldenPlaceholder = '- 相关黄金场景子集：`.ai-gates/verify/golden-scenes.yaml`（无则写无）'
