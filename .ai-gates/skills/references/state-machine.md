@@ -95,6 +95,7 @@ draft(草稿)
 - `runtime-validated(运行已验证)` + `runtime-validated(运行已验证)`：运行环境证据已确认。
 
 不得把 `step-completed(步骤完成)` 写成 `runtime-validated(运行已验证)`，除非有真实运行时证据。
+[long-task.md](./long-task.md) 调度层不得把状态迁到 `runtime-validated`；卡住停点保持当前态 + 确认包。
 
 ### 禁止自造状态名
 

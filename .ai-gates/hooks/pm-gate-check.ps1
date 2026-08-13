@@ -81,7 +81,7 @@ function Test-CursorLevel0Path {
     $rel = Get-CursorRelativePath -FilePath $FilePath
     if (-not $rel) { return $false }
     # CHANGELOG.md 自身（路径以 changelog.md 结尾即可，大小写不敏感）
-    if ($rel -match '(?i)(?:^|/)changelog\.md$') { return $true }
+    if ($rel -match '(?i)(?:^|[\\/])changelog\.md$') { return $true }
     # .ai-gates/hooks-log/** 运行时目录（pm-gate.json / changelog-writes.json / *.log）
     if ($rel -match '(?:^|/)hooks-log(?:/|$)') { return $true }
     # 项目专属 .cursor 文件（自救通道延续；MAINTAINER §目录与同步策略）

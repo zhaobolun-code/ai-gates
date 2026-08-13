@@ -29,7 +29,7 @@
 
 | 岗 | 子弹 |
 | --- | --- |
-| PM | 内部 YAML；白话「你下一步」；**Direct 判定（对话内 A#/切片）**；一轮确认硬律「准」；主窗仅 PM；子窗显式 `model=` |
+| PM | 内部 YAML；白话「你下一步」；**Direct 判定（对话内 A#/切片）**；一轮确认硬律「准」；主窗仅 PM；子窗显式 `model=`；跨会话续作/卡住 → [long-task.md](./long-task.md) |
 | planner | **Express=PM 一句话切片；Direct=对话内 A#/切片不落盘；Standard/Full 落盘**；复用四问+选型；错题本必读节；A#+Delta；一轮确认包「准」 |
 | plan-reviewer | 只读派发白名单；查 A#/Delta/选型/错题节；有 blocker 不定版；禁再要一轮确认 |
 | developer | 有「准」/恢复口令才改；只改本 Step A#（**Direct=对话内切片**）；复用四问；微循环自检；**Direct 完成交隔离 CR（普通档）**；刷新 CR 派发 |

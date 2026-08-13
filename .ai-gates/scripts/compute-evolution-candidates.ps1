@@ -166,13 +166,119 @@ for ($i = $headerIdx + 1; $i -lt $lines.Count; $i++) {
         last_hit = $lastHitPrefix
         hit_approx = 2
         promoted = $promoted
+        source   = 'lessons'
     }
 }
+
+# ---------------------------------------------------------------------------
+# 数据源 2：design-patterns.md 词条表「典故词」（判据仍 01-B；0 条命中合法）
+# 不改上方 lessons 主路径的 90/30 数字。
+# ---------------------------------------------------------------------------
+$DesignPatternsPath = Join-Path $repoRoot ".ai-gates\skills\references\design-patterns.md"
+$patternTerms = New-Object System.Collections.Generic.List[string]
+$patternHitCount = 0
+
+if (-not (Test-Path -LiteralPath $DesignPatternsPath)) {
+    [Console]::Error.WriteLine(("note: design-patterns.md not found: {0} (0 terms)" -f $DesignPatternsPath))
+} else {
+    $dpLines = Get-Content -LiteralPath $DesignPatternsPath -Encoding UTF8
+    $dpHeaderIdx = -1
+    $dpHeaderCells = @()
+    for ($di = 0; $di -lt $dpLines.Count; $di++) {
+        if ($dpLines[$di] -notmatch '^\|') { continue }
+        $dpCells = @(Get-ContentCells -Line $dpLines[$di])
+        if ($dpCells.Count -ge 1 -and ($dpCells -like '*典故词*')) {
+            $dpHeaderIdx = $di
+            $dpHeaderCells = $dpCells
+            break
+        }
+    }
+    $idxTerm = -1
+    for ($dj = 0; $dj -lt $dpHeaderCells.Count; $dj++) {
+        if ($dpHeaderCells[$dj] -like '*典故词*') { $idxTerm = $dj; break }
+    }
+    if ($dpHeaderIdx -lt 0 -or $idxTerm -lt 0) {
+        [Console]::Error.WriteLine("note: design-patterns.md 词条表表头未找到（典故词）；0 terms")
+    } else {
+        for ($di = $dpHeaderIdx + 1; $di -lt $dpLines.Count; $di++) {
+            $dpLine = $dpLines[$di]
+            if ($dpLine -notmatch '^\|') { break }
+            $dpCells = @(Get-ContentCells -Line $dpLine)
+            if ($dpCells.Count -lt 1) { continue }
+            if (($dpCells -join '') -match '^[\s\-:]+$') { continue }
+            if ($idxTerm -ge $dpCells.Count) { continue }
+            $term = ([string]$dpCells[$idxTerm]).Trim()
+            if (-not [string]::IsNullOrWhiteSpace($term)) {
+                [void]$patternTerms.Add($term)
+            }
+        }
+    }
+
+    if ($patternTerms.Count -gt 0) {
+        for ($i = $headerIdx + 1; $i -lt $lines.Count; $i++) {
+            $line = $lines[$i]
+            if ($line -notmatch '^\|') { continue }
+            $cells = @(Get-ContentCells -Line $line)
+            if ($cells.Count -lt 3) { continue }
+            if (($cells -join '') -match '^[\s\-:]+$') { continue }
+
+            $promoted = $cells[$cells.Count - 1]
+            $dateStr = $cells[$idxDate]
+            $lastHitStr = $cells[$idxLastHit]
+            $datePrefix = Get-DatePrefix -Cell $dateStr
+            if (-not $datePrefix) { continue }
+            $lastHitPrefix = Get-DatePrefix -Cell $lastHitStr
+            if (-not $lastHitPrefix) { continue }
+
+            $dateDate = [DateTime]::ParseExact($datePrefix, 'yyyy-MM-dd', $null)
+            $lastHitDate = [DateTime]::ParseExact($lastHitPrefix, 'yyyy-MM-dd', $null)
+
+            $isCandidate = $true
+            if (-not [string]::IsNullOrWhiteSpace($promoted)) { $isCandidate = $false }
+            if (($today - $lastHitDate).Days -gt 30) { $isCandidate = $false }
+            if (($today - $dateDate).Days -gt 90) { $isCandidate = $false }
+            if ($dateDate -ge $lastHitDate) { $isCandidate = $false }
+            if (-not $isCandidate) { continue }
+
+            $rowText = ($cells -join '|')
+            $matchedTerm = $null
+            foreach ($term in $patternTerms) {
+                if ($rowText.IndexOf($term, [System.StringComparison]::Ordinal) -ge 0) {
+                    $matchedTerm = $term
+                    break
+                }
+            }
+            if (-not $matchedTerm) { continue }
+
+            $lesson = [string]$cells[$idxLesson]
+            if ($lesson.Length -gt 40) { $lesson = $lesson.Substring(0, 40) + '…' }
+
+            $patternHitCount++
+            $candidates += [ordered]@{
+                date       = $datePrefix
+                module     = [string]$cells[$idxModule]
+                lesson     = $lesson
+                last_hit   = $lastHitPrefix
+                hit_approx = 2
+                promoted   = $promoted
+                source     = 'design-patterns'
+                pattern    = $matchedTerm
+            }
+        }
+    }
+}
+
+Write-Host ("design-patterns terms: {0}" -f $patternTerms.Count)
+if ($patternTerms.Count -gt 0) {
+    Write-Host ("- {0}" -f ($patternTerms -join ', '))
+}
+Write-Host ("design-patterns source hits: {0}" -f $patternHitCount)
 
 if ($DryRun) {
     Write-Host ("candidates: {0}" -f $candidates.Count)
     foreach ($c in $candidates) {
-        Write-Host ("- {0} | {1} | 最近命中={2} | 命中近似={3} | 晋升='{4}'" -f $c.date, $c.module, $c.last_hit, $c.hit_approx, $c.promoted)
+        $src = $c.source
+        Write-Host ("- {0} | {1} | 最近命中={2} | 命中近似={3} | 晋升='{4}' | source={5}" -f $c.date, $c.module, $c.last_hit, $c.hit_approx, $c.promoted, $src)
     }
     exit 0
 }
@@ -181,6 +287,7 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine("# 升级候选（自动生成：compute-evolution-candidates.ps1，勿手工编辑）")
 [void]$sb.AppendLine("# 判据（保守近似，单时间戳列无法数多次命中）：最近命中 ≤30 天 ∧ 晋升列为空 ∧ 创建 ≤90 天 ∧ 日期 < 最近命中（≥2 独立时间戳留痕）")
 [void]$sb.AppendLine("# 候选≠已确认：须人工确认留痕 + 用户「准」后方可升级（见 lessons-learned §时效归档）；同族错误不重复计数")
+[void]$sb.AppendLine("# 数据源：lessons=主表 01-B；design-patterns=词条表典故词命中且 01-B（0 条合法）")
 [void]$sb.AppendLine('version: 1')
 [void]$sb.AppendLine('candidates:')
 foreach ($c in $candidates) {
@@ -190,6 +297,10 @@ foreach ($c in $candidates) {
     [void]$sb.AppendLine("    last_hit: $($c.last_hit)")
     [void]$sb.AppendLine("    hit_approx: $($c.hit_approx)")
     [void]$sb.AppendLine("    promoted: '$($c.promoted)'")
+    [void]$sb.AppendLine("    source: $($c.source)")
+    if ($c['pattern']) {
+        [void]$sb.AppendLine("    pattern: $($c.pattern)")
+    }
 }
 
 [System.IO.File]::WriteAllText($OutPath, $sb.ToString(), (New-Object System.Text.UTF8Encoding($true)))

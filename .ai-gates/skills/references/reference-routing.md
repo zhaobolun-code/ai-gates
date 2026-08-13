@@ -20,6 +20,7 @@
 | 测挂 L0 / 签收待准错题 / 错题大纲 | `lessons-learned.md`（含 §错题大纲）；项目文件 `.ai-gates/lessons-outline.md` |
 | 签收效果一行 / 月末汇总 | `retrospective-metrics.md` §效果轻量版 |
 | 写方案/改码前精简 / 复用 | `execution-discipline.md` §复用四问；项目硬阈见 `.cursor/project-context.md`（若有神类止血） |
+| 写 Mandatory 前设计模式选型 / 方案审核模式结构 | `design-patterns.md` + `execution-discipline.md` §设计模式一问 |
 | 方案/CR 术语歧义、同义异名 | `shared-language.md`（活词汇表） |
 | CR 双轴（规范轴 + 规格轴） | `dual-axis-review.md` |
 | Full 策划前 / 架构概览体检 | `architecture-health-check.md`（CRG 只读） |
@@ -53,6 +54,12 @@
 | 用户点名教学（「教我 X / 带我学 X」）时 | `teach.md` |
 | 需求模糊 / 访谈 / grill（需求切片未定、澄清仍分歧时） | `demand-clarification.md`（§grill 访谈） |
 | 仍无法证实时 / 不确定则停时 / 确认包·转场前读 open 知识缺口条目 | `knowledge-gap.md` |
+| 设计模式症状 / Mandatory 写模式 / 点名 design-patterns 词条 | `design-patterns.md` |
+| 高危/止损/跨模块大改/用户点名分歧实验 · 策划或改码前 epistemic 分歧 | `divergence-annotation.md` |
+| 用户点名「完整碰撞」**或**（止损触顶/将到 2/3 / 热度爆炸 **且** 确认包选用碰撞）；加载 ≠ 启用；禁止把「止损/热度」单独当启用 | `collision-review.md` |
+| 跨项目沉淀 / 收集仓 / shareable 队列 | `collect-queue.md` |
+| 跨会话续作 / 长期窗卡住 / 质量趋势停点 | `long-task.md` |
+| 覆盖度 / 读过测过失败过 / 禁止自报覆盖率 | `coverage-map.md` |
 
 ## 按岗加载
 

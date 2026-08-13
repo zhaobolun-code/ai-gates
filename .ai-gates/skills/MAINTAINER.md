@@ -50,12 +50,14 @@ v3.1.3 观察期已于 **2026-07-16** 由 TL「bump / 转正」关闭；当前 L
 | 文件 | 读者 | 行数目标 |
 | --- | --- | --- |
 | [USER-GUIDE.md](../USER-GUIDE.md) | **新手指南 / 团队用户（首选）** | ≤130 |
-| [METHODOLOGY.md](../METHODOLOGY.md) | **叙事简介**（老板/新 TL/对外；非 Agent 默认必读） | ≤120 |
+| [METHODOLOGY.md](../METHODOLOGY.md) | **论文**（老板/新 TL/对外；非 Agent 默认必读） | 不限 |
 | [CORE.md](./CORE.md) | **争议/recovery/按 CORE 重来**（日常入口见 agent-entry-route） | ≤200 |
 | 本文件 | 维护者 / Full 车道 | 不限 |
 | 各 `*/SKILL.md` | 岗位 Agent | ≤60 |
 | [templates/](./templates/) | plan-lite、L1.5 CR 派发、恢复记录 | — |
 | [references/](./references/) | Full/L3/状态机等按需规则 | 按主题 |
+
+行数上限只卡 **Agent 必读件**（CORE / SKILL / USER-GUIDE）：进上下文要短。METHODOLOGY 是给人读的论文，厚度用文首「助手不必默认读」约束，**不设行数上限**。
 
 改 CORE 后检查 `.mdc` / `.trae/rules` 与各岗 SKILL 指针。
 
@@ -135,6 +137,12 @@ Cursor/Trae 传送门），**不表示要求安装 Cursor**；Codex-only 团队�
 | 并行接口设计（design-it-twice） | [design-it-twice.md](./references/design-it-twice.md) |
 | 需求澄清与确认（一轮确认 / 三问 / 异步问卷 / grill 访谈） | [demand-clarification.md](./references/demand-clarification.md) |
 | 知识缺口队列（不确定分级 / 入队 / 确认包清队） | [knowledge-gap.md](./references/knowledge-gap.md)；模板 [knowledge-gap.md](./templates/knowledge-gap.md) |
+| 跨项目收集仓（本地 shareable 队列） | [collect-queue.md](./references/collect-queue.md)（默认本地 `.ai-gates/collect-queue.md`；gh 为可选探测而非默认接线；**边界**：≠ [knowledge-gap.md](./references/knowledge-gap.md) / lessons pending / `evolution-candidates.yaml`） |
+| 长期任务感知 + 最小调度（一文件两节） | [long-task.md](./references/long-task.md)（model-invoked：跨会话续作 / 长期窗卡住 / 质量趋势停点 → 见 [reference-routing.md](./references/reference-routing.md)；**一文件两节**感知+调度最小；**边界**：01-D cron 仍搁置、02 覆盖度表已落地见 [coverage-map.md](./references/coverage-map.md)（≠感知）；禁止第二套编排 / 把 heat 当感知触发源） |
+| 设计模式症状/结构表（State/Policy/Seam 等本仓验证实例） | [design-patterns.md](./references/design-patterns.md)（model-invoked：设计模式症状 / Mandatory 写模式 / 点名词条 → 见 [reference-routing.md](./references/reference-routing.md)；**双表边界**：本表=设计模式**症状/结构**；流程/架构共识词仍只走 [shared-language.md](./references/shared-language.md) §典故，禁止同义双挂；本仓晋升闸接 01-B；跨项目依赖 collect；无自动降级脚本） |
+| 单轮多视角分歧标注（divergence-annotation；常规不启用） | [divergence-annotation.md](./references/divergence-annotation.md)（model-invoked：高危/止损/跨模块大改/用户点名分歧实验 · 策划或改码前 epistemic 分歧 → 见 [reference-routing.md](./references/reference-routing.md)；**边界**：入队复用 [knowledge-gap.md](./references/knowledge-gap.md)，**不**替代 [isolated-review.md](./references/isolated-review.md) 隔离审，**不等于**完整碰撞（现行 [collision-review.md](./references/collision-review.md)；5–8x 仍搁置）） |
+| 完整思考碰撞（collision-review；异模型三轮薄碰撞；常规不启用） | [collision-review.md](./references/collision-review.md)（model-invoked：用户点名「完整碰撞」**或**（止损触顶/将到 2/3 / 热度爆炸 **且** 确认包选用碰撞）→ 见 [reference-routing.md](./references/reference-routing.md)；**提示 ≠ 启用**；**加载 ≠ 启用**；禁止止损/热度单独启用；**强制异模型轮转**（禁止同模型双链 / resume 同一对）；**三方边界**：≠ [divergence-annotation.md](./references/divergence-annotation.md) 单轮同 Agent；≠ [isolated-review.md](./references/isolated-review.md) 单向隔离审；启用时复用 isolated-review 派发协议；5–8x 仍非默认） |
+| 覆盖度表（测过/失败过/结构覆盖；禁止自报） | [coverage-map.md](./references/coverage-map.md) + `scripts/compute-coverage-map.ps1` → `.ai-gates/coverage-map.yaml`（model-invoked：覆盖度 / 读过测过失败过 / 禁止自报覆盖率 → 见 [reference-routing.md](./references/reference-routing.md)；**边界**：≠ `.ai-gates/regression-heat.yaml`（失败热度，`compute-failure-heat.ps1`），**heat≠覆盖度**；禁止跨源 `coverage_percent`） |
 修改 reference 后：检查 CORE 翻车表、anti-patterns、`.mdc` / `.trae/rules` 引用是否需同步。
 
 ## 技能元数据规范
@@ -164,6 +172,15 @@ powershell -ExecutionPolicy Bypass -File .cursor/scripts/compute-evolution-candi
 
 判据（保守近似）：近 90 天 ≥2 次命中 且 最近命中 ≤30 天 且「晋升」列为空（日期 < 最近命中 = ≥2 独立时间戳留痕）。
 **候选≠已确认**：机器候选须人工确认留痕（同族错误不重复计数）后，按 lessons-learned §时效归档 升级候选流程 → 用户「准」→ 升 skill 级 → 主表「晋升」列标记。
+
+### 覆盖度表（evolution-02）
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/compute-coverage-map.ps1
+powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/compute-coverage-map.ps1 -Verify
+```
+
+只读 trx / heat / outcome / `.codegraph/`；计数字段仅脚本可写。**heat≠覆盖度**。
 
 ## 维护约定
 

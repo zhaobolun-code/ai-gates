@@ -69,7 +69,7 @@ function Test-CursorLevel0Path {
     param([string]$FilePath)
     $rel = Get-CursorRelativePath -FilePath $FilePath
     if (-not $rel) { return $false }
-    if ($rel -match '(?i)(?:^|/)changelog\.md$') { return $true }
+    if ($rel -match '(?i)(?:^|[\\/])changelog\.md$') { return $true }
     if ($rel -match '(?:^|/)hooks-log(?:/|$)') { return $true }
     if ($rel -match '(?:^|/)(project-context\.md|regression-index\.yaml|lessons-[^/]*|pipeline-recovery-log\.md|pipeline-snapshot\.log|pipeline-outcome\.log)$') { return $true }
     return $false

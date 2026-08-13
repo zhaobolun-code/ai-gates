@@ -44,6 +44,8 @@
 | `test_method` | 验证步骤/关键词写清 |
 | `first_pass` 低且 CR 常 0 blocker | 再考虑业务审严一档（另议） |
 
+质量趋势停点见 [long-task.md](./long-task.md) §感知；以 `summarize-pipeline-outcome.ps1` 输出为准，禁止模型自报覆盖本脚本。
+
 ## 何时填写（完整复盘模板，仍可选）
 
 - 一个执行文档进入 `completed(已归档)` 后

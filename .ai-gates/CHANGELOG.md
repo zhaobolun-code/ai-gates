@@ -10,6 +10,40 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-13：hooks 维护窗：changelog 路径正则 5 处修复（Windows 反斜杠不命中）
+- 2026-08-13：evolution-03-promote 归档签收（Standard · Skill/Doc-only · L1.5）：用户「归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-03-promote/`；回写 evolution-03 机制 D「本仓晋升闸已接 01-B；跨项目仍 gh 未接线」；不 bump VERSION
+- 2026-08-13：evolution-03-promote 错题本落表（用户「准」）：成功经验「晋升闸四条 / 本地 collect ≠ gh 已通」写入 lessons-learned + outline；窗仍在执行中，待「归档」；不 bump VERSION
+- 2026-08-13：evolution-03-promote Step1 落地（Standard · Skill/Doc-only · L1.5）：design-patterns §晋升闸四条（本仓复用 01-B；跨项目 depends-on collect，gh 未接线不可实施）；MAINTAINER +1；plan-reviewer：误称四条为「三重闸」→major、假装 gh 已通→blocker；compute-evolution-candidates.ps1 +1 数据源段（design-patterns 典故词，判据仍 01-B）；**不做** 6 个月降级脚本 / 平行候选脚本 / bump VERSION
+- 2026-08-13：evolution-03-promote 方案审前对齐（Standard · Skill/Doc-only · L1.5）：本地 collect 已签收 vs **gh 未接线**写清（A2/A4/复用四问/Mandatory/口径）；碰撞窗改为已签收；派 `证据/_方案审核派发.md` rev1；不 bump VERSION
+- 2026-08-13：evolution-02-coverage 归档签收（Standard · Skill/Doc-only · L1.5）：用户「归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-02-coverage/`；回写 evolution-02「覆盖度表已落地（结构覆盖代理读过；无会话 read-trace）」；不 bump VERSION
+
+- 2026-08-13：evolution-02-coverage Step1 落地（Standard · Skill/Doc-only · L1.5）：新建 `skills/references/coverage-map.md` + `scripts/compute-coverage-map.ps1`（只读 trx/heat/outcome/.codegraph，写出 `coverage-map.yaml`；顶层仅 `generated_by`/`source_fingerprint`，数据块仅 tested/failed/structure；`-Verify` 点名行键且行值）；reference-routing 模型自动触发 +1 行；MAINTAINER 登记（heat≠覆盖度）；developer 与 planner 各 +1 句禁自报百分比；**不 bump VERSION**
+- 2026-08-13：evolution-long-task 归档签收（Standard · Skill/Doc-only · L1.5）：用户「准 · 归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-long-task/`；回写 evolution-01 §D / evolution-02 方向三「感知+最小调度已落地；cron 仍搁置」；不 bump VERSION
+- 2026-08-13：思考碰撞回灌日常审 + 止损/热度**提示**（不启用）：方案审 3.55 / Analyze 对表加条款可证伪四条（失败句抓自报与缺字段、机器检查点名键、Mandatory 接线进 A#、手工红线不得被脚本绿顶替）；止损将到 2/3 或触顶、以及热度已升 L3/双轮后止损≥1，确认包提示可选完整碰撞；禁止止损/热度单独启用；不 bump VERSION
+- 2026-08-13：METHODOLOGY 碰撞节补第三轮实测（脱敏：另一份从未方案审的流程稿；薄碰撞未截断；打到同类洞：失败句/字段/验收与清单不同句；2 条需拍板；流程稿试验可停）；不 bump VERSION
+- 2026-08-13：METHODOLOGY 按论文重写（摘要 / 问题 / 方法 / 证据 / 讨论·碰撞试验 / 差异 / 边界；操作细节仍指向 README·USER-GUIDE；助手不必默认读）；不 bump VERSION
+- 2026-08-13：METHODOLOGY 取消行数上限（论文给人读，厚度用「助手不必默认读」约束；MAINTAINER 改为不限；validate 把 ≤120 列为过期目标）；评价段按论文展开；不 bump VERSION
+- 2026-08-13：METHODOLOGY 碰撞节补两轮对照 + 评价（同稿旧全量 vs 新薄碰撞；试验可停在同稿；加元认知靠回灌/「我不知道」而非加轮次）；不 bump VERSION
+- 2026-08-13：METHODOLOGY「使用记录」补思考碰撞第二次实测（脱敏：异模型三轮薄碰撞；约 6–8 万 token 无账单；2 条挡开工问题为条款互斥与校验未点名字段；常规仍不启用）；不 bump VERSION
+- 2026-08-13：collision-review 术语自洽：锚=定级锚脚注；pending≠错题本主表；第三条路独立票不降权（禁 0.5 分数票的正向句）；不 bump VERSION
+- 2026-08-13：collision-review 补轮0 共识地基三句话（可引用契约）；短清单=双方各自交+主窗按锚机械拼装（禁改写）；轮2/3 投票须逐字引用原文；逻辑翻转不计票 vs 视角升级（第三条路）计独立票需拍板；不 bump VERSION
+- 2026-08-13：collision-review 补三处硬定义（轮1 分从零/已有方案角色；短清单=未决分歧强制格式，轮2/3 只投票并逐轮收窄；薄归并多数决+结论翻转不计票+残留问拍板；回灌门槛=跨轮重现或绑 A#；准了进错题本，禁自动反模式/7天降级）；不 bump VERSION
+- 2026-08-13：思考碰撞规程改为异模型三轮薄碰撞（`collision-review.md`：轮0 前提截断；轮1 Grok×Sonnet / 轮2 Terra×Grok / 轮3 Sonnet×Terra；不对称红队；定级绑 A#/Mandatory/机器检查；收尾薄归并；回灌须「准」；禁止同模型双链与 resume 同一对）；邻接指针同步；METHODOLOGY 不把新规程写成已实测；不 bump VERSION
+- 2026-08-13：METHODOLOGY「使用记录」补思考碰撞一次实测（脱敏：2 轮隔离互审+裁决；约 2–3 倍普通方案审 token；3 条挡验收问题中 2 条清单可抓、1 条为口径对齐洞；不证明默认启用）；不 bump VERSION
+- 2026-08-13：evolution-02-collision 归档签收（Standard · Skill/Doc-only · L1.5）：用户「准」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-02-collision/`；回写 evolution-02 方向四「2 轮最小版已落地；5–8x 仍搁置」；不 bump VERSION
+- 2026-08-13：evolution-02-collision 完整碰撞最小版落地（Standard · Skill/Doc-only · L1.5）：新建 `skills/references/collision-review.md`（2 轮 Subagent 互审+裁决；常规不启用；启用=用户点名「完整碰撞」或止损触顶且确认包选用碰撞；复用 isolated-review 派发；5–8x 仍非默认）+ isolated-review 触发表+1行+禁止句 + divergence-annotation 文首/升级/禁止边界 + KG「碰撞来源」+ reference-routing 模型自动触发+1行 + MAINTAINER 登记 + planner 4.06 / plan-reviewer 3.14 轻量接线；**不做**默认 5–8x/常规每任务启用/替代 L1.5/L2/logits/第二套队列；**不 bump VERSION**
+- 2026-08-13：evolution-01-collect Step 1 本地收集仓落地（Standard · Skill/Doc-only · L1.5）：新建 `skills/references/collect-queue.md`（默认载体 `.ai-gates/collect-queue.md`；三态 draft/shareable/promoted；可传、不可静默删；入队须人工确认）+ 空仓表头；KG/「准」/routing/MAINTAINER/planner 各 +1 句/行；gh 为可选探测而非默认接线；「准」不建 issue、不自动入仓；不 bump VERSION
+- 2026-08-13：evolution-01-collect 归档签收（Standard · Skill/Doc-only · L1.5）：用户「准 · 归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-01-collect/`；回写 evolution-01 机制 C「已落地（本地默认）」；gh 仍可选未接线；不 bump VERSION
+- 2026-08-13：evolution-02-diverge 分歧标注小试点落地（Standard · Skill/Doc-only · L1.5）：新建 `skills/references/divergence-annotation.md`（单轮 ≥2 视角推理链 + DA-{nn} → 复用 knowledge-gap 入队；常规不启用；启用=高危/止损/跨模块大改/用户点名分歧实验）；KG「分歧来源」段 + isolated-review 边界行 + reference-routing 模型自动触发 +1 行 + developer/planner/plan-reviewer 各 1 条轻量接线 + MAINTAINER 登记；签收 evolution README/未完成 活跃窗指针强化；**不做**完整碰撞/覆盖度/01-C/D/03跨项目/logits/第二套队列/lessons pending 混表；**不 bump VERSION**
+- 2026-08-13：模型路由三档（最低 Grok4.5 `cursor-grok-4.5-medium-fast` / 普通 Grok4.6 `cursor-grok-4.6-high` / 高级 Sonnet→GPT `claude-sonnet-5-thinking-medium` → `gpt-5.6-terra-medium`）；覆盖 2026-08-12「成本优先 Composer」旧定档；岗位：最低=Express/Direct 实现·Auto 微改·Direct CR·docs；普通=策划·Standard+ 程序员/Auto·方案审 L1/L1.5/L2；高级=Full L3 双轮（round1 Sonnet、round2 GPT Terra）·Standard/Full CR·验收；Composer 不再任何岗首选（仅链末应急并标注）；禁止 `cursor-grok-4.5-high-fast` 当首选；Codex 仍两档 deepseek、不假装有 Grok 4.6；改 `project-context` §模型路由 + `model-routing.md` 默认表；Skill/Doc-only；**不 bump VERSION**
+- 2026-08-13：evolution-02-diverge 分歧标注小试点方案落盘（Standard · Skill/Doc-only · L1.5）：执行中窗 `.ai-gates/Doc/AI流水线/执行中/evolution-02-diverge/`（未完成+物理口径+Mandatory-Step01+方案审派发）；范围=新建 `divergence-annotation.md` + KG/isolated-review/routing 轻量扩表 + 三岗 SKILL 各 1 行；签收 evolution README/未完成 活跃窗+长期真源指针；不做完整碰撞/覆盖度/01-C/D/03跨项目/logits；状态 review-pending；不 bump VERSION
+- 2026-08-13：evolution-03-mvp 归档签收（Standard · Skill/Doc-only · L1.5）：用户「准 · 归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-03-mvp/`；回写 evolution 签收对照 A/B/C MVP 已落地；不 bump VERSION
+- 2026-08-12：evolution-03 MVP 落地（Standard · Skill/Doc-only · L1.5）：新建 `skills/references/design-patterns.md`（3 条五字段本仓验证实例）+ `execution-discipline` §设计模式一问（复用四问后、强制选型句+YAGNI 兜底）+ `reference-routing` 双表 +1 行 + plan-reviewer/code-reviewer 轻量接线 + MAINTAINER 登记；不 bump VERSION
+- 2026-08-12：evolution-03 MVP 方案落盘（Standard · Skill/Doc-only · L1.5）：执行中窗 `.ai-gates/Doc/AI流水线/执行中/evolution-03-mvp/`（未完成+物理口径+Mandatory-Step01+方案审派发）；范围=新建 `design-patterns.md`（≤3 本仓实例）+ 设计模式一问 + 强制选型句 + plan-reviewer/code-reviewer 轻量接线；不做跨项目/01-C/降级脚本/完整晋升；状态 review-pending；不 bump VERSION
+- 2026-08-12：evolution 方向提案窗口化（Standard · Skill/Doc-only）：`new-pipeline-window.ps1` 建窗 `.ai-gates/Doc/AI流水线/签收/evolution/`（分类签收）；四文件自 `Doc/evolution/` 迁入窗根；旧目录仅短跳转 README；`未完成.md` 标 `completed(已归档)`；`knowledge-gap.md` 链更新；check-pipeline-doc / validate-pipeline 绿；不 bump VERSION
+- 2026-08-12：自进化接线收口（Standard · Skill/Doc-only）：handoff §0/§F/§A 确认包前读 `证据/_knowledge-gap.md` open 并批量问用户；doc-windowing 登记 `_knowledge-gap.md` 合法读写例外；shared-language 典故三态指针；lessons 主表行 29/37/39 单元格修复；skill-eval-checklist 增置信标注 + 知识缺口评测项；evolution 对照表述对齐；CR 跟修 L12 作用域竖线；不 bump VERSION
+- 2026-08-12：evolution 三份方向提案文档整理（Standard · Skill/Doc-only）：新增 `Doc/evolution/README.md` 总览；01/02/03 文首改「部分已落地」+ 落地对照表；形式化「命中」与时间窗；搁置 01-C/完整碰撞/03 跨项目闸等；纠正知识缺口载体与 01-D↔02 重叠表述；不 bump VERSION
+- 2026-08-12：进化方向「仍值得做」四项落地（P0-1 README 一图流+分平台 Quickstart / P0-2 公开目录投稿草稿 / P1-5 反合理化三行 / P2-9 钉死 macOS·Linux 需 pwsh）；降级项忽略；`Skill进化方向-v3.2.1` 取舍后迁签收；Skill/Doc-only，不 bump VERSION
 - 2026-08-12：知识缺口队列落地（evolution-02 方向二）：新建 `skills/references/knowledge-gap.md`（机制定义：阻塞级停不豁免 / 非阻塞级入队继续 / 三要素必填 / PM 确认包清队）+ `skills/templates/knowledge-gap.md`；developer §5.5 三问句后分流 + §8 交接短表 open 条目；reference-routing「模型自动触发」表 +1 行；MAINTAINER 机制登记；Skill/Doc-only，不 bump VERSION
 - 2026-08-12：晋升演练第一样本（机制 B 闭环首跑）：候选 #10 suppressStreak → anti-patterns §漂移与臆测 新反模式「门卫≠完成」（第一道门状态 ≠ 函数整体执行状态；断言「X 已/未执行」须逐道 guard 确认到出口），主表晋升列已标记；Skill/Doc-only，不 bump VERSION
 - 2026-08-12：自进化三机制落地（①置信标注三档：`确定[有代码证据]`/`推断[有间接证据]`/`猜测[无证据]`，接线方案审 3.56 / CR 1.26 / developer §5.5；②连续触发晋升：新增 `scripts/compute-evolution-candidates.ps1` + 升级候选流程，anti-patterns/code-reviewer「≥2 次复现」旧判据替换；③活跃度三态降级：lessons/shared-language/anti-patterns 三表统一判据+分表动作；Skill/Doc-only，不 bump VERSION）
@@ -29,6 +63,14 @@
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
 
 ## [4.1.0] - 2026-08-12（test-first 默认化 · minor · 发布）
+
+### Included changes — 2026-08-12（进化方向「仍值得做」四项 · 不 bump）
+
+- **P0-1 README**：工作流节补阶段一图流（mermaid）+ Cursor / Codex CLI / Codex App / Trae / Claude Code 分平台 Quickstart（各 ≤6 行）；中文真源 `.ai-gates/README.md`。
+- **P0-2 公开目录**：新增投稿草稿 `.ai-gates/Doc/AI流水线/签收/_directory-submissions-20260812.md`（awesome-cursorrules / cursor.directory / skills.sh 条目与 PR 正文）；外链 PR 须维护者账号提交，本拍不伪造已挂。
+- **P1-5 反合理化（精简）**：`anti-patterns.md` 新增「反合理化（硬门禁借口）」三行（无 [PM] 就写 / 日志关键词冒充 A# / 伪称隔离 CR·白名单）；CORE 硬门禁索引一行指针；`skill-eval-checklist` 增 J1～J3 剧本行。
+- **P2-9 pwsh**：README「平台」+ USER-GUIDE「怎么安装」钉死——macOS/Linux 机器 hooks **必须** PowerShell 7+（`pwsh`）；无 pwsh 则仅规则层生效，不算 hooks 已接线。
+- **路线图收口**：`Skill进化方向-v3.2.1.md` 改为取舍快照并迁 `签收/`；降级项（npx skills add / 十道门禁改名 / 证据包 schema / 全英文 CORE 等）明确搁置。
 
 ### Included changes — 2026-08-12（test-first 默认化）
 

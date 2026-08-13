@@ -28,7 +28,9 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 
 ## 快速开始（3 分钟）
 
-**方式 A（推荐 · 零手动）**：把下面这段**整段**粘贴给任一能改文件的 Agent 窗口（Cursor Agent / Codex / Trae / Claude Code），Agent 会联网获取最新版、安装库、建好传送门并引导初始化：
+### 方式 A（推荐 · 零手动 · 全平台同一段）
+
+把下面这段**整段**粘贴给 Agent；它会联网取最新版、装库、建传送门并引导初始化：
 
 ```text
 请把 ai-gates（AI 开发流水线技能包）从 https://github.com/zhaobolun-code/ai-gates 安装到当前项目，替代手动下载、解压和初始化：
@@ -40,12 +42,32 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 动手前先列计划等我确认；失败或网络问题不要改文件，给出手动下载方案。
 ```
 
-**接入成本**：填一份短项目说明（技术栈、要小心的目录、几条必测）——不是长期运维配置；第一次接入 / 安装更新 / 被拦了怎么办 → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md)（分节速查）。体检：`项目经理 检查健康` / `PM doctor`。
-这是什么、为什么这样设计：[METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)；版本迭代与变更（当前版本以 skills/VERSION 为准）：[CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)。
+### 分平台 Quickstart（装好后日常）
+
+| 平台 | 你怎么开 |
+| --- | --- |
+| **Cursor Agent** | Agent 模式新开 Chat → 贴「项目经理 + 需求」；传送门：`link-platform.ps1` / `.sh` |
+| **Codex CLI** | 项目根 `codex`（hooks 须信任）→ 同一口令；CLI 侧 hooks 已实测 deny |
+| **Codex 桌面** | 新开会话 → 信任项目 hooks →「项目经理 + 需求」；`apply_patch` 钩子可能不触发 → 写后自查 `.ai-gates/hooks-log/` |
+| **Trae** | 新开会话 →「项目经理 + 需求」；仅规则+技能传送门，**无机器 hooks** |
+| **Claude Code** | 项目根会话 → 批准 hooks/MCP →「项目经理 + 需求」；hooks 2026-08-10 已真机确证 |
+
+**接入成本**：填一份短 `project-context`（技术栈、要小心的目录、几条必测）。详解 / 被拦了怎么办 → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md)。体检：`项目经理 检查健康`。设计原因：[METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)；变更：[CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)。
 
 ## 工作流：一个需求怎么走完
 
-ai-gates 管的是流程秩序：判定 → 切片 → 方案 → 实现 → 审查 → 验收，每轮有据可查、可停可撤、做完能收尾。需求进来只有一条主线，车道只决定每步的粗细。你只需说清要什么，剩余环节由流水线按岗位接力走完：
+```mermaid
+flowchart LR
+  A[需求] --> B["PM 判车道"]
+  B --> C[切片 / A#]
+  C --> D["一轮确认「准」"]
+  D --> E[实现]
+  E --> F[隔离 CR]
+  F --> G[你验收]
+  G --> H[复盘 / 收尾]
+```
+
+车道只决定每步粗细（Express 可跳独立 CR；Direct 对话内切片不落盘；Standard/Full 先方案审）。你只需说清要什么：
 
 **需求 → `[PM]` 判定车道 → 切片（改什么 / 怎样算通过）→ 一轮确认（回「准」）→ 实现 → 隔离代码审查 → 验收 → 复盘（失败入错题本）→ 收尾**
 
@@ -92,7 +114,7 @@ ai-gates 管的是流程秩序：判定 → 切片 → 方案 → 实现 → 审
 - **全平台可用（规则 / 技能 / 传送门）**：规则是纯 Markdown，其他 Agent 也可自行适配；传送门脚本**双份**——Windows 用 `link-platform.ps1`，macOS/Linux 用 `link-platform.sh`（Trae 另备 `link-trae-skills.sh`），都建 `.cursor/*`、`.codex`、`.claude`、`.trae/skills`、`.trae/rules`。
 - **Cursor / Codex / Trae / Claude Code 共用同一份库**：跑一次 `link-platform` 即建好全部传送门。
 - **Windows：完整支持**。机器强制 hooks（PM 写门禁 / 高危 git deny / Unity 编译提示，全部 `.ps1`）在 Codex CLI 0.146/0.147 与 Claude Code（2026-08-10 全链路真机确证）已实测 deny 拦截；一键安装见「快速开始」。已知缺口：Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点）——关键写操作后请自查 `.ai-gates/hooks-log/`。
-- **macOS / Linux**：安装、规则、技能、传送门全支持；机器强制 hooks 暂为 PowerShell（`.ps1`）实现，需 pwsh 运行或暂以规则层生效（如实标注）。
+- **macOS / Linux（硬前提）**：安装、规则、技能、传送门全支持（`bash .ai-gates/link-platform.sh`）。机器强制 hooks **全部是 `.ps1`**——要让 deny 真拦，本机须装 **PowerShell 7+（`pwsh`）** 且 Agent/hooks 能调到它；**没有 `pwsh` = 只有规则层，不算 hooks 已接线**（勿宣称机器门禁已生效）。暂不提供 bash 版 hooks。
 - **Trae 为软层**：规则 + 技能传送门齐全，但无机器 hooks——门禁以规则生效，机器强制暂不覆盖。
 - **单仓库边界**：门禁以当前仓库为界——跨仓库（多仓 / 微服务）改动不在机器强制覆盖内，跨仓部分仍靠团队约定。
 

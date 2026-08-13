@@ -719,6 +719,10 @@ Verify 失败 / CR 收口 / 开始改码后：**同条改写首段**。首段仍
 
 **修复黑板例外（精确）**：测挂后修复 / 交审级再修 / CR 复审时，允许 Read **点名的** `证据/_repair-blackboard.md`（可与上一条派发工件同轮各点名一个）。禁止借此扫 `证据/` 其它文件。模板 → [repair-blackboard.md](../templates/repair-blackboard.md)；规则 → [diagnosis-gates.md](./diagnosis-gates.md) §0.6。
 
+**待准经验例外（精确）**：可晋升时允许 Read/Write **点名的** `证据/_lesson-pending.md`（可与派发工件/修复黑板同轮各点名一个）。禁止借此扫 `证据/` 其它文件。模板 → [lesson-pending.md](../templates/lesson-pending.md)；规则 → [lessons-learned.md](./lessons-learned.md) §准全自动。
+
+**知识缺口例外（精确）**：不确定分级入队 / PM 确认包清队时，允许 Read/Write **点名的** `证据/_knowledge-gap.md`（可与上列例外同轮各点名一个）。禁止借此扫 `证据/` 其它文件。模板 → [knowledge-gap.md](../templates/knowledge-gap.md)；规则 → [knowledge-gap.md](./knowledge-gap.md)。
+
 
 
 

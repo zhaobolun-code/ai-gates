@@ -168,6 +168,8 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 6. **PM 不替岗** — 不写 Step 规格、不改代码、不替 CR 宣布无 blocker
 7. **无 PM 门禁不改交付物** — 用户直接叫岗位名时，须同条先 `[PM]` 判车道并输出 **你下一步**；**本轮尚无 PM 结构化判定时不得**创建/修改代码、执行文档、README（只读咨询除外）
 
+**反合理化（借口对照）**：无 `[PM]` 就写 / 日志关键词冒充 A# / 伪称隔离 CR → [anti-patterns.md](references/anti-patterns.md) §反合理化；评测 §K。
+
 **非门禁**：隔离审核是否成功 / 用户是否手动新开 Chat / 换模型 — 只要求诚实标注，不硬阻断。缺 PM 结构化判定或 **你下一步**（含 Express 简略四条）→ **已阻塞**。
 
 **机器强制层（如实）**：Codex CLI / Cursor 侧 hooks 可 deny 拦截；Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点，关键写后自查 `.ai-gates/hooks-log/`）；Trae 为软层（规则 + 技能传送门，无机器 hooks）。

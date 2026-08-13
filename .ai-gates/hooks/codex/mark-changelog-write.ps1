@@ -38,7 +38,7 @@ try {
 
 # CHANGELOG 判定：大小写不敏感，路径可含 .cursor/skills/ 前缀
 foreach ($p in $paths) {
-    if ($p -match '(?i)(?:^|/)changelog\.md$') {
+    if ($p -match '(?i)(?:^|[\\/])changelog\.md$') {
         $isChangelog = $true
         break
     }

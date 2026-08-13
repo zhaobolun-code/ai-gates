@@ -142,7 +142,7 @@ try {
         Write-Host "workflow consistency: FAILED (USER-GUIDE four-lane wording)" -ForegroundColor Red
         $workflowOk = $false
     }
-    if ($maintainerRaw -match 'CORE\.md.*≈120|USER-GUIDE\.md.*≤120|README\.md.*≤90') {
+    if ($maintainerRaw -match 'CORE\.md.*≈120|USER-GUIDE\.md.*≤120|README\.md.*≤90|METHODOLOGY\.md.*≤120') {
         Write-Host "workflow consistency: FAILED (stale line targets)" -ForegroundColor Red
         $workflowOk = $false
     }

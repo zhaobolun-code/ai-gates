@@ -74,6 +74,25 @@
 
 项目可加硬阈（Mandatory **替换句式**、本 Step 新方法行数、交审瘦身一拍）→ 见仓库 `.cursor/project-context.md`（Chemical：§PressureManager 神类止血 · 补强三口）。
 
+### 设计模式一问（强制 · 复用四问之后）
+
+> 接在 §复用四问 短表之后；写 Mandatory / 改码前须答。
+
+**问法**：本 Step 是否引入/变更可复用结构？若有，对照 [design-patterns.md](./design-patterns.md)：触发症状是否成立？本仓哪条验证实例？若无症状或无验证实例 → **默认 YAGNI**，不得新抽象。
+
+**强制选型句**（写进 Mandatory）：
+
+```text
+采用 {典故词} 模式（触发症状：…；理由：…；词条出处：design-patterns.md §{典故词}）
+```
+
+| 缺项 | 方案审 |
+| --- | --- |
+| 缺强制选型句（症状+理由+出处） | **major** |
+| 缺触发症状仍写模式名 | **blocker**（对齐 evolution-03 机制 C） |
+
+流程典故（神类止血/复用四问/双轴/深模块）仍只走 [shared-language.md](./shared-language.md) §典故，不得在本问里重复登记。
+
 ## 假设必须显式
 
 - **策划**：默认决策写入执行文档并列入需求确认摘要；禁止 silent default
