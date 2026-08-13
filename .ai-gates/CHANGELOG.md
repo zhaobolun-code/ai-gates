@@ -10,6 +10,8 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-13：自进化运行态补齐：BOM 教训三次命中留痕回写 + 候选快照重跑（suppressStreak 出列）+ 重跑时机注明
+- 2026-08-13：developer SKILL 钉死 _lesson-pending yaml 格式契约（模板化引用），修复散文草稿被 commit 脚本拒绝问题
 - 2026-08-13：hooks 维护窗：changelog 路径正则 5 处修复（Windows 反斜杠不命中）
 - 2026-08-13：evolution-03-promote 归档签收（Standard · Skill/Doc-only · L1.5）：用户「归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-03-promote/`；回写 evolution-03 机制 D「本仓晋升闸已接 01-B；跨项目仍 gh 未接线」；不 bump VERSION
 - 2026-08-13：evolution-03-promote 错题本落表（用户「准」）：成功经验「晋升闸四条 / 本地 collect ≠ gh 已通」写入 lessons-learned + outline；窗仍在执行中，待「归档」；不 bump VERSION
