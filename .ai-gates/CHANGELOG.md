@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.1.0（发布 · test-first 默认化 · minor；前版 4.0.0 定版信息保留）
+**当前 LTS**：v4.2.0（发布 · 逆链全链路 + 逆向总结典故 · minor；前版 4.1.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 
@@ -81,6 +81,31 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [4.2.0] - 2026-08-14（逆链全链路 + 逆向总结典故 · minor · 发布）
+
+### Included changes — 2026-08-14（逆链机制全链路 + 典故新机制 · 不 bump）
+
+- **逆链机制落地（evolution-02-reverse-chain · Full · L3）**：新建 `skills/references/reverse-chain.md`（第五块「设计因果闭合」；用途分级硬表；倒推 procedure；借口表；Never assume intent；选型行 ≤5；纸老虎；同模型圆稿不合格；交审后改选型须重开选型+逆链）；planner 4.09 / plan-reviewer 3.9.3 / reference-routing +1 / MAINTAINER +1；用户授权代理抽检抬升 runtime-validated；错题本落表；归档签收。
+- **逆链审计修复**：删 reverse-chain.md 不可证伪半句「每条选型行 ≤ 倒推条目」+ 纸老虎措辞消除歧义 + plan-reviewer 3.9.3 尾部去重。
+- **逆链保真加厚（evolution-02-rc-fidelity · Standard · L1.5）**：三格=判断**当时**连接；骨架倒走+断裂只标禁止修补；有效倒走→pending `来源：逆链`；邻机制两行指针；planner 4.09 +1 / plan-reviewer 3.9.3 并进。
+- **逆向总结典故（evolution-02-reverse-allusion · Standard · L1.5）**：新建 `skills/references/reverse-allusion.md`（归档总结提名 ≠ 逆链；用途分级跳过/不跑/跑；pending 典故卡来源：逆向总结）；handoff 仅 §F +1；routing/MAINTAINER +1；planner 4.10；plan-reviewer 3.16 三句 blocker。
+- **碰撞定位纠偏（evolution-02-collision-label · Standard · L1.5）**：collision-review 定位纠偏（对抗审核 ≠ 元认知 / 红队不跑则无本产物）+ 邻表双开（逆链行 + 典故「本文件不建归档总结页」+ 先碰撞后逆链）。
+- **METHODOLOGY 试验记录（methodology-rc-trial · Standard）**：写入逆链试验（§6 讨论；并联、改码前业务方案、第三轮表述修正；花费自估）；碰撞节补第四轮实测；正文隐去业务窗号；归档签收。
+
+### Included changes — 2026-08-13（自进化运行态补齐 + 碰撞规程 + 模型路由 · 不 bump）
+
+- **自进化运行态补齐**：BOM 教训三次命中留痕回写 + 候选快照重跑（suppressStreak 出列）+ 重跑时机注明；developer SKILL 钉死 _lesson-pending yaml 格式契约（模板化引用）。
+- **hooks 维护窗**：changelog 路径正则 5 处修复（Windows 反斜杠不命中）。
+- **思考碰撞规程改为异模型三轮薄碰撞**（collision-review.md：轮0 前提截断；轮1 Grok×Sonnet / 轮2 Terra×Grok / 轮3 Sonnet×Terra；不对称红队；定级绑 A#/Mandatory/机器检查；收尾薄归并；回灌须「准」；禁止同模型双链与 resume 同一对）；思考碰撞回灌日常审 + 止损/热度提示（不启用）。
+- **完整碰撞最小版落地（evolution-02-collision）**：新建 collision-review.md（2 轮 Subagent 互审+裁决；常规不启用；启用=用户点名「完整碰撞」或止损触顶且确认包选用）；isolated-review 触发表 + divergence-annotation 边界 + routing/MAINTAINER/planner 4.06 / plan-reviewer 3.14 接线；归档签收。
+- **分歧标注小试点落地（evolution-02-diverge）**：新建 divergence-annotation.md（单轮 ≥2 视角推理链 + DA-{nn}）；KG/isolated-review/routing 接线 + 三岗 SKILL 各 1 行；归档签收。
+- **收集仓落地（evolution-01-collect）**：新建 collect-queue.md（三态 draft/shareable/promoted；可传、不可静默删；入队须人工确认）+ 空仓表头；KG/「准」/routing/MAINTAINER/planner 各 +1；gh 为可选探测；归档签收。
+- **覆盖度表（evolution-02-coverage）**：新建 coverage-map.md + compute-coverage-map.ps1（只读 trx/heat/outcome/.codegraph；-Verify 点名行键且行值）；routing +1；MAINTAINER 登记（heat≠覆盖度）；developer 与 planner 各 +1 句禁自报百分比；归档签收。
+- **晋升闸（evolution-03-promote）**：design-patterns §晋升闸四条；MAINTAINER +1；plan-reviewer：误称四条为「三重闸」→major、假装 gh 已通→blocker；compute-evolution-candidates.ps1 +1 数据源段；归档签收。
+- **模型路由三档**（最低 Grok4.5 / 普通 Grok4.6 / 高级 Sonnet→GPT Terra）；覆盖 2026-08-12「成本优先 Composer」旧定档；改 project-context §模型路由 + model-routing.md 默认表。
+- **METHODOLOGY 按论文重写** + 取消行数上限（MAINTAINER 同步）+ 碰撞节补两轮对照与评价 + 使用记录补两次实测。
+- **其他 08-13 归档签收**：evolution-long-task（感知+最小调度已落地；cron 仍搁置）、evolution-03-mvp、evolution-03-promote、evolution-02-coverage、evolution-02-collision、evolution-02-diverge、evolution-01-collect。
 
 ## [4.1.0] - 2026-08-12（test-first 默认化 · minor · 发布）
 
