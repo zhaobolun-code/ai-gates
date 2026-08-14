@@ -57,6 +57,8 @@
 | 设计模式症状 / Mandatory 写模式 / 点名 design-patterns 词条 | `design-patterns.md` |
 | 高危/止损/跨模块大改/用户点名分歧实验 · 策划或改码前 epistemic 分歧 | `divergence-annotation.md` |
 | 用户点名「完整碰撞」**或**（止损触顶/将到 2/3 / 热度爆炸 **且** 确认包选用碰撞）；加载 ≠ 启用；禁止把「止损/热度」单独当启用 | `collision-review.md` |
+| 用户点名「逆链」**或**（高危/止损且方案声明启用逆链）；加载 ≠ 启用；禁止每窗必加载 | `reverse-chain.md` |
+| 结案归档（completed/失败封存+migrate）且窗内有改前选型三格 **或** 用户点名「逆向总结典故」；加载 ≠ 每个归档必加载；空闲枢纽迁签收不加载；点名「逆向总结」≠启用逆链 | `reverse-allusion.md` |
 | 跨项目沉淀 / 收集仓 / shareable 队列 | `collect-queue.md` |
 | 跨会话续作 / 长期窗卡住 / 质量趋势停点 | `long-task.md` |
 | 覆盖度 / 读过测过失败过 / 禁止自报覆盖率 | `coverage-map.md` |

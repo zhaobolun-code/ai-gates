@@ -10,6 +10,24 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-14：methodology-rc-trial 归档签收（Standard · Skill/Doc-only · L1.5）：用户「归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/methodology-rc-trial/`；METHODOLOGY §6 为试验记录（含并联、改码前业务方案、第三轮表述修正）；不 bump VERSION
+- 2026-08-14：METHODOLOGY 逆链节第三轮/业务方案表述修正（准入失败≠新设计洞种；设计连接撑住；不把已有启用门槛当回灌）；不 bump VERSION
+- 2026-08-14：METHODOLOGY 逆链节补改码前业务方案一次（脱敏：总现象与本步条款连得上；打到手续洞=选型行超上限、弃项缺负向代价；抽检同意不得标通过；花费约一次模拟倒走量级）。摘要/边界同步；不 bump VERSION
+- 2026-08-14：METHODOLOGY 逆链节补同稿并联两次与花费自估（约两万 token、约普通 L1.5 六到八成）；新增 6.4 它算不算元认知；正文隐去业务窗号；不 bump VERSION
+- 2026-08-14：METHODOLOGY 碰撞节补第四轮实测（脱敏：正在执行的业务实现；薄碰撞未截断、无翻转；打到同类洞：机械绿与人看见的现象不同句 / 条款表把「不要当成通过」并列进失败肢；不 bump VERSION）
+- 2026-08-14：METHODOLOGY 写入逆链试验（一次演练；新增 §6 讨论：逆链试验；摘要/边界并列非常规、非对照；正文隐去业务窗号与现象原文；不 bump VERSION）
+- 2026-08-14：evolution-02-reverse-allusion Step1 落地（Standard · Skill/Doc-only · L1.5）：新建 `skills/references/reverse-allusion.md`（归档总结提名 ≠ 逆链；用途分级跳过/不跑/跑；pending 典故卡来源：逆向总结）；handoff 仅 §F +1；routing/MAINTAINER +1；planner 4.10；plan-reviewer 3.16 三句 blocker；不 bump VERSION
+- 2026-08-14：evolution-02-rc-fidelity Step1 逆链保真加厚（Standard · Skill/Doc-only · L1.5）：三格=判断当时连接；骨架倒走+断裂只标禁止修补；有效倒走→pending 来源：逆链；邻机制两行指针；planner 4.09 +1 / plan-reviewer 3.9.3 并进；不 bump VERSION
+- 2026-08-14：evolution-02-collision-label 归档签收（Standard · Skill/Doc-only · L1.5）：collision-review 定位纠偏（对抗审核 ≠ 元认知 + 先碰撞后逆链）；不 bump VERSION
+- 2026-08-14：collision-review 定位纠偏（对抗审核 ≠ 元认知 / 红队不跑则无本产物）+ 邻表双开（逆链行 + 典故「本文件不建归档总结页」+ 先碰撞后逆链）；不 bump VERSION
+- 2026-08-14：逆链机制审计修复：删 reverse-chain.md 不可证伪半句「每条选型行 ≤ 倒推条目」+ 纸老虎措辞消除歧义 + plan-reviewer 3.9.3 尾部去重
+- 2026-08-14：evolution-02-reverse-chain 归档签收（Full · Skill/Doc-only · L3）：用户「归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-02-reverse-chain/`；回写 evolution-02 对照「第五块逆链已落地」；不 bump VERSION
+- 2026-08-14：evolution-02-reverse-chain 错题本落表（用户「准」）：方案blocker「L3 轮次只写排除节」+ 成功经验「逆链复用选型行 / 加载≠启用」写入 lessons-learned + outline；窗仍 runtime-validated，待「归档」；不 bump VERSION
+- 2026-08-14：evolution-02-reverse-chain Step1 用户授权代理抽检抬升 runtime-validated（Full · Skill/Doc-only）：validate-pipeline / check-pipeline-doc -Strict 绿；A10–A13 字面在盘；本窗未启用逆链、未写「逆链已通过」；不 bump VERSION、未迁签收
+- 2026-08-14：evolution-02-reverse-chain Step1 落地（Full · Skill/Doc-only）：新建 `skills/references/reverse-chain.md`（第五块设计因果闭合；用途分级硬表；倒推 procedure；借口表；Never assume intent；选型行≤5；纸老虎；同模型圆稿不合格；交审后改选型须重开选型+逆链）；planner 4.09 / plan-reviewer 3.9.3 / reference-routing +1 / MAINTAINER +1；**不 bump VERSION**
+- 2026-08-14：evolution-02-reverse-chain L3 清零重生第1轮（rev3）：第2轮 blocker=文首与文档状态各写一份独立复核轮次；轮次迁出哈希正文；`_lesson-pending.md` 已起草（方案blocker）；不改 skills、不 bump VERSION
+- 2026-08-14：evolution-02-reverse-chain 升 Full 交 L3 第1轮（Skill/Doc-only）：窗升 Full · L3 · review-pending；Mandatory 改成交审工单（将新建 reverse-chain.md + planner/plan-reviewer/routing/MAINTAINER 接线）；派 `证据/_方案审核派发.md` rev1；本拍不改 skills、不 bump VERSION
+- 2026-08-14：evolution-02-reverse-chain 开窗+草案（Standard · Skill/Doc-only · L1.5）：执行中窗 `.ai-gates/Doc/AI流水线/执行中/evolution-02-reverse-chain/`（未完成+物理口径+Mandatory-Step01 草案意向）；逆链=02 元认知第五块「设计因果闭合」；复用选型短表行当节点，常规不跑；本拍不改 skills、不交审、不 bump VERSION
 - 2026-08-13：自进化运行态补齐：BOM 教训三次命中留痕回写 + 候选快照重跑（suppressStreak 出列）+ 重跑时机注明
 - 2026-08-13：developer SKILL 钉死 _lesson-pending yaml 格式契约（模板化引用），修复散文草稿被 commit 脚本拒绝问题
 - 2026-08-13：hooks 维护窗：changelog 路径正则 5 处修复（Windows 反斜杠不命中）
@@ -422,7 +440,7 @@
 - `scripts/suggest-pipeline-lane.ps1`：读 `.ai-gates/lessons-learned.md` 作用域/模块列，
   命中当前 diff → `hits_lesson_hotspot` → 最低 Standard（>3 文件 → Full 提示）。
 - `scripts/check-boundaries.ps1`（新增）：解析 project-context §架构边界 规则
-  （`- `源glob` 禁引用 `目标glob``），扫 git 变更文件的 using/require/import/#include。
+  （`-`源glob` 禁引用 `目标glob``），扫 git 变更文件的 using/require/import/#include。
 - `scripts/validate-pipeline.ps1`：接入 check-boundaries（-Strict 联动）。
 
 ##### 验证
@@ -692,7 +710,8 @@
 - `validate-pipeline -Strict` 全绿；链接扫描无新增死链；发行包重建。
 
 > 窗：Standard · Skill/Doc-only · 无窗。机械层 Codex 接线早已就位（`.ai-gates/codex/hooks.json`
-> + `config.toml` + `hooks/codex/*.ps1`，已在 codex-cli 0.146 实测 deny 拦截），但对外文档仍残留
+>
+> - `config.toml` + `hooks/codex/*.ps1`，已在 codex-cli 0.146 实测 deny 拦截），但对外文档仍残留
 > 多处「仅适配 Cursor / 其他平台未正式打包」的过时说法。本次收口为三平台（Cursor / Codex / Trae）
 > 共用同一份 `.ai-gates/` 中央库的表述，并顺带把 README 安装流更新为新布局（解压到项目根 +
 > `link-platform`）。

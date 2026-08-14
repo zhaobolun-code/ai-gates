@@ -114,6 +114,7 @@
 3. **自动**追加效果一行：`append-pipeline-outcome.ps1`（`event=step_pass`；填 `verify_fails` / `rounds_to_pass` / `first_pass` / `why_multi` / `repair_rounds`）。失败则手工 JSONL，**不阻塞签收**。见 [pipeline-outcome-log.md](../templates/pipeline-outcome-log.md)。
 4. 按 Delta Spec 提示物理口径/A# 需改句子；有 MODIFIED/REMOVED 则列入待办后再结案。
 **结案 / 止损封存**：迁 `completed` 或失败夹时再 append 一行（`close` / `stop_fail`），避免同窗重复瞎记时可只保留最终 `close`。**同条须完成 §E 迁夹硬项**（`migrate-pipeline-window.ps1` 或同等）；未迁夹不得在交接写「已结案」。
+**逆向总结典故（归档压缩提名）**：`completed` 或失败封存（含止损）**且**同条已 migrate：若窗内有改前选型三格（【本步方案】【为什么】【不选的】）→ 加载并跑 [reverse-allusion.md](./reverse-allusion.md)；若无三格 → 整段跳过（禁止补跑逆链、禁止补写 why）。空闲枢纽迁签收不跑（本条不挂 §E 空闲迁夹）。禁止每个终态（含空闲）必跑。
 **兑现勾选**：同条核对 [retrospective-metrics.md](./retrospective-metrics.md) §每窗兑现清单 1–6；交接可写 `兑现：1✅…`（半页模板 → [window-fulfillment-halfpage.md](../templates/window-fulfillment-halfpage.md) / USER-GUIDE §半页备忘）。
 **不自动**：静默改 lessons 主表 / 静默改 Skill；测失败同条写 L1。
 **Auto / §H 叠加（预算用尽）**：若当前为 `await_human reason=max_auto_steps` 签收，本节仍触发 E4，但**必须**保留该 `stop_reason` 并迁 `runtime-validated`；**禁止**本节逻辑清除 reason 或等价「继续 Auto」续跑下一 Step。字段冲突时 **§H 优先**。

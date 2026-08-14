@@ -48,6 +48,8 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 4.06 **完整碰撞（默认不启用）**：完整碰撞默认不启用；启用须点名 [collision-review.md](../references/collision-review.md)（异模型三轮；轮0 产出可引用共识地基三句；轮1 Grok 构建者×Sonnet 红队且开头引用地基；短清单主窗机械拼装；轮2/3 引用原文只投票；禁止同模型双链）。不得把 diverge 填成碰撞。止损触顶/将到 2/3 或热度爆炸时由 PM 在确认包**提示**可选碰撞，策划不得自行开跑。
 4.07 **跨会话续作**：续作前按 [long-task.md](../references/long-task.md) 核感知/卡住；命中停点先确认包，禁止静默续改码。
 4.08 **覆盖度**：若引用覆盖度，必须来自 `.ai-gates/coverage-map.yaml` 或刚跑的 `compute-coverage-map.ps1` 输出；禁止自报百分比。
+4.09 **逆链（默认不启用）**：高危 / 止损 / 用户点名「逆链」时，方案 `未完成.md` 或 Mandatory **须声明是否启用**逆链；默认 **不启用**；节点=选型短表**行**；禁止第四张逻辑节点表。点名 [reverse-chain.md](../references/reverse-chain.md)。三格【本步方案】【为什么】【不选的】=判断当时的连接（依据→判断→不选），禁止交审散文补 why。
+4.10 **归档总结（逆向总结典故）**：归档总结默认**不在执行中跑**；仅结案归档（`completed`/失败封存+migrate）且有改前选型三格才触发；无三格跳过；空闲枢纽迁签收不跑；**禁止与 4.09 逆链混称**。点名 [reverse-allusion.md](../references/reverse-allusion.md)。
 4.5 **复核派发工件**：交方案审前按 [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md) + 模板生成/刷新 `证据/_方案审核派发.md`（`mode=plan`）；blocker 修订后重算 revision、去重回归项≤20 行、L3 清零并重生第1轮；第1→2 转场见 handoff §I（Checker 无写权）
 5. 「文档状态」：`draft` → `review-pending` → 过审发确认包 →「准」后 ready 并同条开始改码（[handoff-automation.md](../references/handoff-automation.md) §0/§F）
 6. 禁止「考虑」「待定」— 转默认决策或 blocker
