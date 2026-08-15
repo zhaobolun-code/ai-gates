@@ -78,9 +78,9 @@
 
 > 接在 §复用四问 短表之后；写 Mandatory / 改码前须答。
 
-**问法**：本 Step 是否引入/变更可复用结构？若有，对照 [design-patterns.md](./design-patterns.md)：触发症状是否成立？本仓哪条验证实例？若无症状或无验证实例 → **默认 YAGNI**，不得新抽象。
+**问法**：写 Mandatory 前**必扫** [design-patterns.md](./design-patterns.md) 词条表「触发症状」列（扫症状列，不是优先套用）。命中 → 写强制选型句（格式不变）。未命中 → 字面 `本步不采用 design-patterns 词条`。无症状不得新抽象（YAGNI）。
 
-**强制选型句**（写进 Mandatory）：
+**强制选型句**（写进 Mandatory；格式不变）：
 
 ```text
 采用 {典故词} 模式（触发症状：…；理由：…；词条出处：design-patterns.md §{典故词}）
@@ -88,7 +88,8 @@
 
 | 缺项 | 方案审 |
 | --- | --- |
-| 缺强制选型句（症状+理由+出处） | **major** |
+| 未命中却缺「本步不采用 design-patterns 词条」 | **major** |
+| 缺强制选型句（症状+理由+出处）（已声明采用时） | **major** |
 | 缺触发症状仍写模式名 | **blocker**（对齐 evolution-03 机制 C） |
 
 流程典故（神类止血/复用四问/双轴/深模块）仍只走 [shared-language.md](./shared-language.md) §典故，不得在本问里重复登记。

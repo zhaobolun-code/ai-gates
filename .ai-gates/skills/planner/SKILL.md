@@ -28,6 +28,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 
 1. Read `.cursor/project-context.md`（若存在）+ 范围内 README + 真实代码入口 + **先** `.ai-gates/lessons-outline.md`（若存在，按桶扫）**再** `.ai-gates/lessons-learned.md`（点名行：模块/症状/作用域；命中则 Pitfalls + 更新「最近命中」；近 6 月命中 → 至少 L1.5，见 [plan-review-tiers.md](../references/plan-review-tiers.md)；细则 [lessons-learned.md](../references/lessons-learned.md)）。**强制**在 `未完成.md` 写 **`## 错题本必读（给程序员）`**：大纲桶 + 主表锚点（日期/模块/关键词）≤5 条，或「无（已扫大纲·{桶}）」；条目须能落到错因/改正
 1.1 **复用四问**（写 Mandatory 前强制，见 [execution-discipline.md](../references/execution-discipline.md)）：已有吗→能复用吗→能少写/不写吗→能删吗；每 Step 落 ≤6 行短表（可并入选型短表）；未检索不得写新路径。若 project-context 有 **神类止血/补强三口**：Mandatory 须用**替换句式**，超净增阈/方法预算须 Service·拆分·REMOVED 或豁免句
+1.2 **设计模式一问（扫症状）**：写 Mandatory 前扫 [design-patterns.md](../references/design-patterns.md) 词条表「触发症状」列。命中 → 强制选型句（格式见 execution-discipline）；未命中 → 字面 `本步不采用 design-patterns 词条`。显式采用或不采用；禁止优先套用；无症状不得新抽象（YAGNI）。细则 [execution-discipline.md](../references/execution-discipline.md) §设计模式一问
 2. **Standard / Full 落盘（Direct 除外：对话内 A#/切片，不落盘）**：用户指定 > project-context 文档根 > `.ai-gates/Doc/{主题}/执行中/{方案短名}/`（见 [doc-path-defaults.md](../references/doc-path-defaults.md)）；**必须**文件夹 + `未完成.md` + `已完成/_索引.md`（见 [doc-windowing.md](../references/doc-windowing.md)）；默认进 **执行中/**；空闲/结案同条迁 **签收/**；失败/回退/停写/换层按 doc-windowing（**失败含止损**，方案夹不加前缀）；**禁止**新建无窗口单文件长方案；活跃正文只写在 `未完成.md`
 2.1 **诊断闸门**：止损（含热修失败计入）/ 热修上限 / 放行合取 / 热修并行实现一句 / 并行实现收敛 / **Verify→Discover** → [diagnosis-gates.md](../references/diagnosis-gates.md)；违反则不得定版
 2.1.1 **Discover 全路径预扫**：Mandatory 触及 §0.8 信号枚举（最低集：放行、早 return、`allow_*`、`redirect`、`handover`、Ready/Register、`*_not_ready`/`upstream_not_ready`/`terminal_not_ready`、增改通路改道）→ 须写预扫链：**「跳」= 门闸/调用边（≠ CG 条数）**；CG 覆盖 ≥2 跳 → 读码复核 ≥1 跳（或 CG 未覆盖→已读码 `path:symbol`）；列扫过符号；≥2 门闸一次策略；BMAD 自包含；正文扩写点名 `ShouldBypass*` / `force*`·`suppress*` / `TryAdvance*` 改道；**禁只开第一道门**
@@ -50,6 +51,8 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 4.08 **覆盖度**：若引用覆盖度，必须来自 `.ai-gates/coverage-map.yaml` 或刚跑的 `compute-coverage-map.ps1` 输出；禁止自报百分比。
 4.09 **逆链（默认不启用）**：高危 / 止损 / 用户点名「逆链」时，方案 `未完成.md` 或 Mandatory **须声明是否启用**逆链；默认 **不启用**；节点=选型短表**行**；禁止第四张逻辑节点表。点名 [reverse-chain.md](../references/reverse-chain.md)。三格【本步方案】【为什么】【不选的】=判断当时的连接（依据→判断→不选），禁止交审散文补 why。
 4.10 **归档总结（逆向总结典故）**：归档总结默认**不在执行中跑**；仅结案归档（`completed`/失败封存+migrate）且有改前选型三格才触发；无三格跳过；空闲枢纽迁签收不跑；**禁止与 4.09 逆链混称**。点名 [reverse-allusion.md](../references/reverse-allusion.md)。
+4.11 **模式沉淀**（生产侧）。可晋升时（签收/`runtime-validated` 抽出可复用结构且对仓三档=有真锚点；CR 发现未入表真锚点；用户点名「模式沉淀」；归档逆向总结卡已有本仓锚点）**自动**落 `证据/_pattern-pending.md`；主窗只问「准否」；禁止静默入表；禁止塞进 `_lesson-pending.md`。Express / 空闲枢纽默认不跑。不是岗。点名 [pattern-harvest.md](../references/pattern-harvest.md)。
+4.12 **电路子窗**。写 ≥2 Step 契约前答电路一问；能并则并；阻塞边必填「串联 / 并联」+ 路径集。单 Step / Express / Direct 对话内切片：字面 `无（单步·不跑电路）`。不是岗。点名 [circuit-windows.md](../references/circuit-windows.md)。
 4.5 **复核派发工件**：交方案审前按 [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md) + 模板生成/刷新 `证据/_方案审核派发.md`（`mode=plan`）；blocker 修订后重算 revision、去重回归项≤20 行、L3 清零并重生第1轮；第1→2 转场见 handoff §I（Checker 无写权）
 5. 「文档状态」：`draft` → `review-pending` → 过审发确认包 →「准」后 ready 并同条开始改码（[handoff-automation.md](../references/handoff-automation.md) §0/§F）
 6. 禁止「考虑」「待定」— 转默认决策或 blocker

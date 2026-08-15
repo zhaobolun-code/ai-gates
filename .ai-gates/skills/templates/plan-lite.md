@@ -73,7 +73,7 @@
   - **MODIFIED**：[本步修改的既有口径/行为；无则写「无」]
   - **REMOVED**：[本步废除的口径/行为/字段用法；无则写「无」]
 - **满足验收**：A1, A2
-- **阻塞边（blocking edges，可选）**：[本 Step 依赖的 Step/窗口/票（depends-on）；被谁依赖（blocks）；无或无需并行调度则省略/写「无（独立 Step）」——为并行窗口与调度铺路]
+- **阻塞边（blocking edges）**：≥2 Step **必填**「串联 / 并联」+ 路径集；单 Step 字面 `无（单步·不跑电路）`。[depends-on / blocks]
 - **Agent 易错语义**：[符号 + 实际语义 + 文件/类/方法证据；未发现则写「未发现；已检查 [关键符号]」]
 - **Unity 验证**：[Editor 操作步骤]
 - **Regression Validation**：[预期现象 + Console 关键词]
@@ -85,7 +85,7 @@
 - **Mandatory Code Changes**：
 - **Delta Spec**：ADDED / MODIFIED / REMOVED（同上；无变更写「无」）
 - **满足验收**：
-- **阻塞边（blocking edges，可选）**：
+- **阻塞边（blocking edges）**：
 - **Agent 易错语义**：
 - **Unity 验证**：
 - **Regression Validation**：
@@ -105,7 +105,7 @@
 
 ## 给程序员的说明
 
-一次只做一个 Step；只为实现所引用的验收条款。方案与真实代码冲突时停下报差异，禁止臆测 API。Step 签收后由策划/PM 迁入 `已完成/`；若 Delta Spec 含 MODIFIED/REMOVED，须同步提示并更新 `物理口径.md`/A#（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md) §Delta Spec）。
+每个实现子窗只做自己的 Step；并联组由 PM 同时派多个子窗。只为实现所引用的验收条款。方案与真实代码冲突时停下报差异，禁止臆测 API。Step 签收后由策划/PM 迁入 `已完成/`；若 Delta Spec 含 MODIFIED/REMOVED，须同步提示并更新 `物理口径.md`/A#（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md) §Delta Spec）。
 
 状态迁移：`draft` → 用户确认后 `review-pending` → L1/L1.5 无 blocker 后 `implementation-ready` + **可交给程序员**=是。
 

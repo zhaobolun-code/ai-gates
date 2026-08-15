@@ -34,6 +34,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 1.25 **复盘写回提议（P2 · 须「准」）**：本次 blocker 满足升级资格（**近 90 天 ≥2 次命中 且 最近命中 ≤30 天**；机器候选见 `scripts/compute-evolution-candidates.ps1`，另须人工确认留痕——同族错误不重复计数、机器候选≠已确认）→ findings 附一行「**复盘写回提议**：<拟补 anti-patterns/lessons 的一句>」；**用户「准」后**才改 Skill（改前 CHANGELOG）。**禁止**静默改规则 / 把一次偶发提为规则（评测 [skill-eval-checklist.md](../references/skill-eval-checklist.md) E2）。
 1.26 **置信标注核验**（见 [evidence-levels.md](../references/evidence-levels.md) §置信标注）：developer 自检/交接中的「确定[有代码证据]」须可回引真实符号/文件位置；标注与实际不符（含按标注回引不到代码位置）→ **major**；未标注断言冒充确定（无据称有据）→ **blocker**（伪称执行同族，`.ai-gates/lessons-learned.md` 2026-08-10 行）。
 1.5 **经验/错题（准全自动）**（见 [lessons-learned.md](../references/lessons-learned.md)）：blocker 修复确认后交主窗 PM **自动**起草 `证据/_lesson-pending.md`（类型默认 `CR blocker`）；成功路径同条可代拟 pending；**须用户「准」**才写入主表；禁静默/空泛；扫表命中须更新「最近命中」。
+1.55 **模式沉淀**：CR 发现「本仓已有结构、表里没有」→ 交主窗 **自动**起草 `证据/_pattern-pending.md`；**须「准」**才入表。点名 [pattern-harvest.md](../references/pattern-harvest.md)。
 2. **L1.5**：经 [cr-dispatch-l1.5.md](../templates/cr-dispatch-l1.5.md) 派发；**优先** Subagent（标「L1.5 隔离复核（Subagent）」）；手动新 Chat 标「L1.5 独立 CR」；原 Chat 标「非独立 CR」。细则 → [isolated-review.md](../references/isolated-review.md)
 3. 有图谱则探测影响面：**先 CRG，必要时补 CodeGraph**（见 [references/codegraph-probe.md](../references/codegraph-probe.md)）
 4. 输出 findings：**blocker / major / minor / nit**（**短表**）；L1.5+ 主 CR/复审 **必须**含集成维一句（见下）
@@ -53,7 +54,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 - **语言维（必扫 · 按 diff 语言层路由）**：diff 含 `.cs` → C# 层查 MonoBehaviour 生命周期 / 对象池复用 / 协程泄漏 / Editor 专有 API；含 `.lua` → Lua 层查 table 频繁分配 / 闭包泄漏 / 全局变量污染 / 跨语言装箱与 LuaFunction 预缓存；检查项指针 → project-context §代码审核额外关注点（不内联复制）
 - 仅 Skill/Doc-only → 文档一致性；无 CRG/CodeGraph → 静态读码 + 按 [codegraph-probe.md](../references/codegraph-probe.md) 记 soft risk / 验证缺口，**不硬拦**
 - **质量维（默认）**：只实现当前 Step/未扩 scope；覆盖且未越出 A#（[acceptance-and-delta.md](../references/acceptance-and-delta.md)）；README/project-context 硬约束（含 **神类止血/补强三口** 若有）；边界/状态安全；语义理解错误（名实不符→查证，改行为记 major/blocker）；**复用四问**（[execution-discipline.md](../references/execution-discipline.md)）：可复用却复制新实现→major；只增不删且无说明→major；形成并行实现无互斥句→blocker；过度设计/死代码/类膨胀→major；新方法体超预算无豁免→major；缺瘦身一拍且膨胀明显→nit/major；禁把 static-checked 写成 runtime-validated；**设计模式结构核对**（[design-patterns.md](../references/design-patterns.md)）：Mandatory 声明的模式须与词条「结构/禁用边界」一致；明显可 inline 却新抽象（模式崇拜）→ **major**；与 §典故 重复造词 → **major**；**证据黑板**（派发点名时可 Read）：手法与最近条「禁止再做」实质相同→**major/blocker**；`repair_rounds≥1` 却无黑板/未注入→**major**；止损或 `max_repair_rounds` 触顶后仍同 A# 交修→**blocker**；**错题必读**：方案已点名错因/改正行，diff 仍复现同错因→**major**
-- **集成维（L1.5+ 主 CR 与 blocker 复审必扫；**语言维必扫见上**）**：调用链入口/出口；回归索引场景是否仍覆盖；跨模块或 C#/Lua 契约；A# 场景闭合；**CRG（优先）/CodeGraph** 影响面一句；**强制**扫本 Step **冻结表 / DO NOT TOUCH**（有则核对 diff 未碰；无则「冻结表：无（已扫）」）+ 黑板「禁止再做」是否复现（无黑板则「禁项：无（已扫）」）。findings **必须**含「集成维：…」或「集成维：未发现缺口」且覆盖冻结表/禁项扫描；**缺句或未扫 → major**；复现禁项 / 碰冻结符号 → **major/blocker**（档位按方案 `物理口径.md`）
+- **集成维（L1.5+ 主 CR 与 blocker 复审必扫；**语言维必扫见上**）**：调用链入口/出口；回归索引场景是否仍覆盖；跨模块或 C#/Lua 契约；A# 场景闭合；**CRG（优先）/CodeGraph** 影响面一句；**强制**扫本 Step **冻结表 / DO NOT TOUCH**（有则核对 diff 未碰；无则「冻结表：无（已扫）」）+ 黑板「禁止再做」是否复现（无黑板则「禁项：无（已扫）」）。findings **必须**含「集成维：…」或「集成维：未发现缺口」且覆盖冻结表/禁项扫描；**缺句或未扫 → major**；复现禁项 / 碰冻结符号 → **major/blocker**（档位按方案 `物理口径.md`）。并联汇合后缺集成维一句 → **major**。
 - **安全维（按需）**：密钥泄露/注入/不可信输入；非默认必跑；Full 或派发 `+security` 时扫
 
 ## 对抗模式（高风险可选）

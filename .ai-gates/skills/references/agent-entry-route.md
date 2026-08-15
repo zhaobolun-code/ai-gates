@@ -16,6 +16,8 @@
 - 真实源码 / diff（优先 `codegraph_explore`）
 - 方案点名的 lessons / 错题大纲行
 - Express：`express-slice` / `express-self-check`
+- 点名「模式沉淀」→ 加载 [pattern-harvest.md](./pattern-harvest.md)
+- 点名「电路子窗」→ 加载 [circuit-windows.md](./circuit-windows.md)
 
 ## CORE 全文何时读
 

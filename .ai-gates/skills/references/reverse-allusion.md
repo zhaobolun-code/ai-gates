@@ -48,6 +48,7 @@
 | 设计模式词条 | [design-patterns.md](./design-patterns.md) | 五字段对齐；本页不写入词条表 |
 | 共享语言典故 | [shared-language.md](./shared-language.md) | 本页不写入词条表 |
 | 晋升 | lessons 机制 B / 01-B | pending → 准进主表 → 01-B → 再准入典；本页不实施 |
+| 模式沉淀 | [pattern-harvest.md](./pattern-harvest.md) | 入表手续（准后写词条/口诀）；本页只压卡不当新表；有本仓锚点可转一份 `_pattern-pending.md`，不重复压卡 |
 
 ## 晋升（只声明，本页不实施）
 

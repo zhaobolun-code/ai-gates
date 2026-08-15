@@ -2,13 +2,33 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.2.0（发布 · 逆链全链路 + 逆向总结典故 · minor；前版 4.1.0 定版信息保留）
+**当前 LTS**：v4.2.1（发布 · 电路子窗 + 模式沉淀 + 设计模式一问 · patch；前版 4.2.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-08-15：电路子窗手续接线（Standard · Skill/Doc-only）：新建 circuit-windows.md；策划 ≥2 Step 强制串/并；3.06 缺边/假串联 major、相交并联 blocker；不 bump VERSION
+
+- 2026-08-15：归档签收 pattern-harvest-flow（用户「准+归档」：错题入主表+大纲；逆向总结典故卡已追加、不当新表/不转 pattern pending）；不 bump VERSION
+
+- 2026-08-15：模式沉淀流程接线（Standard · Skill/Doc-only）：新建 pattern-harvest.md + pattern-pending 模板；准全自动起草 _pattern-pending.md；禁止静默入表/第七岗/第 7 行；routing 双表+MAINTAINER+四岗 SKILL 轻量接线；不 bump VERSION
+
+- 2026-08-15：归档签收 pattern-harvest-observer / pattern-harvest-command / pattern-harvest-ability / project-maxims-context（用户「归档」；逆向总结典故卡已追加、不当新表）；模式沉淀流程另开窗；不 bump VERSION
+
+- 2026-08-15：design-patterns 词条「能力模板」（Standard · Skill/Doc-only）：本仓锚点 InteractionAbilityBase + ConfigurablePourAbility / SimpleHeatingAbility + InteractionManager 调度；热路径/压力/门闸/传质/守恒不做 Ability；与 ICommand 撤销栈区分；禁止新开平行 InteractionManager；不把 IPourStrategy 当本行；不 bump VERSION
+- 2026-08-15：project-context 增「项目口诀」（通断只认闸门 / 判定量同源 / 输入不进能力）；不占 design-patterns 词条表；不 bump VERSION
+- 2026-08-15：design-patterns 词条「命令（撤销）」（Standard · Skill/Doc-only）：本仓锚点 ICommand + CommandManager 双栈；热路径/要返回值直调；无撤销不套壳；禁止第二套栈；不 bump VERSION
+
+- 2026-08-14：设计模式一问改为写 Mandatory 前必扫症状列；未命中须写「本步不采用 design-patterns 词条」；planner +1 / plan-reviewer 3.12 缺句→major；不是优先套用；不 bump VERSION
+
+- 2026-08-14：design-patterns 对仓压缩手续 + 词条「事件分发（观察者）」（Express · Skill/Doc-only）：一次一条三档、表上限 6；本仓锚点 ChemicalEquipmentEventDispatcher；热路径/门闸/传质禁用总线；不 bump VERSION
+
+- 2026-08-14：METHODOLOGY 逆链节补「手续合格后再倒走」一轮（脱敏：同一份改码前业务方案；设计连接撑住、断裂 0；抽检同意不得标通过；未把尚未改码标成断裂；业务方案面可停）。摘要/边界同步；不 bump VERSION
+
+- 2026-08-14：R35 错题本落表（用户「写入错题本」=准）：主表 +5（残液早退/微量气/选型行上限/共享调用者/mid==terminal 早退）；大纲桶「压力 / 门闸与传质」+「Skill / 流水线」同步；不等于准改码、不等于逆链/L3 通过；不 bump VERSION
 
 - 2026-08-14：methodology-rc-trial 归档签收（Standard · Skill/Doc-only · L1.5）：用户「归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/methodology-rc-trial/`；METHODOLOGY §6 为试验记录（含并联、改码前业务方案、第三轮表述修正）；不 bump VERSION
 - 2026-08-14：METHODOLOGY 逆链节第三轮/业务方案表述修正（准入失败≠新设计洞种；设计连接撑住；不把已有启用门槛当回灌）；不 bump VERSION
@@ -81,6 +101,22 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [4.2.1] - 2026-08-15（电路子窗 + 模式沉淀 + 设计模式一问 · patch · 发布）
+
+### Included changes — 2026-08-15（电路子窗 + 模式沉淀全链路 + 词条补全 · 不 bump）
+
+- **电路子窗手续接线（Standard · Skill/Doc-only）**：新建 `skills/references/circuit-windows.md`（契约串/并联：能并则并；阻塞边必填「串联/并联」+ 路径集；路径相交改串）；策划 ≥2 Step 强制串/并；plan-reviewer 3.06 缺边/假串联→major、相交并联→blocker；planner 4.12；显式不是岗，禁止 circuit-job/第八岗。
+- **模式沉淀流程接线（Standard · Skill/Doc-only）**：新建 `skills/references/pattern-harvest.md` + `skills/templates/pattern-pending.md`（status: pending + 五格 + destination）；准全自动起草 `证据/_pattern-pending.md`；主窗只问「准否」；禁止静默入表 / 第七岗 / 第 7 行；routing 双表 + MAINTAINER + 四岗 SKILL（planner 4.11 / plan-reviewer / developer / code-reviewer）轻量接线。
+- **归档签收 pattern-harvest-flow / observer / command / ability / project-maxims-context**（用户「准+归档」/「归档」；逆向总结典故卡追加、不当新表、不转 pattern pending）。
+- **design-patterns 词条「命令（撤销）」「能力模板」**：本仓锚点 ICommand + CommandManager 双栈（`ICommand_Move.cs` / `ICommand_Delete.cs`）/ InteractionAbilityBase + ConfigurablePourAbility / SimpleHeatingAbility + InteractionManager 调度；禁止第二套 undo/redo 栈、禁止平行 InteractionManager；热路径、压力、门闸、传质、守恒不做 Ability；与 ICommand 撤销栈区分；IPourStrategy 不再挂第二条策略。
+- **project-context 增「项目口诀」**（通断只认闸门 / 判定量同源 / 输入不进能力）；不占 design-patterns 词条表。
+
+### Included changes — 2026-08-14（设计模式一问 + 词条补全 + 逆链节补 · 不 bump）
+
+- **设计模式一问**：写 Mandatory 前必扫 design-patterns 词条「触发症状」列；命中→强制选型句（格式入 execution-discipline）；未命中→字面 `本步不采用 design-patterns 词条`；禁止优先套用；无症状不得新抽象（YAGNI）；planner 1.2 / plan-reviewer 3.12 缺句→major。
+- **design-patterns 对仓压缩手续 + 词条「事件分发（观察者）」**：一次一条三档（有真锚点 / 误匹配 / 本仓没有）、表上限 6；本仓锚点 ChemicalEquipmentEventDispatcher / BaseEquipment.OnStateChanged / ConfigurablePourAbility 订阅 PourUIEvent；热路径、门闸、传质禁用总线；禁止新开第二套全局总线。
+- **METHODOLOGY 逆链节补「手续合格后再倒走」一轮**：脱敏（同一份改码前业务方案；设计连接撑住、断裂 0；抽检同意不得标通过；未把尚未改码标成断裂；业务方案面可停）。
 
 ## [4.2.0] - 2026-08-14（逆链全链路 + 逆向总结典故 · minor · 发布）
 

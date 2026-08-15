@@ -18,6 +18,8 @@
 | L1.5/L2/L3 隔离 | `isolated-review.md`；派发版本问题再加 `review-dispatch-lifecycle.md` |
 | 派岗选模型 / 贵便宜路由 | `model-routing.md`（可与 isolated-review 二选一加载） |
 | 测挂 L0 / 签收待准错题 / 错题大纲 | `lessons-learned.md`（含 §错题大纲）；项目文件 `.ai-gates/lessons-outline.md` |
+| 签收可复用结构 / CR 未入表真锚点 / 点名「模式沉淀」 | `pattern-harvest.md` |
+| 写 ≥2 Step 契约 / 点名「电路子窗」 | `circuit-windows.md` |
 | 签收效果一行 / 月末汇总 | `retrospective-metrics.md` §效果轻量版 |
 | 写方案/改码前精简 / 复用 | `execution-discipline.md` §复用四问；项目硬阈见 `.cursor/project-context.md`（若有神类止血） |
 | 写 Mandatory 前设计模式选型 / 方案审核模式结构 | `design-patterns.md` + `execution-discipline.md` §设计模式一问 |
@@ -59,6 +61,8 @@
 | 用户点名「完整碰撞」**或**（止损触顶/将到 2/3 / 热度爆炸 **且** 确认包选用碰撞）；加载 ≠ 启用；禁止把「止损/热度」单独当启用 | `collision-review.md` |
 | 用户点名「逆链」**或**（高危/止损且方案声明启用逆链）；加载 ≠ 启用；禁止每窗必加载 | `reverse-chain.md` |
 | 结案归档（completed/失败封存+migrate）且窗内有改前选型三格 **或** 用户点名「逆向总结典故」；加载 ≠ 每个归档必加载；空闲枢纽迁签收不加载；点名「逆向总结」≠启用逆链 | `reverse-allusion.md` |
+| 签收或 runtime-validated 抽出可复用结构且对仓三档=有真锚点 **或** CR 发现本仓已有结构、表里没有 **或** 用户点名「模式沉淀」；加载 ≠ 静默入表；Express / 空闲枢纽不加载；点名「模式沉淀」≠启用逆链 | `pattern-harvest.md` |
+| 写 ≥2 Step 契约 **或** 点名「电路子窗」；**加载 ≠ 减审**；Express / 单 Step 不加载 | `circuit-windows.md` |
 | 跨项目沉淀 / 收集仓 / shareable 队列 | `collect-queue.md` |
 | 跨会话续作 / 长期窗卡住 / 质量趋势停点 | `long-task.md` |
 | 覆盖度 / 读过测过失败过 / 禁止自报覆盖率 | `coverage-map.md` |

@@ -39,6 +39,7 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 2.4 **热路径批量回归结案**（读 **`.cursor/project-context.md`** §热路径批量回归，若存在）：本 Step Mandatory 触及该表「路径 glob」时，标 `step-completed` / `runtime-validated` **前**须跑表内「场景 ID」（默认 `run-unity-verify-golden.ps1`；跑前**须关本机 Unity Editor**；可 `-All` 但须点名表内各景 JSON；可用表内核对脚本 + `-RequireSceneIds`）；不跑/红不得标过。**无该节 = 不强制点名黄金景。****禁止**用批量回归绿冒充业务 A# 手测签收（≠有意义≠A#，见 [diagnosis-gates.md](../references/diagnosis-gates.md) §0.2.1）
 2.5 **覆盖度**：若引用覆盖度，必须来自 `.ai-gates/coverage-map.yaml` 或刚跑的 `compute-coverage-map.ps1` 输出；禁止自报百分比。
 3. **只改说定的文件**；一次一个 Step/切片；**只为实现所引验收条款 A#**（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md)）；**Auto 下同样**一次一 Step、遵守微循环，未测签收不得进下一 Step（见 [loop-engineering.md](../references/loop-engineering.md)）
+3.05 **电路子窗路径集**：只改本子窗路径集；看见并联组不得改邻 Step 文件。点名 [circuit-windows.md](../references/circuit-windows.md)。
 4. **精简优先（YAGNI）**：只做需求所需的最小实现，不顺手加方案外抽象/配置项；改动路径上的废弃方法/字段/死代码顺手清理或交接说明未清理原因；本步神类只增不减须在交接说明是否建议抽离
 4.5 **Reflexion 微循环（P1.5）**：按「改一段 → 自检 → 修正 → 继续」推进，禁止攒到整 Step 结束才第一次检查。自检至少含：① **真编译**（`dotnet build` 相关 csproj，或 [unity-editor-log.md](../references/unity-editor-log.md) §A Editor.log 无新增错误；**新增/改动 `out` 参数必须在方法入口（任何早退之前）定值**，防 CS0177 definite-assignment）；② 本段语义三问（见 5.5）。业务 C# Step 交 CR 前的**最小验证**=**真编译零错误**（dotnet build 相关 csproj 或 Unity Editor.log 无新增错误）+ 可执行 Unity 验收步骤/预期关键词；**禁以静态 grep/括号平衡充当编译通过**；UNITY_EXE 未配置时用 dotnet build 兜底。仓库根存在 `Tests/EditMode/` 外部 dotnet NUnit 工程时（TDD 设施，Assets 外不编入 Assembly-CSharp），可加跑 `.ai-gates/scripts/run-dotnet-editmode-tests.ps1`（trx 判定 total≥70 且 failed=0 方绿，防伪绿）作为增量验证层——不替代 golden/手测。Skill/文档用静态核对+假需求，不伪造 Unity。单个 Step 内 **≥50%** 小改动块须留自检痕迹。
 4.6 **test-first 默认**：本 Step 验收**含可机械验证项**（纯逻辑 / 状态机 / 确定性算法，可写成 EditMode / PlayMode 或脚本化断言）时，**先写最小可执行断言再实现至绿**，见 [test-first.md](../references/test-first.md)；方案点名或 PM 指定仍强制；断言绿 ≠ 业务 A# 通过，golden/手测照常。
@@ -49,6 +50,7 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 7.5 **Editor.log**：改完先按 [unity-editor-log.md](../references/unity-editor-log.md) §A 查编译错误并自修。用户测挂 / Discover 缺证据时按 §B **先查运行日志关键词**，勿默认让用户贴长 Console；不得据此标 `runtime-validated`
 8. 交接：**短表**（改了什么、A#、怎么测、未验证项、微循环自检摘要）；禁止默认贴大段代码/长 Console（证据外置）；有 open 知识缺口条目时列出（见 [knowledge-gap.md](../references/knowledge-gap.md)）
 8.5 **经验/错题（准全自动）**：①失败：**自动** L0；②成功/根因验证后交主窗 PM **自动**落 `证据/_lesson-pending.md`（勿静默写主表）；③用户「准」后 `commit-lesson-pending.ps1 -Apply`（见 [lessons-learned.md](../references/lessons-learned.md)）。禁空话 pending。**格式强制**：教训草稿 `_lesson-pending.md` 必须按模板 [lesson-pending.md](../templates/lesson-pending.md) 用 `yaml` fenced block 撰写——首块必填 `status/date/module/lesson/source/doc/type` + 非空 `cause/fix`；可选 `keywords/prevent/scope/l0_section/outline_bucket`；格式契约以 `commit-lesson-pending.ps1` 函数体为准（`$required` 数组 + cause/fix 非空校验）；交草稿前自检 yaml 块存在——散文/标题格式会被 commit 脚本拒绝（2026-08-13 实测）。
+8.6 **模式沉淀**：成功/发现可复用结构（对仓三档=有真锚点）交主窗 **自动**落 `证据/_pattern-pending.md`；**禁静默写** `design-patterns.md` 词条表；禁塞 `_lesson-pending.md`。点名 [pattern-harvest.md](../references/pattern-harvest.md)。
 9. 改动 >3 文件 / 跨模块 / 命中 regression-index → 停，报 PM 升级
 10. CR 有 blocker 先修，不写最终 README
 11. 用户仅咨询时不改文件

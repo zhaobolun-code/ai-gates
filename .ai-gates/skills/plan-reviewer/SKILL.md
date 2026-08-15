@@ -32,7 +32,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 2. **独立找 blocker**；不得只复述上一轮
 3. 每 Step 查：Mandatory Code Changes、**DO NOT TOUCH（冻结表）**、**Delta Spec（ADDED/MODIFIED/REMOVED）**、**满足验收：A#**、验证、Prerequisites
 3.05 **DO NOT TOUCH（冻结表）**：每 Step 须有该节（README 版本段 + 点名 API/文件，或「无（已扫）」）；缺节 → **major**。窗级「不要动什么」≠ Step 冻结表，不可用窗级替代
-3.06 **阻塞边（blocking edges，可选）**：Step 声明依赖/被依赖（depends-on / blocks；无则「无（独立 Step）」）；缺失不硬拦（并行窗口或跨 Step 依赖场景建议声明），但与 Step 顺序矛盾 → **major**
+3.06 **阻塞边（blocking edges）**：≥2 Step **必填**「串联 / 并联」+ 路径集。缺边 → **major**；假串联 → **major**；路径相交却标并联 → **blocker**。日常单 Step / Express / Direct 对话内切片写「无（单步·不跑电路）」→ 不硬拦。旧句「缺失不硬拦」作废。点名 [circuit-windows.md](../references/circuit-windows.md)。
 3.07 **共享语言**：方案两套叫法并存或术语未登记而歧义 → **major**（细则 [shared-language.md](../references/shared-language.md)）
 3.5 **验收条款 + Delta-only + Delta Spec**（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md)）：无 `A1…`、条款不可证伪、Step 未引用 A#、文档复述整模块原理、或缺 Delta Spec 三段 → **blocker**，不得定版
 3.55 **Analyze 对表（P2）**：交审时核对三表——A# ↔ Mandatory（Code Changes / Delta）↔ 预期 Console 关键词（回归索引 / 验收信号）；缺任一或对不上 → **major**（缺 A# 直接 blocker，见 3.5）。细则 → [acceptance-and-delta.md](../references/acceptance-and-delta.md) §Analyze 对表。**条款可证伪（思考碰撞回灌）**命中任一条 → **major**：①成功句有机器源，失败句只禁某种做法、抓不到「自报 / 不读该源 / 缺字段」；②机器检查只写「计数字段/脚本绿」未点名要比对的字段或行键；③Mandatory 入口接线（某 SKILL +1 行等）未写入对应 A#；④手工红线与脚本证据不同句，脚本绿可单独冒充该红线已过
@@ -50,11 +50,12 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 3.9.3 **逆链（声明启用时）**：方案声明启用逆链时（[reverse-chain.md](../references/reverse-chain.md)）：倒推起点不是失败标准 / 冻结表 / 不选的 → **major**；缺 Why Not Chosen 或负向代价 → **major**；从实现编 why → **blocker**；同模型圆稿标通过 → **major**；只审文档不审实现 → **major**；选型行 >5 无豁免 → **major**；交审后改选型须重开选型+逆链；静默改选型 / 改写用户拍板 → **blocker**。骨架倒走发现断裂却补链圆稿（禁修补）、或倒走产出比正向更完整的 why、或提示「请重构设计思路」→ **major**；缺改前三格或三格明显事后补写仍标该次逆链通过 → **blocker**。
 3.10 **复用四问**（[execution-discipline.md](../references/execution-discipline.md)）：每 Step 缺「已有/复用/少写或不写/能删」短表 → **blocker**；明显可复用既有 helper/Service/门闸却新开并行实现或新抽象 → **blocker**；REMOVED 恒为「无」且 Mandatory 只往神类堆逻辑、无抽离说明 → **major**
 3.11 **项目神类止血/补强三口**（若 `.cursor/project-context.md` 有该节）：Mandatory 仅「追加」口吻无下沉/REMOVED → **major**；超净增阈无 Service/REMOVED/用户确认收敛债 → **blocker**；新方法体超预算无豁免句 → **major**
-3.12 **设计模式外部校验（轻量 · evolution-03 机制 C）**：Step Mandatory 声明采用 [design-patterns.md](../references/design-patterns.md) 词条时，缺**触发症状**描述 → **blocker**；缺**强制选型句**（症状+理由+出处）→ **major**；词条与 shared-language §典故 **同义双挂**（如又登记神类止血）→ **blocker**；无验证实例仍推模式 → **major**（YAGNI）。无模式声明的 Step：不强行要求选型句。
+3.12 **设计模式外部校验（轻量 · evolution-03 机制 C）**：Step Mandatory 声明采用 [design-patterns.md](../references/design-patterns.md) 词条时，缺**触发症状**描述 → **blocker**；缺**强制选型句**（症状+理由+出处）→ **major**；词条与 shared-language §典故 **同义双挂**（如又登记神类止血）→ **blocker**；无验证实例仍推模式 → **major**（YAGNI）。无采用声明：须有字面 `本步不采用 design-patterns 词条`；缺句 → **major**。
 3.13 **分歧标注（轻量）**：Mandatory/方案声明「已启用分歧标注」时，缺视角名或缺 DA→KG 指针 → **major**；把单轮链写成「完整碰撞已做」→ **blocker**（[divergence-annotation.md](../references/divergence-annotation.md)）
 3.14 **完整碰撞（轻量）**：方案把碰撞写成默认 5–8x 或直到共识 → **blocker**（[collision-review.md](../references/collision-review.md)）。启用碰撞却同模型双链 / `resume` 同一对冒充异模型轮转 → **blocker**。把止损触顶/热度单独写成已启用碰撞（确认包未选用）→ **major**。轮 1 不引用共识地基、轮 2/3 重写分歧/方案、或把完整方案/Top 3 当短清单 → **major**。把第三条路当震荡不计票写成现行 → **major**。把旧「恰好 2 轮对称全量 + 第三窗再审」写成现行手续 → **major**。声称 diverge 小试点=完整碰撞：保持既有 **3.13 blocker**，禁止降为 major。
 3.15 **晋升闸文案（evolution-03-promote）**：晋升方案写「三重闸」却列四条 → **major**；假装 **gh** 已通 / 跨项目可跑 → **blocker**（[design-patterns.md](../references/design-patterns.md) §晋升闸）。
 3.16 **逆向总结典故（轻量）**：把归档总结写成「逆链已通过」→ **blocker**；把本机制产出写成自动入典（写入 shared-language / design-patterns 词条表，或热度满自动晋升）→ **blocker**；无改前三格仍补跑逆链（归档触发 `reverse-chain.md` 启用级手续，或新编 why）→ **blocker**（[reverse-allusion.md](../references/reverse-allusion.md)）。
+3.17 **模式沉淀（轻量）**（[pattern-harvest.md](../references/pattern-harvest.md)）：日常方案缺「模式沉淀」声明 → **不硬拦**（不因此 blocker / 不因此 major）。审查本机制页 / 本窗（pattern-harvest-flow）方案时，A# 须可证伪（触发表、禁止静默入表、表满停/进口诀、禁止第七岗）；缺可证伪失败句 → **major**。把模式沉淀写成第七岗 / 岗位路由新行 / `knowledge-harvest` 岗 → **blocker**。把模式沉淀写成可加第 7 行词条 → **blocker**。
 4. 有 blocker → 不得 `implementation-ready` / 可交给程序员=是；策划正确响应后可提醒提议 lessons 类型=`方案blocker`（须「准」，见 [lessons-learned.md](../references/lessons-learned.md)）
 5. **L1.5 触发**（CORE §Standard 加强审核）：每 Step 的 Regression Validation 须引用 project-context 回归索引对应行；plan-lite「方案审核档位」记 **L1.5**
 6. **L2 触发**（CORE §Standard 交叉审核）：跨 2+ 业务模块 → 档位 **L2**；**优先** Subagent 隔离（见 [isolated-review.md](../references/isolated-review.md)）；失败再提示手动新开；同 Chat 标 **「L2 非独立复核」**
