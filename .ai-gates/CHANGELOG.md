@@ -10,6 +10,8 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-15：README 首页「为什么值得下载」改为「特有机制」（交付/错题/任务路由/止损闭环；模型分档对照估算标非账单）；英文版同步补齐（Signature mechanisms / 分平台 Quickstart 表 / 工作流 mermaid / macOS pwsh 硬前提）；不 bump VERSION
+
 - 2026-08-15：电路子窗手续接线（Standard · Skill/Doc-only）：新建 circuit-windows.md；策划 ≥2 Step 强制串/并；3.06 缺边/假串联 major、相交并联 blocker；不 bump VERSION
 
 - 2026-08-15：归档签收 pattern-harvest-flow（用户「准+归档」：错题入主表+大纲；逆向总结典故卡已追加、不当新表/不转 pattern pending）；不 bump VERSION

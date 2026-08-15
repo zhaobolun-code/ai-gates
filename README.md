@@ -2,13 +2,16 @@
 
 **AI can ship bad code in seconds. ai-gates is a complete development pipeline: you just state the need, it runs the whole chain (judge → slice → plan → implement → review → accept) and hands you a test plan — you test it, and only then is it done.**
 
-### Why download it (30-second read)
+### Signature mechanisms
 
-- **Real gates, not prompt suggestions.** Writes without a fresh PM go-ahead, and dangerous git commands (e.g. `push --force`), are denied by hooks (verified on Codex CLI).
-- **Past failures raise the bar.** Modules that already broke are tracked; touching them again auto-escalates the lane and review tier (minimum Standard + L1.5).
-- **3-minute setup, cross-platform.** One `.ai-gates/` library shared by Cursor / Codex / Trae / Claude Code; new users can paste one prompt to install and start using — no need to learn lane concepts for daily use.
-- **Free (MIT), not a silver bullet — acceptance is yours.** AI can change code, but it cannot see whether the software actually behaves correctly — a log keyword ≠ fixed; every step passes your hands-on acceptance — it removes busywork, not human judgment.
-- **A full pipeline, not a gatekeeper.** planner writes the plan → developer writes the code → code-reviewer reviews → you accept — the pipeline produces the code, it does not just block you.
+A few that are rare elsewhere and already running here. Not a feature list.
+
+- **Delivery loop.** One folder per request; when done it must leave "in progress" (signed off / not passed). Replying `approve` = understanding + plan + one-shot go-ahead. Work gets closed out, not just its status word changed.
+- **Error-book loop.** A failed test auto-writes L0 → the fix drafts a pending card → your `approve` moves it into the main table → next planning round reads it → hitting it escalates the review tier. Failures become rules, not chat history.
+- **Task routing.** PM assigns a model per task — light edits take the cheapest tier, planning/implementation the normal tier, code review and acceptance the high tier. Cost comparison (not a bill; relative prices min 1 : normal 2 : high 8): a standard window (plan + plan review + implement + isolated CR + acceptance) costs ≈ 40 all-high vs ≈ 22 routed — roughly 40–50% less high-tier spend. Collision / reverse-chain default off, to avoid paying 2–3× plan review per window.
+- **Stop-loss loop.** The same approach failing repeatedly gets archived and re-routed — this path is closed, no endless micro-patches.
+
+Real gates (hooks deny), 3-minute setup, acceptance is yours — see Positioning and Quick Start below.
 
 ### Positioning: the project manager for AI coding
 
@@ -40,12 +43,33 @@ Install the ai-gates skill pack (AI development pipeline) into this project from
 Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
 ```
 
+**Per-platform quickstart (after install)**
+
+| Platform | How you start |
+| --- | --- |
+| **Cursor Agent** | New Agent-mode chat → paste "PM + request"; portals: `link-platform.ps1` / `.sh` |
+| **Codex CLI** | `codex` at the project root (trust the hooks) → same phrase; CLI-side hooks verified to actually deny |
+| **Codex desktop** | New session → trust project hooks → "PM + request"; `apply_patch` hooks may not fire → self-check `.ai-gates/hooks-log/` after writes |
+| **Trae** | New session → "PM + request"; rules + skill portals only, **no machine hooks** |
+| **Claude Code** | Session at the project root → approve hooks/MCP → "PM + request"; hooks machine-verified end-to-end 2026-08-10 |
+
 **The whole setup cost**: a short project note (stack, careful paths, a few must-test cases) — not an ongoing maintenance config; first-time setup / install & update / blocked-by-a-gate quick-ref: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (sectioned). Health check? Say `PM doctor`.
 What this is / why it is designed this way: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md); version and changes (current version per skills/VERSION): [CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md).
 
 ### Workflow: how one request goes through
 
 ai-gates governs process order: judge → slice → plan → implement → review → accept — every round is traceable, stoppable/reversible, and finishes with a close-out. Every request follows one main line; the lane only decides how heavy each step is. You only state what you need — the pipeline carries the rest through by role:
+
+```mermaid
+flowchart LR
+  A[Request] --> B["PM judges the lane"]
+  B --> C[Slice / A#]
+  C --> D["One-round confirm (approve)"]
+  D --> E[Implement]
+  E --> F[Isolated CR]
+  F --> G[You accept]
+  G --> H[Retrospective / close-out]
+```
 
 **Request → `[PM]` judges the lane → slice (what changes / what counts as done) → one-round confirmation (`approve`) → implement → isolated code review → acceptance → retrospective (failures go to the lessons book) → close-out**
 
@@ -76,7 +100,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Recovery phrases** | A reset phrase snaps a derailed session back into process; a rollback phrase reverts code through a confirmed `git checkout` |
 | **Roles** | PM dispatches planner / developer / CR / docs; main chat stays PM when possible |
 | **Subagents** | Prefer isolated sub-sessions for implement/review so the main chat stays PM-only—not one mega-thread |
-| **Model routing** | Reviews can use a stronger model than implementation (project-configurable)—not the same cheap model for both |
+| **Model routing** | Three-tier task routing: light edits take the cheapest tier, planning/implementation the normal tier, code review and acceptance the high tier (project-configurable)—not the same cheap model for both review and implementation |
 | **Windowed docs** | One task = one folder (plan / physical spec / evidence / done); status-classified |
 | **Physical spec** | Hard constraints + negative constraints + failure criteria (Standard/Full windows) |
 | **Blackboard** | Per-window repair log: what changed → why failed → do not repeat |
@@ -92,7 +116,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 - **Cross-platform (rules / skills / portals)**: rules are plain Markdown, other agents can adapt them; portal scripts ship in pairs — `link-platform.ps1` on Windows, `link-platform.sh` on macOS/Linux (plus `link-trae-skills.sh` for Trae) — all create `.cursor/*`, `.codex`, `.claude`, `.trae/skills`, `.trae/rules`.
 - **One `.ai-gates/` library for Cursor / Codex / Trae / Claude Code**; one `link-platform` run creates all the portals.
 - **Windows: full support.** The machine-enforced hooks (PM write gate, high-risk git deny, Unity compile hints — all PowerShell) are verified on codex-cli 0.146/0.147 and Claude Code (end-to-end machine-verified 2026-08-10); one-command install = Quick Start. Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
-- **macOS / Linux**: install, rules, skills, and portals fully supported; the machine hooks are currently PowerShell (`.ps1`) — run via pwsh or rely on the rule layer for now (stated honestly).
+- **macOS / Linux (hard prerequisite)**: install, rules, skills, and portals fully supported (`bash .ai-gates/link-platform.sh`). The machine-enforced hooks are **all `.ps1`** — for the denies to actually block, the machine must have **PowerShell 7+ (`pwsh`)** and the agent/hooks must be able to reach it; **no `pwsh` = rule layer only, hooks not wired** (do not claim machine gates are active). No bash hooks yet.
 - **Trae runs soft-layer only** (rules + skills portals, no machine hooks) — the gates still apply as instructions there, but enforcement is not machine-backed.
 - **Single-repo boundary**: gates are scoped to the current repository — cross-repo (multi-repo / microservices) changes are not covered by the machine layer; rely on team discipline there.
 
