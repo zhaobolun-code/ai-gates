@@ -4,11 +4,16 @@
 
 **当前 LTS**：v4.2.1（发布 · 电路子窗 + 模式沉淀 + 设计模式一问 · patch；前版 4.2.0 定版信息保留）
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
+格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
+**同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
 
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-08-16：错题本「疑问句只答不改文件」（Skill/流水线）；用户带问号只回答，明确要改才动文件。不 bump VERSION
+
+- 2026-08-16：README 标题定为「30 秒安装，3 分钟熟练」（安装与熟练拆开；同位置迭代改原条）；USER-GUIDE / METHODOLOGY 导航同步。不 bump VERSION
 
 - 2026-08-15：通用典故「一错不二犯」入 `shared-language.md` §典故（犯错不可怕，可怕的是重复同一错误；错题本记坑、典故记结构都为此）。不 bump VERSION
 

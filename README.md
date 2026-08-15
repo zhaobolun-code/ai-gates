@@ -11,7 +11,7 @@ A few that are rare elsewhere and already running here. Not a feature list.
 - **Task routing.** PM assigns a model per task — light edits take the cheapest tier, planning/implementation the normal tier, code review and acceptance the high tier. Cost comparison (not a bill; relative prices min 1 : normal 2 : high 8): a standard window (plan + plan review + implement + isolated CR + acceptance) costs ≈ 40 all-high vs ≈ 22 routed — roughly 40–50% less high-tier spend. Collision / reverse-chain default off, to avoid paying 2–3× plan review per window.
 - **Stop-loss loop.** The same approach failing repeatedly gets archived and re-routed — this path is closed, no endless micro-patches.
 
-Real gates (hooks deny), 3-minute setup, acceptance is yours — see Positioning and Quick Start below.
+Real gates (hooks deny), 30-second install / 3-minute fluency, acceptance is yours — see Positioning and "30-second install, 3-minute fluency" below.
 
 ### Positioning: the project manager for AI coding
 
@@ -29,7 +29,9 @@ Typical failure modes when AI edits complex systems directly, and the mechanism 
 | The same issue patched over and over, getting messier | Stop-loss chain (forced re-scoping, no same path again) |
 | Special-casing to pass the current demo | Physical constraints (no special-casing for specific scenarios) |
 
-### Get it (3 minutes)
+### 30-second install, 3-minute fluency
+
+Option A hands the install to a single paste; once installed you don't need to memorize the mechanism table. Daily use is just three steps: state the need, reply `approve`, test as prompted.
 
 **Option A (recommended, zero manual steps):** paste the whole block below into any file-editing agent window (Cursor **Agent** / Codex / Trae / Claude Code):
 
@@ -115,7 +117,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 
 - **Cross-platform (rules / skills / portals)**: rules are plain Markdown, other agents can adapt them; portal scripts ship in pairs — `link-platform.ps1` on Windows, `link-platform.sh` on macOS/Linux (plus `link-trae-skills.sh` for Trae) — all create `.cursor/*`, `.codex`, `.claude`, `.trae/skills`, `.trae/rules`.
 - **One `.ai-gates/` library for Cursor / Codex / Trae / Claude Code**; one `link-platform` run creates all the portals.
-- **Windows: full support.** The machine-enforced hooks (PM write gate, high-risk git deny, Unity compile hints — all PowerShell) are verified on codex-cli 0.146/0.147 and Claude Code (end-to-end machine-verified 2026-08-10); one-command install = Quick Start. Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
+- **Windows: full support.** The machine-enforced hooks (PM write gate, high-risk git deny, Unity compile hints — all PowerShell) are verified on codex-cli 0.146/0.147 and Claude Code (end-to-end machine-verified 2026-08-10); one-command install = "30-second install, 3-minute fluency". Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
 - **macOS / Linux (hard prerequisite)**: install, rules, skills, and portals fully supported (`bash .ai-gates/link-platform.sh`). The machine-enforced hooks are **all `.ps1`** — for the denies to actually block, the machine must have **PowerShell 7+ (`pwsh`)** and the agent/hooks must be able to reach it; **no `pwsh` = rule layer only, hooks not wired** (do not claim machine gates are active). No bash hooks yet.
 - **Trae runs soft-layer only** (rules + skills portals, no machine hooks) — the gates still apply as instructions there, but enforcement is not machine-backed.
 - **Single-repo boundary**: gates are scoped to the current repository — cross-repo (multi-repo / microservices) changes are not covered by the machine layer; rely on team discipline there.
@@ -143,7 +145,7 @@ Everything else runs through the pipeline by role. What it does inside vs. what 
 | Retrospective, failures into the error book | draft auto; reply "approve" when asked |
 | Close-out: sign off, move the folder | you say "pass" and it is done |
 
-The mechanism table is **guardrail reference**, not a checklist to memorize before coding; the assistant runs the gates. Blocked? The deny message carries its own escape steps; full quick-reference: the USER-GUIDE link in "Get it" above.
+The mechanism table is **guardrail reference**, not a checklist to memorize before coding; the assistant runs the gates. Blocked? The deny message carries its own escape steps; full quick-reference: the USER-GUIDE link in "30-second install, 3-minute fluency" above.
 
 ---
 

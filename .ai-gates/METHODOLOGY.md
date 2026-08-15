@@ -196,8 +196,8 @@
 
 ## 阅读顺序
 
-1. [README.md](./README.md)（30 秒看懂 + 安装）
-2. [USER-GUIDE.md](./USER-GUIDE.md)（3 分钟上手）
+1. [README.md](./README.md)（30 秒安装）
+2. [USER-GUIDE.md](./USER-GUIDE.md)（3 分钟熟练）
 3. 需要深挖「为什么这么设计」时再读本文
 
 入口：说明要解决什么或看到什么现象。新项目第一次：先做项目说明初始化。
