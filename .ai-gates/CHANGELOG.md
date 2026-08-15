@@ -10,6 +10,14 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-15：通用典故「一错不二犯」入 `shared-language.md` §典故（犯错不可怕，可怕的是重复同一错误；错题本记坑、典故记结构都为此）。不 bump VERSION
+
+- 2026-08-15：错题本/典故目的句：犯错不可怕，可怕的是一直犯同一个错误；两套表都为此而写（lessons-learned / pattern-harvest / README / METHODOLOGY）。不 bump VERSION
+
+- 2026-08-15：沉淀四格（典故×错题 × 通用×项目）写入 pattern-harvest / lessons-learned；Skill 自进化=项目格抽象升通用格（机制 B / 晋升闸）；最终目标=用户上传 GitHub 项目典故与错题本 → 抽象通用级 → 下发 Skill；本地 collect-queue 已签收、gh 未接线不可实施。不 bump VERSION
+
+- 2026-08-15：通用典故 vs 项目典故分界（Skill/Doc）：通用典故须抽象到系统架构层（决策层/真源/对照/重设计），禁止以本仓窗号/场景当压缩包主体，落 `shared-language.md` §典故；项目典故仍为 design-patterns / 项目口诀（本仓实际问题，手续不变）。新登记「改坏即错刀」「连败先问重设计」。不 bump VERSION
+
 - 2026-08-15：README 首页「为什么值得下载」改为「特有机制」（交付/错题/任务路由/止损闭环；模型分档对照估算标非账单）；英文版同步补齐（Signature mechanisms / 分平台 Quickstart 表 / 工作流 mermaid / macOS pwsh 硬前提）；不 bump VERSION
 
 - 2026-08-15：电路子窗手续接线（Standard · Skill/Doc-only）：新建 circuit-windows.md；策划 ≥2 Step 强制串/并；3.06 缺边/假串联 major、相交并联 blocker；不 bump VERSION

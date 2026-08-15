@@ -1,6 +1,6 @@
 # 设计模式症状/结构表
 
-> **设计模式症状/结构表**：登记可复用结构的症状、结构与本仓验证实例。流程/架构共识词（神类止血、复用四问、双轴、深模块）见 [shared-language.md](./shared-language.md) §典故——**禁止同义双挂**。
+> **设计模式症状/结构表**：登记可复用结构的症状、结构与本仓验证实例（**项目典故**）。流程/架构共识词（神类止血、复用四问、双轴、深模块、改坏即错刀、连败先问重设计、一错不二犯）见 [shared-language.md](./shared-language.md) §典故（**通用典故**须架构层抽象，禁止以本仓窗号当压缩包主体）——**禁止同义双挂**。
 
 ## 对仓压缩
 
@@ -44,4 +44,4 @@
 3. **禁用边界必填**：五字段「禁用边界」非空。
 4. **无争议 + 用户「准」**：方案审/CR 无 blocker 后用户「准」才改 skill 级词条。
 
-**跨项目 ≥2**：依赖收集仓同典故词在 ≥2 项目队列出现（depends-on [collect-queue.md](./collect-queue.md) / 窗 `evolution-01-collect`）。本地队列**已签收**；**gh 未接线** → 本条规则可写、**不可实施**。
+**跨项目 ≥2**：依赖收集仓同典故词在 ≥2 项目队列出现（depends-on [collect-queue.md](./collect-queue.md) / 窗 `evolution-01-collect`）。本地队列**已签收**；**gh 未接线** → 本条规则可写、**不可实施**。Skill 自进化最终目标（上传 GitHub → 抽象通用级 → 下发 Skill）见 [pattern-harvest.md](./pattern-harvest.md) §Skill 自进化，同样未接线。

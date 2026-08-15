@@ -1,11 +1,12 @@
 # 模式沉淀（入表手续）
 
 > **模式沉淀**。定位=**错题本同构的入表手续**，显式 **不是岗**。岗位路由表不加行。**禁止** `knowledge-harvest` 岗 / **第七岗**。
+> **目的**：见通用典故 **一错不二犯**。典故把已验证的结构/共识压成一词，提词即唤起。错题本记坑、典故记结构，都为此。
 > **加载本文件 ≠ 静默入表。**
 
 ## 准全自动（硬）
 
-触发时**自动**起草 pending；主窗只问「准否」；写入 `design-patterns.md` 词条一行或口诀进 `.cursor/project-context.md` **须「准」**。**禁止静默入表**。**不准默认超时入库**。
+触发时**自动**起草 pending；主窗只问「准否」；写入 `design-patterns.md`（**项目典故**）或 `shared-language.md` §典故（**通用典故**）或项目口诀 **须「准」**。**禁止静默入表**。**不准默认超时入库**。
 
 ```text
 可复用结构 + 对仓三档=有真锚点
@@ -27,7 +28,7 @@
 | --- | --- |
 | 机制说明（本文件） | `skills/references/pattern-harvest.md` |
 | 待准 | 方案夹 `证据/_pattern-pending.md`（模板 → [pattern-pending.md](../templates/pattern-pending.md)） |
-| 主表 | `design-patterns.md` 词条一行 **或** 口诀进 `.cursor/project-context.md`（不占表） |
+| 主表 | **项目典故**：`design-patterns.md` 词条 或 `.cursor/project-context.md` 项目口诀。**通用典故**：`shared-language.md` §典故（架构层，禁本仓窗号当压缩包主体） |
 
 **禁止塞进 `_lesson-pending.md`**（那边强制 cause/fix，五格对不上，`commit-lesson-pending.ps1` 会拒）。
 
@@ -41,6 +42,30 @@
 | 归档逆向总结卡已有本仓锚点 → 转一份 pattern pending，不重复压卡 | 主窗 PM（结案同条；不改 reverse-allusion 压卡手续） |
 
 **不起草**：无锚点 / 误匹配 / 与现有词条同义；表已满 6 行**且**也进不了口诀/典故；Express、空闲枢纽（与 reverse-allusion 一样默认不跑）。
+
+## 四格（正交 · 禁止混挂）
+
+两套分界正交：**典故 ≠ 错题本**，**通用 ≠ 项目**。同一事实只进一格。
+
+| | **典故**（可复用结构 / 共识） | **错题本**（坑：错因 + 改正） |
+| --- | --- | --- |
+| **通用** | 架构层，禁本仓窗号/场景当压缩包主体。落 `shared-language.md` §典故 | 未晋升：项目主表大纲桶「Skill / 流水线」。晋升后：`anti-patterns.md`（[lessons-learned.md](./lessons-learned.md) 机制 B） |
+| **项目** | 本仓实际结构或口诀。落 `design-patterns.md` 或 project-context 项目口诀 | `.ai-gates/lessons-learned.md` 业务桶（如「压力 / 门闸与传质」） |
+
+`destination`：`design-patterns` / `maxim`（项目典故·口诀）/ `maxim-generic`（通用典故）/ `allusion`。pending 的本仓验证只作证据，**不**写进通用压缩包。
+
+## Skill 自进化（目标 / 现状）
+
+Skill 自进化靠把项目格**抽象**成通用级典故和错题本，不是再开岗、也不是把项目坑直接抄进 Skill。
+
+```text
+本仓已有：项目格沉淀 →「准」入表 → 去上下文化（机制 B / 晋升闸）→「准」升通用格
+最终目标：用户把项目典故 + 项目错题本上传 GitHub 收集仓
+         → 抽象成通用级典故和错题本
+         → 下发到用户 Skill
+```
+
+**现状**：本地 [collect-queue.md](./collect-queue.md) 已签收；**gh 未接线** → 上传 / 跨机下发 **不可实施**。禁止写「gh 已通 / 已自进化下发」。禁止第七岗。不新建通用错题主表文件（晋升前共用项目主表对应桶）。
 
 ## 表满
 
@@ -69,6 +94,7 @@
 | 「表满了先加第 7 行」 | 禁止；停或进口诀 |
 | 「自动起草=自动入表」 | 禁止静默入表 |
 | 「点名模式沉淀就是启用逆链」 | 正交，本窗不启用逆链 |
+| 「gh 已通 / 已自进化下发」 | 本地 collect-queue 已签收；gh 未接线不可实施 |
 
 ## 禁止
 
@@ -79,3 +105,4 @@
 - bump VERSION。
 - 写「逆链已通过」。
 - 把五格塞进 `_lesson-pending.md`。
+- 写「gh 已接线 / 已自进化下发」。
