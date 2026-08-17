@@ -1,6 +1,6 @@
 # 收集仓（本地 shareable 队列）
 
-> evolution-01 机制 C **本地默认**。原 gh issues 收集仓方案**未在本仓验证**，禁止写成已接线。跨项目闸（evolution-03-promote）depends-on 本机制落地，未通前禁止假装已通。
+> evolution-01 机制 C **本地默认**。gh 出口：**本机可探测；禁止包级已通**。跨项目闸（evolution-03-promote）depends-on 本机制落地，未通前禁止假装已通。
 
 ## 定位
 
@@ -32,19 +32,65 @@
 
 人工提名，或 01-B 候选经**用户确认**后写入。禁止扫主表 / `evolution-candidates.yaml` 自动入仓。禁止「准」自动入仓。
 
+**本地环**：项目格已「准」条目 → 去上下文化（去掉本仓窗号/场景名/模块专名）→ 写入默认载体 `.ai-gates/collect-queue.md` 且 `state=shareable` → 抽象成通用级草稿仍停在队列 → 仍须用户「准」才入通用格。三态 `draft/shareable/promoted` 不变。写入 `shareable` 后抽象草稿停队列；入通用格须另一次「准」。禁止第二套队列页。
+
 ## gh（可选，非默认）
 
 1. 探测：`gh auth status`（及 `gh --version`）。
-2. 仅 exit 0 时，**可**写「本机可选用 gh issue 作跨机出口」。
-3. 探测失败或未跑：**禁止**出现「gh 已接线」陈述。
-4. **禁止**把「准」映射为 `gh issue create`。建 issue 须单独用户口令（≠「准」）。
+2. 仅 exit 0 时，可写「本机可选用 gh」；主通道为 **PR** 到收集仓；issue 仅草稿讨论，不是主上传通道。
+3. 探测失败或未跑：**禁止**出现「gh 已接线/已通/已下发」陈述。
+4. Chemical「准」不触发 `gh pr create` 与 `gh issue create`、不自动入仓。建 PR / 贴 issue 草稿须独立口令「上传」（≠「准」）。缺探测成功 → 不得开 PR；本地队列照常。
 
-本窗未将探测成功作为落地前提；默认出口始终是本地队列。
+须钉死的默认决策：
+
+```text
+默认载体仍是 .ai-gates/collect-queue.md
+本机 gh auth status 仅 exit 0 时，可把 shareable 行去上下文化后，
+按独立口令「上传」以 PR 写入收集仓（fork → 按模板建条目文件 → PR）
+默认仓：zhaobolun-code/ai-gates-collect
+  https://github.com/zhaobolun-code/ai-gates-collect
+目录：典故/（项目典故）+ 错题本/（项目错题）
+模板：templates/典故-条目.md 、 templates/错题本-条目.md
+一条一文件；文件名=标题；去上下文化（禁窗号/场景名/文件路径/内部编号）
+合并 = 审查（收集仓侧审查，≠ Chemical「准」）
+main 受保护：禁直接改/删 main、禁 force push
+issue 仅可贴草稿讨论，不是主上传通道
+Chemical「准」不触发 gh pr create / gh issue create、不自动入仓
+缺探测成功 → 不得开 PR；本地队列照常
+禁止 cron；禁止自动扫主表开 PR
+zhaobolun-code/ai-gates 仍是技能包真源，不是收集仓默认
+下发 = 「项目经理 升级 ai-gates」拉 zhaobolun-code/ai-gates（不是拉 collect 仓，不是再开 PR）
+收集仓合并 ≠ 已下发
+入通用格须另「准」
+```
+
+本窗未将探测成功作为落地前提；默认出口始终是本地队列。本窗**不**执行 `gh pr create` / `gh issue create` / `gh repo create`。
+
+### 附录：日后「上传」命令示例（仅独立口令才跑；本窗不跑）
+
+独立口令「上传」且 `gh auth status` exit 0 时，可按收集仓 README 开 **pull request**。下列仅为示例，**仅独立口令才跑；本窗不跑**：
+
+```bash
+gh auth status
+# fork 后按 templates/ 建一条一文件，再：
+# gh pr create --repo zhaobolun-code/ai-gates-collect --title "..." --body "..."
+# issue 仅草稿讨论，不是主通道：勿把 gh issue create 当上传。
+```
+
+## Skill 自进化（回传 = 升级拉包）
+
+最终：用户上传 GitHub（项目典故 + 项目错题本）→ 抽象成通用级 → 下发到用户 Skill。四格与本仓抽象路径见 [pattern-harvest.md](./pattern-harvest.md) §Skill 自进化。回传=升级拉包：下发=「项目经理 升级 ai-gates」（=`PM upgrade ai-gates`）拉 `zhaobolun-code/ai-gates`，不是拉 collect 仓。收集仓合并 ≠ 已下发。入通用格须另「准」。本页只提供本地 shareable 队列；**跨机仍须探测**；上传=collect PR。「准」不开 PR。禁止平行 `github-collect.md`。未验证 `gh auth status` 成功时禁止「gh 已接线/已通/已下发」。
+
+本地环到 `shareable` + 抽象草稿为止；「准」才入通用格。禁止把「准」写成自动入仓或自动写入 `shared-language.md` §典故 / `anti-patterns.md` 的触发器。
 
 ## 禁止
 
 - 平行第二套队列
 - lessons pending 混表
 - cron 同步 GitHub
-- 未限定探测成功的句子里写「gh 已接线」
-- 把「准」写成 `gh issue create` 或自动入仓触发器
+- 未限定探测成功的句子里写「gh 已接线/已通/已下发」
+- 把「准」写成 `gh pr create` / `gh issue create` 或自动入仓触发器
+- 把 `zhaobolun-code/ai-gates` 当收集仓默认（该仓仅技能包真源）
+- 本窗执行 `gh repo create`
+- 平行 `github-collect.md`
+- 把下发写成拉 collect 仓

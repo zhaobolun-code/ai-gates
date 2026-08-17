@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.2.1（发布 · 电路子窗 + 模式沉淀 + 设计模式一问 · patch；前版 4.2.0 定版信息保留）
+**当前 LTS**：v4.2.2（发布 · 收集闭环回传（evolution-04/05/06）+ 3 条反模式升通用格 + 接入口径改写 · patch；前版 4.2.1 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -11,7 +11,14 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-17：人工提名升通用格：`anti-patterns.md` 补疑问句只答不改文件 / 收集仓走 PR（「准」≠「上传」）/ 下发=升级拉真源（收集仓合并≠已下发）；`shared-language.md` §典故补「入表不是岗」。不 bump VERSION。不是官方包下发。
+
+- 2026-08-17：evolution-06-skill-return Skill 回传（项目侧收包）：回传=升级拉 `ai-gates` 真源（口令「项目经理 升级 ai-gates」/ `PM upgrade ai-gates`）；收集仓合并不等于项目已收到包；入通用格须另「准」。不 bump VERSION
+
+- 2026-08-17：evolution-05-gh-collect GitHub 收集仓（可选 gh 出口，用户「归档」签收）：collect-queue §gh 加厚默认仓 `zhaobolun-code/ai-gates-collect`、上传通道 PR、「准」不开 PR；本机可探测、未探测成功禁止自称已通。收集仓 PR #1 已合并（两条错题）。禁止包级自称已下发。不 bump VERSION
+
 - 2026-08-17：接入口径正面改写（README / USER-GUIDE / METHODOLOGY）：开工=「项目经理 初始化」；碰撞/逆链写点名才启用、不纳入车道；评价段去掉「不成立」。不 bump VERSION
+
 
 - 2026-08-17：evolution-04-local-loop 本地自进化环（第一段可跑，用户「归档」签收）：手续页加厚去上下文化→shareable→抽象→「准」才入通用格；planner/developer/plan-reviewer 接线；本机队列 1 条 shareable 演练。不 bump VERSION。gh 未接线不可实施上传/下发。
 
@@ -120,6 +127,29 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [4.2.2] - 2026-08-17（收集闭环回传 + 3 条反模式升通用格 + evolution-04/05/06 · patch · 发布）
+
+### Included changes — 2026-08-17（升通用格 + 收集/回传机制 + 接入口径 · 不 bump）
+
+- **人工提名升通用格**：`anti-patterns.md` 补疑问句只答不改文件 / 收集仓走 PR（「准」≠「上传」）/ 下发=升级拉真源（收集仓合并≠已下发）；`shared-language.md` §典故补「入表不是岗」。
+- **evolution-06-skill-return Skill 回传（项目侧收包）**：回传=升级拉 `ai-gates` 真源（口令「项目经理 升级 ai-gates」/ `PM upgrade ai-gates`）；收集仓合并不等于项目已收到包；入通用格须另「准」。
+- **evolution-05-gh-collect GitHub 收集仓（可选 gh 出口，用户「归档」签收）**：collect-queue §gh 加厚默认仓 `zhaobolun-code/ai-gates-collect`、上传通道 PR、「准」不开 PR；本机可探测、未探测成功禁止自称已通。收集仓 PR #1 已合并（两条错题）。禁止包级自称已下发。
+- **接入口径正面改写（README / USER-GUIDE / METHODOLOGY）**：开工=「项目经理 初始化」；碰撞/逆链写点名才启用、不纳入车道；评价段去掉「不成立」。
+- **evolution-04-local-loop 本地自进化环（第一段可跑，用户「归档」签收）**：手续页加厚去上下文化→shareable→抽象→「准」才入通用格；planner/developer/plan-reviewer 接线；本机队列 1 条 shareable 演练。gh 未接线不可实施上传/下发。
+
+### Included changes — 2026-08-16（错题本 + README 标题 · 不 bump）
+
+- **错题本「疑问句只答不改文件」（Skill/流水线）**：用户带问号只回答，明确要改才动文件。
+- **README 标题定为「30 秒安装，3 分钟熟练」**（安装与熟练拆开；同位置迭代改原条）；USER-GUIDE / METHODOLOGY 导航同步。
+
+### Included changes — 2026-08-15 晚（沉淀四格 + 典故分界 + 特有机制 · 不 bump）
+
+- **沉淀四格（典故×错题 × 通用×项目）写入 pattern-harvest / lessons-learned**；Skill 自进化=项目格抽象升通用格（机制 B / 晋升闸）；最终目标=用户上传 GitHub 项目典故与错题本 → 抽象通用级 → 下发 Skill；本地 collect-queue 已签收、gh 未接线不可实施。
+- **通用典故 vs 项目典故分界（Skill/Doc）**：通用典故须抽象到系统架构层（决策层/真源/对照/重设计），禁止以本仓窗号/场景当压缩包主体，落 `shared-language.md` §典故；项目典故仍为 design-patterns / 项目口诀。新登记「改坏即错刀」「连败先问重设计」。
+- **通用典故「一错不二犯」入 `shared-language.md` §典故**（犯错不可怕，可怕的是重复同一错误；错题本记坑、典故记结构都为此）。
+- **错题本/典故目的句**：犯错不可怕，可怕的是一直犯同一个错误；两套表都为此而写（lessons-learned / pattern-harvest / README / METHODOLOGY）。
+- **README 首页「为什么值得下载」改为「特有机制」**（交付/错题/任务路由/止损闭环；模型分档对照估算标非账单）；英文版同步补齐（Signature mechanisms / 分平台 Quickstart 表 / 工作流 mermaid / macOS pwsh 硬前提）。
 
 ## [4.2.1] - 2026-08-15（电路子窗 + 模式沉淀 + 设计模式一问 · patch · 发布）
 

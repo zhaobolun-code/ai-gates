@@ -65,7 +65,36 @@ Skill 自进化靠把项目格**抽象**成通用级典故和错题本，不是�
          → 下发到用户 Skill
 ```
 
-**现状**：本地 [collect-queue.md](./collect-queue.md) 已签收；**gh 未接线** → 上传 / 跨机下发 **不可实施**。禁止写「gh 已通 / 已自进化下发」。禁止第七岗。不新建通用错题主表文件（晋升前共用项目主表对应桶）。
+**本地环（可跑 · 不接 GitHub）**：
+
+```text
+项目格（已「准」的项目典故/错题）
+  → 去上下文化（去掉本仓窗号/场景名/模块专名）
+  → 写入本地收集仓 collect-queue，state=shareable
+  → 抽象成通用级典故/错题草稿
+  → 仍须用户「准」才入通用格（shared-language §典故 / anti-patterns.md）
+```
+
+**回传（项目侧收包）**：下发 = 「项目经理 升级 ai-gates」（=`PM upgrade ai-gates`）拉技能包真源仓 `zhaobolun-code/ai-gates`，不是拉 collect 仓，也不是再开 PR。
+
+```text
+收集仓合并（=审查）
+  → 维护者抽象进技能包真源仓 zhaobolun-code/ai-gates（通用典故/反模式）
+  → 各项目「项目经理 升级 ai-gates」（=`PM upgrade ai-gates`）拉回技能包
+下发 = 升级拉 ai-gates 真源仓，不是拉 collect 仓，也不是再开 PR
+收集仓合并 ≠ 已下发
+升级成功 ≠ 自动写入本仓 shared-language.md / anti-patterns.md 之外的项目表
+入本仓通用格若仍走本地环，须另「准」
+本页不实施维护者在 ai-gates 仓里的抽象合入
+跨机仍须探测；上传通道仍是 collect 仓 PR
+禁止包级自称「gh 已接线/已通/已下发」
+禁止第七岗；禁止第 7 行
+```
+
+**跨机仍须探测**：仅本机 `gh auth status` exit 0 时可选用 gh，按 [collect-queue.md](./collect-queue.md) §gh 以 **PR** 上传到 `zhaobolun-code/ai-gates-collect`；未探测成功则不得开 PR，本地队列照常。上传通道=collect 仓 PR。禁止包级自称「gh 已接线/已通/已下发」。禁止再写「往 ai-gates 开 issue」当上传通道。
+「准」不自动入仓、不自动写入通用格。禁止静默入通用格。禁止第七岗。禁止第 7 行。入通用格须另「准」。
+
+**现状**：本地 [collect-queue.md](./collect-queue.md) 已签收；**跨机仍须探测**。上传通道=collect 仓 PR（`zhaobolun-code/ai-gates-collect`）。回传=「项目经理 升级 ai-gates」拉 ai-gates 真源。下发=拉 ai-gates 真源。收集仓合并 ≠ 已下发。入通用格须另「准」。本页不实施维护者在 ai-gates 仓里的抽象合入。禁止包级自称已通。禁止第七岗。不新建通用错题主表文件（晋升前共用项目主表对应桶）。
 
 ## 表满
 
@@ -94,7 +123,7 @@ Skill 自进化靠把项目格**抽象**成通用级典故和错题本，不是�
 | 「表满了先加第 7 行」 | 禁止；停或进口诀 |
 | 「自动起草=自动入表」 | 禁止静默入表 |
 | 「点名模式沉淀就是启用逆链」 | 正交，本窗不启用逆链 |
-| 「gh 已通 / 已自进化下发」 | 本地 collect-queue 已签收；gh 未接线不可实施 |
+| 「gh 已通 / 已自进化下发」 | 禁止包级自称已通；跨机须探测；上传通道=collect 仓 PR；回传=升级拉 ai-gates；收集仓合并 ≠ 已下发 |
 
 ## 禁止
 
@@ -105,4 +134,5 @@ Skill 自进化靠把项目格**抽象**成通用级典故和错题本，不是�
 - bump VERSION。
 - 写「逆链已通过」。
 - 把五格塞进 `_lesson-pending.md`。
+- 未升级成功自称已下发。
 - 写「gh 已接线 / 已自进化下发」。

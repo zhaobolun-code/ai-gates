@@ -1,6 +1,7 @@
 # 经验沉淀 / 错题本（Lessons Learned）
 
-> 目的：把方案/CR blocker、运行时与自引入 bug、Skill 流程错，以及签收后的成功经验，沉淀成可复用的「一句话」，供策划/CR/开发检索避坑。
+> **目的**：见通用典故 **一错不二犯**。本表把坑写成可检索的错因+改正，下次策划必读。
+> 把方案/CR blocker、运行时与自引入 bug、Skill 流程错，以及签收后的成功经验，沉淀成可复用的「一句话」。
 > **准全自动**：L0 与待准 L1 **自动起草**；写入主表仍须用户/TL「准」。「准」≠根因已证。
 > **禁止**静默写主表。
 
@@ -9,11 +10,15 @@
 | 层 | 路径 |
 | --- | --- |
 | 机制说明（本文件） | `skills/references/lessons-learned.md` |
-| 项目 L1 主表 | 仓库根 `.ai-gates/lessons-learned.md`（模板 → [templates/lessons-learned.md](../templates/lessons-learned.md)） |
+| **项目错题** L1 主表 | 仓库根 `.ai-gates/lessons-learned.md`（模板 → [templates/lessons-learned.md](../templates/lessons-learned.md)）；业务大纲桶 |
+| **通用错题**（未晋升） | 同一主表大纲桶「Skill / 流水线」（不另建文件） |
+| **通用错题**（已晋升） | `anti-patterns.md`（机制 B；去上下文化；须「准」） |
 | **错题大纲** | 仓库根 `.ai-gates/lessons-outline.md`（模板 → [templates/lessons-outline.md](../templates/lessons-outline.md)） |
 | L0 草稿 | 方案夹 `未完成.md` → `## 错题 L0 草稿` |
 | **待准 L1** | 方案夹 `证据/_lesson-pending.md`（模板 → [templates/lesson-pending.md](../templates/lesson-pending.md)） |
 | 落表脚本 | `.cursor/scripts/commit-lesson-pending.ps1` |
+
+与典故正交：坑进本表；结构/共识走 [pattern-harvest.md](./pattern-harvest.md) 四格。禁止把错题行抄成典故词。Skill 自进化（项目错题抽象升通用错题 / 再下发 Skill）见 pattern-harvest §Skill 自进化；**gh 未接线不可实施**。
 
 ## 准全自动流程（强制）
 
@@ -113,14 +118,14 @@ powershell -ExecutionPolicy Bypass -File .cursor/scripts/commit-lesson-pending.p
 
 - **三态判据（三表统一）**：高频 → 升级候选（机制 B：近 90 天 ≥2 次命中 且 最近命中 ≤30 天）；稳定 → 维持（近 6 个月有命中且未达升级资格）；低触发 → 降级（近 6 个月无命中 且 非本轮）
 - **降级动作（错题表）**：标 `[低活跃]` 退出必读范围、**留档不删**（「最近命中」> 6 个月且非本轮 → 可标 `[低活跃]`，须人工确认；过期写「已废弃：原因」）
-- **升级候选流程（机制 B）**：① 机器候选（`scripts/compute-evolution-candidates.ps1`：近 90 天 ≥2 次命中 且 最近命中 ≤30 天 且 晋升列为空）或维护者人工提名 → ② 维护者整理抽象（去上下文化 / 压缩词条 / 补禁用边界）→ ③ 用户「准」→ ④ 升 skill 级（`anti-patterns.md` 条目或 `shared-language.md` 典故词条）→ ⑤ 主表「晋升」列标记（`已晋升…`）。候选≠已确认：机器候选须人工确认留痕；同族错误不重复计数
+- **升级候选流程（机制 B）**：① 机器候选（`scripts/compute-evolution-candidates.ps1`：近 90 天 ≥2 次命中 且 最近命中 ≤30 天 且 晋升列为空）或维护者人工提名 → ② 维护者整理抽象（去上下文化 / 压缩词条 / 补禁用边界）→ ③ 用户「准」→ ④ 升 **通用级**（错题 → `anti-patterns.md`；共识结构 → `shared-language.md` 典故）→ ⑤ 主表「晋升」列标记（`已晋升…`）。候选≠已确认：机器候选须人工确认留痕；同族错误不重复计数。跨机上传/下发见 [pattern-harvest.md](./pattern-harvest.md) §Skill 自进化（gh 未通则不可实施）。
 - **只增不删**；过期写「已废弃：原因」
 
 ## 边界
 
 | 机制 | 边界 |
 | --- | --- |
-| `anti-patterns.md` | 团队级通用；本表项目具体 |
+| `anti-patterns.md` | **通用错题**（已晋升）；本表 **项目错题** |
 | review-dispatch | 管本次 revision；本表跨轮避坑 |
 | Auto / 子窗 | 不削弱「准」；pending 由主窗 PM 问准 |
 | diagnosis-gates | 测挂自动 L0；不自动 L1 |

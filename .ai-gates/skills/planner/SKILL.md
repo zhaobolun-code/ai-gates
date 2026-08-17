@@ -53,6 +53,9 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 4.10 **归档总结（逆向总结典故）**：归档总结默认**不在执行中跑**；仅结案归档（`completed`/失败封存+migrate）且有改前选型三格才触发；无三格跳过；空闲枢纽迁签收不跑；**禁止与 4.09 逆链混称**。点名 [reverse-allusion.md](../references/reverse-allusion.md)。
 4.11 **模式沉淀**（生产侧）。可晋升时（签收/`runtime-validated` 抽出可复用结构且对仓三档=有真锚点；CR 发现未入表真锚点；用户点名「模式沉淀」；归档逆向总结卡已有本仓锚点）**自动**落 `证据/_pattern-pending.md`；主窗只问「准否」；禁止静默入表；禁止塞进 `_lesson-pending.md`。Express / 空闲枢纽默认不跑。不是岗。点名 [pattern-harvest.md](../references/pattern-harvest.md)。
 4.12 **电路子窗**。写 ≥2 Step 契约前答电路一问；能并则并；阻塞边必填「串联 / 并联」+ 路径集。单 Step / Express / Direct 对话内切片：字面 `无（单步·不跑电路）`。不是岗。点名 [circuit-windows.md](../references/circuit-windows.md)。
+4.13 **本地自进化环**。项目格已「准」→ 去上下文化 → collect-queue `shareable` → 抽象 → 须「准」才入通用格。禁止静默入通用格。未验证 `gh auth status` 成功时禁止方案写「gh 已接线/已通/已下发」。不是岗。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化。
+4.14 **GitHub 收集仓**。默认本地队列（[collect-queue.md](../references/collect-queue.md) §gh）；本机 `gh auth status` exit 0 时可选用 gh；默认仓 `zhaobolun-code/ai-gates-collect`；上传通道 **PR**。「准」不触发 `gh pr create` / `gh issue create`。未探测成功禁止方案写「gh 已接线/已通/已下发」。不是岗。回传手续见 4.15。
+4.15 **Skill 回传**。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化：下发=「项目经理 升级 ai-gates」或 `PM upgrade ai-gates` 拉 `zhaobolun-code/ai-gates`，不是拉 collect 仓、不是再开 PR；收集仓合并 ≠ 已下发；入通用格须另「准」。不是岗。本窗不执行升级、不执行 gh create。
 4.5 **复核派发工件**：交方案审前按 [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md) + 模板生成/刷新 `证据/_方案审核派发.md`（`mode=plan`）；blocker 修订后重算 revision、去重回归项≤20 行、L3 清零并重生第1轮；第1→2 转场见 handoff §I（Checker 无写权）
 5. 「文档状态」：`draft` → `review-pending` → 过审发确认包 →「准」后 ready 并同条开始改码（[handoff-automation.md](../references/handoff-automation.md) §0/§F）
 6. 禁止「考虑」「待定」— 转默认决策或 blocker
