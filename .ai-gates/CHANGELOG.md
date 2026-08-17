@@ -11,6 +11,10 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-17：接入口径正面改写（README / USER-GUIDE / METHODOLOGY）：开工=「项目经理 初始化」；碰撞/逆链写点名才启用、不纳入车道；评价段去掉「不成立」。不 bump VERSION
+
+- 2026-08-17：evolution-04-local-loop 本地自进化环（第一段可跑，用户「归档」签收）：手续页加厚去上下文化→shareable→抽象→「准」才入通用格；planner/developer/plan-reviewer 接线；本机队列 1 条 shareable 演练。不 bump VERSION。gh 未接线不可实施上传/下发。
+
 - 2026-08-16：错题本「疑问句只答不改文件」（Skill/流水线）；用户带问号只回答，明确要改才动文件。不 bump VERSION
 
 - 2026-08-16：README 标题定为「30 秒安装，3 分钟熟练」（安装与熟练拆开；同位置迭代改原条）；USER-GUIDE / METHODOLOGY 导航同步。不 bump VERSION

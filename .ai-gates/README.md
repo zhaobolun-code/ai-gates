@@ -8,10 +8,10 @@
 
 - **交付闭环**：每个需求一个文件夹；结束必须离开「进行中」（签收 / 未通过）。回「准」= 理解 + 方案 + 开工一次确认。做完能收尾，不能只改状态字。
 - **错题闭环**：见通用典故「一错不二犯」。测挂自动写 L0 → 修好起草 pending → 你回「准」才进主表 → 下次策划必读 → 命中就升审核档。失败变成规则，不是聊天记录。典故把已验证的做法压成一词，同一结构坑不再重讲。
-- **任务路由**：PM 按任务派模型——轻改走最低档，策划/实现走普通档，代码审和验收才上高级档。对照估算（非账单；相对价最低 1 ∶ 普通 2 ∶ 高级 8）：一条标准窗（策划+方案审+实现+隔离 CR+验收）全用高级档约 40，按路由约 22，大约少花四五成高级档费用。碰撞/逆链默认关，避免每窗付 2–3 倍方案审。
+- **任务路由**：PM 按任务派模型——轻改走最低档，策划/实现走普通档，代码审和验收才上高级档。对照估算（非账单；相对价最低 1 ∶ 普通 2 ∶ 高级 8）：一条标准窗（策划+方案审+实现+隔离 CR+验收）全用高级档约 40，按路由约 22，大约少花四五成高级档费用。思考碰撞 / 逆链是非常规手续，点名才启用，不纳入车道，不计日常窗成本。
 - **止损闭环**：同一手法反复失败就封存换路，记下此路不通，不无限小补丁。
 
-真门禁（hooks 会 deny）、30 秒安装 3 分钟熟练、验收权在你——见下方定位与「30 秒安装，3 分钟熟练」。
+规则层全平台可用；机器 hooks 会 deny 的范围见下方「平台」。30 秒安装 3 分钟熟练、验收权在你。
 
 ## 定位：AI 编码的项目经理
 
@@ -42,7 +42,7 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 - 取最新 release tag，克隆/下载到临时目录；校验根目录有 .ai-gates/ 且 skills/VERSION 是合法 x.y.z 并等于该 tag，不符就停下。
 - 把临时 .ai-gates/ 的 skills/hooks/scripts/rules/codex、根文档、hooks.json、link-platform.*、LICENSE 复制到项目根 .ai-gates/；若已装过，先比对版本，仅更新时替换，保留 project-context、mcp.json、hooks-log、tmp、verify、regression-*、pipeline-* 等项目状态。
 - 运行 link-platform.ps1（Unix 用 .sh）建传送门，写 install-info.json。
-- 运行 pm-init.ps1 引导我填项目说明（技术栈、要小心的目录、必测场景），生成 .cursor/project-context.md。
+- 运行 pm-init.ps1；说「项目经理 初始化」即可开工（回归索引可后补），生成 .cursor/project-context.md。
 - 完成后报告版本与传送门状态，并告诉我以后用「项目经理 + 需求」入口。
 动手前先列计划等我确认；失败或网络问题不要改文件，给出手动下载方案。
 ```
@@ -57,7 +57,7 @@ AI 直接改复杂系统的典型困境，以及对应的机制：
 | **Trae** | 新开会话 →「项目经理 + 需求」；仅规则+技能传送门，**无机器 hooks** |
 | **Claude Code** | 项目根会话 → 批准 hooks/MCP →「项目经理 + 需求」；hooks 2026-08-10 已真机确证 |
 
-**接入成本**：填一份短 `project-context`（技术栈、要小心的目录、几条必测）。详解 / 被拦了怎么办 → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md)。体检：`项目经理 检查健康`。设计原因：[METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)；变更：[CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)。
+**接入**：新仓库说一句 `项目经理 初始化`。助手生成项目说明、探测技术栈；回归索引可后补，不填也能开工。CodeGraph 可选。详解 / 被拦了怎么办 → [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md)。体检：`项目经理 检查健康`。设计原因：[METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md)；变更：[CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)。
 
 ## 工作流：一个需求怎么走完
 
@@ -126,7 +126,7 @@ flowchart LR
 ## 前提
 
 - 任一能改文件的 Agent 会话（Agent 与系统平台支持范围见上「平台」）
-- 一次初始化 + 短 `project-context` / 测试清单（包**不含**别人的业务窗与 CHANGELOG）
+- 一次 `项目经理 初始化`（回归索引可后补；包**不含**别人的业务窗与 CHANGELOG）
 
 ## 你只需要做三件事
 

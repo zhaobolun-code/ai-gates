@@ -8,10 +8,10 @@ A few that are rare elsewhere and already running here. Not a feature list.
 
 - **Delivery loop.** One folder per request; when done it must leave "in progress" (signed off / not passed). Replying `approve` = understanding + plan + one-shot go-ahead. Work gets closed out, not just its status word changed.
 - **Error-book loop.** A failed test auto-writes L0 → the fix drafts a pending card → your `approve` moves it into the main table → next planning round reads it → hitting it escalates the review tier. Failures become rules, not chat history.
-- **Task routing.** PM assigns a model per task — light edits take the cheapest tier, planning/implementation the normal tier, code review and acceptance the high tier. Cost comparison (not a bill; relative prices min 1 : normal 2 : high 8): a standard window (plan + plan review + implement + isolated CR + acceptance) costs ≈ 40 all-high vs ≈ 22 routed — roughly 40–50% less high-tier spend. Collision / reverse-chain default off, to avoid paying 2–3× plan review per window.
+- **Task routing.** PM assigns a model per task — light edits take the cheapest tier, planning/implementation the normal tier, code review and acceptance the high tier. Cost comparison (not a bill; relative prices min 1 : normal 2 : high 8): a standard window (plan + plan review + implement + isolated CR + acceptance) costs ≈ 40 all-high vs ≈ 22 routed — roughly 40–50% less high-tier spend. Collision / reverse-chain are exceptional procedures — enabled only when named, not part of the lanes, not counted in daily window cost.
 - **Stop-loss loop.** The same approach failing repeatedly gets archived and re-routed — this path is closed, no endless micro-patches.
 
-Real gates (hooks deny), 30-second install / 3-minute fluency, acceptance is yours — see Positioning and "30-second install, 3-minute fluency" below.
+The rule layer works on every platform; the range that machine hooks actually deny is covered under Platform below. 30-second install / 3-minute fluency, acceptance is yours.
 
 ### Positioning: the project manager for AI coding
 
@@ -40,7 +40,7 @@ Install the ai-gates skill pack (AI development pipeline) into this project from
 - Take the latest release tag, clone/download it to a temp dir; validate that the root contains `.ai-gates/` and `skills/VERSION` is a valid x.y.z equal to that tag — otherwise stop.
 - Copy `.ai-gates/` contents (skills/hooks/scripts/rules/codex, root docs, hooks.json, link-platform.*, LICENSE) into the project root `.ai-gates/`; if already installed, compare versions and replace only when newer, preserving project state (project-context, mcp.json, hooks-log, tmp, verify, regression-*, pipeline-* etc.).
 - Run link-platform.ps1 (Unix: .sh) to create the portals; write install-info.json.
-- Run pm-init.ps1 to walk me through the project note (stack, careful paths, must-test scenarios) and generate `.cursor/project-context.md`.
+- Run pm-init.ps1; say `PM init` and work can start right away (the regression index can be added later), generating `.cursor/project-context.md`.
 - Finally report the version and portal status, and tell me the entry phrase for future requests — `PM + request`.
 Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
 ```
@@ -55,7 +55,7 @@ Before doing anything, present the plan and wait for my confirmation; on any fai
 | **Trae** | New session → "PM + request"; rules + skill portals only, **no machine hooks** |
 | **Claude Code** | Session at the project root → approve hooks/MCP → "PM + request"; hooks machine-verified end-to-end 2026-08-10 |
 
-**The whole setup cost**: a short project note (stack, careful paths, a few must-test cases) — not an ongoing maintenance config; first-time setup / install & update / blocked-by-a-gate quick-ref: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (sectioned). Health check? Say `PM doctor`.
+**Getting in**: in a new repo, say `PM init` once. The assistant generates the project note and probes the tech stack for your confirmation; the regression index (must-test cases) can be added later — you can start `PM + request` without it, and filling it in makes heat escalation more accurate. CodeGraph is optional and only installed with your consent. First-time setup / install & update / blocked-by-a-gate quick-ref: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (sectioned). Health check? Say `PM doctor`.
 What this is / why it is designed this way: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md); version and changes (current version per skills/VERSION): [CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md).
 
 ### Workflow: how one request goes through
@@ -125,7 +125,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 ### Requirements
 
 - Any agent session that can edit files (agent and platform coverage: see "Platform" above)
-- One-time `PM init` + short `project-context.md` / test list (the pack does **not** ship another team's business windows or CHANGELOG)
+- One-time `PM init` (the regression index can be added later; the pack does **not** ship another team's business windows or CHANGELOG)
 
 ### You only do three things
 
