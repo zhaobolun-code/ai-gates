@@ -48,9 +48,6 @@ function Resolve-DefaultDocRoot {
     $raw = Get-Content -LiteralPath $pc -Raw -Encoding UTF8
     if ($raw -match '(?ms)^##\s+执行文档存放约定\s*\r?\n(.*?)(?=^##\s|\z)') {
         $section = $Matches[1]
-        if ($section -match '`((?:Assets/)[^`]*?化学文档/压力系统)(?:/\{方案短名\}/|/)?`') {
-            return ($Matches[1] -replace '\\', '/').TrimEnd('/')
-        }
         if ($section -match '`((?:Assets/)[^`]+?)(?:/\{方案短名\}/|/)?`') {
             return ($Matches[1] -replace '\\', '/').TrimEnd('/')
         }
@@ -58,18 +55,33 @@ function Resolve-DefaultDocRoot {
     return $fallback
 }
 
+function Add-UniqueDocRoot {
+    param([System.Collections.Generic.List[string]]$List, [string]$Abs)
+    if (-not $Abs -or -not (Test-Path -LiteralPath $Abs)) { return }
+    $resolved = (Resolve-Path -LiteralPath $Abs).Path
+    if (-not ($List | Where-Object { $_ -eq $resolved })) { [void]$List.Add($resolved) }
+}
+
 function Get-DocRoots {
     param([string]$RepoRoot)
-    $roots = @()
-    $assetsDoc = Join-Path $RepoRoot ".ai-gates/Doc"
-    if (Test-Path -LiteralPath $assetsDoc) { $roots += , ((Resolve-Path -LiteralPath $assetsDoc).Path) }
+    $roots = New-Object System.Collections.Generic.List[string]
+    Add-UniqueDocRoot -List $roots -Abs (Join-Path $RepoRoot ".ai-gates/Doc")
     $overrideRel = Resolve-DefaultDocRoot -RepoRoot $RepoRoot
-    $overrideAbs = Join-Path $RepoRoot ($overrideRel.Replace('/', [string][IO.Path]::DirectorySeparatorChar))
-    if (Test-Path -LiteralPath $overrideAbs) {
-        $resolved = (Resolve-Path -LiteralPath $overrideAbs).Path
-        if (-not ($roots | Where-Object { $_ -eq $resolved })) { $roots += , $resolved }
+    $overrideNorm = (($overrideRel -replace '\\', '/').TrimEnd('/'))
+    if (-not $overrideNorm -or $overrideNorm -eq ".ai-gates/Doc") {
+        return , @($roots.ToArray())
     }
-    return , $roots
+    $overrideAbs = Join-Path $RepoRoot ($overrideRel.Replace('/', [string][IO.Path]::DirectorySeparatorChar))
+    if (-not (Test-Path -LiteralPath $overrideAbs)) { return , @($roots.ToArray()) }
+    $parentAbs = Split-Path -Parent $overrideAbs
+    $repoFull = [IO.Path]::GetFullPath($RepoRoot)
+    $parentFull = [IO.Path]::GetFullPath($parentAbs)
+    if ($parentFull.StartsWith($repoFull, [StringComparison]::OrdinalIgnoreCase) -and ($parentFull.Length -gt $repoFull.Length)) {
+        Add-UniqueDocRoot -List $roots -Abs $parentAbs
+    } else {
+        Add-UniqueDocRoot -List $roots -Abs $overrideAbs
+    }
+    return , @($roots.ToArray())
 }
 
 function Test-SkipScanPath {

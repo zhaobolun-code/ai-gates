@@ -3,7 +3,7 @@
 > 权威：凡需用户拍板的内容均遵守本文件。
 > 技术钉死在 `Mandatory-*.md` / A#，**不**因白话而变虚。
 > **硬律**：每个决策点 **只 1 轮确认**；细则与自动手续 → [handoff-automation.md](./handoff-automation.md) §0。
-> **拍板口令**：确认包正文只写 **「准」**（可附「或回复按推荐」）。禁止在确认包里教「开干」「做吧」「听你的」。
+> **拍板口令**：确认包正文只写 **「准」**（英文会话写 **`approve`**，可注 `= 准`；可附「或回复按推荐」/ `or reply to follow the recommendation`）。禁止在确认包里教「开干」「做吧」「听你的」。确认包语言跟本会话用户语言 → [user-visible-states.md](./user-visible-states.md) §用户语言。
 > 「准」= 定版+改码；**不**自动 `gh issue create`、**不**自动写入收集仓（[collect-queue.md](./collect-queue.md)）。
 
 ## 目标

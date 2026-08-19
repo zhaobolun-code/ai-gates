@@ -27,7 +27,7 @@ Mandatory 规格：【同目录 Mandatory-StepN.md 或未完成.md 内 Mandatory
 当前 Step：【Step N — 名称】
 dimensions: quality+integration
 （Full/高风险可写 dimensions: quality+integration+security；安全维按需）
-axis（可选）：standards+spec（双轴模式，规范轴/规格轴分开扫；细则 [dual-axis-review.md](../references/dual-axis-review.md)）
+axis：standards+spec（默认必填双轴，禁止省略；findings 必须分组 [规格轴] / [规范轴]；细则 [dual-axis-review.md]）
 错题本必读路径：【未完成.md##错题本必读 → 点名大纲/主表行】
 黑板证据：【证据/_repair-blackboard.md 最近≤3「禁止再做」】或【无黑板（已查路径）】
 冻结表扫描：【本 Step DO NOT TOUCH / 冻结符号清单；空=无（已扫）】
@@ -39,6 +39,8 @@ Mandatory 源码：
 默认可读：未完成.md；物理口径.md（若有）；Mandatory-Step*.md（若有）；上列源码；派发点名的错题行/黑板（≤3）。
 图谱：优先 CRG（detect-changes / impact；业务 C# 用 LabSDK 子模块图）；需原文再窄用 codegraph_explore。禁止全目录扫读；禁止两套完整双跑。
 禁止：已完成/ 历史全文与除 _索引 外全文；证据/（派发点名黑板除外）；第二份长方案；主对话长讨论。
+主窗不得在本审结束前改 Mandatory 业务文件（该 Step Mandatory 点名的业务文件）。排除（不算违规）：改文档状态字段 / migrate-pipeline-window.ps1 / 用户「准」之后的口径/A# 复议落盘 / 硬停白名单已等人「准」的改动。
+无四态第一行不得派 CR（Standard/Full）。
 
 只读输出 findings 短表（blocker/major/minor）与验证缺口；**必须**含「集成维：…」且覆盖冻结表+禁项扫描（或「无/已扫」）；缺句/未扫=major；复现禁项/碰冻结=major/blocker。无 blocker 方可建议更新 README。
 独立寻找问题；不得扩大阅读面。
@@ -49,3 +51,4 @@ Mandatory 源码：
 - 已拉起 Subagent：`你下一步` 说明「隔离审核进行中」
 - 需手动：粘贴上方最短包
 - 同 Chat 降级须标 **「非独立 CR」**
+- 隔离主 CR 返回前，禁止主窗改该 Step Mandatory 点名的业务文件；上列排除不算违规。

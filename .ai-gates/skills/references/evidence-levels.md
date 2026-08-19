@@ -19,6 +19,11 @@
 - 运行时未测时，应明确写 `not run(未运行)` 或 `static-checked(静态核对)`。
 - AI 不得在无用户或运行时证据时自行迁移文档状态至 `runtime-validated(运行已验证)`。
 - 证据等级表示**验证强度**；文档「状态」（见 `state-machine.md`）表示**流程阶段**。二者不可互相替代。
+- **Agent 自称** `locally-validated(本地已验证)` 时，**本条消息**必须含命令 + 退出码或失败计数。上一轮输出、会话记忆、「应该过了 / 编译没问题」都不算。
+- **用户** Unity 目视签收：仍可口头 `locally-validated(本地已验证)`；Agent **不得**因此改写成自己已 Play。
+- Unity 手测 / 黄金回归在用户或脚本证据出现前保持 `not run`。
+- 不新增第四套等级名；不把 `locally-validated` 并进 `runtime-validated`。
+- Skill/Doc-only 命中 AI 验收后，verify 子窗仍可通过≡抬升 `runtime-validated`（[handoff-automation.md](./handoff-automation.md) §C/§E；CORE）；本条不砍该路径。
 
 ## 示例
 
@@ -37,7 +42,7 @@ Express 车道（含仅 prefab/资源、无脚本的小改）下，Agent 输出�
 - 证据等级：static-checked(静态核对)（未做独立代码审核；以 express-self-check 为准）
 ```
 
-不得使用高于 `static-checked(静态核对)` 的证据等级，不得迁移文档状态机。用户 Unity Editor 目视确认后，可口头声明 `locally-validated(本地已验证)`，但 Agent 不得自行写入 `runtime-validated(运行已验证)`。
+不得使用高于 `static-checked(静态核对)` 的证据等级，不得走 Standard 文档状态机（`implementation-ready` / 自写 `runtime-validated`）。用户 Unity Editor 目视确认后，可口头声明 `locally-validated(本地已验证)`，但 Agent 不得自行写入 `runtime-validated(运行已验证)`。Agent 仍不得自写 `locally-validated`（仅用户口头）。Express 仍允许 `static-checked(静态核对)` + 自检；未改 cs 则 `not run`，不强制每条 Express 都 `dotnet build`。**已建分类夹**的迁夹（签收/停写）见 [doc-windowing.md](./doc-windowing.md) §与 Express，≠ 自写 `runtime-validated`。
 
 ## hard blocker / soft risk（门禁类型）
 

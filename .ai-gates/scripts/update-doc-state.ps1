@@ -1,9 +1,11 @@
 ﻿<#
 .SYNOPSIS
-  方案夹状态外置（支柱 B · 最小实现）：把 `未完成.md` 文档状态段落里那些靠 Agent 自己
-  解析/自己改的字段（文档状态、止损计数、auto_steps_done、repair_rounds…）搬进一个
-  脚本管理的 sidecar `.state.json`，非法迁移由脚本拒绝，而不是靠 Agent 记住 CORE 里
-  "禁止 XX" 这句话。
+  方案夹状态外置（支柱 B）+ Step 账本字段：把 `未完成.md` 文档状态段落里那些靠 Agent 自己
+  解析/自己改的字段（文档状态、止损计数、auto_steps_done、repair_rounds…以及账本
+  ledgerPlan/stepPhase/baseRefs/headRefs/agentId/ruling）搬进一个脚本管理的 sidecar
+  `.state.json`，非法迁移由脚本拒绝，而不是靠 Agent 记住 CORE 里 "禁止 XX" 这句话。
+  文档别名 repair_rounds 与脚本真源 repairRounds 互认；stepPhase=complete 不是
+  文档主链 docStatus=completed，也不是 currentStep。
 
 .DESCRIPTION
   权威：.cursor/skills/references/loop-engineering.md §3（状态迁移表）+ 各岗 SKILL 里
@@ -59,6 +61,25 @@
 .PARAMETER ForceReason
   配合 -Force 的越权理由，写入历史记录，不允许留空。
 
+.PARAMETER SetLedgerPlan
+  账本身份 / 身份行：本窗 `未完成.md` 的仓库相对路径；空字符串视为无身份行。
+
+.PARAMETER SetStepPhase
+  Step 账本态，仅 dispatched | complete | parked。不是文档主链 docStatus，也不是 currentStep。
+  dispatched 且 repairRounds>0 时展示为 fix round {repair_rounds}/2（由 repairRounds 派生）。
+
+.PARAMETER SetBaseRefs
+  BASE: 仓键→短 SHA，格式 `key:sha[,key:sha]`。派实现者前写入。拒绝裸 SHA。拒绝键或值为字面 HEAD~1。
+
+.PARAMETER SetHeadRefs
+  HEAD: 同上格式；收口写入。拒绝裸 SHA。拒绝键或值为字面 HEAD~1。
+
+.PARAMETER SetAgentId
+  agent: 子窗 id 或精确字面「主窗降级」。
+
+.PARAMETER SetRuling
+  Ruling: 字符串，默认为空；本刀只留字段位。
+
 .PARAMETER Note
   本次变更的一句话备注，写入 .state-history.jsonl。
 
@@ -96,6 +117,19 @@ param(
     [string]$SetReason,
 
     [string]$SetStopLoss,
+
+    [string]$SetLedgerPlan,
+
+    [ValidateSet("dispatched", "complete", "parked")]
+    [string]$SetStepPhase,
+
+    [string]$SetBaseRefs,
+
+    [string]$SetHeadRefs,
+
+    [string]$SetAgentId,
+
+    [string]$SetRuling,
 
     [switch]$Force,
 
@@ -165,6 +199,12 @@ function New-DefaultState {
         maxAutoSteps     = 3
         maxRepairRounds  = 2
         stopLossCounters = [ordered]@{}
+        ledgerPlan       = ""
+        stepPhase        = $null
+        baseRefs         = [ordered]@{}
+        headRefs         = [ordered]@{}
+        agentId          = ""
+        ruling           = ""
         createdUtc       = [DateTime]::UtcNow.ToString("o")
         lastUpdatedUtc   = [DateTime]::UtcNow.ToString("o")
         lastTransition   = $null
@@ -205,6 +245,42 @@ function Emit {
     exit $exitCode
 }
 
+function Set-StateField {
+    param($state, [string]$Name, $Value)
+    if ($null -eq $state.PSObject.Properties[$Name]) {
+        $state | Add-Member -NotePropertyName $Name -NotePropertyValue $Value
+    } else {
+        $state.$Name = $Value
+    }
+}
+
+function ConvertTo-KeyedRefs {
+    param([string]$Raw, [string]$ParamName)
+    if ([string]::IsNullOrWhiteSpace($Raw)) {
+        Write-ErrAndExit -Message "$ParamName 不得为空；格式须为 '仓键:短SHA[,仓键:短SHA]'，禁止裸 SHA。" -ExitCode 1
+    }
+    $map = [ordered]@{}
+    foreach ($part in ($Raw -split ",")) {
+        $item = $part.Trim()
+        if ($item -notmatch '^(?<key>[^:]+):(?<sha>.+)$') {
+            Write-ErrAndExit -Message "$ParamName 须为 '仓键:短SHA[,仓键:短SHA]'，禁止裸 SHA；实际收到：$Raw" -ExitCode 1
+        }
+        $key = $Matches.key.Trim()
+        $sha = $Matches.sha.Trim()
+        if ($key -eq "HEAD~1" -or $sha -eq "HEAD~1") {
+            Write-ErrAndExit -Message "$ParamName 拒绝字面 HEAD~1 作为键或值（禁止用 HEAD~1 冒充 BASE）。" -ExitCode 1
+        }
+        if ([string]::IsNullOrWhiteSpace($key) -or [string]::IsNullOrWhiteSpace($sha)) {
+            Write-ErrAndExit -Message "$ParamName 仓键与短 SHA 均不得为空；实际收到：$Raw" -ExitCode 1
+        }
+        $map[$key] = $sha
+    }
+    if ($map.Count -eq 0) {
+        Write-ErrAndExit -Message "$ParamName 解析后为空；禁止裸 SHA。" -ExitCode 1
+    }
+    return $map
+}
+
 # --- Init ---
 if ($Init) {
     if (Test-Path -LiteralPath $StatePath) {
@@ -221,6 +297,25 @@ $state = Load-State
 # --- 简单字段更新（不涉及状态机合法性） ---
 if ($SetLane) { $state.lane = $SetLane }
 if ($SetCurrentStep) { $state.currentStep = $SetCurrentStep }
+
+if ($PSBoundParameters.ContainsKey("SetLedgerPlan")) {
+    Set-StateField -state $state -Name "ledgerPlan" -Value $SetLedgerPlan
+}
+if ($PSBoundParameters.ContainsKey("SetStepPhase")) {
+    Set-StateField -state $state -Name "stepPhase" -Value $SetStepPhase
+}
+if ($PSBoundParameters.ContainsKey("SetBaseRefs")) {
+    Set-StateField -state $state -Name "baseRefs" -Value (ConvertTo-KeyedRefs -Raw $SetBaseRefs -ParamName "SetBaseRefs")
+}
+if ($PSBoundParameters.ContainsKey("SetHeadRefs")) {
+    Set-StateField -state $state -Name "headRefs" -Value (ConvertTo-KeyedRefs -Raw $SetHeadRefs -ParamName "SetHeadRefs")
+}
+if ($PSBoundParameters.ContainsKey("SetAgentId")) {
+    Set-StateField -state $state -Name "agentId" -Value $SetAgentId
+}
+if ($PSBoundParameters.ContainsKey("SetRuling")) {
+    Set-StateField -state $state -Name "ruling" -Value $SetRuling
+}
 
 if ($SetStopLoss) {
     if ($SetStopLoss -notmatch '^(?<label>[^=]+)=(?<cur>\d+)/(?<max>\d+)$') {
@@ -293,7 +388,7 @@ if ($Transition) {
 
     $state.docStatus = $Transition
     Add-History -fromStatus $from -toStatus $Transition -forced (-not $isLegal) -forceReason $ForceReason -note $Note
-} elseif ($Note -or $SetLane -or $SetCurrentStep -or $SetStopLoss -or $IncrementAutoSteps -or $IncrementRepairRounds -or $ResetAutoSteps -or $PSBoundParameters.ContainsKey("SetStopReason") -or $PSBoundParameters.ContainsKey("SetReason")) {
+} elseif ($Note -or $SetLane -or $SetCurrentStep -or $SetStopLoss -or $IncrementAutoSteps -or $IncrementRepairRounds -or $ResetAutoSteps -or $PSBoundParameters.ContainsKey("SetStopReason") -or $PSBoundParameters.ContainsKey("SetReason") -or $PSBoundParameters.ContainsKey("SetLedgerPlan") -or $PSBoundParameters.ContainsKey("SetStepPhase") -or $PSBoundParameters.ContainsKey("SetBaseRefs") -or $PSBoundParameters.ContainsKey("SetHeadRefs") -or $PSBoundParameters.ContainsKey("SetAgentId") -or $PSBoundParameters.ContainsKey("SetRuling")) {
     Add-History -fromStatus $state.docStatus -toStatus $state.docStatus -forced $false -forceReason $null -note $Note
 }
 

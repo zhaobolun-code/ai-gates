@@ -8,8 +8,8 @@
 
 | 档位 | 何时用 | 做法 | 独立复核 |
 | --- | --- | --- | --- |
-| **L1 自审** | Standard、单模块、无状态机/持久化 | 同 Agent 读取 `plan-reviewer/SKILL.md` 审查；输出须标注「L1 非独立复核」 | 否 |
-| **L1.5 加强** | Standard 且 Mandatory Code Changes 命中 project-context 回归索引模块（**小规模 → 维持 L1.5，不取较高档**），**或**命中 `.ai-gates/lessons-learned.md` 近 6 个月内有记录的模块/文件（文件热度），**或** `.ai-gates/regression-heat.yaml` 该模块 heat≥medium（机器热度，自动生成）——**文件/机器热度命中取较高档：L1.5 之上 → 方案审 L3 / 双轮 CR（强度升级，不整条升 Full）**；**回归索引模块小规模 + 文件/机器热度双命中 → 按热度入口取较高档（方案审 L3 / 双轮 CR，M2）** | L1 同 Chat；CR **优先** Subagent 隔离（见 [isolated-review.md](./isolated-review.md)） | 方案否 / CR 隔离优先 |
+| **L1 自审** | Standard、单模块、无状态机/持久化 | 须子窗（同会话 Subagent 即可，不强制新开 Chat）；输出须标注「L1 非独立复核」 | 否 |
+| **L1.5 加强** | Standard 且 Mandatory Code Changes 命中 project-context 回归索引模块（**小规模 → 维持 L1.5，不取较高档**），**或**命中 `.ai-gates/lessons-learned.md` 近 6 个月内有记录的模块/文件（文件热度），**或** `.ai-gates/regression-heat.yaml` 该模块 heat≥medium（机器热度，自动生成）——**文件/机器热度命中取较高档：L1.5 之上 → 方案审 L3 / 双轮 CR（强度升级，不整条升 Full）**；**回归索引模块小规模 + 文件/机器热度双命中 → 按热度入口取较高档（方案审 L3 / 双轮 CR，M2）** | 方案审须子窗（同会话即可，不强制新 Chat 隔离）；CR **优先** Subagent 隔离（见 [isolated-review.md](./isolated-review.md)） | 方案否 / CR 隔离优先 |
 | **L2 交叉审** | Standard、未触 Full，跨 2 模块或涉及 public API | **优先** Subagent 隔离；仍读 plan-reviewer SKILL | 部分 |
 | **L3 独立审** | Full 车道、状态机/事务/持久数据/跨模块并行 | **优先**每轮 Subagent 隔离；每轮独立找 blocker | 是 |
 

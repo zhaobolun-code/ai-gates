@@ -13,7 +13,7 @@
 
 ## PM 内部结构化判定（强制）
 
-每轮 `[PM]` 在回复用户前**必须**完成下列 YAML 字段判定；YAML 默认仅作 Agent 内部契约，**不直接展示给团队用户**。用户可见内容只输出白话 **你下一步**；TL / 维护模式或用户追问时可展开内部字段。
+每轮 `[PM]` 在回复用户前**必须**完成下列 YAML 字段判定；回复**必须含**字面 `[PM]` YAML 块供 hooks 打点。YAML **不对团队讲解字段名**（如 `review_tier`）。用户可见内容按 §用户可见输出；TL / 维护模式或用户追问时可展开内部字段。
 
 ```yaml
 pm:
@@ -31,7 +31,7 @@ pm:
 
 ### Express 简略（用户可见）
 
-**全部**满足 → 用户可见只输出白话 **你下一步**（**不要**摘要表；内部仍完成 YAML 判定）：
+**全部**满足 → 用户可见只输出白话 **你下一步**（**不要**摘要表）。回复仍须含字面 `[PM]` YAML（给机器，不向用户讲解）：
 
 - `lane: Express`
 - `blockers: []`
@@ -54,7 +54,7 @@ pm:
 | README | [skip / 程序员一行 / 文档岗] — [理由] |
 | 进度 | [五态] |
 
-表格后**必须**：**你下一步**：……（完整输出同样须满足 §Express 简略 四条最低内容，可写在表后一句里）。内部 YAML 不默认展示。
+表格后**必须**：**你下一步**：……（完整输出同样须满足 §Express 简略 四条最低内容，可写在表后一句里）。YAML 在回复里给机器，不向用户讲解字段。
 
 **隔离审核**：L1.5 CR / L2 / L3 / 高风险对抗 CR → **优先**主 Agent 拉起 Subagent 隔离会话；高风险**优先异模型**（首选高质量档，失败回退同模型，不硬拦）；失败再提示手动新开 Chat；同 Chat 续审须标非独立。细则 → [isolated-review.md](references/isolated-review.md)。**不校验**用户是否接受隔离/是否换模型。
 
@@ -65,8 +65,13 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 ### 用户可见输出（强制）
 
-- **YAML、`[PM]` 等岗位标记、摘要表**：Agent **内部**结构化用；**默认不对团队用户展示**。
-- **面向用户只输出白话「你下一步」**（及必要时五态语义、可复制派发块）；须满足 §Express 简略 四条最低内容。
+**机器层**（hooks / Stop 打点）：回复**必须含**字面 `[PM]` YAML 块。不对团队讲解 `review_tier` 等字段名。YAML 出现在回复里 **不是**「本条已完成结构化判定」的用户可读证明。
+
+**用户可见**：
+
+- Express 简略（上节全部满足）：只输出白话 **你下一步**（不要摘要表）。YAML 仍写在回复里给机器，不解释给用户。
+- 非 Express：白话摘要表（车道/下一岗/README/进度）+ **你下一步**。
+- 白话与落盘正文跟本会话用户语言（中文可夹英文专名；文件名仍为机器锚）→ [user-visible-states.md](references/user-visible-states.md) §用户语言。
 - 用户追问进度/TL 模式/维护场景时，可展开内部字段；**禁止**无翻译地抛 `review_tier`、`implementation-ready` 等术语。细则 → [user-visible-states.md](references/user-visible-states.md)。
 
 ### Full 强制 — 用户可见（强制）
@@ -127,7 +132,7 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 | 车道 | 流程 | 文档 |
 | --- | --- | --- |
-| **Express** | 一句话切片 → **一轮确认** → 子窗程序员 → 一行自检 → Unity 测；无 CR；默认不落盘、不建窗；如需落盘仍走 `未完成.md`（现状保留） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
+| **Express** | 一句话切片 → **一轮确认** → 子窗程序员 → 一行自检 → Unity 测；无 CR；默认不落盘、不建窗；**一旦已建分类夹** → [doc-windowing.md](references/doc-windowing.md) §与 Express（最小两文件 + 终态须 migrate；不强制 `未完成.md`） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
 | **Direct** | PM → 子窗策划（对话内 A#/切片，不落盘）→ **一轮确认** → 子窗程序员 → 隔离 CR（普通档）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
 | **Standard** | plan-lite → L1/L1.5/L2 → **一轮确认** → `[developer]` → `[CR]` → README | plan-lite；A# + delta-only |
 | **Full** | TL 显式启用；见 [references/](references/) | 执行文档；须含验收 A# |
@@ -142,7 +147,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 步骤 4 **未**触 Full 且 Mandatory Code Changes 命中 project-context 回归索引**模块**（**小规模 → 维持 Standard+L1.5，不取较高档**），或命中 `.ai-gates/lessons-learned.md` 近 6 个月记录（文件热度），或 `.ai-gates/regression-heat.yaml` 该模块 heat≥medium（机器热度，自动生成）→ L1.5；**文件/机器热度命中取较高档：L1.5 之上 → 方案审 L3 / 双轮 CR（不整条升 Full）**；**回归索引模块小规模 + 文件/机器热度双命中 → 按热度入口取较高档（方案审 L3 / 双轮 CR，M2）**（热度细则 → [plan-review-tiers.md](references/plan-review-tiers.md)）。
 
-- **方案审核**：L1 同 Chat；plan-lite 档位 **L1.5**；Regression Validation **须引用**索引行
+- **方案审核**：须子窗（同会话即可，不强制新 Chat 隔离）；plan-lite 档位 **L1.5**；Regression Validation **须引用**索引行
 - **代码审核**：**优先** Subagent 隔离 + [cr-dispatch-l1.5.md](./templates/cr-dispatch-l1.5.md)；失败再提示手动新开；同 Chat 须标 **「非独立 CR」**
 未触发 L1.5：CR 可同 Chat。
 
@@ -172,7 +177,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 **非门禁**：隔离审核是否成功 / 用户是否手动新开 Chat / 换模型 — 只要求诚实标注，不硬阻断。缺 PM 结构化判定或 **你下一步**（含 Express 简略四条）→ **已阻塞**。
 
-**机器强制层（如实）**：Codex CLI / Cursor 侧 hooks 可 deny 拦截；Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点，关键写后自查 `.ai-gates/hooks-log/`）；Trae 为软层（规则 + 技能传送门，无机器 hooks）。
+**机器强制层（如实）**：Codex CLI / Cursor 侧 hooks 可 deny 拦截；Codex 桌面应用对 `apply_patch` 钩子可能不触发（信任已批准仍零打点，关键写后自查 `.ai-gates/hooks-log/`）；Trae 为软层（规则 + 技能传送门，无机器 hooks）。`[PM]` **120 分钟窗口是近似门禁**（Stop 打点后一段时间内放行写入），**不是**「本条消息已完成结构化判定」。`failClosed: false`：hook 脚本失败则放行。kill switch `.ai-gates/hooks-log/pm-gate-disabled` 可整条关掉。硬门禁 #7 仍须自觉。本句不改 hook 行为。
 
 **工作区卫生（非门禁）**：一次性中间产物（revision/hash 计算、压力测试、批量迁移脚本等）只放 **`.ai-gates/tmp/`**（不入库，环节收尾整目录清空）；不得散落在 `.cursor/` 根、`.ai-gates/hooks-log/`（运行时证据）或 `.ai-gates/skills|scripts|hooks|rules`（中央库内容）。细则 → [execution-discipline.md](references/execution-discipline.md) §工作区卫生。
 
@@ -206,7 +211,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 3. Express → 补 express-slice + express-self-check（若已改代码）；Standard 缺 L1/L1.5 → 回 plan-lite / plan-reviewer
 4. 说明上轮偏差；追加 [pipeline-recovery-log.md](./templates/pipeline-recovery-log.md)；快照见 [pm-tooling.md](references/pm-tooling.md)
 
-**另一口令 `方案推翻`**（撤销已落地代码，非流程纠偏）：确认文件清单→用户确认→`git checkout -- <文件>`→记录原因，细则 → [rollback.md](references/rollback.md)。
+**另一口令 `方案推翻`**（撤销已落地代码，非流程纠偏）：确认文件清单→用户确认→**列出** `git checkout -- <文件>` 请用户在终端执行（Agent 禁止经 Shell 跑该命令）→记录原因，细则 → [rollback.md](references/rollback.md)。
 
 **PM 自检**：结构化判定 + **你下一步**；express-slice；A#；L1.5 派发块；子窗首回合核验（空上下文询问 → `fork_turns=all` 重派）；**一轮确认硬律**（handoff §0）；CR/Verify；止损含热修；首段=状态；未夸大 Unity/completed。
 

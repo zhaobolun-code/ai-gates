@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.2.2（发布 · 收集闭环回传（evolution-04/05/06）+ 3 条反模式升通用格 + 接入口径改写 · patch；前版 4.2.1 定版信息保留）
+**当前 LTS**：v4.3.0（发布 · express-closeout 四连 + evolution-08/09 + README 机制表 · minor；前版 4.2.2 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,38 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-08-19：README 机制表补交付闭环/文档窗/审查门禁，并加跨会话账本、实现者四态；USER-GUIDE 一句 Express 建夹须迁、换对话续做接着上次。不 bump VERSION
+- 2026-08-19：待办对照表已清空：Superpowers P0–P2 与 Express D1–D4 两份对照清单迁 `Doc/AI流水线/签收/`。不 bump VERSION
+- 2026-08-19：express-closeout-d4：check-pipeline-doc 对文档状态 vs 给程序员/关系表交叉核对打 warning；-Strict 不把本刀升 error。不 bump VERSION
+- 2026-08-19：express-closeout-d3：落盘 Express 跨会话无本会话测令视为空闲迁停写，不得用 not run 抗辩；本会话待测仍留执行中；未测不得标通过。不 bump VERSION
+- 2026-08-19：express-closeout-d2：空壳扫描根扩到 project-context 文档路径的主题父目录（各主题执行中），不再把单一主题当唯一业务根；`.ai-gates/Doc` 仍扫。不 bump VERSION
+- 2026-08-19：express-closeout-d1：Express 一旦落盘须最小两文件（slice+自检）且终态 migrate；日常仍 Chat 切片；不强制未完成.md；CORE 仅派岗表一行指针。不 bump VERSION
+- 2026-08-19：evolution-09-doc-honesty：CORE 钉 hooks 120 分钟[PM]为近似门禁；用户可见输出与摘要表分车道；PACKAGE-INFO 与 MAINTAINER 对齐实物（含手册；LTS=VERSION）。不 bump VERSION
+- 2026-08-19：evolution-08-skill-hygiene：六岗 SKILL `name` 改为目录名；rollback 改为用户终端执行 `git checkout --`；本仓「升级 ai-gates」高危口令写 project-context；清「L1 同 Chat」；Express 中途超 2 交 PM 按判定树重判。不 bump VERSION
+- 2026-08-18：evolution-07-sdd-p18 借口 vs 现实短表（P2-8）：两岗 SKILL 文末各加对照表（developer 4 行、CR 3 行）；不 bump VERSION
+
+- 2026-08-18：evolution-07-sdd-p17 CR 审核不重跑测（P1-7）：默认不为确认报告重跑实现者已报同一命令；缺输出=验证缺口，禁止黄金/包级补洞；点名怀疑才聚焦。不 bump VERSION
+
+- 2026-08-18：evolution-07-sdd-p16 L1.5+ / Full 主 CR 默认双轴（P1-6）：`axis: standards+spec` 从可选改为默认必填；findings 分组 [规格轴]/[规范轴]；Direct 单表不默认；Express 不变。不 bump VERSION
+
+- 2026-08-18：evolution-07-sdd-p15 本条消息验证（P1-5）：Agent 自称 locally-validated 须本条消息含命令+退出码/失败计数；CR 无命令自称=major（用户口头不算）；不 bump VERSION
+
+- 2026-08-18：错题本卫生（用户「准」）：正则条文去掉单元格内竖线；07-09 三行补类型/错因/改正；大纲补 handover、L0 测失败、开管加热。不 bump VERSION
+
+- 2026-08-18：evolution-07-sdd-p04 两条禁止（P0-4）：工人不自审（仍允许刷新 CR 派发 md）、主窗派审后不改 Mandatory 业务文件（违规=blocker，对照账本 BASE）、无四态第一行不得派 CR 写入 cr-dispatch。不 bump VERSION
+
+- 2026-08-18：evolution-07-sdd-p03 修轮收敛（P0-3）：`repair_rounds` 预算仍 2；0→1 resume、1→2 新窗+高一档、触顶 `Ruling:` 后走 §0.7、复审只审 BASE..HEAD。不 bump VERSION
+
+- 2026-08-18：evolution-07-sdd-p02 实现者四态（P0-2）：Standard/Full 最后一条 ≤15 行且第一行 `DONE`/`DONE_WITH_CONCERNS`/`BLOCKED`/`NEEDS_CONTEXT`；Direct 口头禁落盘；Express 不加四态；Auto×CONCERNS = `Ruling:` 后可派 CR、不新增停点。不 bump VERSION
+
+- 2026-08-18：新增待办 `Doc/AI流水线/待办-Express落盘收口与巡检根.md`（化学文档非压力系统流水线窗反映的 Skill 收口洞）。不是执行窗。不 bump VERSION
+
+- 2026-08-18：迁夹 gzip：`migrate-pipeline-window.ps1` 目标不是 `执行中` 时，把窗内 `unity-verify-*.log` 压成 `.log.gz` 并删明文（不压 json/md）；doc-windowing §迁移动作接线。不 bump VERSION
+
+- 2026-08-18：用户语言（对话 + 落盘正文跟本会话；文件名仍为机器锚；不拆中英两包）。`user-visible-states` §用户语言；CORE / USER-GUIDE / agent-entry-route / demand-clarification 接线。不 bump VERSION
+
+- 2026-08-18：evolution-07-sdd-contract Step 账本（P0-1）：Standard/Full 跨会话或压缩续作强制 `.state.json` 账本字段（`update-doc-state.ps1` 读写 `ledgerPlan`/`stepPhase`/`baseRefs`/`headRefs`/`agentId`/`ruling`）；不 bump VERSION
 
 - 2026-08-17：人工提名升通用格：`anti-patterns.md` 补疑问句只答不改文件 / 收集仓走 PR（「准」≠「上传」）/ 下发=升级拉真源（收集仓合并≠已下发）；`shared-language.md` §典故补「入表不是岗」。不 bump VERSION。不是官方包下发。
 
@@ -127,6 +159,20 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [4.3.0] - 2026-08-19（express-closeout 四连 + evolution-08/09 + README 机制表 · minor · 发布）
+
+### Included changes — 2026-08-19（Express 收尾机制 + 规则诚实 + README 机制表 · 不 bump）
+
+- **express-closeout d1–d4（Express 落盘收尾机制四连）**：
+  - d1：Express 一旦落盘须最小两文件（slice + 自检）且终态 migrate；日常仍 Chat 切片；不强制 `未完成.md`；CORE 仅派岗表一行指针。
+  - d2：空壳扫描根扩到 project-context 文档路径的主题父目录（各主题执行中），不再把单一主题当唯一业务根；`.ai-gates/Doc` 仍扫。
+  - d3：落盘 Express 跨会话无本会话测令视为空闲迁停写，不得用 not run 抗辩；本会话待测仍留执行中；未测不得标通过。
+  - d4：check-pipeline-doc 对文档状态 vs 给程序员/关系表交叉核对打 warning；-Strict 不把本刀升 error。
+- **evolution-08-skill-hygiene（规则卫生）**：六岗 SKILL `name` 改为目录名；rollback 改为用户终端执行 `git checkout --`；本仓「升级 ai-gates」高危口令写 project-context；清「L1 同 Chat」；Express 中途超 2 交 PM 按判定树重判。
+- **evolution-09-doc-honesty（文档诚实）**：CORE 钉 hooks 120 分钟[PM]为近似门禁；用户可见输出与摘要表分车道；PACKAGE-INFO 与 MAINTAINER 对齐实物（含手册；LTS=VERSION）。
+- **README 机制表补交付闭环/文档窗/审查门禁**，并加跨会话账本、实现者四态；USER-GUIDE 一句 Express 建夹须迁、换对话续做接着上次。
+- **待办对照表已清空**：Superpowers P0–P2 与 Express D1–D4 两份对照清单迁 `Doc/AI流水线/签收/`。
 
 ## [4.2.2] - 2026-08-17（收集闭环回传 + 3 条反模式升通用格 + evolution-04/05/06 · patch · 发布）
 

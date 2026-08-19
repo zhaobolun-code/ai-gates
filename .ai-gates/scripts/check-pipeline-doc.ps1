@@ -1,6 +1,8 @@
 ﻿# check-pipeline-doc.ps1 — 执行文档「文档状态」轻量校验（advisory，默认 warn）
 # 当前版本读取 ../skills/VERSION；PM 门禁见 CORE #7；方案审核档位 L1/L1.5/L2/L3/跳过
 # Supports: (1) template ## 文档状态 block (2) legacy inline **文档状态** | **可交给程序员** lines
+# express-closeout-d4: 文档状态 vs 给程序员/关系表交叉核对 → soft warning；-Strict 不把本刀升 error
+# Express 仅 slice/自检且无未完成.md：缺文档状态不报 error（D1 管形态）
 # Usage:
 #   .\check-pipeline-doc.ps1 -DocPath "path/to/方案.md"
 #   .\check-pipeline-doc.ps1 -DocPath "..." -CheckGit
@@ -29,6 +31,7 @@ if (-not (Test-Path -LiteralPath $versionPath)) {
 }
 $pipelineVersion = (Get-Content -LiteralPath $versionPath -Raw).Trim()
 $warnings = @()
+$softWarnings = @()
 $errors = @()
 $format = $null
 $status = $null
@@ -52,7 +55,68 @@ $validStatuses = @(
 
 function Add-Issue($level, $message) {
     if ($level -eq "error") { $script:errors += $message }
+    elseif ($level -eq "soft") { $script:softWarnings += $message }
     else { $script:warnings += $message }
+}
+
+function Test-IsExpressSliceOnlyFolder {
+    param([string]$DocFilePath)
+    $dir = Split-Path -Parent $DocFilePath
+    $base = [IO.Path]::GetFileName($DocFilePath)
+    $hasWei = Test-Path -LiteralPath (Join-Path $dir '未完成.md')
+    $hasSlice = Test-Path -LiteralPath (Join-Path $dir 'express-slice.md')
+    $hasSelf = Test-Path -LiteralPath (Join-Path $dir 'express-self-check.md')
+    $isSliceFile = $base -match '^(express-slice|express-self-check)\.md$'
+    if ($hasWei) { return $false }
+    if ($isSliceFile) { return $true }
+    if ($hasSlice -or $hasSelf) { return $true }
+    return $false
+}
+
+function Get-StepTokenFromText {
+    param([string]$Text)
+    if ([string]::IsNullOrWhiteSpace($Text)) { return $null }
+    if ($Text -match '(?i)^\s*N/?A\s*$') { return $null }
+    $mCur = [regex]::Match($Text, '(?i)当前[^\r\n。]{0,80}?Step(?:\(步骤\))?\s*(\d+[a-z]?)')
+    if ($mCur.Success) { return $mCur.Groups[1].Value.ToLowerInvariant() }
+    $m = [regex]::Match($Text, '(?i)Step(?:\(步骤\))?\s*(\d+[a-z]?)')
+    if ($m.Success) { return $m.Groups[1].Value.ToLowerInvariant() }
+    $mZh = [regex]::Match($Text, '步骤\s*(\d+[a-z]?)')
+    if ($mZh.Success) { return $mZh.Groups[1].Value.ToLowerInvariant() }
+    return $null
+}
+
+function Get-StateMachineToken {
+    param([string]$Text)
+    if ([string]::IsNullOrWhiteSpace($Text)) { return $null }
+    $t = ($Text -replace '\*+', '' -replace '`', '').Trim()
+    $m = [regex]::Match($t, '(?i)(draft|review-pending|implementation-ready|in-progress|blocked|step-completed|runtime-validated|completed)')
+    if ($m.Success) { return $m.Groups[1].Value.ToLowerInvariant() }
+    return $null
+}
+
+function Get-SectionBody {
+    param([string]$Text, [string]$HeadingPattern)
+    $m = [regex]::Match($Text, "(?ms)^##\s+$HeadingPattern\s*\r?\n(.*?)(?=^##\s|\z)")
+    if ($m.Success) { return $m.Groups[1].Value }
+    return $null
+}
+
+function Get-ThisWindowRelStatusCell {
+    param([string]$RelBlock, [string]$WindowName)
+    if ([string]::IsNullOrWhiteSpace($RelBlock) -or [string]::IsNullOrWhiteSpace($WindowName)) { return $null }
+    foreach ($line in ($RelBlock -split '\r?\n')) {
+        if ($line -notmatch '^\|') { continue }
+        if ($line -match '^\|\s*[-:| ]+\s*$') { continue }
+        if ($line -match '窗路径') { continue }
+        $cells = @($line.Trim().Trim('|') -split '\|' | ForEach-Object { $_.Trim() })
+        if ($cells.Count -lt 3) { continue }
+        $pathCell = ($cells[0] -replace '`', '' -replace '\*', '').Trim()
+        if ($pathCell -eq $WindowName -or $pathCell.IndexOf($WindowName, [StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            return $cells[2]
+        }
+    }
+    return $null
 }
 
 function Normalize-CanDev([string]$raw) {
@@ -97,6 +161,8 @@ if (-not (Test-Path -LiteralPath $DocPath)) {
 }
 
 $content = Get-Content -LiteralPath $DocPath -Raw -Encoding UTF8
+$resolvedDocPath = (Resolve-Path -LiteralPath $DocPath).Path
+$skipExpressSliceOnly = Test-IsExpressSliceOnlyFolder -DocFilePath $resolvedDocPath
 
 if ($content -match '(?ms)^##\s+文档状态\s*$') {
     $format = "template"
@@ -137,6 +203,8 @@ if ($content -match '(?ms)^##\s+文档状态\s*$') {
     }
 
     if ($block -match '(?m)^[\s\-]*\*\*当前 Step\(步骤\)\*\*[：:]\s*`?([^`\r\n]+?)`?\s*$') {
+        $currentStep = $Matches[1].Trim()
+    } elseif ($block -match '(?m)^[\s\-]*\*\*当前 Step\*\*[：:]\s*`?([^`\r\n]+?)`?\s*$') {
         $currentStep = $Matches[1].Trim()
     } else {
         Add-Issue "warning" "Recommended field missing: **当前 Step(步骤)**"
@@ -185,7 +253,11 @@ elseif ($content -match '(?m)\*\*文档状态\*\*[：:]') {
     }
 }
 else {
-    Add-Issue "error" "Missing '## 文档状态' section and no legacy **文档状态** inline field."
+    if ($skipExpressSliceOnly) {
+        Write-Host "skip: Express slice/self-check without 未完成.md — no 文档状态 error (D1 form; D4 cross-check skipped)"
+    } else {
+        Add-Issue "error" "Missing '## 文档状态' section and no legacy **文档状态** inline field."
+    }
 }
 
 if ($format) {
@@ -272,6 +344,30 @@ if ($format) {
             if ($Strict) {
                 Add-Issue "error" "Strict: Step missing 满足验收 reference"
             }
+        }
+    }
+}
+
+# --- express-closeout-d4: 文档状态 vs 给程序员 / 窗口关系表（soft warning；-Strict 不升 error） ---
+if (-not $skipExpressSliceOnly) {
+    $devSection = Get-SectionBody -Text $content -HeadingPattern '给程序员'
+    if (-not $devSection) {
+        $devSection = Get-SectionBody -Text $content -HeadingPattern '给下一个 AI 的第一条指令'
+    }
+    $statusStepToken = Get-StepTokenFromText -Text $currentStep
+    $devStepToken = Get-StepTokenFromText -Text $devSection
+    if ($statusStepToken -and $devStepToken -and ($statusStepToken -ne $devStepToken)) {
+        Add-Issue "soft" "文档状态当前 Step=$statusStepToken but 给程序员/给下一个 AI Step=$devStepToken (must copy 文档状态)"
+    }
+
+    $relBlock = Get-SectionBody -Text $content -HeadingPattern '窗口关系摘要'
+    if ($relBlock -and ($relBlock -match '\|') -and $status) {
+        $windowName = Split-Path -Leaf (Split-Path -Parent $resolvedDocPath)
+        $relStatusCell = Get-ThisWindowRelStatusCell -RelBlock $relBlock -WindowName $windowName
+        $docStateTok = Get-StateMachineToken -Text $status
+        $relStateTok = Get-StateMachineToken -Text $relStatusCell
+        if ($docStateTok -and $relStateTok -and ($docStateTok -ne $relStateTok)) {
+            Add-Issue "soft" "文档状态=$docStateTok but 窗口关系摘要本窗行状态=$relStateTok"
         }
     }
 }
@@ -504,6 +600,7 @@ if ($status) { Write-Host "状态: $status" }
 if ($canDev) { Write-Host "可交给程序员: $canDev" }
 if ($planReviewTier) { Write-Host "方案审核档位: $planReviewTier" }
 foreach ($w in $warnings) { Write-Host "WARN: $w" -ForegroundColor Yellow }
+foreach ($w in $softWarnings) { Write-Host "WARN: $w" -ForegroundColor Yellow }
 foreach ($e in $errors) { Write-Host "ERROR: $e" -ForegroundColor Red }
 
 if ($Strict -and ($warnings.Count -gt 0 -or $errors.Count -gt 0)) { exit 1 }

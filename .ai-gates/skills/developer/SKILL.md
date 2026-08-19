@@ -1,5 +1,5 @@
 ---
-name: 程序员
+name: developer
 description: 按方案分步实现代码。用户说「程序员」「做 Step N」「按方案实现」时使用。Express 完成后输出 express-self-check.md。
 ---
 
@@ -15,12 +15,12 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 
 | 车道 | 本岗 |
 | --- | --- |
-| Express | 按 PM 的 [express-slice.md](../templates/express-slice.md) 实现；完成后 [express-self-check.md](../express-self-check.md) |
+| Express | 按 PM 的 [express-slice.md](../templates/express-slice.md) 实现；完成后 [express-self-check.md](../express-self-check.md)。若已建分类夹：自检必须落在窗内；收口见 [doc-windowing.md](../references/doc-windowing.md) §与 Express。不强制 `未完成.md`；无 CR |
 | Direct | 按主窗对话内 A#/切片实现；完成后交隔离 CR（普通档）；单会话收口 |
 | Standard | 按 plan-lite Step；L1.5 → 完成后交 PM **提示**用户新开 Chat 做 CR；同 Chat 须标「非独立 CR」 |
 | Full | Step 串行；完成后交 `[CR]`；见 [references/](../references/) |
 
-命中 CORE §四车道判定 升级链（实改超机械范围 / 超 2 文件 / 跨模块）→ 停扩 scope，交 PM 改判升 Direct（再升 Standard/Full 按判定树）。
+命中 CORE §四车道判定 升级链（实改超机械范围 / 超 2 文件 / 跨模块）→ 停扩 scope，交 PM 按判定树重判。禁止本岗写死「升 Direct」。
 
 ## 模型路由 + 子窗
 
@@ -46,6 +46,8 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 5. 方案/切片与代码冲突 → 停，报差异，**禁止臆测**；越出 A# 范围同样停报
 5.5 **改完自我质疑三问**（微循环内每段 + 交自检/CR 前终检）：① 是否仅凭变量名、方法名或注释推断行为？② 是否核对了真实数据来源、回退分支、调用链与生命周期？③ 若自己的语义理解恰好相反，会破坏什么现有行为？有疑点继续读真实代码/测试查证；仍无法证实时停下交 PM，禁止带猜测交审。**不确定分级**（[knowledge-gap.md](../references/knowledge-gap.md)）：阻塞级（物理口径/范围/A# 语义）→ 停并入队 `证据/_knowledge-gap.md` **不豁免**；非阻塞级（第三方库 API 细节/历史文档口径）→ 入队继续当前 Step，不阻塞；无法归类 → 保守按阻塞级。入队三要素必填（问题一句话/上下文位置/已尝试），缺则拒收。交审前终检/自检摘要中涉及行为如何、是否已改 X 类的**关键行为断言**须带置信标注（`确定[有代码证据]`/`推断[有间接证据]`/`猜测[无证据]`，见 [evidence-levels.md](../references/evidence-levels.md) §置信标注）；「确定」须可回引真实符号/文件位置，仍无法证实 → 按既有「不确定则停」处理，禁止带猜测交审。命中启用级且存在未解 epistemic 分歧时，先读 [divergence-annotation.md](../references/divergence-annotation.md) 跑单轮多视角；有分歧按该文件入队，**不替代**阻塞级「停」
 6. Express → express-self-check；Standard/Full → 交代码审核前按 [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md) 生成/刷新 `证据/_Step{NN}-代码审核派发.md`（绑定当前 Step、Mandatory、最新 diff）；blocker 修复后更新 revision/diff + 上轮 blocker≤20 行再交复审；README 按 [readme-dispatch.md](../references/readme-dispatch.md)
+6.05 **工人不自审**：实现本 Step 时 **禁止 Task 派** `代码审核` / 自造 reviewer 子窗。自评 = 读自己的 diff。审核由 PM 在报告之后派。**仍允许**刷新 `证据/_Step{NN}-代码审核派发.md` 给 PM。禁止的是自己 `Task` 出审核岗，不是禁止写派发文件。Express 不加审核子窗（仍用 `express-self-check.md`）。
+6.06 **本条消息验证**：交 CR 前：适用才跑 `dotnet build` 或本步点名测试；不适用写 `not run` + 原因。Agent 自称 `locally-validated` 时本条消息必须含命令 + 退出码/失败计数。Express 未改 cs → `not run`，不强制每条 Express 都 `dotnet build`。Skill/Doc-only 仍用静态核对；不伪造 Unity Play。细则 → [evidence-levels.md](../references/evidence-levels.md)。
 7. Unity 未跑写 `not run`；不得夸大证据等级；**仅业务 C#** 同一 Step/切片连续 ≥2 次交审/交自检整轮 `static-checked` 修复仍无 Unity 验证 → 停并提示先测，不再叠加。微循环中间自检、Skill/纯文档假需求均不计。用户测失败后交 PM 走 [diagnosis-gates.md](../references/diagnosis-gates.md) §0，禁止自行开 Step N+1；若交接已有 `Auto采纳推荐` 且 `auto_follow: yes`，按该项执行，勿再等人「准」（硬停除外）。**证据黑板**：交审级修复/测挂后再改前 Read `证据/_repair-blackboard.md` 最近 ≤3 条，禁换皮重试「禁止再做」；本刀失败同条追加一条（模板 [repair-blackboard.md](../templates/repair-blackboard.md)）。止损或 `max_repair_rounds` 触顶 → 不得再同 A# 改码，交 PM 走 §0.7 A#/口径复议。**准全自动**：**自动**在方案夹 `未完成.md`→`## 错题 L0 草稿` 记 L0（禁写主表）。
 7.5 **Editor.log**：改完先按 [unity-editor-log.md](../references/unity-editor-log.md) §A 查编译错误并自修。用户测挂 / Discover 缺证据时按 §B **先查运行日志关键词**，勿默认让用户贴长 Console；不得据此标 `runtime-validated`
 8. 交接：**短表**（改了什么、A#、怎么测、未验证项、微循环自检摘要）；禁止默认贴大段代码/长 Console（证据外置）；有 open 知识缺口条目时列出（见 [knowledge-gap.md](../references/knowledge-gap.md)）
@@ -57,6 +59,7 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 9. 改动 >3 文件 / 跨模块 / 命中 regression-index → 停，报 PM 升级
 10. CR 有 blocker 先修，不写最终 README
 11. 用户仅咨询时不改文件
+12. **回传合同（P0-2）**：Standard/Full 最后一条消息按下方「回复须含」；Express **不加四态**（仍用 [express-self-check.md](../express-self-check.md)）；Direct 只要口头第一行四态、禁止落盘报告
 
 ## README
 
@@ -64,17 +67,41 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 - **`readme: dev-one-liner`**：CR/自检无 blocker 后追加**一行**版本记录
 - **`readme: docs`**：交 `[docs]`（见 [readme-dispatch.md](../references/readme-dispatch.md)）
 
-## 回复须含
+## 回复须含（回传合同）
 
-- 变更文件列表
-- 覆盖的验收条款（A#）
-- **语义自检**：三问后发现的疑点及证据；无疑点写「未发现语义疑点」即可
-- 验证状态（static-checked / not run）
-- **回归验证**：Unity 操作步骤 + 预期 Console 关键词（优先引用 project-context 回归索引）
-- **Analyze 对表**：A# ↔ Mandatory ↔ 预期 Console 关键词三表一致；条款可证伪四条（失败句能抓自报/缺字段、机器检查点名键、Mandatory 接线进 A#、手工红线不得被脚本绿顶替）见 [acceptance-and-delta.md](../references/acceptance-and-delta.md) §Analyze 对表（缺任一不得交 CR / 自检）
+**Express：明确排除**——不加四态，仍交 [express-self-check.md](../express-self-check.md)。
+
+**Direct**：最后一条消息 **≤15 行**，**第一行必须是四态之一**；疑点写在这 ≤15 行里。**禁止**要求 `证据/_Step*-implement-report.md` / `未完成.md` 新节（四态口头、禁止落盘报告）。
+
+**Standard/Full**：最后一条消息 **≤15 行**，**第一行必须是四态之一**。详细（测了什么、改了哪些文件、CONCERNS、Analyze 对表）写入 `证据/_Step{NN}-implement-report.md` 或 `未完成.md`「实现者报告」；主窗禁止把整份 diff 再贴一遍。无四态第一行：**PM 不得派 CR**。
+
+四态字面（禁止同义改名；≠ `stepPhase=complete` ≠ `docStatus=completed`）：
+
+- `DONE`：本 Step A# 范围内做完，无未决疑问
+- `DONE_WITH_CONCERNS`：做完但正确性/范围有疑（必须写疑点）；PM 不得当无事收口；须写账本 `Ruling:`（采纳或记下疑点）后仍可派 CR
+- `BLOCKED`：做不完；须写卡在哪、试过什么、要什么帮助；**禁止**派 CR；补上下文或升模型后重派
+- `NEEDS_CONTEXT`：缺白名单外信息；禁止猜测实现；**禁止**派 CR；补上下文或升模型后重派
+
+**禁止**要求实现者在计划里贴完整实现代码。短回传仍须能指到：变更文件 / A# / 验证状态；细则进报告。
+
+## 修轮派发合同（Standard/Full）
+
+只认现 `repair_rounds`（脚本 `repairRounds`）。Express / Direct **不加厚**（不要求本映射）。禁止指望主窗在隔离 CR 有 blocker 时改业务码「顺手修」。
+
+- `repair_rounds` `0 → 1`：resume 原实现子窗（同 agent id 若平台支持；否则新派但必须注入 P0-2 报告或口头四态 + findings 原文）
+- `1 → 2`：新开实现者 + 至少高一档（project-context §模型路由；须显式 `model=`；档不可用走回退链，禁止省略 `model=`）
 
 ## 禁止
 
 - 一次多 Step / 无 express-slice 或 plan-lite 就改 / 跳过 CR 或 Express 自检 / 无运行证据声称通过
 
 细节模板 → [references/handoff-template.md](../references/handoff-template.md)
+
+## 借口 vs 现实
+
+| 借口 | 现实 |
+| --- | --- |
+| 先改再审 | 无「准」或无恢复口令不得改码 |
+| 测过了所以绿 | Agent 自称须本条消息带命令；无命令不算 locally-validated |
+| 再修一轮就会好 | 修轮预算仍是 2；触顶写 Ruling，禁止第 3 轮同 A# |
+| 主窗顺手改两行 | 隔离 CR 有 blocker 时，主窗禁止改 Mandatory 业务文件 |

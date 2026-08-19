@@ -1,5 +1,5 @@
 ---
-name: 方案审核
+name: plan-reviewer
 description: 审核执行文档可执行性。用户说「方案审核」「审方案」时使用。Express 跳过。
 ---
 
@@ -17,7 +17,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 | --- | --- |
 | Express | **跳过** |
 | Direct | 跳过（无方案审；CR 隔离见 [code-reviewer/SKILL.md](../code-reviewer/SKILL.md)） |
-| Standard | L1 同 Chat；L1.5 回归索引模块；**跨 2+ 业务模块 → L2**（CORE §Standard 交叉审核）；L1.5 与 L2 取较高档 |
+| Standard | L1 须子窗（同会话即可，不强制新 Chat 隔离）；L1.5 回归索引模块；**跨 2+ 业务模块 → L2**（CORE §Standard 交叉审核）；L1.5 与 L2 取较高档 |
 | Full | L2/L3 → [references/plan-review-tiers.md](../references/plan-review-tiers.md)；本岗**必须子窗** + **高质量**档（[model-routing.md](../references/model-routing.md)）；隔离见 [isolated-review.md](../references/isolated-review.md) |
 
 ## 模型路由 + 子窗

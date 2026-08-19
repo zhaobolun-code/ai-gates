@@ -1,18 +1,18 @@
 ﻿# AI 开发流水线 Skill - 打包信息
 
-- 版本：v4.2.2
-- 打包日期：2026-08-17
+- 版本：v4.3.0
+- 打包日期：2026-08-19
 - 来源：本包由 .ai-gates/package-release.ps1 从中央技能库生成，仅含随 Skill 分发的通用文件。
 
-## 本包不含（按设计，维护者专属）
+## 本包含维护者手册
 
-- MAINTAINER.md：版本升级策略、RC 转正条件、发布检查清单，含源仓库专属的审计记录，不通用
+- MAINTAINER.md：维护策略与发布清单（随本包分发）。**当前 LTS** 以 `skills/VERSION` + 包根 `CHANGELOG.md` 顶行为准；文内 v3.1.4 段是 2026-07 历史定版，不是当前版本值。
 
 ## 本包含变更历史
 
 - CHANGELOG.md：随包分发，便于公开仓/Release 增信与接入方对照版本。
 
-维护策略与发布清单仍以源仓库 MAINTAINER.md 为准；本包已随附 references/skill-eval-checklist.md（迷你 Harness，可直接用于新项目自测）。
+维护策略与发布清单以本包 MAINTAINER.md 为准；本包已随附 references/skill-eval-checklist.md（迷你 Harness，可直接用于新项目自测）。
 
 ## 首次接入新项目
 

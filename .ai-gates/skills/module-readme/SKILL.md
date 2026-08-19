@@ -1,5 +1,5 @@
 ﻿---
-name: 文档
+name: module-readme
 description: 维护模块 README 与版本记录。用户说「文档」「更新 README」时使用。
 ---
 

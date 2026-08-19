@@ -84,7 +84,12 @@ triage 坏了。打开主文件修一下。问题在 150 行附近的函数。
 - 其它配置字段的改动
 ```
 
+## 回传四态（what · 行为契约）
+
+委托书要求子代理**最后一条消息 ≤15 行**，**第一行**必须是四态之一（what，不是 how）：`DONE` | `DONE_WITH_CONCERNS` | `BLOCKED` | `NEEDS_CONTEXT`。详情报文件**仅 Standard/Full**（`证据/_Step{NN}-implement-report.md` 或方案夹「实现者报告」）。Direct 只要口头第一行；Express 不加四态。**禁止**要求计划里贴完整实现代码。原则第 2 条「行为式不过程式」保留：不要把 brief 改成「先打开某文件第 N 行再怎么改」。
+
 ## 本仓接线
 
+- **工人不自审**：实现者禁止 Task 派审核子窗；刷新 CR 派发 md 仍允许，由 PM 在报告之后派审。
 - **Codex 桌面派发**：任务须随 spawn 初始消息投递（完整任务放初始消息；`followup_task` 补投不可靠，见 [model-routing.md](./model-routing.md) §Codex 桌面派发实测）。
 - **长任务**：可另落 `.ai-gates/tmp/{窗口}-{岗}-task.md` 作为任务唯一来源文件（收尾清空，见 CORE §工作区卫生）；委托书按本模板撰写，任务文件即唯一权威契约。

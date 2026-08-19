@@ -4,8 +4,10 @@
 #   powershell -NoProfile -File .cursor/scripts/migrate-pipeline-window.ps1 -DocFolder "..." -ToCategory 失败 -DryRun
 #
 # 行为：创建目标分类夹 → Move 方案夹（及同名 .meta）→ 改写夹内 **方案文件夹** →
+#       目标不是「执行中」时 gzip 窗内 unity-verify-*.log →
 #       repair-doc-crosslinks.ps1 -Path <docRoot> -Apply → REPORT。
 # 不改 update-doc-state.ps1 Transition 表（状态机与 Move 分离）。
+# 不压 *.json / *.md；迁回执行中不压缩。
 
 param(
     [Parameter(Mandatory = $true)]
@@ -41,9 +43,6 @@ function Resolve-DefaultDocRoot {
     $raw = Get-Content -LiteralPath $pc -Raw -Encoding UTF8
     if ($raw -match '(?ms)^##\s+执行文档存放约定\s*\r?\n(.*?)(?=^##\s|\z)') {
         $section = $Matches[1]
-        if ($section -match '`((?:Assets/)[^`]*?化学文档/压力系统)(?:/\{方案短名\}/|/)?`') {
-            return ($Matches[1] -replace '\\', '/').TrimEnd('/')
-        }
         if ($section -match '`((?:Assets/)[^`]+?)(?:/\{方案短名\}/|/)?`') {
             return ($Matches[1] -replace '\\', '/').TrimEnd('/')
         }
@@ -51,19 +50,33 @@ function Resolve-DefaultDocRoot {
     return $fallback
 }
 
+function Add-UniqueDocRoot {
+    param([System.Collections.Generic.List[string]]$List, [string]$Abs)
+    if (-not $Abs -or -not (Test-Path -LiteralPath $Abs)) { return }
+    $resolved = (Resolve-Path -LiteralPath $Abs).Path
+    if (-not ($List | Where-Object { $_ -eq $resolved })) { [void]$List.Add($resolved) }
+}
+
 function Get-DocRoots {
     param([string]$RepoRoot)
-    $roots = @()
-    $assetsDoc = Join-Path $RepoRoot ".ai-gates/Doc"
-    if (Test-Path -LiteralPath $assetsDoc) { $roots += , ((Resolve-Path -LiteralPath $assetsDoc).Path) }
+    $roots = New-Object System.Collections.Generic.List[string]
+    Add-UniqueDocRoot -List $roots -Abs (Join-Path $RepoRoot ".ai-gates/Doc")
     $overrideRel = Resolve-DefaultDocRoot -RepoRoot $RepoRoot
-    $overrideAbs = Join-Path $RepoRoot ($overrideRel.Replace('/', [string][IO.Path]::DirectorySeparatorChar))
-    if (Test-Path -LiteralPath $overrideAbs) {
-        $resolved = (Resolve-Path -LiteralPath $overrideAbs).Path
-        if (-not ($roots | Where-Object { $_ -eq $resolved })) { $roots += , $resolved }
+    $overrideNorm = (($overrideRel -replace '\\', '/').TrimEnd('/'))
+    if (-not $overrideNorm -or $overrideNorm -eq ".ai-gates/Doc") {
+        return @($roots.ToArray())
     }
-    # Emit flat string[] (avoid `return , $roots` nesting under `@()`).
-    return @($roots)
+    $overrideAbs = Join-Path $RepoRoot ($overrideRel.Replace('/', [string][IO.Path]::DirectorySeparatorChar))
+    if (-not (Test-Path -LiteralPath $overrideAbs)) { return @($roots.ToArray()) }
+    $parentAbs = Split-Path -Parent $overrideAbs
+    $repoFull = [IO.Path]::GetFullPath($RepoRoot)
+    $parentFull = [IO.Path]::GetFullPath($parentAbs)
+    if ($parentFull.StartsWith($repoFull, [StringComparison]::OrdinalIgnoreCase) -and ($parentFull.Length -gt $repoFull.Length)) {
+        Add-UniqueDocRoot -List $roots -Abs $parentAbs
+    } else {
+        Add-UniqueDocRoot -List $roots -Abs $overrideAbs
+    }
+    return @($roots.ToArray())
 }
 
 function Get-RepoRelative {
@@ -74,6 +87,55 @@ function Get-RepoRelative {
         return $full.Substring($rootFull.Length).TrimStart('\', '/').Replace('\', '/')
     }
     return $full.Replace('\', '/')
+}
+
+function Compress-UnityVerifyLogs {
+    param(
+        [string]$WindowRoot,
+        [switch]$DryRun
+    )
+    if (-not $WindowRoot -or -not (Test-Path -LiteralPath $WindowRoot)) {
+        Write-Host "gzip unity-verify logs: skip (window missing)"
+        return
+    }
+    $logs = @(Get-ChildItem -LiteralPath $WindowRoot -Recurse -File -Filter "unity-verify-*.log" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Extension -eq '.log' })
+    if ($logs.Count -eq 0) {
+        Write-Host "gzip unity-verify logs: none"
+        return
+    }
+    if ($DryRun) {
+        Write-Host "DryRun: would gzip $($logs.Count) unity-verify-*.log (delete plaintext; keep json/md)"
+        return
+    }
+    Add-Type -AssemblyName System.IO.Compression
+    $n = 0
+    foreach ($f in $logs) {
+        $dest = $f.FullName + ".gz"
+        $in = $null
+        $out = $null
+        $gz = $null
+        try {
+            $in = [System.IO.File]::OpenRead($f.FullName)
+            $out = [System.IO.File]::Create($dest)
+            $gz = New-Object System.IO.Compression.GZipStream($out, [System.IO.Compression.CompressionLevel]::Optimal)
+            $in.CopyTo($gz)
+        } finally {
+            if ($gz) { $gz.Dispose() }
+            if ($out) { $out.Dispose() }
+            if ($in) { $in.Dispose() }
+        }
+        if (-not (Test-Path -LiteralPath $dest) -or (Get-Item -LiteralPath $dest).Length -le 0) {
+            Write-Host "WARN: gzip failed, left plaintext $($f.Name)" -ForegroundColor Yellow
+            if (Test-Path -LiteralPath $dest) { Remove-Item -LiteralPath $dest -Force }
+            continue
+        }
+        Remove-Item -LiteralPath $f.FullName
+        $meta = $f.FullName + ".meta"
+        if (Test-Path -LiteralPath $meta) { Remove-Item -LiteralPath $meta }
+        $n++
+    }
+    Write-Host "gzip unity-verify logs: $n -> .log.gz"
 }
 
 # Resolve source folder
@@ -124,6 +186,11 @@ if ($DryRun) {
     Write-Host "DryRun: would create parent=$dstParent"
     Write-Host "DryRun: would Move folder + optional .meta"
     Write-Host "DryRun: would rewrite **方案文件夹** backticks inside window"
+    if ($ToCategory -ne "执行中") {
+        Compress-UnityVerifyLogs -WindowRoot $srcAbs -DryRun
+    } else {
+        Write-Host "DryRun: skip gzip (target=执行中)"
+    }
     Write-Host "DryRun: would run repair-doc-crosslinks.ps1 -Path <each docRoot> -Apply"
     exit 0
 }
@@ -167,6 +234,12 @@ foreach ($md in @(Get-ChildItem -LiteralPath $dstAbs -Recurse -Filter "*.md" -Fi
     }
 }
 Write-Host "Rewrote **方案文件夹** lines: $rewritten"
+
+if ($ToCategory -ne "执行中") {
+    Compress-UnityVerifyLogs -WindowRoot $dstAbs
+} else {
+    Write-Host "gzip unity-verify logs: skip (target=执行中)"
+}
 
 # repair md-links (+ 方案文件夹 backticks) under each doc root — always with -Path (never ForceRepo)
 $repairScript = Join-Path $scriptDir "repair-doc-crosslinks.ps1"

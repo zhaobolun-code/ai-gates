@@ -1,5 +1,5 @@
 ---
-name: 周报
+name: weekly-report
 description: 根据执行文档和/或 README 版本记录生成工作周报（供用户向非程序同事汇报）。用户说「周报」时使用。
 ---
 

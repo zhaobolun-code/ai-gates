@@ -103,6 +103,7 @@
 若本步 Delta Spec 含 MODIFIED/REMOVED：口径/A# 未同步前**不得**标方案 `completed`（可保持 `step-completed`）。
 
 **结案检查单硬项（迁夹）**：文档状态进入终态（`completed` / 用户签收结案 / 止损·放弃→失败夹 / 回退夹 / 空闲枢纽须离执行中）时，**同条必须**跑 `migrate-pipeline-window.ps1 -DocFolder … -ToCategory …`（或 doc-windowing §迁移动作同等：Move + 改写「方案文件夹」+ 链修复）。**禁止**只改状态字段仍停在 `执行中/`；未迁夹 → 视同**未结案**（PM 不得宣称收口）。
+**Express 落盘**：若已建分类夹（不论有无 `未完成.md`），终态 / 放弃 / 空闲离执行中同样适用上款迁夹硬项。未迁夹不得写「Express 已收口」。半截（只有 slice 的执行中窗）→ 同条迁 **停写/** 或删空壳，见 [doc-windowing.md](./doc-windowing.md) §与 Express。
 
 ## F. 用户「测试通过」→ 经验提议 + 口径提示 + 效果一行（P1.5）
 

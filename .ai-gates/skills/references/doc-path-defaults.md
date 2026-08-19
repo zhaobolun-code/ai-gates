@@ -48,6 +48,8 @@
 
 | **3** | 以上皆无 | **`.ai-gates/Doc/`**（通用 Skill 默认） |
 
+空壳扫描（`detect-empty-pipeline-windows.ps1`）：根 = `.ai-gates/Doc` **以及** project-context 文档路径的**主题父目录**（其下各主题的 `执行中/`）。通用包不把某一主题名写死为唯一业务根。无覆盖时只扫 `.ai-gates/Doc`。新建窗默认仍按上表优先级 2 的单一文档根。
+
 
 
 

@@ -3,7 +3,7 @@
 #   powershell -NoProfile -File .cursor/scripts/detect-empty-pipeline-windows.ps1
 #   powershell -NoProfile -File .cursor/scripts/detect-empty-pipeline-windows.ps1 -Apply
 #
-# 扫描 .ai-gates/Doc + project-context 压力文档根下 执行中/*。
+# 扫描 .ai-gates/Doc + project-context 文档路径的主题父目录下 **/执行中/*。
 # 合取判据：isEmptyShell = hasTemplatePlaceholder && !hasRealStepTitle && !hasEvidenceJson && !hasLiveState
 # -Apply：归档到 {docRoot}/签收/_空壳清扫-YYYYMMDD/{短名}/（Move，不 Delete）。
 
@@ -41,9 +41,6 @@ function Resolve-DefaultDocRoot {
     $raw = Get-Content -LiteralPath $pc -Raw -Encoding UTF8
     if ($raw -match '(?ms)^##\s+执行文档存放约定\s*\r?\n(.*?)(?=^##\s|\z)') {
         $section = $Matches[1]
-        if ($section -match '`((?:Assets/)[^`]*?化学文档/压力系统)(?:/\{方案短名\}/|/)?`') {
-            return ($Matches[1] -replace '\\', '/').TrimEnd('/')
-        }
         if ($section -match '`((?:Assets/)[^`]+?)(?:/\{方案短名\}/|/)?`') {
             return ($Matches[1] -replace '\\', '/').TrimEnd('/')
         }
@@ -51,19 +48,33 @@ function Resolve-DefaultDocRoot {
     return $fallback
 }
 
+function Add-UniqueDocRoot {
+    param([System.Collections.Generic.List[string]]$List, [string]$Abs)
+    if (-not $Abs -or -not (Test-Path -LiteralPath $Abs)) { return }
+    $resolved = (Resolve-Path -LiteralPath $Abs).Path
+    if (-not ($List | Where-Object { $_ -eq $resolved })) { [void]$List.Add($resolved) }
+}
+
 function Get-DocRoots {
     param([string]$RepoRoot)
-    $roots = @()
-    $assetsDoc = Join-Path $RepoRoot ".ai-gates/Doc"
-    if (Test-Path -LiteralPath $assetsDoc) { $roots += , ((Resolve-Path -LiteralPath $assetsDoc).Path) }
+    $roots = New-Object System.Collections.Generic.List[string]
+    Add-UniqueDocRoot -List $roots -Abs (Join-Path $RepoRoot ".ai-gates/Doc")
     $overrideRel = Resolve-DefaultDocRoot -RepoRoot $RepoRoot
-    $overrideAbs = Join-Path $RepoRoot ($overrideRel.Replace('/', [string][IO.Path]::DirectorySeparatorChar))
-    if (Test-Path -LiteralPath $overrideAbs) {
-        $resolved = (Resolve-Path -LiteralPath $overrideAbs).Path
-        if (-not ($roots | Where-Object { $_ -eq $resolved })) { $roots += , $resolved }
+    $overrideNorm = (($overrideRel -replace '\\', '/').TrimEnd('/'))
+    if (-not $overrideNorm -or $overrideNorm -eq ".ai-gates/Doc") {
+        return @($roots.ToArray())
     }
-    # Emit flat string[] (avoid `return , $roots` nesting under `@()`).
-    return @($roots)
+    $overrideAbs = Join-Path $RepoRoot ($overrideRel.Replace('/', [string][IO.Path]::DirectorySeparatorChar))
+    if (-not (Test-Path -LiteralPath $overrideAbs)) { return @($roots.ToArray()) }
+    $parentAbs = Split-Path -Parent $overrideAbs
+    $repoFull = [IO.Path]::GetFullPath($RepoRoot)
+    $parentFull = [IO.Path]::GetFullPath($parentAbs)
+    if ($parentFull.StartsWith($repoFull, [StringComparison]::OrdinalIgnoreCase) -and ($parentFull.Length -gt $repoFull.Length)) {
+        Add-UniqueDocRoot -List $roots -Abs $parentAbs
+    } else {
+        Add-UniqueDocRoot -List $roots -Abs $overrideAbs
+    }
+    return @($roots.ToArray())
 }
 
 function Get-RepoRelative {
@@ -138,7 +149,13 @@ foreach ($root in $docRoots) {
             if ($child.Name -match '^_') { continue } # skip archive buckets
             $scanned++
             $未完成 = Join-Path $child.FullName "未完成.md"
-            if (-not (Test-Path -LiteralPath $未完成)) { continue }
+            if (-not (Test-Path -LiteralPath $未完成)) {
+                $slice = Join-Path $child.FullName "express-slice.md"
+                if (Test-Path -LiteralPath $slice) {
+                    Write-Host ("WARN slice-only (not empty-shell Apply): {0}" -f (Get-RepoRelative -AbsPath $child.FullName -RepoRoot $repoRoot))
+                }
+                continue
+            }
             $content = Get-Content -LiteralPath $未完成 -Raw -Encoding UTF8
             $hasTpl = Test-HasTemplatePlaceholder -Content $content
             $hasReal = Test-HasRealStepTitle -Content $content

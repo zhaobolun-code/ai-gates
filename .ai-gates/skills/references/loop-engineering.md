@@ -16,9 +16,9 @@
 
 **启动前仍须「准」**（一轮确认包）。Standard/Full：「准」**默认** Auto；显式「准, 不 Auto」则单步。`lane: Full` ≠ `execution_mode: Auto`（正交）。
 
-## 1.5 状态外置（支柱 B · 可选）
+## 1.5 状态外置与 Step 账本（支柱 B）
 
-本节以下 `stop_reason`/`auto_steps_done`/`repair_rounds`/止损计数等字段，默认仍写在 `未完成.md` 文档状态段落（叙述性，人读）。有 `scripts/update-doc-state.ps1` 时**可选**把这些字段搬进方案夹的 `.state.json`（机器事实来源，非法迁移脚本直接拒绝，退出码非 0）：
+本节以下 `stop_reason`/`auto_steps_done`/`repair_rounds`/止损计数等字段，默认仍写在 `未完成.md` 文档状态段落（叙述性，人读）。有 `scripts/update-doc-state.ps1` 时把这些字段写入方案夹 `.state.json`（机器事实来源，非法迁移脚本直接拒绝，退出码非 0）：
 
 ```powershell
 powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -Init   # 新方案夹
@@ -29,7 +29,24 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 - `-IncrementAutoSteps`/`-IncrementRepairRounds` 按 §4 预算（3/2）自动派生 `reason=max_auto_steps`/`fuse reason=max_repair_rounds`；`-ResetAutoSteps` 对应「本窗 Auto」（不重置已触顶 `repairRounds`）
 - 止损计数用 `-SetStopLoss "标签=当前/上限"`
 - 人工越权用 `-Force -ForceReason "..."`（写入 `.state-history.jsonl`，标 `forced:true`，不建议常规使用）
-- 两者不同步时以 `.state.json` 为准；`未完成.md` 仍是给人看的叙述，脚本文件是给 Hook/CR 复核用的事实——**未落地为强制**，本 Step 只提供工具，不要求所有方案夹立即迁移
+- 两者不同步时以 `.state.json` 为准；`未完成.md` 仍是给人看的叙述，脚本文件是给 Hook/CR 复核用的事实
+
+**Step 账本（Standard/Full · 跨会话或压缩续作 · 不限 Auto）**：Standard/Full **凡跨会话或压缩续作都强制**账本字段（**不限 Auto**）。**跨会话或压缩续作**时无账本身份行不得派 Step N+1。同会话 Auto 连跑下一步**不强制**建账本。Express/Direct **禁止**建账本。
+
+权威优先方案夹 `.state.json`（经 `update-doc-state.ps1`）；无 sidecar 则写 `未完成.md` 文档状态必填行。无 `.state.json` 时不强制历史窗立刻 `-Init`；Standard/Full 跨会话或压缩续作若无 sidecar，必须在文档状态写同上必填行（含身份行）。人读副本可选 `证据/_step-ledger.md`；禁止与 `.state.json` 各写各的；人读副本**不得成为第三真源**。身份行必须能指回本窗 `未完成.md`；另一窗账本禁止读写。压缩或跨会话续作：信任账本 + git log，不信任会话记忆；已 `complete` 禁止重派。
+
+`stepPhase=complete` ≠ 文档主链 `docStatus=completed`；不要把 `currentStep` 当 `stepPhase`。`stepPhase` 仅 `dispatched` | `complete` | `parked`（ValidateSet 无第四态）。
+
+每 Step **禁止散文代替**，机器/文档须能还原为：
+
+- `Step N: dispatched | complete | fix round {repair_rounds}/2 | parked` — `complete`←`stepPhase=complete`；`parked`←`stepPhase=parked`；`dispatched`←`stepPhase=dispatched` 且 `repairRounds=0`；`fix round {repair_rounds}/2`←`stepPhase=dispatched` 且 `repairRounds>0`（由现字段 `repairRounds` 派生，文档别名 `repair_rounds`；不要另造平行计数器）
+- `BASE:` / `HEAD:` 短 SHA，**必须标仓键**；禁止裸 SHA；禁止用 `HEAD~1` 冒充 BASE。脚本：`-SetBaseRefs` / `-SetHeadRefs` 格式 `key:sha[,key:sha]`（`baseRefs` / `headRefs`）
+- `agent:` 子窗 id 或「主窗降级」（`agentId`）
+- `Ruling:` 仅触顶/裁决时写（`ruling` 字段位；本刀不实现 5 轮收敛）
+
+身份行 JSON：`ledgerPlan`（本窗 `未完成.md` 仓库相对路径；空则视为无身份行）。
+
+通用包：**必须标仓键，禁止裸 SHA**；仓键名从该仓 `project-context.md` 读；未配置则用 `default:` 标当前 git 根。**禁止**把项目专属仓键写进本通用页。
 
 ## 1.6 范围化预授权（可选 · 有额度 · 不免验）
 
@@ -58,6 +75,7 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 2. Auto **不**静默写 lessons 主表、不标 `runtime-validated`（主窗自验冒充隔离禁止）。规格漂移改口径/A#：可落草稿，**开码前**属硬停（须「准」）——见 diagnosis §0.5 / 硬停表。
 3. 每个 Step 在 CR 无 blocker 收口后 → **必须**待验：命中 AI 验收则派验收子窗（可瞬态 `await_verify reason=ai_static`；**禁止**只写 `unity_test` 干等）；未命中/不确定 → `await_human reason=unity_test`；禁止连开下一 Step 改码；**禁止多 Step 攒批再验**。
 3.1 **用户可见停点（Auto 启用）**：仅 (a) 待验 / AI 验收结果；(b) `max_auto_steps`；(c) diagnosis **硬停白名单**。中间选型包、测挂后对 `auto_follow: yes` 推荐的「准」→ **不发、不等**（同条执行并留据）。
+3.15 **实现者四态 × Auto（P0-2）**：`DONE_WITH_CONCERNS` → PM 写账本 `Ruling:`（采纳或记下疑点）后**可派 CR**，**不新增**用户停点（停点仍只有待验 / 预算 / 硬停）。禁止把 CONCERNS 当 DONE 偷溜；禁止 Auto 因 CONCERNS 干等。`BLOCKED` / `NEEDS_CONTEXT`：**不得**派 CR。Standard/Full **无四态第一行不得派 CR**。四态 ≠ `stepPhase=complete` ≠ `docStatus=completed`。
 3.2 **测挂**：走 [diagnosis-gates.md](./diagnosis-gates.md) §0（再改码前须 **有意义评审** §0.2.1；G*≠有意义≠A#）；`auto_follow: yes` 且未硬停 → 同条采纳【推荐】连跑至再次待验；硬停（含止损将到 2/3）→ 确认包等人。自动跟**不是**旁路 Exit Gate。
 4. Maker/Checker 分离：不得「自写自审通过」冒充隔离 CR；**Auto 不得降档**；验收子窗禁改任何仓库交付物。
 4.1 模型路由：Auto 改码 / CR / 方案审 / **验收/verify** 按 [model-routing.md](./model-routing.md)（project-context §模型路由优先；须显式传 `model=`；验收=高质量档）。
@@ -103,7 +121,7 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 ## 4. 默认预算
 
 - `max_auto_steps`：**3**（单次预算内最多推进至待验的 Step 数）
-- `max_repair_rounds`：**2**（交审级修复；微循环不计）
+- `max_repair_rounds`：**2**（交审级修复；微循环不计）。谁来修 / 换模型 / 复审范围 → §5.1（本数字仍为 **2**）
 - 停滞：同一失败标签 / 同一 Mandatory 无实质 diff 连续 **2** 轮 → `fuse`
 - **超时硬停（2026-08-05）**：同一 Step 连续 **60 分钟**无新 diff / 无新证据 / 无子窗返回 → `fuse reason=stall_timeout`；Auto 子窗无响应 **15 分钟** → 主窗接管（不再干等），按 §3 恢复路径处理。
 - **子窗确认（2026-08-07）**：执行期每 **5 分钟**一次短 wait + `list_agents` / 产物 mtime 确认；连续 3 轮（约 15 分钟）零活动 → 主窗接管；首轮 ACK 收紧为 **1 分钟** + 内容握手 → 细则见 [model-routing.md](./model-routing.md) §子窗健康检查与有界等待。
@@ -118,10 +136,15 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 
 - 微循环自检行为不变，**不计入** Checklist 7。
 - Checklist 7（权威见 `developer/SKILL.md`，勿钉行号）：**仅业务 C#** 的交审/交自检整轮累计；微循环、Skill/纯文档假需求不计；同一 Step 连续第 **2** 次 `static-checked` 修复仍未 Unity → 停，提示先测。
-- `repair_rounds`：进 Step 时为 0；**初次实现与初次隔离主 CR 不计**；CR 有 blocker 后、开始下一轮交审级修复前 `+=1`；`== max_repair_rounds` 且仍有 blocker → `fuse`，禁止第 3 轮修复。
-- **`repair_rounds` 与 Checklist 7 同一 Step 内独立、互不合并/重置，谁先触达谁生效**；新 Step 各自初始化为 0。
+- `repair_rounds`：进 Step 时为 0；**初次实现与初次隔离主 CR 不计**（初次实现 + 初次隔离主 CR **仍不计** `repair_rounds`）；CR 有 blocker 后、开始下一轮交审级修复前 `+=1`；`== max_repair_rounds` 且仍有 blocker → `fuse`，禁止第 3 轮修复。Minor / nit **不计入** `repair_rounds`。
+- **`repair_rounds` 与 Checklist 7 同一 Step 内独立、互不合并/重置，谁先触达谁生效**；新 Step 各自初始化为 0。只认现字段 `repair_rounds`（脚本 `repairRounds` 互认）；不要另造「第几次交审」计数器。
 - `max_repair_rounds` 触顶后，不因「本窗 Auto」/新会话重置；仅方案级恢复链 + 重新「准」后显式归零。
 - **触顶 → A# 复议**：`fuse reason=max_repair_rounds` 后【推荐】必须走 [diagnosis-gates.md](./diagnosis-gates.md) §0.7（A#/口径复议），**禁止**同 A# 再开交审修复；恢复链须含复议「准」与口径/A# 更新。
+- **修轮映射（Standard/Full）**：仓键从 `.cursor/project-context.md` 读；**禁止**本文件写死 `labsdk`。Express / Direct **不加厚**修轮手续。主窗 PM **禁止**在隔离 CR 有 blocker 时直接改业务码「顺手修」。
+  - `0 → 1`（第一次交审级修复）：resume 原实现子窗（同 agent id 若平台支持；否则新派但 **必须注入** P0-2 报告或口头四态 + findings 原文）
+  - `1 → 2`（第二次交审级修复）：新开实现者 + **至少高一档模型**（读 project-context §模型路由；须显式 `model=`）。该档不可用 → 按该表回退链，禁止省略 `model=`
+  - 仍有 blocker（将触顶 / 已 =2）：`fuse reason=max_repair_rounds`；PM 写 `Ruling:` 进账本（P0-1 字段 `ruling`；无 sidecar 则 `未完成.md`）后走 diagnosis-gates §0.7。**禁止**主窗自己改两行 Mandatory 当第 3 轮修。`Ruling:` 触顶去向 ≠ P0-2 CONCERNS 裁决（可复用同一账本字段位，语义分开）。四态 ≠ `stepPhase=complete` ≠ `docStatus=completed`。
+- 复审只审本轮 fix 的 BASE..HEAD（指针：[code-reviewer/SKILL.md](../code-reviewer/SKILL.md)）；整 Step 再全量 CR 当复审 = **反模式**。§6/§10「最新版 diff」= 初次隔离主 CR 口径，**不**代替 CR skill 钉 BASE..HEAD。
 - **证据黑板**：交审级修复前 Read `证据/_repair-blackboard.md` 最近 ≤3 条；失败追加一条（diagnosis §0.6）。
 
 ### 5.2 经验提议（E4）
@@ -167,6 +190,8 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 - Auto 跳过 Delta Spec；静默写 lessons；自动标 runtime-validated
 - 熔断重审把 Standard 误升 Full
 - 恢复路径统一直迁 `in-progress`；方案级跳过重新「准」
+- Auto 因 `DONE_WITH_CONCERNS` 干等（CONCERNS 不是第四停点）；把 CONCERNS 当 DONE 偷溜后派 CR
+- 全量复审当修轮复审；扩到 5 轮当新上限；主窗改 Mandatory 当第 3 轮修；触顶无 `Ruling:`
 
 ## 9. 复核派发工件（摘要）
 

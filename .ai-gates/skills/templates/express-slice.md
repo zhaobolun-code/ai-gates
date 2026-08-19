@@ -22,7 +22,7 @@
 
 - `[文件路径 1]`
 - （Express 须 ≤2 **业务源文件**，如 `.cs`；`.meta` 与同批 prefab 配套资源不计入）
-- **升级出口**：实改超机械范围 / 超 2 文件 / 跨模块 → 升 **Direct**（对话内 A#/切片）；再超 → **Standard / Full**（判定树，见 [CORE.md](../CORE.md) §四车道判定）
+- **升级出口**：实改超机械范围 / 超 2 文件 / 跨模块 → 停扩，交 PM 按 [CORE.md](../CORE.md) §四车道判定树重判。禁止本切片写死升 Direct。
 
 ## 复用四问（极简 · 见 execution-discipline）
 

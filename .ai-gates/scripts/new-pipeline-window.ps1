@@ -46,9 +46,6 @@ function Resolve-DefaultDocRoot {
     $raw = Get-Content -LiteralPath $pc -Raw -Encoding UTF8
     if ($raw -match '(?ms)^##\s+执行文档存放约定\s*\r?\n(.*?)(?=^##\s|\z)') {
         $section = $Matches[1]
-        if ($section -match '`((?:Assets/)[^`]*?化学文档/压力系统)(?:/\{方案短名\}/|/)?`') {
-            return ($Matches[1] -replace '\\', '/').TrimEnd('/')
-        }
         if ($section -match '`((?:Assets/)[^`]+?)(?:/\{方案短名\}/|/)?`') {
             return ($Matches[1] -replace '\\', '/').TrimEnd('/')
         }

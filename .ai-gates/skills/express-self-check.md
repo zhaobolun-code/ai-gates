@@ -7,6 +7,7 @@
 
 - PM 判定 **车道：Express**
 - 改动完成后，在同一条回复末尾输出本清单
+- **若已建分类夹**（`执行中/{短名}/`）：本清单必须写在窗内 `express-self-check.md`，与 `express-slice.md` 成对。禁止只有 slice 长期停执行中。不强制 `未完成.md`；无 CR / 账本 / 四态。收口须 migrate → [doc-windowing.md](./references/doc-windowing.md) §与 Express
 
 ## 自检清单（须逐项勾选）
 
@@ -31,7 +32,7 @@
 - 标题 **`[Express 自检 — 视同代码审核]`**
 - 首行 **`[developer]`**
 - 须含 **`车道：Express`** 与 **`证据等级：static-checked(静态核对)`**
-- 任一 □ 无法满足 → **不得**声明通过；实改超机械范围 / 超 2 文件 / 跨模块 → 升 Direct（再升 Standard/Full 按判定树）并说明原因
+- 任一 □ 无法满足 → **不得**声明通过；实改超机械范围 / 超 2 文件 / 跨模块 → 停扩，交 PM 按判定树重判（禁止本清单写死升 Direct）并说明原因
 
 ## 与代码审核岗
 

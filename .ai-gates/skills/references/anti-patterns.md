@@ -72,6 +72,7 @@
 | 首段仍 in-progress、状态已 blocked/测挂 | 下一 AI 误改码 | 首段=状态（[doc-windowing.md](./doc-windowing.md)） |
 | 热修/切片已被主窗放弃引用，短窗仍留「未完成」不封存 | 下一 Agent 误以为仍可改码；「永远未完成」误解 | 命中止损/用户放弃后同条归档或标 `archived`（doc-windowing.md §热修/切片失败或回退即封存） |
 | 无活跃 Mandatory / 无可改码窗的空闲枢纽长期停 `执行中/` | `执行中` 假活跃；下一 Agent 误开刀 | 空闲同条迁 **签收/**（续作再迁回执行中）；见 doc-windowing §状态分类夹 |
+| Express 落盘夹停 `执行中/` 且已无下一岗（含只有 slice 的半截窗） | 无收口挂钩；半截窗假活跃 | 已落盘=最小两文件 + 终态/放弃须 migrate；只有 slice → 停写或删空壳（[doc-windowing.md](./doc-windowing.md) §与 Express） |
 | 状态分类搬家手挪方案夹、不跑 `migrate-pipeline-window.ps1` | 漏改「方案文件夹」/跨链相对路径；下一窗读到假路径 | **必须** migrate；禁止手挪后只改状态字段（doc-windowing §迁移动作） |
 | 文档已 `completed`/签收/失败/回退（或空闲须离执行中），夹子仍停 `执行中/` 未 migrate | `执行中` 假活跃；可迁残留堆积 | **结案检查单硬项**：终态同条 migrate（或同等）；未迁夹=未结案（handoff §E） |
 | 诊断中、根因未钉死就抢先标 `archived` | 过度归档，掩盖仍在排查的问题 | 只有触发止损或用户/PM 明确放弃才归档（滥用反例 C5b） |
