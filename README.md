@@ -6,7 +6,7 @@
 
 A few that are rare elsewhere and already running here. Not a feature list.
 
-- **Delivery loop.** One folder per request; when done it must leave "in progress" (signed off / not passed). Replying `approve` = understanding + plan + one-shot go-ahead. Work gets closed out, not just its status word changed.
+- **Delivery loop.** One folder per request; when done it must leave "in progress" (signed off / not passed). A small change, once it has created a folder, must also leave "in progress" once tested or unclaimed — it can't camp on "not tested yet". Replying `approve` = understanding + plan + one-shot go-ahead. Work gets closed out, not just its status word changed.
 - **Error-book loop.** A failed test auto-writes L0 → the fix drafts a pending card → your `approve` moves it into the main table → next planning round reads it → hitting it escalates the review tier. Failures become rules, not chat history.
 - **Task routing.** PM assigns a model per task — light edits take the cheapest tier, planning/implementation the normal tier, code review and acceptance the high tier. Cost comparison (not a bill; relative prices min 1 : normal 2 : high 8): a standard window (plan + plan review + implement + isolated CR + acceptance) costs ≈ 40 all-high vs ≈ 22 routed — roughly 40–50% less high-tier spend. Collision / reverse-chain are exceptional procedures — enabled only when named, not part of the lanes, not counted in daily window cost.
 - **Stop-loss loop.** The same approach failing repeatedly gets archived and re-routed — this path is closed, no endless micro-patches.
@@ -95,7 +95,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Four-lane routing** | Express / Direct / Standard / Full auto-picked from the task (Direct: straight through, no written plan window; you can still force Full); escalates mid-task if the scope grows beyond the lane |
 | **Stop-loss chain** | Repeated same-approach fails → forced reassessment / A# reopen—not endless micro-patches |
 | **Slice-first** | Even small edits start as a slice—what changes, what counts as passing; one slice at a time, over-scope stops |
-| **Mandatory review, tiered** | Where the lane requires it: no plan-review pass → no coding; CR blocker → not “done” (Express/Direct may skip plan review; Direct still requires isolated CR). Tiers escalate with risk: L1.5 for modules with past failures, L2 cross-module, Full L3, heat hit → L3 plan review / double CR, adversarial CR for high-risk |
+| **Mandatory review, tiered** | Where the lane requires it: no plan-review pass → no coding; CR blocker → not “done” (Express/Direct may skip plan review; Direct still requires isolated CR). Tiers escalate with risk: L1.5 for modules with past failures, L2 cross-module, Full L3, heat hit → L3 plan review / double CR, adversarial CR for high-risk. L1.5 defaults to spec+norm axes; review does not re-run tests the implementer already reported; an agent claim of having tested must name the command |
 | **Round confirmation** | One confirm package per decision (`approve`); no silent start of implement/CR |
 | **grill clarification** | Requirements undecided (vague / large / still split after repeated clarification)? One question at a time until the decision tree is exhausted before writing anything; each question carries a recommended answer; approval stays a single round (`approve`) |
 | **Harness + Auto** | In-session gates constrain the agent; after `approve`, Standard/Full may run implement↔CR until hard-stop or await-verify (Express/Direct: no Auto) |
@@ -103,15 +103,17 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Roles** | PM dispatches planner / developer / CR / docs; main chat stays PM when possible |
 | **Subagents** | Prefer isolated sub-sessions for implement/review so the main chat stays PM-only—not one mega-thread |
 | **Model routing** | Three-tier task routing: light edits take the cheapest tier, planning/implementation the normal tier, code review and acceptance the high tier (project-configurable)—not the same cheap model for both review and implementation |
-| **Windowed docs** | One task = one folder (plan / physical spec / evidence / done); status-classified |
+| **Windowed docs** | One task = one folder (plan / physical spec / evidence / done); status-classified. Express normally creates no window; once a folder exists it must carry a slice + self-check and be migrated away when done |
 | **Physical spec** | Hard constraints + negative constraints + failure criteria (Standard/Full windows) |
 | **Blackboard** | Per-window repair log: what changed → why failed → do not repeat |
 | **Lessons** | Cross-window error book; drafts auto, **your `approve`** required before the project table |
 | **Allusion guardrails** | An agreed allusion term instantly recalls a whole shared consensus (registered in the shared-language allusion dictionary; silent redefinition forbidden); survives model or person switches |
 | **Delta Spec** | ADDED / MODIFIED / REMOVED tracked per step; no silent scope creep |
+| **Implementer four-state** | The coding sub-window reports first: done / has doubt / stuck / lacks context; Standard and Full lanes do not dispatch review without this line. Fast lanes keep the one-line self-check, no four-state |
 | **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done. Hot-path regression modules auto-run a smoke check and collect logs/screenshots/test reports as evidence — auto-verification ≠ manual acceptance |
 | **Repeatable assertions (TDD)** | An external dotnet NUnit test project at the repo root (e.g. `Tests/EditMode/`) is a repeatable regression guard: run it after business changes, green trx required (total≥70, failed=0); assertions green ≠ business accepted — manual testing still applies. Steps with mechanically verifiable acceptance default to writing assertions first (test-first on by default; forced when the plan/PM names it) |
 | **File portals** | One `.ai-gates/` library shared via link-platform portals by Cursor/Codex/Trae/Claude Code — one edit applies everywhere, no four drifting copies |
+| **Cross-session ledger** | Standard/Full lanes switching chats mid-work reconcile the account first; completed steps must not be re-dispatched. Fast lanes keep no ledger |
 
 ### Platform
 
