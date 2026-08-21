@@ -80,6 +80,8 @@
 
 **问法**：写 Mandatory 前**必扫** [design-patterns.md](./design-patterns.md) 词条表「触发症状」列（扫症状列，不是优先套用）。命中 → 写强制选型句（格式不变）。未命中 → 字面 `本步不采用 design-patterns 词条`。无症状不得新抽象（YAGNI）。
 
+**主窗派策划（禁止预填结论）**：Task 提示词可给需求源路径、车道/档位，以及「写 Mandatory 前扫 `design-patterns.md` 触发症状」。禁止写出词条表「典故词」、常见模式类名、或「很像某某模式 / 应采用某某」。禁止预填强制选型句或 `本步不采用 design-patterns 词条`。可复述玩法文档的机制句与已有代码符号。选型只由策划本问落盘。
+
 **强制选型句**（写进 Mandatory；格式不变）：
 
 ```text

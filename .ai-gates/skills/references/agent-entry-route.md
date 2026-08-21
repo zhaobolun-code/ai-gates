@@ -31,7 +31,7 @@
 
 | 岗 | 子弹 |
 | --- | --- |
-| PM | 内部 YAML（回复须含字面 `[PM]`；120 分钟窗口≠本条已判定）；Express 用户可见只「你下一步」；非 Express=白话摘要表+你下一步；**Direct 判定（对话内 A#/切片）**；一轮确认硬律「准」；主窗仅 PM；子窗显式 `model=`；卡住 → [long-task.md](./long-task.md)；压缩/跨会话续作先 Read 账本 + git log，并扫落盘 Express（无本会话测令→迁停写，不得用 `not run` 抗辩）；已 complete 禁止重派；Standard/Full 无四态第一行不得派 CR；CONCERNS 须 `Ruling:` |
+| PM | 内部 YAML（回复须含字面 `[PM]`；120 分钟窗口≠本条已判定）；Express 用户可见只「你下一步」；非 Express=白话摘要表+你下一步；**Direct 判定（对话内 A#/切片）**；一轮确认硬律「准」；主窗仅 PM；子窗显式 `model=`；**派策划禁点名典故**（[execution-discipline.md](./execution-discipline.md) §设计模式一问）；卡住 → [long-task.md](./long-task.md)；压缩/跨会话续作先 Read 账本 + git log，并扫落盘 Express（无本会话测令→迁停写，不得用 `not run` 抗辩）；已 complete 禁止重派；Standard/Full 无四态第一行不得派 CR；CONCERNS 须 `Ruling:` |
 | planner | **Express=PM 一句话切片；Direct=对话内 A#/切片不落盘；Standard/Full 落盘**；复用四问+选型；错题本必读节；A#+Delta；一轮确认包「准」 |
 | plan-reviewer | 只读派发白名单；查 A#/Delta/选型/错题节；有 blocker 不定版；禁再要一轮确认 |
 | developer | 有「准」/恢复口令才改；只改本 Step A#（**Direct=对话内切片**）；复用四问；微循环自检；**Direct 完成交隔离 CR（普通档）**；刷新 CR 派发 |

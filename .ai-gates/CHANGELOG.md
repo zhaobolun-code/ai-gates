@@ -11,6 +11,8 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-21：METHODOLOGY 增「项目典故试验」一次实测（跨仓库；玩法不写模式名时症状表对上词条并落地；人测后签收已落盘）。不 bump VERSION
+- 2026-08-21：派策划禁止预填字典结论：主窗 Task 提示词可点名 `design-patterns.md` 扫症状，禁止写出典故词 / 「很像某某模式」/ 预填采用句；选型只由策划 1.2 落盘。不 bump VERSION
 - 2026-08-20：evolution-12-source-first-pm-inherit：Discover 从物质生成点起查；业务路径子窗可继承父会话新鲜 [PM]（inherited_parent_pm）。不 bump VERSION
 - 2026-08-20：evolution-11-matt-borrow：Matt 1–7 薄句接到现闸（点名本刀红/绿、听不懂重说、三条反模式、问卷先两句、气味永远是判断、`<REDACTED>`、原型结论留证据）。不 bump VERSION
 - 2026-08-20：evolution-10-verify-hardness：有闸 TDD / 立即派 CR / DONE 须命令 / 修轮禁止同档连派；用户过目迁签收；成功经验写入错题主表。不 bump VERSION

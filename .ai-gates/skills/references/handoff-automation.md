@@ -51,6 +51,8 @@
 3. Standard/Full：默认启用 Auto（§H；`auto_steps_done=0`），除非用户用了退出句；Express / Direct：**不**启用 Auto
 4. `[developer]` 立即改码（仅当前 Step / 登记窗）：**必须** Task 子窗，并按 [model-routing.md](./model-routing.md) 解析后的首选 slug **显式**传 `model=`（project-context §模型路由优先）
 
+**派策划 Task**：提示词禁点名典故 / 「很像某某模式」；扫 `design-patterns.md` 触发症状由策划完成。细则 [execution-discipline.md](./execution-discipline.md) §设计模式一问。
+
 ## G. 续链合并包 → 开窗并开始改码（禁止拆两轮）
 
 **触发**：本窗已签收，且仍有明确下一刀（β→γ 等）。
