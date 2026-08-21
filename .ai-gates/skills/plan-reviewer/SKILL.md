@@ -59,6 +59,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 3.18 **本地自进化环（轻量）**：假装 gh 已通/已下发 → **blocker**；未「准」写入 `shared-language.md` §典故或 `anti-patterns.md` → **blocker**；写成第七岗 / 第 7 行 / 平行队列 / 新建通用错题主表 → **blocker**。
 3.19 **GitHub 收集仓（轻量）**（[collect-queue.md](../references/collect-queue.md)）：把「准」写成建 issue/开 PR → **blocker**；把 issue 当主通道而仓已是 PR 仓 → **blocker**；`gh repo create` → **blocker**；未探测成功仍写「gh 已接线/已通/已下发」→ **blocker**；写成第七岗 / 第 7 行 / `github-collect.md` / 第二套队列 → **blocker**。
 3.20 **Skill 回传（轻量）**（[pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化）：把收集仓合并写成已下发 → **blocker**；把下发写成拉 collect 仓 → **blocker**；第七岗 / 第 7 行 → **blocker**；未升级成功自称已下发 → **blocker**。
+3.21 **机械 A# 无最小断言**（[test-first.md](../references/test-first.md)）：本 Step A# 含可机械验证项却无最小断言（`证据/test-first/` 或既有测试路径）→ **major**。不可机械项不启用 test-first，不得因此 major。三条反模式（测私有实现 / 同一套公式 / 先写完全部测试）命中 → 判断/major，不得写成全程 TDD 硬挡。
 4. 有 blocker → 不得 `implementation-ready` / 可交给程序员=是；策划正确响应后可提醒提议 lessons 类型=`方案blocker`（须「准」，见 [lessons-learned.md](../references/lessons-learned.md)）
 5. **L1.5 触发**（CORE §Standard 加强审核）：每 Step 的 Regression Validation 须引用 project-context 回归索引对应行；plan-lite「方案审核档位」记 **L1.5**
 6. **L2 触发**（CORE §Standard 交叉审核）：跨 2+ 业务模块 → 档位 **L2**；**优先** Subagent 隔离（见 [isolated-review.md](../references/isolated-review.md)）；失败再提示手动新开；同 Chat 标 **「L2 非独立复核」**

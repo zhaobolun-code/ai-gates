@@ -11,6 +11,12 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-20：evolution-12-source-first-pm-inherit：Discover 从物质生成点起查；业务路径子窗可继承父会话新鲜 [PM]（inherited_parent_pm）。不 bump VERSION
+- 2026-08-20：evolution-11-matt-borrow：Matt 1–7 薄句接到现闸（点名本刀红/绿、听不懂重说、三条反模式、问卷先两句、气味永远是判断、`<REDACTED>`、原型结论留证据）。不 bump VERSION
+- 2026-08-20：evolution-10-verify-hardness：有闸 TDD / 立即派 CR / DONE 须命令 / 修轮禁止同档连派；用户过目迁签收；成功经验写入错题主表。不 bump VERSION
+- 2026-08-19：divergence-drill-gate 成功经验准写入错题主表。不 bump VERSION
+- 2026-08-19：divergence-drill-gate Step1 对照 + METHODOLOGY §7；用户过目迁签收。不 bump VERSION
+- 2026-08-19：divergence-drill-gate：闸门三态题面开分歧实验窗（Skill/Doc-only；启用分歧标注，不启用逆链/碰撞）。不 bump VERSION
 - 2026-08-19：README 机制表补交付闭环/文档窗/审查门禁，并加跨会话账本、实现者四态；USER-GUIDE 一句 Express 建夹须迁、换对话续做接着上次。不 bump VERSION
 - 2026-08-19：待办对照表已清空：Superpowers P0–P2 与 Express D1–D4 两份对照清单迁 `Doc/AI流水线/签收/`。不 bump VERSION
 - 2026-08-19：express-closeout-d4：check-pipeline-doc 对文档状态 vs 给程序员/关系表交叉核对打 warning；-Strict 不把本刀升 error。不 bump VERSION

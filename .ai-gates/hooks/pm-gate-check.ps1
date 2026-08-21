@@ -147,6 +147,61 @@ function Emit-Deny {
     Write-Output ($result | ConvertTo-Json -Compress)
 }
 
+# 业务路径子窗继承：仅当本 conversation 无新鲜 [PM]，且唯一父 transcript 存在，且父 lastPmAtUtc 在 120 分钟内。
+# 禁止任意会话有 PM 即放行。找不到父 / 父不新鲜 / 父文件>1 / conversation_id=unknown → 仍 DENY。禁止把 Level 1 改成继承。
+function Resolve-UniqueParentConversationId {
+    param([string]$ChildId)
+    if ([string]::IsNullOrWhiteSpace($ChildId) -or $ChildId -eq "unknown") {
+        return $null
+    }
+    $projectsRoot = Join-Path $env:USERPROFILE ".cursor\projects"
+    if (-not (Test-Path -LiteralPath $projectsRoot)) { return $null }
+    $hits = New-Object System.Collections.Generic.List[string]
+    try {
+        $projDirs = [System.IO.Directory]::GetDirectories($projectsRoot)
+    } catch {
+        return $null
+    }
+    foreach ($proj in $projDirs) {
+        $transcriptsRoot = Join-Path $proj "agent-transcripts"
+        if (-not [System.IO.Directory]::Exists($transcriptsRoot)) { continue }
+        try {
+            $parentDirs = [System.IO.Directory]::GetDirectories($transcriptsRoot)
+        } catch {
+            continue
+        }
+        foreach ($parentDir in $parentDirs) {
+            $childFile = Join-Path $parentDir ("subagents\" + $ChildId + ".jsonl")
+            if ([System.IO.File]::Exists($childFile)) {
+                $hits.Add([System.IO.Path]::GetFileName($parentDir))
+            }
+        }
+    }
+    if ($hits.Count -ne 1) { return $null }
+    return $hits[0]
+}
+
+function Try-EmitInheritedParentPm {
+    param(
+        [string]$ConversationId,
+        $Gate
+    )
+    if ($ConversationId -eq "unknown") { return $false }
+    $parentId = Resolve-UniqueParentConversationId -ChildId $ConversationId
+    if (-not $parentId) { return $false }
+    $parentEntry = $Gate.$parentId
+    if (-not $parentEntry -or -not $parentEntry.lastPmAtUtc) { return $false }
+    try {
+        $parentPmUtc = [DateTime]::Parse($parentEntry.lastPmAtUtc).ToUniversalTime()
+    } catch {
+        return $false
+    }
+    $parentAgeMinutes = ([DateTime]::UtcNow - $parentPmUtc).TotalMinutes
+    if ($parentAgeMinutes -gt $FreshnessMinutes) { return $false }
+    Emit-Allow ("inherited_parent_pm_age={0}min parent={1}" -f [Math]::Round($parentAgeMinutes, 1), $parentId)
+    return $true
+}
+
 # kill switch first (no stdin parse needed)
 if (Test-Path -LiteralPath $killSwitch) {
     Emit-Allow "kill_switch_active"
@@ -257,6 +312,7 @@ try {
 
 $entry = $gate.$conversationId
 if (-not $entry -or -not $entry.lastPmAtUtc) {
+    if (Try-EmitInheritedParentPm -ConversationId $conversationId -Gate $gate) { return }
     $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "no_pm_marker_for_conversation" -UserHint $hint
     return
@@ -272,6 +328,7 @@ try {
 
 $ageMinutes = ([DateTime]::UtcNow - $lastPmUtc).TotalMinutes
 if ($ageMinutes -gt $FreshnessMinutes) {
+    if (Try-EmitInheritedParentPm -ConversationId $conversationId -Gate $gate) { return }
     $hint = "逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 $FreshnessMinutes 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail ("stale_pm_marker_age={0}min" -f [Math]::Round($ageMinutes,1)) -UserHint $hint
     return

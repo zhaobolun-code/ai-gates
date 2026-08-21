@@ -34,6 +34,7 @@
 ```
 
 禁止：先问用户理解/开始改码，再交方案审；禁止方案审通过后再拆第二轮用户确认。
+一次「准」后无 blocker 的实现交回接线见 **§H**（立即派 CR；禁止再发用户确认包）。
 
 ## F. 一次确认包 → 定版并开始改码
 
@@ -85,6 +86,7 @@
 4. **Exit 分支（机械）**：
    - **热路径批量回归义务（叠加）**：若 `.cursor/project-context.md` 有 **§热路径批量回归**，且 Mandatory 触及表内路径 glob → 标 `step-completed` / `runtime-validated` **前**须表内场景 ID exit 0（JSON；跑前关 Unity Editor）；不跑/红不得标过；**禁**批量回归绿冒充业务 A#（≠有意义评审）。无该节则本条不触发。
    - **命中 AI 验收**：Mandatory **无**业务 C#（路径规则见方案物理口径#0：仅看将改路径，文档提及 `.cs` 名不算）**且**「Unity 验证」trim 后大小写不敏感精确∈{`无`,`N/A`,`Skill/Doc-only`}，**且** verify 派发齐套已存在（lifecycle `mode=verify` + `templates/verify-dispatch.md` + 模型表「验收/verify」行）→ 主窗 PM **必须**落 `证据/_Step{NN}-验收派发.md` 并派高规格验收子窗（`mode=verify`，显式 `model=` 高质量档；剧本=本 Step Unity 验证+Regression；子窗禁改任何仓库交付物）。**禁止**只写 `await_human reason=unity_test` 干等。派发前可瞬态 `stop_reason=await_verify reason=ai_static`（子窗返回后消）。通过≡「测试通过」走 §E 同条抬升+Auto 续；不通过≡测失败（diagnosis/L0）。
+   - **失败可证伪（Skill/Doc-only）**：Skill/Doc-only 已命中 AI 验收 → **必须派 verify**；只写 `await_human reason=unity_test` 干等=失败。禁止把 AI 静态验收扩到业务 C# 冒充 Play。业务 C# 机械项走 [test-first.md](./test-first.md) + 本条命令，禁止「等人看见 / 口头过」顶替机械项绿。
    - **未命中 / 不确定是否业务 C# / Unity 字段缺失·未知·非免测集合 / 齐套不存在** → `await_human reason=unity_test`（**你下一步**：请 Unity 测；此为验证，非方案确认轮）；**禁止**派 AI 验收抬升。
 
 **Auto 启用时（强制叠加）**：除上列外，必须同时执行共同 Exit Gate / [loop-engineering.md](./loop-engineering.md)：**`auto_steps_done +1`** 后只写**一个** `stop_reason`——命中且派验收前可瞬态 `await_verify reason=ai_static`；人测路径未耗尽预算 → `await_human reason=unity_test`；已耗尽 → `await_human reason=max_auto_steps`。文档状态均为 `step-completed`（含瞬态 `await_verify`）。禁止只走本节简化收口而不写 stop_reason/步数。**优先级**：Exit Gate / §H **优先于**本节省略路径。
@@ -134,6 +136,7 @@ Standard/Full：确认包【推荐】「准」→ **默认本窗启用 Auto**（
 实现 + **隔离主 CR** 无 blocker → `auto_steps_done +1` → 按 §C Exit 分支写**唯一** reason：命中 AI 验收 → 派验收子窗（可瞬态 `await_verify reason=ai_static`，**禁止**只写 `unity_test` 干等）；未命中/不确定 → `< max_auto_steps` → `await_human reason=unity_test`；`≥` → `await_human reason=max_auto_steps`；文档均为 `step-completed`。**禁止**未验改下一 Step；**禁止多 Step 攒批再验**。
 
 **用户停点**：待验 / AI 验收 / `max_auto_steps` / diagnosis 硬停。Auto 下**禁止**在实现↔CR 之间或可自动跟的测挂推荐上再发确认包。
+**立即派 CR（准后无 blocker）**：一次「准」后无 blocker，实现子窗交回须**立即派 CR**；中间**禁止再发用户确认包**。禁止教「请先测再让我派 CR」。禁止只写口号、禁止第二套 Auto。权威只落本节（§0 可互指一句；禁止写进 §F）。
 
 ### 口令
 

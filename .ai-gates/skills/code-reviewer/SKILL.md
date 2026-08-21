@@ -32,6 +32,8 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 1.12 **修轮复审范围（硬挡）**：复审 **只审**本轮 fix 的 BASE..HEAD（派发带 SHA 范围；仓键从 `.cursor/project-context.md` 读，与 P0-1 同一套；**禁止**本文件写死 `labsdk`）。loop-engineering §6/§10「最新版 diff」≠ 已钉 SHA，本条才是复审范围。禁止整 Step 再全量 CR 当「复审」（**反模式**）。未改动文件上的新意见 → 记 minor/parked，**不**延长修轮。仅 minor / nit **不计入** `repair_rounds`。
 1.13 **派审后额外提交（硬挡）**：若 diff 含「主窗在派审后、收口前」对该 Step **Mandatory 点名的业务文件**的额外提交且无 `Ruling:` → **blocker**（不用 major）。对照账本 `BASE`（P0-1；仓键从 `.cursor/project-context.md` 读）。禁止口头猜「是不是主窗改的」。**禁止**本文件写死仓键 `labsdk:`。排除（不算违规）：改文档状态字段 / `migrate-pipeline-window.ps1` / 用户「准」之后的口径/A# 复议落盘 / 硬停白名单已等人「准」的改动。
 1.14 **无命令自称 locally-validated（硬挡）**：Agent 无命令输出却自称 `locally-validated` → **major**（写死 **major**，不是 blocker，不是 nit）。用户口头签收不算这条 major。禁止把用户口头改写成 Agent 已 Play。细则 → [evidence-levels.md](../references/evidence-levels.md)。
+1.145 **有机械 A# 无最小断言（硬挡）**：本 Step A# 含可机械验证项却无最小断言（`证据/test-first/` 或既有测试路径）→ **major**（不可机械项除外）。点名 [test-first.md](../references/test-first.md)。三条反模式命中（测私有实现 / 同一套公式 / 先写完全部测试）→ 判断/major（不得写成全程 TDD 硬挡）。
+1.146 **DONE 无同条命令（硬挡）**：自称 **DONE** 且本步有可跑命令却无同条退出码/失败计数 → **major**；PM 见 DONE 无命令 → 不得当无事派 CR。不新造证据等级。
 1.15 **图谱定向（审核岗）**：**优先 CRG**（diff / `detect-changes` / impact / review context；业务 C# 在 `Assets/LabSDK` 子模块时对子模块根查图，见 [codegraph-probe.md](../references/codegraph-probe.md)）；需 verbatim 或 CRG 未命中符号时再窄用 `codegraph_explore`。**禁止**宣称 CodeGraph「额度已用尽」后整轮改 Grep/Read；禁止全目录扫读；禁止 CRG+CodeGraph 各跑一遍完整影响面。本 Step **仅** Skill/Doc、无业务 C# 时无图谱 → soft risk / 验证缺口，**不得**单独 hard blocker 挡收口
 1.16 **不重跑实现者已报测试（硬挡）**：CR 默认**不**为「确认报告」重跑同一命令；对照 diff 核查声称。报告缺命令/缺输出 → 记 **验证缺口**，禁止用跑黄金/包级套件来补洞。仅当 diff 让审核者对某断言产生 **点名怀疑** 时，才跑 **聚焦** 命令（单测/单文件）。project-context 热路径黄金回归仍按 **结案/A#**（developer **2.4**）触发，不改成「每次 CR 必跑」。
 1.2 **命中文件热度时反推同类隐患**：本次 diff 涉及的文件/模块若命中 `lessons-learned.md`，**不止核对该条教训本身是否复现**，还要用该教训的根因反问一遍当前 diff 是否存在同类风险（参考 L3 多轮独立审的"换角度攻击"思路，如：单位/顺序/因果关系类教训 → 查本次 diff 有无同类隐患，即使触发路径不同）；无同类风险须在 findings 中写一句「已按 [教训一句话] 反推，未发现同类隐患」
@@ -51,7 +53,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 
 ## 双轴模式（L1.5+ 默认）
 
-规范轴（standards）+ 规格轴（spec）分开扫、结论分组防污染（与对抗模式并列，不替代）。Standard L1.5+ 与 Full **主 CR** 默认 `axis: standards+spec`；findings 必须分组 `[规格轴]` / `[规范轴]`。Direct 普通档：**保持单表**；不默认 `axis`。Express：不启用双轴。禁止用规范轴风格偏好当规格轴 blocker。细则 → [dual-axis-review.md](../references/dual-axis-review.md)。
+规范轴（standards）+ 规格轴（spec）分开扫、结论分组防污染（与对抗模式并列，不替代）。Standard L1.5+ 与 Full **主 CR** 默认 `axis: standards+spec`；findings 必须分组 `[规格轴]` / `[规范轴]`。Direct 普通档：**保持单表**；不默认 `axis`。Express：不启用双轴。禁止用规范轴风格偏好当规格轴 blocker。L1.5+ 规范轴可点名 5～6 条气味（神秘命名、重复、散弹手术、投机抽象、基本类型偏执、特性依恋）——**永远是判断**，不得单独当规格轴 blocker。仓库已有规则优先。Direct/Express 不加厚。细则 → [dual-axis-review.md](../references/dual-axis-review.md)。
 
 ## 审查维度
 

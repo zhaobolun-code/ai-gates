@@ -20,6 +20,7 @@
 - AI 不得在无用户或运行时证据时自行迁移文档状态至 `runtime-validated(运行已验证)`。
 - 证据等级表示**验证强度**；文档「状态」（见 `state-machine.md`）表示**流程阶段**。二者不可互相替代。
 - **Agent 自称** `locally-validated(本地已验证)` 时，**本条消息**必须含命令 + 退出码或失败计数。上一轮输出、会话记忆、「应该过了 / 编译没问题」都不算。
+- **Agent 自称** `DONE` 且本步有可跑命令时，**本条消息**必须含命令 + 退出码或失败计数；否则四态必须是 `DONE_WITH_CONCERNS`（不得写 `DONE`）。`DONE` 是实现者回传四态，不是新证据等级。
 - **用户** Unity 目视签收：仍可口头 `locally-validated(本地已验证)`；Agent **不得**因此改写成自己已 Play。
 - Unity 手测 / 黄金回归在用户或脚本证据出现前保持 `not run`。
 - 不新增第四套等级名；不把 `locally-validated` 并进 `runtime-validated`。

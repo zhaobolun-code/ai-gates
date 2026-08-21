@@ -74,7 +74,7 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 1. Auto **不**取消首轮「准」与验收（人测或 AI 验收二选一按触发；能 AI 测则子窗，不能再人测）。**不**因自动跟推荐而免验。
 2. Auto **不**静默写 lessons 主表、不标 `runtime-validated`（主窗自验冒充隔离禁止）。规格漂移改口径/A#：可落草稿，**开码前**属硬停（须「准」）——见 diagnosis §0.5 / 硬停表。
 3. 每个 Step 在 CR 无 blocker 收口后 → **必须**待验：命中 AI 验收则派验收子窗（可瞬态 `await_verify reason=ai_static`；**禁止**只写 `unity_test` 干等）；未命中/不确定 → `await_human reason=unity_test`；禁止连开下一 Step 改码；**禁止多 Step 攒批再验**。
-3.1 **用户可见停点（Auto 启用）**：仅 (a) 待验 / AI 验收结果；(b) `max_auto_steps`；(c) diagnosis **硬停白名单**。中间选型包、测挂后对 `auto_follow: yes` 推荐的「准」→ **不发、不等**（同条执行并留据）。
+3.1 **用户可见停点（Auto 启用）**：仅 (a) 待验 / AI 验收结果；(b) `max_auto_steps`；(c) diagnosis **硬停白名单**。中间选型包、测挂后对 `auto_follow: yes` 推荐的「准」→ **不发、不等**（同条执行并留据）。停点列表与 [handoff-automation.md](./handoff-automation.md) §H 对齐（实现↔CR 不是用户停点）。PM **必须按映射派**；**禁止同档连派两次当第二轮**（映射见 §5.1）。
 3.15 **实现者四态 × Auto（P0-2）**：`DONE_WITH_CONCERNS` → PM 写账本 `Ruling:`（采纳或记下疑点）后**可派 CR**，**不新增**用户停点（停点仍只有待验 / 预算 / 硬停）。禁止把 CONCERNS 当 DONE 偷溜；禁止 Auto 因 CONCERNS 干等。`BLOCKED` / `NEEDS_CONTEXT`：**不得**派 CR。Standard/Full **无四态第一行不得派 CR**。四态 ≠ `stepPhase=complete` ≠ `docStatus=completed`。
 3.2 **测挂**：走 [diagnosis-gates.md](./diagnosis-gates.md) §0（再改码前须 **有意义评审** §0.2.1；G*≠有意义≠A#）；`auto_follow: yes` 且未硬停 → 同条采纳【推荐】连跑至再次待验；硬停（含止损将到 2/3）→ 确认包等人。自动跟**不是**旁路 Exit Gate。
 4. Maker/Checker 分离：不得「自写自审通过」冒充隔离 CR；**Auto 不得降档**；验收子窗禁改任何仓库交付物。
@@ -143,6 +143,7 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 - **修轮映射（Standard/Full）**：仓键从 `.cursor/project-context.md` 读；**禁止**本文件写死 `labsdk`。Express / Direct **不加厚**修轮手续。主窗 PM **禁止**在隔离 CR 有 blocker 时直接改业务码「顺手修」。
   - `0 → 1`（第一次交审级修复）：resume 原实现子窗（同 agent id 若平台支持；否则新派但 **必须注入** P0-2 报告或口头四态 + findings 原文）
   - `1 → 2`（第二次交审级修复）：新开实现者 + **至少高一档模型**（读 project-context §模型路由；须显式 `model=`）。该档不可用 → 按该表回退链，禁止省略 `model=`
+  - PM **必须按映射派**；**禁止同档连派两次当第二轮**。`max_repair_rounds` 保持 **2**，禁止改成 5。
   - 仍有 blocker（将触顶 / 已 =2）：`fuse reason=max_repair_rounds`；PM 写 `Ruling:` 进账本（P0-1 字段 `ruling`；无 sidecar 则 `未完成.md`）后走 diagnosis-gates §0.7。**禁止**主窗自己改两行 Mandatory 当第 3 轮修。`Ruling:` 触顶去向 ≠ P0-2 CONCERNS 裁决（可复用同一账本字段位，语义分开）。四态 ≠ `stepPhase=complete` ≠ `docStatus=completed`。
 - 复审只审本轮 fix 的 BASE..HEAD（指针：[code-reviewer/SKILL.md](../code-reviewer/SKILL.md)）；整 Step 再全量 CR 当复审 = **反模式**。§6/§10「最新版 diff」= 初次隔离主 CR 口径，**不**代替 CR skill 钉 BASE..HEAD。
 - **证据黑板**：交审级修复前 Read `证据/_repair-blackboard.md` 最近 ≤3 条；失败追加一条（diagnosis §0.6）。

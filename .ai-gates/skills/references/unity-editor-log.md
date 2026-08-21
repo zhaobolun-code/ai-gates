@@ -44,7 +44,7 @@ powershell -ExecutionPolicy Bypass -File .cursor/scripts/verify-runtime-evidence
 1. 用 Shell/rg 查 Editor.log（勿整文件 Read 灌进上下文）
 2. 关键词来自：当前窗验收 A# / Mandatory 预期 Console / 用户白话现象对应审计标签
    （例：ValveFSM、SerialPendingAdvance、IngressBlocked、HandoverBlocked、CollectionDrainAudit）
-3. 只摘 ≤15 行相关 + 一行结论写入 Discover / 证据/ 摘要
+3. 只摘 ≤15 行相关 + 一行结论写入 Discover / 证据/ 摘要。贴命令/日志/产物前，密钥与 token 写成 `<REDACTED>`；只引信号行。禁止整段贴未脱敏 log。
 4. 仍不够 → 再请用户：补测一次，或贴短摘录 / 说明「刚 Play 过、日志已刷新」
 ```
 
