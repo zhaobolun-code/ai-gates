@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.3.0（发布 · express-closeout 四连 + evolution-08/09 + README 机制表 · minor；前版 4.2.2 定版信息保留）
+**当前 LTS**：v4.3.1（发布 · divergence-drill-gate 收尾 + evolution-10/11/12 + 派策划禁预填字典结论 · patch；前版 4.3.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -167,6 +167,25 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [4.3.1] - 2026-08-21（divergence-drill-gate 收尾 + evolution-10/11/12 + 派策划禁预填字典结论 · patch · 发布）
+
+### Included changes — 2026-08-21（派策划禁预填 + 典故试验实测 · 不 bump）
+
+- **派策划禁止预填字典结论**：主窗 Task 提示词可点名 `design-patterns.md` 扫症状，禁止写出典故词 / 「很像某某模式」/ 预填采用句；选型只由策划 1.2 落盘（planner / plan-reviewer SKILL + agent-entry-route / execution-discipline / handoff-automation 接线）。
+- **METHODOLOGY 增「项目典故试验」一次实测**：跨仓库；玩法不写模式名时症状表对上词条并落地；人测后签收已落盘。
+
+### Included changes — 2026-08-20（验证硬化 + 借用 + 子窗继承 · 不 bump）
+
+- **evolution-10-verify-hardness（验证硬化）**：有闸 TDD / 立即派 CR / DONE 须命令 / 修轮禁止同档连派；用户过目迁签收；成功经验写入错题主表。
+- **evolution-11-matt-borrow**：Matt 1–7 薄句接到现闸（点名本刀红/绿、听不懂重说、三条反模式、问卷先两句、气味永远是判断、`<REDACTED>`、原型结论留证据）。
+- **evolution-12-source-first-pm-inherit**：Discover 从物质生成点起查；业务路径子窗可继承父会话新鲜 [PM]（`inherited_parent_pm`，pm-gate-check.ps1 `Resolve-UniqueParentConversationId`）。
+
+### Included changes — 2026-08-19（分歧实验窗收尾 · 不 bump）
+
+- **divergence-drill-gate：闸门三态题面开分歧实验窗**（Skill/Doc-only；启用分歧标注，不启用逆链/碰撞）。
+- **divergence-drill-gate Step1 对照 + METHODOLOGY §7**；用户过目迁签收。
+- **divergence-drill-gate 成功经验准写入错题主表**。
 
 ## [4.3.0] - 2026-08-19（express-closeout 四连 + evolution-08/09 + README 机制表 · minor · 发布）
 
