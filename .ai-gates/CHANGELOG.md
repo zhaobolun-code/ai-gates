@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.4.0（发布 · 模型路由换档 + design-patterns 词条表结构调整 + 分歧标注两隔离槽 · minor；前版 4.3.1 定版信息保留）
+**当前 LTS**：v4.5.0（发布 · 车道判定改写 + Claude/Codex 业务写门禁接 inherited_parent_pm · minor；前版 4.4.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -175,6 +175,13 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [4.5.0] - 2026-08-25（车道判定改写 + Claude/Codex 业务写门禁接 inherited_parent_pm · minor · 发布）
+
+### Included changes — 2026-08-25（车道判定 + 门禁继承 · 不 bump）
+
+- **车道判定改写**：快道=仅 1 个文件且机械（原 ≤2 文件）；直通=默认小改（≤3 文件、无 API/存档/跨模块）；>3 文件或 API/存档/跨模块=标准；止损先升标准、标准上再止损才完整；**回归索引/路径不封车道**；PM 默认直通道（CORE / lane-glossary / full-lane-decision-tree / plan-review-tiers / express-self-check / express-slice / developer SKILL / README / USER-GUIDE / tl-onboarding / examples / pm-init / project-local-config / project-context.template / skill-eval-checklist / execution-discipline 同步）。
+- **Claude/Codex 业务写门禁接 `inherited_parent_pm`**：与 Cursor 同源——唯一父、120 分钟、禁止任意会话放行、禁止 Level 1 继承（`hooks/pm-gate-check.ps1` ×3：根 / claude / codex）；METHODOLOGY §8 补第二次实测（禁用边界拦住误套）。
 
 ## [4.4.0] - 2026-08-25（模型路由换档 + design-patterns 词条表结构调整 + 分歧标注两隔离槽 · minor · 发布）
 
