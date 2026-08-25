@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.3.1（发布 · divergence-drill-gate 收尾 + evolution-10/11/12 + 派策划禁预填字典结论 · patch；前版 4.3.0 定版信息保留）
+**当前 LTS**：v4.4.0（发布 · 模型路由换档 + design-patterns 词条表结构调整 + 分歧标注两隔离槽 · minor；前版 4.3.1 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -173,6 +173,18 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [4.4.0] - 2026-08-25（模型路由换档 + design-patterns 词条表结构调整 + 分歧标注两隔离槽 · minor · 发布）
+
+### Included changes — 2026-08-25（模型路由 + 词条表 + 复用四问 · 不 bump）
+
+- **模型路由换档**：高级档 Sonnet/Terra 改为 **Opus 5 / GPT 5.6 Sol**；最低档去掉 fast（model-routing.md + 四岗 SKILL 同步）。
+- **design-patterns 词条表结构调整**：取消行数上限（原 6 行 / 禁止第 7 行），仍一次一条、须真锚点、禁止全量 GoF 图鉴与同义双挂；新增词条「**特效适配器**」（锚点 `IEffectAdapter` + `EffectSpawner`，Flexalon 不当验证）与「**简单工厂**」（锚点 `ChemicalSubstanceDataFactory.CreateSubstanceData`，禁止抽象工厂引申）；项目口诀同义条删除以免双挂；shared-language「入表不是岗」同步。
+- **复用四问第 3 问补句**：平台 API 直调 + 少写不得牺牲物理；定级——CR nit（包一层）/ 方案审 major（包一层≠并行实现 blocker）；不装 Ponytail（execution-discipline + code-reviewer/developer SKILL）。
+
+### Included changes — 2026-08-24（分歧标注两隔离槽 · 不 bump）
+
+- **分歧标注规格改两隔离槽**：不同 id、B 不见 A 的链、对照/未裁由派发方写；产物回灌 isolated-review 便宜审（第二消费者）。仍非常规、点名才启用、不进车道、不标外源元认知（divergence-annotation + isolated-review 接线）。
 
 ## [4.3.1] - 2026-08-21（divergence-drill-gate 收尾 + evolution-10/11/12 + 派策划禁预填字典结论 · patch · 发布）
 
