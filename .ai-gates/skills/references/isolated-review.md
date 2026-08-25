@@ -71,7 +71,7 @@
 | Standard L2 方案审核 | **是** |
 | Full L3 每轮方案审核 | **是** |
 | 高风险对抗 CR | **是**（可选，用户可跳过） |
-| 单轮多视角分歧标注（divergence-annotation） | **否**（非默认；与 L1.5/L2 隔离审正交） |
+| 分歧标注（divergence-annotation） | **否**（非默认启用分歧；启用后的 DA 入队产物**回灌**本节便宜隔离审（L1.5 CR / 适用的方案审），不是与本节永远正交到不吃产物） |
 | 完整思考碰撞（collision-review，异模型三轮薄碰撞） | **否**（非默认；启用时碰撞文件自己派 Subagent，仍复用本节派发协议） |
 
 ## 主 Agent 派发时须做
@@ -79,8 +79,9 @@
 1. 组装最小派发块（路径、档位、Step、只读、禁改范围；**CR** 默认注明 `dimensions: quality+integration`，Full/高风险可 `+security`）；有活跃控制工件时优先生成/刷新点名 `证据/_…派发.md`（见 [review-dispatch-lifecycle.md](./review-dispatch-lifecycle.md)）  
 2. Reviewer **先读**点名派发工件，再**只读**工件白名单；校验 `target_revision` / `review_input_revision`，不匹配 → `blocked reason=stale_dispatch`  
 3. 若环境支持 Subagent/Task：按 §高风险审核异模型 选定 `model` 后启动；白话 **你下一步** 说明「已开隔离审核（异模型/同模型）」  
-4. 若不支持：输出派发块，请用户新开 Chat（高风险附「优先选 Sonnet 5」）  
+4. 若不支持：输出派发块，请用户新开 Chat（高风险附「优先选 Opus 5」）  
 5. 收回结论后：有 blocker → 交策划/程序员（Checker **不改**工件）；无 blocker → 按车道继续，**不**替用户宣布 Unity 已通过  
+6. 若窗内 `证据/_knowledge-gap.md` 有 **open** 且标注 `来源：分歧标注`，组装最短派发包时必须点名这些条目；审方须逐条表态（同意/不同意/须用户澄清）。这就是「同一族洞回灌便宜审」。  
 工人不自审：实现者禁止 Task 派审核子窗；Checker 不改码；主窗派审后不得改 Mandatory 点名的业务文件。
 
 ## 禁止
@@ -91,5 +92,5 @@
 - **无理由 Read `已完成/**`、`证据/**` 或 `历史全文-*`**（降 token 硬规则）  
 - 向隔离会话塞入第二份 1000+ 行方案或主对话长实现讨论  
 - Reviewer 修改派发工件；扫描整个 `证据/`；把非点名证据文件加入白名单
-- 把 `divergence-annotation` 单轮链冒充「隔离复核」或「完整思考碰撞」
+- 把单窗自写两链标成隔离复核；把缺三条证伪条件的分歧标成外源；把 `divergence-annotation` 冒充「完整思考碰撞」
 - 禁止把 collision-review 冒充日常隔离审，或把碰撞写成 5–8x 默认 / 同模型双链

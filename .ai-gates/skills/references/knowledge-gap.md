@@ -26,7 +26,7 @@
 
 ## 分歧来源
 
-经 [divergence-annotation.md](./divergence-annotation.md) 入队的条目，须在问题句或上下文位置标注 `来源：分歧标注` + `DA-{nn}`；仍须满足三要素；缺 DA 对照 → 拒收。收敛/升级规则不变（确认包清队、同族跨窗 ≥2 → 机制 A）。
+经 [divergence-annotation.md](./divergence-annotation.md) 入队的条目，须在问题句或上下文位置标注 `来源：分歧标注` + `DA-{nn}`；仍须满足三要素；缺 DA 对照 → 拒收。对照须由派发方写，条目不得由 A/B 自写对照冒充。收敛/升级规则不变（确认包清队、同族跨窗 ≥2 → 机制 A）。
 
 ## 碰撞来源
 

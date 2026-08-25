@@ -11,6 +11,12 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-25：高级档 Sonnet/Terra 改为 Opus 5 / GPT 5.6 Sol；最低档去掉 fast；不 bump VERSION
+- 2026-08-25：复用四问第3问补平台 API 直调 + 少写不得牺牲物理；CR nit（包一层）/方案审 major（包一层≠并行实现 blocker）；不装 Ponytail；不 bump VERSION
+- 2026-08-25：词条表增「特效适配器」；锚点 `IEffectAdapter` + `EffectSpawner`；Flexalon 不当验证。（现行技能）不 bump VERSION
+- 2026-08-25：词条表增「简单工厂（按类型创建）」；锚点 `ChemicalSubstanceDataFactory.CreateSubstanceData`；禁止抽象工厂引申。项目口诀同义条删除以免双挂。（现行技能）不 bump VERSION
+- 2026-08-25：design-patterns 词条表取消行数上限（原 6 行 / 禁止第 7 行）。仍一次一条、须真锚点、禁止全量 GoF 图鉴与同义双挂；第七岗仍禁。（现行技能）不 bump VERSION
+- 2026-08-24：分歧标注规格改为两隔离槽（不同 id、B 不见 A 的链、对照/未裁由派发方写）；产物回灌 isolated-review 便宜审（第二消费者）。仍非常规、点名才启用、不进车道、不标外源元认知。不 bump VERSION
 - 2026-08-21：METHODOLOGY 增「项目典故试验」一次实测（跨仓库；玩法不写模式名时症状表对上词条并落地；人测后签收已落盘）。不 bump VERSION
 - 2026-08-21：派策划禁止预填字典结论：主窗 Task 提示词可点名 `design-patterns.md` 扫症状，禁止写出典故词 / 「很像某某模式」/ 预填采用句；选型只由策划 1.2 落盘。不 bump VERSION
 - 2026-08-20：evolution-12-source-first-pm-inherit：Discover 从物质生成点起查；业务路径子窗可继承父会话新鲜 [PM]（inherited_parent_pm）。不 bump VERSION

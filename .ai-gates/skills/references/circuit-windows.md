@@ -26,4 +26,4 @@
 
 ## 禁止
 
-- 新建岗 SKILL；改 4.11；改 design-patterns 6 行；改 execution-discipline 必扫；改业务 C#；bump VERSION；写「逆链已通过」；写调度脚本。
+- 新建岗 SKILL；改 4.11；改 execution-discipline 必扫；改业务 C#；bump VERSION；写「逆链已通过」；写调度脚本。

@@ -17,7 +17,7 @@
 ## 目标
 
 - 主窗保持短、稳、可交接；规格与实现上下文不挤进 PM 对话。  
-- 普通档（Grok 4.6）砸**策划**与 Standard 实现 / L1～L2 方案审；高级档（Sonnet→GPT）砸 Full L3 / Standard·Full CR / 验收；最低档（Grok 4.5）走 Express/Direct 实现、Direct CR 与文档。
+- 普通档（Grok 4.6）砸**策划**与 Standard 实现 / L1～L2 方案审；高级档（Opus 5 → GPT 5.6 Sol）砸 Full L3 / Standard·Full CR / 验收；最低档（Grok 4.5）走 Express/Direct 实现、Direct CR 与文档。
 
 ## 主窗 vs 子窗
 
@@ -45,20 +45,20 @@
 ## Skill 默认表（无 project-context 覆盖时才用 · 示例）
 
 > 下列 slug 仅为**缺省示例**。若仓库有 `.cursor/project-context.md` §模型路由，**整表以项目节为准**。  
-> **统一三档**（无 project-context 时用；覆盖旧「两档 / Composer 首选」）：最低 = Grok 4.5（`cursor-grok-4.5-medium-fast`；**禁止**把 `cursor-grok-4.5-high-fast` 当首选，若会话白名单有 high-fast 仅可作同档回退）；普通 = Grok 4.6（`cursor-grok-4.6-high`）；高级 = Sonnet → GPT Terra（`claude-sonnet-5-thinking-medium` → `gpt-5.6-terra-medium`，再回退 Grok 4.6）。Composer `composer-2.5-fast` **不再作为任何岗首选**，仅可作链末应急并标注「未按模型路由」。档内链用尽 → 下一档。
+> **统一三档**（无 project-context 时用；覆盖旧「两档 / Composer 首选」）：最低 = Grok 4.5（`cursor-grok-4.5-high`；**禁止**把 `cursor-grok-4.5-medium-fast` / `cursor-grok-4.5-high-fast` 当首选）；普通 = Grok 4.6（`cursor-grok-4.6-high`）；高级 = Opus 5 → GPT 5.6 Sol（`claude-opus-5-thinking-high` → `gpt-5.6-sol-medium`，再回退 Grok 4.6）。Composer `composer-2.5-fast` **不再作为任何岗首选**，仅可作链末应急并标注「未按模型路由」。档内链用尽 → 下一档。
 
 | 岗位 / 场景 | 场所 | 档位 | Task `model`（首选 → 回退） |
 | --- | --- | --- | --- |
 | **PM**（主窗） | 主窗 | 用户所选 | — |
-| Express / Direct 实现与 Auto 微改 | **必须子窗** | 最低 | `cursor-grok-4.5-medium-fast` → `cursor-grok-4.6-high` |
-| **代码审** / 对抗（Direct CR） | **必须子窗** | 最低 | `cursor-grok-4.5-medium-fast` → `cursor-grok-4.6-high` |
-| **文档** `readme: docs` | **必须子窗** | 最低 | `cursor-grok-4.5-medium-fast` → `cursor-grok-4.6-high` |
-| **策划** | **必须子窗** | 普通 | `cursor-grok-4.6-high` → `claude-sonnet-5-thinking-medium` → `gpt-5.6-terra-medium` |
-| **程序员** / Auto（Standard 及以上） | **必须子窗** | 普通 | `cursor-grok-4.6-high` → `claude-sonnet-5-thinking-medium` → `gpt-5.6-terra-medium` |
-| **方案审** L1 / L1.5 / L2 | **必须子窗** | 普通 | `cursor-grok-4.6-high` → `claude-sonnet-5-thinking-medium` → `gpt-5.6-terra-medium` |
-| **方案审** Full L3 round 1 | **必须子窗** | 高级 | `claude-sonnet-5-thinking-medium` → `gpt-5.6-terra-medium` → `cursor-grok-4.6-high` |
-| **方案审** Full L3 round 2 | **必须子窗**（须与 round1 **不同子窗**） | 高级 | `gpt-5.6-terra-medium` → `cursor-grok-4.6-high` |
-| **代码审** / 对抗（Standard/Full CR） | **必须子窗** | 高级 | `claude-sonnet-5-thinking-medium` → `gpt-5.6-terra-medium` → `cursor-grok-4.6-high` |
+| Express / Direct 实现与 Auto 微改 | **必须子窗** | 最低 | `cursor-grok-4.5-high` → `cursor-grok-4.6-high` |
+| **代码审** / 对抗（Direct CR） | **必须子窗** | 最低 | `cursor-grok-4.5-high` → `cursor-grok-4.6-high` |
+| **文档** `readme: docs` | **必须子窗** | 最低 | `cursor-grok-4.5-high` → `cursor-grok-4.6-high` |
+| **策划** | **必须子窗** | 普通 | `cursor-grok-4.6-high` → `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` |
+| **程序员** / Auto（Standard 及以上） | **必须子窗** | 普通 | `cursor-grok-4.6-high` → `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` |
+| **方案审** L1 / L1.5 / L2 | **必须子窗** | 普通 | `cursor-grok-4.6-high` → `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` |
+| **方案审** Full L3 round 1 | **必须子窗** | 高级 | `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` → `cursor-grok-4.6-high` |
+| **方案审** Full L3 round 2 | **必须子窗**（须与 round1 **不同子窗**） | 高级 | `gpt-5.6-sol-medium` → `cursor-grok-4.6-high` |
+| **代码审** / 对抗（Standard/Full CR） | **必须子窗** | 高级 | `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` → `cursor-grok-4.6-high` |
 | **验收/verify** | **必须子窗** | 高级 | 同 Standard/Full CR；**禁止**最低/普通档首发或省略 `model=`；**禁止** Composer 冒充验收首选 |
 | **周报** | **不要求子窗** | 用户所选 | — |
 | Express / Direct 切片文案 | **主窗 PM** 出切片（Express=主窗 PM 一句话切片；Direct=策划子窗对话内 A#/切片、不落盘）；**实现仍必须子窗** | 实现走最低档 | 同上 |

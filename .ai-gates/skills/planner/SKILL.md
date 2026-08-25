@@ -45,7 +45,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 3.6 **结案收敛**：准备 `completed` 时生成一页内「结案变更摘要」（ADDED/MODIFIED/REMOVED/归并到）；有 MODIFIED/REMOVED 须实际更新物理口径/A#，禁“待同步”结案
 4. 交审前写 **选型短表**；方案审无 blocker 后发 **一轮**确认包（理解+选型+开始改码），见 [demand-clarification.md](../references/demand-clarification.md)；**禁止**拆多轮、禁止审前先问用户开始改码。方案 blocker 已正确响应后：**自动**落 `证据/_lesson-pending.md`（类型=`方案blocker`），主窗问「准」再写主表（[lessons-learned.md](../references/lessons-learned.md) §准全自动）。**Auto 测挂**：PM 已按 diagnosis §0 `auto_follow: yes` 留据代选时，勿再卡「等准」才写 Discover/范围内下一刀（硬停除外）
 4.01 **跨项目出口**：默认本地收集仓（[collect-queue.md](../references/collect-queue.md)）；未验证 `gh auth status` 成功时禁止方案写「gh 已接线」。
-4.05 **分歧标注（默认不启用）**：跨模块/高危/止损/用户点名分歧实验时，方案 `未完成.md` 或 Mandatory 须声明是否启用分歧标注；启用则列视角名与预期 DA→KG 收敛，默认 **不启用**（[divergence-annotation.md](../references/divergence-annotation.md)）
+4.05 **分歧标注（默认不启用）**：跨模块/高危/止损/用户点名分歧实验时，方案 `未完成.md` 或 Mandatory 须声明是否启用分歧标注；启用则按 [divergence-annotation.md](../references/divergence-annotation.md) 派两个隔离槽，对照由派发方写；默认 **不启用**
 4.06 **完整碰撞（默认不启用）**：完整碰撞默认不启用；启用须点名 [collision-review.md](../references/collision-review.md)（异模型三轮；轮0 产出可引用共识地基三句；轮1 Grok 构建者×Sonnet 红队且开头引用地基；短清单主窗机械拼装；轮2/3 引用原文只投票；禁止同模型双链）。不得把 diverge 填成碰撞。止损触顶/将到 2/3 或热度爆炸时由 PM 在确认包**提示**可选碰撞，策划不得自行开跑。
 4.07 **跨会话续作**：续作前按 [long-task.md](../references/long-task.md) 核感知/卡住；命中停点先确认包，禁止静默续改码。
 4.08 **覆盖度**：若引用覆盖度，必须来自 `.ai-gates/coverage-map.yaml` 或刚跑的 `compute-coverage-map.ps1` 输出；禁止自报百分比。
