@@ -11,6 +11,8 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-25：Claude/Codex 业务写门禁接 inherited_parent_pm（与 Cursor 同源：唯一父、120 分钟、禁止任意会话放行、禁止 Level 1 继承）。方法论第 8 节补第二次：禁用边界拦住误套。不 bump VERSION
+- 2026-08-25：车道：快=仅 1 个文件且机械；直通=默认小改（≤3 文件、无 API/存档/跨模块）；>3 文件或 API/存档/跨模块=标准；止损先升标准，标准上再止损才完整。回归索引/路径不封车道。不 bump VERSION
 - 2026-08-25：高级档 Sonnet/Terra 改为 Opus 5 / GPT 5.6 Sol；最低档去掉 fast；不 bump VERSION
 - 2026-08-25：复用四问第3问补平台 API 直调 + 少写不得牺牲物理；CR nit（包一层）/方案审 major（包一层≠并行实现 blocker）；不装 Ponytail；不 bump VERSION
 - 2026-08-25：词条表增「特效适配器」；锚点 `IEffectAdapter` + `EffectSpawner`；Flexalon 不当验证。（现行技能）不 bump VERSION

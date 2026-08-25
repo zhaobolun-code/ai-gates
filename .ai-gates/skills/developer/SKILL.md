@@ -20,7 +20,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 | Standard | 按 plan-lite Step；L1.5 → 完成后交 PM **提示**用户新开 Chat 做 CR；同 Chat 须标「非独立 CR」 |
 | Full | Step 串行；完成后交 `[CR]`；见 [references/](../references/) |
 
-命中 CORE §四车道判定 升级链（实改超机械范围 / 超 2 文件 / 跨模块）→ 停扩 scope，交 PM 按判定树重判。禁止本岗写死「升 Direct」。
+命中 CORE §四车道判定 升级链（1 文件胀成 2～3 → Direct；>3 或 API/持久/跨模块 → Standard；出现行为变化 → Direct）→ 停扩 scope，交 PM 按判定树重判。禁止本岗写死升道目标。
 
 ## 模型路由 + 子窗
 

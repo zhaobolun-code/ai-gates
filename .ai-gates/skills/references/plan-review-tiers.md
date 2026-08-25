@@ -9,7 +9,7 @@
 | 档位 | 何时用 | 做法 | 独立复核 |
 | --- | --- | --- | --- |
 | **L1 自审** | Standard、单模块、无状态机/持久化 | 须子窗（同会话 Subagent 即可，不强制新开 Chat）；输出须标注「L1 非独立复核」 | 否 |
-| **L1.5 加强** | Standard 且 Mandatory Code Changes 命中 project-context 回归索引模块（**小规模 → 维持 L1.5，不取较高档**），**或**命中 `.ai-gates/lessons-learned.md` 近 6 个月内有记录的模块/文件（文件热度），**或** `.ai-gates/regression-heat.yaml` 该模块 heat≥medium（机器热度，自动生成）——**文件/机器热度命中取较高档：L1.5 之上 → 方案审 L3 / 双轮 CR（强度升级，不整条升 Full）**；**回归索引模块小规模 + 文件/机器热度双命中 → 按热度入口取较高档（方案审 L3 / 双轮 CR，M2）** | 方案审须子窗（同会话即可，不强制新 Chat 隔离）；CR **优先** Subagent 隔离（见 [isolated-review.md](./isolated-review.md)） | 方案否 / CR 隔离优先 |
+| **L1.5 加强** | **已判 Standard** 且 Mandatory Code Changes 命中 project-context 回归索引模块，**或**命中 `.ai-gates/lessons-learned.md` 近 6 个月内有记录的模块/文件（文件热度），**或** `.ai-gates/regression-heat.yaml` 该模块 heat≥medium。回归索引/热度**不得**把 Express/Direct 拉进 Standard。文件/机器热度命中取较高档：L1.5 之上 → 方案审 L3 / 双轮 CR（不整条升 Full） | 方案审须子窗（同会话即可，不强制新 Chat 隔离）；CR **优先** Subagent 隔离（见 [isolated-review.md](./isolated-review.md)） | 方案否 / CR 隔离优先 |
 | **L2 交叉审** | Standard、未触 Full，跨 2 模块或涉及 public API | **优先** Subagent 隔离；仍读 plan-reviewer SKILL | 部分 |
 | **L3 独立审** | Full 车道、状态机/事务/持久数据/跨模块并行 | **优先**每轮 Subagent 隔离；每轮独立找 blocker | 是 |
 
@@ -19,7 +19,7 @@
 | --- | --- | --- |
 | **Express** | 跳过方案审核 | 不适用 |
 | **Direct** | 无方案审；CR 隔离（普通档） | 隔离 CR（Subagent / 新 Chat，普通档）无 blocker 且用户认可 |
-| **Standard** | L1；回归索引模块小规模升 **L1.5**（**不取较高档**）；**文件/机器热度命中**（lessons 近 6 个月 / heat≥medium / last_fail_ts）→ **方案审 L3 / 双轮 CR**（取较高档：覆盖既有 L1.5 热度触发；强度升级，不整条升 Full）；**回归索引模块小规模 + 热度双命中 → 按热度入口取较高档（方案审 L3 / 双轮 CR，M2）**；未触 Full 且跨 2 模块时升 L2 | L1/L1.5/L2 无 blocker 且用户确认需求后可 `implementation-ready` |
+| **Standard** | L1；**已判 Standard** 且命中回归索引模块 → **L1.5**；文件/机器热度命中 → **方案审 L3 / 双轮 CR**（不整条升 Full）；未触 Full 且跨 2 模块时升 L2。回归索引/热度不得把 Express/Direct 拉进本行 | L1/L1.5/L2 无 blocker 且用户确认需求后可 `implementation-ready` |
 | **Full** | L3，至少 2 轮 | 多轮均无 blocker 且用户确认 |
 
 ## 执行文档字段

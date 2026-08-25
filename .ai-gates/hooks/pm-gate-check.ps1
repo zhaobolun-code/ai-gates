@@ -16,6 +16,8 @@
 # allow 旁路：
 #   1. kill switch：存在 .ai-gates/hooks-log/pm-gate-disabled 时整条检查临时关闭（仍写审计）。
 #   2. 该 conversation_id 在新鲜度窗口内有有效 [PM] 标记 → allow。
+#   3. 业务路径 inherited_parent_pm：本 conversation 无新鲜 [PM]，但唯一父 transcript 的 lastPmAtUtc
+#      在 120 分钟内 → allow。禁止任意会话有 PM 即放行；禁止 Level 1 走继承。
 #
 # .cursor/** 分级豁免（2026-08-03 自我治理轻门禁，替代原"全豁免"）：
 #   Level 0 全豁免 allow：CHANGELOG.md 自身；.ai-gates/hooks-log/**（运行时目录：

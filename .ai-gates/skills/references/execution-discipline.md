@@ -107,7 +107,7 @@
 | 信号 | 动作 |
 | --- | --- |
 | 超出当前 Step / Mandatory Code Changes | 停止实现 → `代码审核` 或回 `程序员` 收窄 |
-| 命中 CORE §四车道判定 升级链（Express→Direct→Standard→Full）或 project-context §车道升级（禁入 Express / Direct） | 立即升级车道并告知用户 |
+| 命中 CORE §四车道判定 升级链（1 文件胀成 2～3 → Direct；>3 或 API/持久/跨模块 → Standard；Express/Direct 止损 → Standard；Standard 再止损 → Full） | 立即升级车道并告知用户。**禁止**仅因 project-context 路径前缀或回归索引点名就升 Standard；禁止快/直通第一次止损就跳 Full |
 | 证据等级被夸大 | 降回如实等级；无运行证据不得 `runtime-validated` |
 | 无执行文档做大功能 | 回 `策划`；不得维持「想到哪改到哪」 |
 | 同一 Step/切片内连续 ≥3 次 `static-checked` 修复仍无 Unity 验证 | 停止继续叠加修复 → 提示用户先做一次真实回归，确认现象后再继续（防止无法定位是哪次改动引发新问题） |
