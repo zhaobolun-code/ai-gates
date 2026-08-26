@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.5.0（发布 · 车道判定改写 + Claude/Codex 业务写门禁接 inherited_parent_pm · minor；前版 4.4.0 定版信息保留）
+**当前 LTS**：v4.5.1（发布 · 写岗子窗 DENY 改向 + 设计模式使用/入表拆开 · patch；前版 4.5.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -178,6 +178,13 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [4.5.1] - 2026-08-26（写岗子窗 DENY 改向 + 设计模式使用/入表拆开 · patch · 发布）
+
+### Included changes — 2026-08-26（门禁改向 + 设计模式口径 · 不 bump）
+
+- **写岗子窗 DENY 改向**：子窗被 DENY 不再叫它自己发 `[PM]`；能解析唯一父时改提示「主窗先打点再派/续写」；父 transcript 近 120 分钟内已有 `[PM]` 也可 `inherited_parent_pm`（打点文件尚未写上时）（`hooks/pm-gate-check.ps1` ×3 + `scripts/test-hooks.ps1` 回归同步）。
+- **设计模式「使用」与「入表」拆开**：仅缺触发症状 → YAGNI；症状命中无本仓验证仍按人类/经典模式结构配方新建（State/Policy/Seam 仍无锚点不采用）；问法与方案审 3.12 对齐（design-patterns + planner / plan-reviewer / developer SKILL + execution-discipline）。
 
 ## [4.5.0] - 2026-08-25（车道判定改写 + Claude/Codex 业务写门禁接 inherited_parent_pm · minor · 发布）
 

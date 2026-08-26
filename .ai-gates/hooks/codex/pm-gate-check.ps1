@@ -1,4 +1,4 @@
-# pm-gate-check.ps1 -- Codex 版
+﻿# pm-gate-check.ps1 -- Codex 版
 # PreToolUse hook (matcher: ^apply_patch$) -- 支柱 D。
 #
 # Cursor 原版 matcher 是 Write|StrReplace|EditNotebook，路径来自 tool_input.file_path；

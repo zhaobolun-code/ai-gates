@@ -1,4 +1,4 @@
-# pm-gate-check.ps1 -- Claude Code 版
+﻿# pm-gate-check.ps1 -- Claude Code 版
 # PreToolUse hook (matcher: ^(Write|Edit|MultiEdit|NotebookEdit)$) -- 支柱 D。
 #
 # 与 Codex 版同源（2026-08-10 复制改写）：Claude Code 写工具输入为结构化字段

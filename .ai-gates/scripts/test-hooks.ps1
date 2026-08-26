@@ -1,4 +1,4 @@
-# test-hooks.ps1 — 支柱 C（最小实现）：给 .cursor/hooks/ 下的机械化脚本
+﻿# test-hooks.ps1 — 支柱 C（最小实现）：给 .cursor/hooks/ 下的机械化脚本
 # （audit-write / git-safety-check / verify-runtime-evidence / update-doc-state /
 #  mark-pm-gate / pm-gate-check / check-unity-compile）建一套可重复运行的行为回归测试。
 #

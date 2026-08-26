@@ -1,4 +1,4 @@
-# pm-gate-check.ps1
+﻿# pm-gate-check.ps1
 # preToolUse hook (matcher: Write|StrReplace|EditNotebook) -- 支柱 D。
 #
 # 目的：机械化 CORE.md 硬门禁 #7 的近似版本——"最近 N 分钟内这个会话（conversation_id）
