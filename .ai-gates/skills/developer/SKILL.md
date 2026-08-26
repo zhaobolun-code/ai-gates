@@ -11,6 +11,8 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 
 用户直接叫本岗、且**本轮尚无** `[PM]` YAML + **你下一步** 时：**不得**改代码；须同条先 `[PM]` 判车道并输出白话 **你下一步**，再切本岗。只读咨询（不改文件）→ 不阻塞。
 
+写岗**子窗**被 Write 门禁拦住时：**禁止**在本子窗回复里发 `[PM]` 自救，也禁止让主窗把 `[PM]` 写进 resume 提示词。先看 `.ai-gates/hooks-log/pm-gate-check.log` 同秒是否已有 `inherited_parent_pm` ALLOW（有则继续写）。若 DENY `parent_pm_not_marked`：等主窗自己的回复打点后再续写，或主窗代写并标明未开子窗。
+
 ## 车道
 
 | 车道 | 本岗 |

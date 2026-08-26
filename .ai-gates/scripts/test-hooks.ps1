@@ -1,4 +1,4 @@
-﻿# test-hooks.ps1 — 支柱 C（最小实现）：给 .cursor/hooks/ 下的机械化脚本
+# test-hooks.ps1 — 支柱 C（最小实现）：给 .cursor/hooks/ 下的机械化脚本
 # （audit-write / git-safety-check / verify-runtime-evidence / update-doc-state /
 #  mark-pm-gate / pm-gate-check / check-unity-compile）建一套可重复运行的行为回归测试。
 #
@@ -245,6 +245,46 @@ try {
     # A5：缺标记业务 Write → deny（Cursor 2.2+ ask 无效改硬拦；逃生提示在 user_message）
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $convNone } | ConvertTo-Json -Compress)
     Assert-Test "A5 pm-gate-check: no marker business Write -> deny (exit 0)" ($r.ExitCode -eq 0 -and ((Get-Permission $r.Stdout) -eq "deny")) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    Assert-Test "A5 pm-gate-check: no-parent deny still tells this session to emit [PM]" ($r.Stdout -match "先在本会话回复中发出") "stdout=$($r.Stdout)"
+
+    # A5c/A5d/A5e：唯一父 transcript（写到真实 ~/.cursor/projects 测试夹，finally 删）
+    $script:projTest = Join-Path $env:USERPROFILE ".cursor\projects\__pmgate_inherit_test__"
+    $parentId = "__test__parent-$([Guid]::NewGuid().ToString('N'))"
+    $childWithPm = "__test__child-pm-$([Guid]::NewGuid().ToString('N'))"
+    $childNoPm = "__test__child-nopm-$([Guid]::NewGuid().ToString('N'))"
+    $childTx = "__test__child-tx-$([Guid]::NewGuid().ToString('N'))"
+    $parentDir = Join-Path $script:projTest "agent-transcripts\$parentId"
+    $subDir = Join-Path $parentDir "subagents"
+    New-Item -ItemType Directory -Path $subDir -Force | Out-Null
+    [System.IO.File]::WriteAllText((Join-Path $subDir "$childWithPm.jsonl"), "{}" )
+    [System.IO.File]::WriteAllText((Join-Path $subDir "$childNoPm.jsonl"), "{}" )
+    [System.IO.File]::WriteAllText((Join-Path $subDir "$childTx.jsonl"), "{}" )
+    [System.IO.File]::WriteAllText((Join-Path $parentDir "$parentId.jsonl"), "{`"role`":`"assistant`",`"text`":`"no marker yet`"}")
+
+    $gateNow = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    $nowUtc = [DateTime]::UtcNow.ToString('o')
+    $gateNow | Add-Member -NotePropertyName $parentId -NotePropertyValue ([pscustomobject]@{ lastPmAtUtc = $nowUtc; snippet = '[PM] inherit-test' }) -Force
+    $gateNow | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $gateFile -Encoding UTF8
+
+    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $childWithPm } | ConvertTo-Json -Compress)
+    Assert-Test "A5c pm-gate-check: unique parent with fresh [PM] -> allow inherit" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+
+    # 父从 gate 去掉，transcript 仍无 [PM] → 子窗 DENY 不得叫子窗自己发 [PM]
+    $gateStripped = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    $gateStripped.PSObject.Properties.Remove($parentId)
+    $gateStripped | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $gateFile -Encoding UTF8
+    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $childNoPm } | ConvertTo-Json -Compress)
+    Assert-Test "A5d pm-gate-check: unique parent unmarked -> deny parent_pm_not_marked" ($r.ExitCode -eq 0 -and ((Get-Permission $r.Stdout) -eq "deny") -and $r.Stdout -match "parent_pm_not_marked") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    Assert-Test "A5d pm-gate-check: child deny must not tell child to emit [PM]" ($r.Stdout -match "子窗不要发" -and $r.Stdout -notmatch "先在本会话回复中发出") "stdout=$($r.Stdout)"
+
+    # 父 transcript 含 [PM]、gate 无父条目 → transcript 继承放行
+    [System.IO.File]::WriteAllText((Join-Path $parentDir "$parentId.jsonl"), "{`"role`":`"assistant`",`"text`":`"[PM] yaml block`"}")
+    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $childTx } | ConvertTo-Json -Compress)
+    Assert-Test "A5e pm-gate-check: parent transcript has [PM] -> allow inherit" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+
+    if (Test-Path -LiteralPath $script:projTest) {
+        Remove-Item -LiteralPath $script:projTest -Recurse -Force -ErrorAction SilentlyContinue
+    }
 
     # A4：text 字段命中 [PM] → 新鲜 pm-gate.json + mark-pm-gate.log 含 wrote=
     $r = Invoke-HookScript -ScriptName "mark-pm-gate.ps1" -StdinJson (@{ text = "[PM] 测试判定，你下一步：..."; conversation_id = $convFresh } | ConvertTo-Json -Compress)
@@ -549,6 +589,9 @@ try {
 
 }
 finally {
+    if ($script:projTest -and (Test-Path -LiteralPath $script:projTest)) {
+        Remove-Item -LiteralPath $script:projTest -Recurse -Force -ErrorAction SilentlyContinue
+    }
     # 精确还原 pm-gate.json：只删掉本次测试写入的 __test__/__sim__ 前缀会话，保留任何真实会话数据
     if (Test-Path -LiteralPath $gateFile) {
         try {

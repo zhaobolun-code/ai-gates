@@ -1,4 +1,4 @@
-﻿# pm-gate-check.ps1
+# pm-gate-check.ps1
 # preToolUse hook (matcher: Write|StrReplace|EditNotebook) -- 支柱 D。
 #
 # 目的：机械化 CORE.md 硬门禁 #7 的近似版本——"最近 N 分钟内这个会话（conversation_id）
@@ -149,7 +149,8 @@ function Emit-Deny {
     Write-Output ($result | ConvertTo-Json -Compress)
 }
 
-# 业务路径子窗继承：仅当本 conversation 无新鲜 [PM]，且唯一父 transcript 存在，且父 lastPmAtUtc 在 120 分钟内。
+# 业务路径子窗继承：仅当本 conversation 无新鲜 [PM]，且唯一父 transcript 存在，且
+# （父 lastPmAtUtc 在 120 分钟内，或父 transcript 近 120 分钟内已含字面 [PM]）。
 # 禁止任意会话有 PM 即放行。找不到父 / 父不新鲜 / 父文件>1 / conversation_id=unknown → 仍 DENY。禁止把 Level 1 改成继承。
 function Resolve-UniqueParentConversationId {
     param([string]$ChildId)
@@ -183,25 +184,70 @@ function Resolve-UniqueParentConversationId {
     return $hits[0]
 }
 
-function Try-EmitInheritedParentPm {
+function Test-ParentTranscriptHasRecentPm {
+    param([string]$ParentId)
+    if ([string]::IsNullOrWhiteSpace($ParentId) -or $ParentId -eq "unknown") { return $false }
+    $projectsRoot = Join-Path $env:USERPROFILE ".cursor\projects"
+    if (-not (Test-Path -LiteralPath $projectsRoot)) { return $false }
+    try {
+        $projDirs = [System.IO.Directory]::GetDirectories($projectsRoot)
+    } catch {
+        return $false
+    }
+    foreach ($proj in $projDirs) {
+        $file = Join-Path $proj ("agent-transcripts\" + $ParentId + "\" + $ParentId + ".jsonl")
+        if (-not [System.IO.File]::Exists($file)) { continue }
+        try {
+            $info = New-Object System.IO.FileInfo $file
+            $ageMin = ([DateTime]::UtcNow - $info.LastWriteTimeUtc).TotalMinutes
+            if ($ageMin -gt $FreshnessMinutes) { continue }
+            $len = $info.Length
+            if ($len -le 0) { continue }
+            $start = [Math]::Max([int64]0, $len - 524288)
+            $fs = [System.IO.File]::Open($file, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+            try {
+                $null = $fs.Seek($start, [System.IO.SeekOrigin]::Begin)
+                $toRead = [int]($len - $start)
+                $buf = New-Object byte[] $toRead
+                $read = $fs.Read($buf, 0, $toRead)
+            } finally {
+                $fs.Dispose()
+            }
+            $text = [System.Text.Encoding]::UTF8.GetString($buf, 0, $read)
+            if ($text.Contains('[PM]')) { return $true }
+        } catch {
+            continue
+        }
+    }
+    return $false
+}
+
+function Get-ChildSessionDenyHint {
+    return "子窗不要发 [PM]，也不要把 [PM] 写进 resume 提示词。主窗须在自己的回复里发出 [PM]，等 afterAgentResponse 写入 pm-gate.json 后再派或续写。或主窗代写并标明未开子窗。或放置 hooks-log/pm-gate-disabled / 手动编辑。"
+}
+
+function Get-InheritedParentPmReason {
     param(
         [string]$ConversationId,
         $Gate
     )
-    if ($ConversationId -eq "unknown") { return $false }
+    if ($ConversationId -eq "unknown") { return $null }
     $parentId = Resolve-UniqueParentConversationId -ChildId $ConversationId
-    if (-not $parentId) { return $false }
+    if (-not $parentId) { return $null }
     $parentEntry = $Gate.$parentId
-    if (-not $parentEntry -or -not $parentEntry.lastPmAtUtc) { return $false }
-    try {
-        $parentPmUtc = [DateTime]::Parse($parentEntry.lastPmAtUtc).ToUniversalTime()
-    } catch {
-        return $false
+    if ($parentEntry -and $parentEntry.lastPmAtUtc) {
+        try {
+            $parentPmUtc = [DateTime]::Parse($parentEntry.lastPmAtUtc).ToUniversalTime()
+            $parentAgeMinutes = ([DateTime]::UtcNow - $parentPmUtc).TotalMinutes
+            if ($parentAgeMinutes -le $FreshnessMinutes) {
+                return ("inherited_parent_pm_age={0}min parent={1}" -f [Math]::Round($parentAgeMinutes, 1), $parentId)
+            }
+        } catch { }
     }
-    $parentAgeMinutes = ([DateTime]::UtcNow - $parentPmUtc).TotalMinutes
-    if ($parentAgeMinutes -gt $FreshnessMinutes) { return $false }
-    Emit-Allow ("inherited_parent_pm_age={0}min parent={1}" -f [Math]::Round($parentAgeMinutes, 1), $parentId)
-    return $true
+    if (Test-ParentTranscriptHasRecentPm -ParentId $parentId) {
+        return ("inherited_parent_pm_transcript parent={0}" -f $parentId)
+    }
+    return $null
 }
 
 # kill switch first (no stdin parse needed)
@@ -314,7 +360,13 @@ try {
 
 $entry = $gate.$conversationId
 if (-not $entry -or -not $entry.lastPmAtUtc) {
-    if (Try-EmitInheritedParentPm -ConversationId $conversationId -Gate $gate) { return }
+    $inheritReason = Get-InheritedParentPmReason -ConversationId $conversationId -Gate $gate
+    if ($inheritReason) { Emit-Allow $inheritReason; return }
+    $parentId = Resolve-UniqueParentConversationId -ChildId $conversationId
+    if ($parentId) {
+        Emit-Deny -ConversationId $conversationId -Detail "parent_pm_not_marked" -UserHint (Get-ChildSessionDenyHint) -BaseMsg "PM gate deny detail=parent_pm_not_marked : unique parent transcript found but parent has no fresh [PM]. Child must not emit [PM]."
+        return
+    }
     $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "no_pm_marker_for_conversation" -UserHint $hint
     return
@@ -330,7 +382,13 @@ try {
 
 $ageMinutes = ([DateTime]::UtcNow - $lastPmUtc).TotalMinutes
 if ($ageMinutes -gt $FreshnessMinutes) {
-    if (Try-EmitInheritedParentPm -ConversationId $conversationId -Gate $gate) { return }
+    $inheritReason = Get-InheritedParentPmReason -ConversationId $conversationId -Gate $gate
+    if ($inheritReason) { Emit-Allow $inheritReason; return }
+    $parentId = Resolve-UniqueParentConversationId -ChildId $conversationId
+    if ($parentId) {
+        Emit-Deny -ConversationId $conversationId -Detail "parent_pm_not_marked" -UserHint (Get-ChildSessionDenyHint) -BaseMsg "PM gate deny detail=parent_pm_not_marked : unique parent transcript found but parent has no fresh [PM]. Child must not emit [PM]."
+        return
+    }
     $hint = "逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 $FreshnessMinutes 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail ("stale_pm_marker_age={0}min" -f [Math]::Round($ageMinutes,1)) -UserHint $hint
     return

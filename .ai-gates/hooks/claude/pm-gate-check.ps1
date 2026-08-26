@@ -1,4 +1,4 @@
-﻿# pm-gate-check.ps1 -- Claude Code 版
+# pm-gate-check.ps1 -- Claude Code 版
 # PreToolUse hook (matcher: ^(Write|Edit|MultiEdit|NotebookEdit)$) -- 支柱 D。
 #
 # 与 Codex 版同源（2026-08-10 复制改写）：Claude Code 写工具输入为结构化字段
@@ -91,7 +91,8 @@ function Test-CursorLevel1Path {
     return $false
 }
 
-# 业务路径子窗继承：仅当本 session 无新鲜 [PM]，且唯一父 transcript 存在，且父 lastPmAtUtc 在 120 分钟内。
+# 业务路径子窗继承：仅当本 session 无新鲜 [PM]，且唯一父 transcript 存在，且
+# （父 lastPmAtUtc 在 120 分钟内，或父 transcript 近 120 分钟内已含字面 [PM]）。
 # 禁止任意会话有 PM 即放行。找不到父 / 父不新鲜 / 父文件>1 / session_id=unknown → 仍 DENY。禁止把 Level 1 改成继承。
 function Resolve-UniqueParentConversationId {
     param([string]$ChildId)
@@ -125,6 +126,48 @@ function Resolve-UniqueParentConversationId {
     return $hits[0]
 }
 
+function Test-ParentTranscriptHasRecentPm {
+    param([string]$ParentId)
+    if ([string]::IsNullOrWhiteSpace($ParentId) -or $ParentId -eq "unknown") { return $false }
+    $projectsRoot = Join-Path $env:USERPROFILE ".cursor\projects"
+    if (-not (Test-Path -LiteralPath $projectsRoot)) { return $false }
+    try {
+        $projDirs = [System.IO.Directory]::GetDirectories($projectsRoot)
+    } catch {
+        return $false
+    }
+    foreach ($proj in $projDirs) {
+        $file = Join-Path $proj ("agent-transcripts\" + $ParentId + "\" + $ParentId + ".jsonl")
+        if (-not [System.IO.File]::Exists($file)) { continue }
+        try {
+            $info = New-Object System.IO.FileInfo $file
+            $ageMin = ([DateTime]::UtcNow - $info.LastWriteTimeUtc).TotalMinutes
+            if ($ageMin -gt $FreshnessMinutes) { continue }
+            $len = $info.Length
+            if ($len -le 0) { continue }
+            $start = [Math]::Max([int64]0, $len - 524288)
+            $fs = [System.IO.File]::Open($file, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+            try {
+                $null = $fs.Seek($start, [System.IO.SeekOrigin]::Begin)
+                $toRead = [int]($len - $start)
+                $buf = New-Object byte[] $toRead
+                $read = $fs.Read($buf, 0, $toRead)
+            } finally {
+                $fs.Dispose()
+            }
+            $text = [System.Text.Encoding]::UTF8.GetString($buf, 0, $read)
+            if ($text.Contains('[PM]')) { return $true }
+        } catch {
+            continue
+        }
+    }
+    return $false
+}
+
+function Get-ChildSessionDenyHint {
+    return "子窗不要发 [PM]，也不要把 [PM] 写进 resume 提示词。主窗须在自己的回复里发出 [PM]，等打点写入 pm-gate.json 后再派或续写。或主窗代写并标明未开子窗。或放置 hooks-log/pm-gate-disabled / 手动编辑。"
+}
+
 function Try-InheritParentPm {
     param(
         [string]$SessionId,
@@ -134,16 +177,21 @@ function Try-InheritParentPm {
     $parentId = Resolve-UniqueParentConversationId -ChildId $SessionId
     if (-not $parentId) { return $false }
     $parentEntry = $Gate.$parentId
-    if (-not $parentEntry -or -not $parentEntry.lastPmAtUtc) { return $false }
-    try {
-        $parentPmUtc = [DateTime]::Parse($parentEntry.lastPmAtUtc).ToUniversalTime()
-    } catch {
-        return $false
+    if ($parentEntry -and $parentEntry.lastPmAtUtc) {
+        try {
+            $parentPmUtc = [DateTime]::Parse($parentEntry.lastPmAtUtc).ToUniversalTime()
+            $parentAgeMinutes = ([DateTime]::UtcNow - $parentPmUtc).TotalMinutes
+            if ($parentAgeMinutes -le $FreshnessMinutes) {
+                Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("ALLOW inherited_parent_pm_age={0}min parent={1}" -f [Math]::Round($parentAgeMinutes, 1), $parentId)
+                return $true
+            }
+        } catch { }
     }
-    $parentAgeMinutes = ([DateTime]::UtcNow - $parentPmUtc).TotalMinutes
-    if ($parentAgeMinutes -gt $FreshnessMinutes) { return $false }
-    Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("ALLOW inherited_parent_pm_age={0}min parent={1}" -f [Math]::Round($parentAgeMinutes, 1), $parentId)
-    return $true
+    if (Test-ParentTranscriptHasRecentPm -ParentId $parentId) {
+        Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("ALLOW inherited_parent_pm_transcript parent={0}" -f $parentId)
+        return $true
+    }
+    return $false
 }
 
 # 业务门禁：无新鲜 [PM] → 返回 deny reason 字符串（主流程 emit+return）；通过返回 $true
@@ -165,7 +213,13 @@ function Test-BusinessGate {
     $entry = $gate.$SessionId
     if (-not $entry -or -not $entry.lastPmAtUtc) {
         if (Try-InheritParentPm -SessionId $SessionId -Gate $gate) { return $true }
-        $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 Stop hook 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。子窗应能继承父新鲜 [PM]（唯一父 transcript）。"
+        $parentId = Resolve-UniqueParentConversationId -ChildId $SessionId
+        if ($parentId) {
+            $hint = Get-ChildSessionDenyHint
+            Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=parent_pm_not_marked" -f $SessionId)
+            return ("PM gate deny detail=parent_pm_not_marked : unique parent transcript found but parent has no fresh [PM]. Child must not emit [PM]. " + $hint)
+        }
+        $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 Stop hook 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=no_pm_marker_for_session" -f $SessionId)
         return ("PM gate deny detail=no_pm_marker_for_session : no fresh [PM] marker detected. " + $hint)
     }
@@ -179,7 +233,13 @@ function Test-BusinessGate {
     $ageMinutes = ([DateTime]::UtcNow - $lastPmUtc).TotalMinutes
     if ($ageMinutes -gt $FreshnessMinutes) {
         if (Try-InheritParentPm -SessionId $SessionId -Gate $gate) { return $true }
-        $hint = "逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 $FreshnessMinutes 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。子窗应能继承父新鲜 [PM]（唯一父 transcript）。"
+        $parentId = Resolve-UniqueParentConversationId -ChildId $SessionId
+        if ($parentId) {
+            $hint = Get-ChildSessionDenyHint
+            Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=parent_pm_not_marked" -f $SessionId)
+            return ("PM gate deny detail=parent_pm_not_marked : unique parent transcript found but parent has no fresh [PM]. Child must not emit [PM]. " + $hint)
+        }
+        $hint = "逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 $FreshnessMinutes 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=stale_pm_marker_age={1}min" -f $SessionId, [Math]::Round($ageMinutes, 1))
         return (("PM gate deny detail=stale_pm_marker_age={0}min : no fresh [PM] marker detected. " -f [Math]::Round($ageMinutes, 1)) + $hint)
     }

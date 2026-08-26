@@ -11,6 +11,9 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-26：设计模式「使用」与「入表」拆开：仅缺触发症状 → YAGNI；症状命中无本仓验证仍按人类/经典模式结构配方新建（State/Policy/Seam 仍无锚点不采用）。问法与方案审 3.12 对齐。不 bump VERSION
+- 2026-08-26：写岗子窗 DENY 不再叫子窗自己发 [PM]；能解析唯一父时改提示「主窗先打点再派/续写」。父 transcript 近 120 分钟内已有 [PM] 也可 inherited_parent_pm（打点文件尚未写上时）。不 bump VERSION
+- 2026-08-26：迷雾地图草案落入 `.ai-gates/Doc/AI流水线/迷雾地图-5.0.0-草案.md`。图块=文档窗；机制当标记/边；完成标志=Skill **5.0.0** 上线。不 bump VERSION
 - 2026-08-25：Claude/Codex 业务写门禁接 inherited_parent_pm（与 Cursor 同源：唯一父、120 分钟、禁止任意会话放行、禁止 Level 1 继承）。方法论第 8 节补第二次：禁用边界拦住误套。不 bump VERSION
 - 2026-08-25：车道：快=仅 1 个文件且机械；直通=默认小改（≤3 文件、无 API/存档/跨模块）；>3 文件或 API/存档/跨模块=标准；止损先升标准，标准上再止损才完整。回归索引/路径不封车道。不 bump VERSION
 - 2026-08-25：高级档 Sonnet/Terra 改为 Opus 5 / GPT 5.6 Sol；最低档去掉 fast；不 bump VERSION
