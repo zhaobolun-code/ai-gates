@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.5.1（发布 · 写岗子窗 DENY 改向 + 设计模式使用/入表拆开 · patch；前版 4.5.0 定版信息保留）
+**当前 LTS**：v4.5.2（发布 · 设计模式通用化（典故化）+ 打包排除本仓验证 · patch；前版 4.5.1 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -189,6 +189,17 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [4.5.2] - 2026-08-27（设计模式通用化（典故化）+ 打包排除本仓验证 · patch · 发布）
+
+### Included changes — 2026-08-27（典故通用化 + 打包口径 · 不 bump）
+
+- **设计模式通用化（典故化）**：11 条项目典故提升为通用典故——整树同形 / 叠衣增效 / 沿路截办 / 换态易行 / 订阅推送（事件分发去上下文化）/ 自注册只认接口（特效适配器禁用边界改指向该典故）/ 可撤销入栈 / 共享生命周期 / 按类型创建 / 外形适配 / 同一动作换算法；对应词条表行挂通用配方指针（shared-language §典故），项目表保留验证格；词条表新增「**倾倒策略**」（锚点 `IPourStrategy` + `TopLayerPourStrategy`/`ProportionalPourStrategy`，与 Policy 分列）；Policy 词条补蒸发证据 `EvaporationPolicy` + `EvaporationPolicyResolver.Resolve`（design-patterns）。
+- **打包排除项目词条本仓验证**：进包的 `design-patterns.md` 用 `templates/design-patterns.template.md` 空表模板覆盖（本仓验证行不随包）；错题本 / 口诀本本就不进包（package-release.ps1 + project-local-config 同步）。
+
+### Included changes — 2026-08-26（使用/入表拆开收尾 · 不 bump）
+
+- **「使用与入表拆开」收尾**：通用典故增「使用与入表拆开」（shared-language）；METHODOLOGY 改口语，写清是什么、为什么这么用 + 第 8 节补第三次（使用/入表拆开后无本仓验证仍按配方新建；漏接线≠选型失败）；特效适配器词条补邻仓按配方新建 FarmBloomGate（不当本仓复用入口）；pattern-local-or-human 用户归档迁签收。
 
 ## [4.5.1] - 2026-08-26（写岗子窗 DENY 改向 + 设计模式使用/入表拆开 · patch · 发布）
 
