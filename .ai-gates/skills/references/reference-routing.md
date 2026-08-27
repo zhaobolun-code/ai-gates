@@ -48,6 +48,7 @@
 | 超大任务决策点地图 | `decision-map.md` |
 | 只能人做的步骤（凭证 / 授权 / 后台） | `human-wizard.md` |
 | 外部事实 / API / 文档调研（开子窗） | `research-task.md` |
+| 用户点名「外仓对照」；加载 ≠ 启用；PM 提示 ≠ 启用；禁止每窗必搜 GitHub | `external-compare.md` |
 | AFK 子代理委托书 / 耐久契约 | `agent-brief.md` |
 | 需求评估 / 被拒需求去重 | `out-of-scope.md` |
 | 设计模块形状 / 找 seam / 接口方案对比（与 `architecture-health-check`「体检找候选」互补；并行接口设计见 `design-it-twice.md`，共用本行） | `codebase-design.md` |
@@ -72,7 +73,7 @@
 
 ## 按岗加载
 
-- **策划/方案审**：当前缺口优先在 `acceptance-and-delta`、`doc-windowing`、`diagnosis-gates`、`execution-discipline`（复用四问）中点名 1～2 份；术语歧义加 `shared-language`；Full 策划前可加 `architecture-health-check`；接口设计 / 找 seam / 方案对比加 `codebase-design`；超大任务可加 `decision-map`。主窗派调研子窗加 `research-task`；有「只能人做」的步骤加 `human-wizard`。
+- **策划/方案审**：当前缺口优先在 `acceptance-and-delta`、`doc-windowing`、`diagnosis-gates`、`execution-discipline`（复用四问）中点名 1～2 份；术语歧义加 `shared-language`；Full 策划前可加 `architecture-health-check`；接口设计 / 找 seam / 方案对比加 `codebase-design`；超大任务可加 `decision-map`。主窗派调研子窗加 `research-task`；用户点名「外仓对照」加 `external-compare`（加载 ≠ 启用）；有「只能人做」的步骤加 `human-wizard`。
 - **程序员**：优先 `unity-editor-log`；Auto/修复计数需要时加 `loop-engineering`；精简/净增加 `execution-discipline`（或 project-context 止血节）；test-first（含可机械验证项默认启用；方案点名强制）。
 - **代码审核**：优先 `codegraph-probe`；派发或隔离问题时二选一加载 `review-dispatch-lifecycle` / `isolated-review`；双轴模式加 `dual-axis-review`；seam / 设计相关评审加 `codebase-design`。
 - **文档/周报**：只读岗位 SKILL 点名的 README/周报规则，不因“参考完整”扫目录。

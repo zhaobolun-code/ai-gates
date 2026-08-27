@@ -56,6 +56,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 4.13 **本地自进化环**。项目格已「准」→ 去上下文化 → collect-queue `shareable` → 抽象 → 须「准」才入通用格。禁止静默入通用格。未验证 `gh auth status` 成功时禁止方案写「本机已登录/已开 PR/技能包已下发」。不是岗。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化。
 4.14 **GitHub 收集仓**。收集仓已开通（[collect-queue.md](../references/collect-queue.md) §gh）；公开仓 `zhaobolun-code/ai-gates-collect`；上传 = 开分支 + **PR**（不需要合并权限）；合并须维护者权限。「准」不触发 `gh pr create` / `gh issue create`。本机 `gh auth status` exit 0 且独立口令「上传」才开 PR。未探测成功禁止方案写「本机已登录/已开 PR/已下发」；允许写「收集仓已开通」。不是岗。回传手续见 4.15。
 4.15 **Skill 回传**。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化：下发=「项目经理 升级 ai-gates」或 `PM upgrade ai-gates` 拉 `zhaobolun-code/ai-gates`，不是拉 collect 仓、不是再开 PR；收集仓合并 ≠ 已下发；入通用格须另「准」。不是岗。本窗不执行升级、不执行 gh create。
+4.16 **外仓对照（默认不启用）**：Express / Direct 不提示。Standard / Full 且本仓无明显同类时，由 **PM** 在「你下一步」提示可选「外仓对照」；**未点名不搜、不 clone**。启用须用户点名「外仓对照」。外仓只作结构参考，禁止复制进本仓；Mandatory 只点名本仓符号。不是岗。点名 [external-compare.md](../references/external-compare.md)。策划不得自行开跑。
 4.5 **复核派发工件**：交方案审前按 [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md) + 模板生成/刷新 `证据/_方案审核派发.md`（`mode=plan`）；blocker 修订后重算 revision、去重回归项≤20 行、L3 清零并重生第1轮；第1→2 转场见 handoff §I（Checker 无写权）
 5. 「文档状态」：`draft` → `review-pending` → 过审发确认包 →「准」后 ready 并同条开始改码（[handoff-automation.md](../references/handoff-automation.md) §0/§F）；给程序员当前 Step 必须抄文档状态 **当前 Step**（`check-pipeline-doc` 交叉核对，不一致只 warn）
 6. 禁止「考虑」「待定」— 转默认决策或 blocker

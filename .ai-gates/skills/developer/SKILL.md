@@ -58,6 +58,7 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 8.7 **本地自进化环**：演练/入队只写 `.ai-gates/collect-queue.md` 的 `shareable`；禁静默写 `shared-language.md` / `anti-patterns.md`；禁 bump VERSION。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化。
 8.8 **GitHub 收集仓**：收集仓已开通（公开仓）。仅用户口令「上传」且本机 `gh auth status` exit 0 才允许开分支 + `gh pr create`；「准」不开 PR、不建 issue；默认仓 `zhaobolun-code/ai-gates-collect`；探测失败不得开 PR。禁止 `gh pr merge`、禁止直接改 `main`。点名 [collect-queue.md](../references/collect-queue.md) §gh。未口令不执行 create。
 8.9 **Skill 回传**：下发只走「项目经理 升级 ai-gates」拉 `zhaobolun-code/ai-gates`；禁止拉 collect 仓当下发；收集仓合并 ≠ 已下发；未升级成功禁止自称已下发。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化。本窗不执行升级。
+8.10 **外仓对照**：方案声明启用时仍禁把外仓文件/类名/路径复制进本仓；只按本仓符号落地。点名 [external-compare.md](../references/external-compare.md)。未点名不 clone。
 9. 改动 >3 文件 / 跨模块 / 命中 regression-index → 停，报 PM 升级
 10. CR 有 blocker 先修，不写最终 README
 11. 用户仅咨询时不改文件

@@ -192,7 +192,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 ## 进阶指针（lazy load）
 
-日常入口 → [agent-entry-route.md](references/agent-entry-route.md)（本页+project-context+岗 checklist + 任务白名单）。另按 [reference-routing.md](references/reference-routing.md) 点名≤2份 reference；禁整目录灌入。CORE 全文仅争议/recovery/`按 CORE 重来`。
+日常入口 → [agent-entry-route.md](references/agent-entry-route.md)（本页+project-context+岗 checklist + 任务白名单）。另按 [reference-routing.md](references/reference-routing.md) 点名≤2份 reference；禁整目录灌入。CORE 全文仅争议/recovery/`按 CORE 重来`。外仓对照（PM 可提示；用户点名才启用）→ [external-compare.md](references/external-compare.md)。
 
 ## 岗位切换
 

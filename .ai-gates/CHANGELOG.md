@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.5.2（发布 · 设计模式通用化（典故化）+ 打包排除本仓验证 · patch；前版 4.5.1 定版信息保留）
+**当前 LTS**：v4.5.3（发布 · 收集仓口径收敛 + 外仓对照机制 · patch；前版 4.5.2 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -11,6 +11,7 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-27：外仓对照（点名才开）：PM 可提示、用户点名才搜/对照；外仓只作结构参考，禁止复制进本仓。方法论补一次实测（隐去项目细节）。不是岗。不 bump VERSION
 - 2026-08-27：说明文档表面「会生长」：README / USER-GUIDE 写清典故与错题的留下、上传、升级；全世界一起进化，AI 每错一次都是契机。收集仓已开通（公开仓 `zhaobolun-code/ai-gates-collect`：开分支即可交 PR，合并须权限）；本机仍须登录才开 PR；合并≠已下发。不 bump VERSION
 - 2026-08-27：通用典故增「整树同形」「叠衣增效」「沿路截办」「换态易行」。不 bump VERSION
 - 2026-08-27：打包排除项目词条本仓验证：进包的 `design-patterns.md` 换成空表模板；错题本/口诀本就不进包。不 bump VERSION
@@ -201,6 +202,16 @@
 ### Included changes — 2026-08-26（使用/入表拆开收尾 · 不 bump）
 
 - **「使用与入表拆开」收尾**：通用典故增「使用与入表拆开」（shared-language）；METHODOLOGY 改口语，写清是什么、为什么这么用 + 第 8 节补第三次（使用/入表拆开后无本仓验证仍按配方新建；漏接线≠选型失败）；特效适配器词条补邻仓按配方新建 FarmBloomGate（不当本仓复用入口）；pattern-local-or-human 用户归档迁签收。
+
+## [4.5.3] - 2026-08-27（收集仓口径收敛 + 外仓对照机制 · patch · 发布）
+
+### Included changes — 2026-08-27（外仓对照 · 不 bump）
+
+- **外仓对照（点名才开）**：新 reference `external-compare.md`——PM 判定 Standard/Full 且本仓无明显同类时才**提示**，用户点名「外仓对照」才搜/对照；外仓只作结构参考，**禁止复制进本仓**（先读本仓真实代码，硬门禁 #1）；不是岗、不替代复用四问；METHODOLOGY 补一次实测（隐去项目细节）。同步：CORE / 四岗 SKILL / agent-entry-route / reference-routing / README / USER-GUIDE。
+
+### Included changes — 2026-08-27（收集仓口径收敛 · 不 bump）
+
+- **收集仓口径收敛**：把「收集仓已开通=已下发」收回为「本地默认队列 + gh 出口须本机探测 + gh 未接线时跨项目 ≥2 规则可写但不可实施」；说明文档表面「会生长」（README/USER-GUIDE 写清留下/上传/升级，合并≠已下发）；同步：planner / developer / plan-reviewer SKILL + collect-queue / pattern-harvest / lessons-learned / design-patterns（含空表模板）。
 
 ## [4.5.1] - 2026-08-26（写岗子窗 DENY 改向 + 设计模式使用/入表拆开 · patch · 发布）
 

@@ -60,6 +60,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 3.19 **GitHub 收集仓（轻量）**（[collect-queue.md](../references/collect-queue.md)）：把「准」写成建 issue/开 PR → **blocker**；把 issue 当主通道而仓已是 PR 仓 → **blocker**；`gh repo create` / 上传者 `gh pr merge` / 直接改 `main` → **blocker**；未探测成功仍写「本机已登录/已开 PR/技能包已下发」→ **blocker**；写成第七岗 / `github-collect.md` / 第二套队列 → **blocker**。允许写「收集仓已开通」。公开仓：开分支交 PR 即可，合并须权限。
 3.20 **Skill 回传（轻量）**（[pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化）：把收集仓合并写成已下发 → **blocker**；把下发写成拉 collect 仓 → **blocker**；第七岗 → **blocker**；未升级成功自称已下发 → **blocker**。
 3.21 **机械 A# 无最小断言**（[test-first.md](../references/test-first.md)）：本 Step A# 含可机械验证项却无最小断言（`证据/test-first/` 或既有测试路径）→ **major**。不可机械项不启用 test-first，不得因此 major。三条反模式（测私有实现 / 同一套公式 / 先写完全部测试）命中 → 判断/major，不得写成全程 TDD 硬挡。
+3.22 **外仓对照（轻量）**（[external-compare.md](../references/external-compare.md)）：未点名却写成已对照 / 已 clone → **blocker**；PM 提示写成已启用 → **major**；Mandatory 点名外仓路径/类名或把外仓文件列入改动 → **blocker**；缺「不选照抄外仓」选型行却声明启用 → **major**；写成第七岗 → **blocker**。日常方案未声明 → **不硬拦**。
 4. 有 blocker → 不得 `implementation-ready` / 可交给程序员=是；策划正确响应后可提醒提议 lessons 类型=`方案blocker`（须「准」，见 [lessons-learned.md](../references/lessons-learned.md)）
 5. **L1.5 触发**（CORE §Standard 加强审核）：每 Step 的 Regression Validation 须引用 project-context 回归索引对应行；plan-lite「方案审核档位」记 **L1.5**
 6. **L2 触发**（CORE §Standard 交叉审核）：跨 2+ 业务模块 → 档位 **L2**；**优先** Subagent 隔离（见 [isolated-review.md](../references/isolated-review.md)）；失败再提示手动新开；同 Chat 标 **「L2 非独立复核」**
