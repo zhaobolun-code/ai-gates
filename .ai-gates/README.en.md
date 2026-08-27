@@ -6,6 +6,8 @@
 
 The flow of vibe coding is: skip syntax, skip the docs, skip a complete architecture up front, and build the code by feel, like drawing. ai-gates is the most graceful balance we have so far between engineering governance and natural interaction—it does not buy safety by interrupting you; it uses low-perception guardrails so you can keep moving. That is the bridge from vibe coding as a toy to vibe coding that is production-usable.
 
+You are not forced to drop the vibe, and you are not left naked in it. Day to day you only reply `准`: understand + plan + start, one confirmation. After that, Standard/Full may Auto-run implement↔review until a hard stop or wait-for-accept—black-box speed while you stay in flow. The main chat stays the project manager; coding and review sit in sub-sessions, so the flow thread is not flooded with diffs. When you need safety, open the doc window and the box turns white (Express/Direct may skip a folder). Vibe coding’s real fear is not “it wrote it wrong,” but “it wrote it wrong and you only find out in production.” The folder is the power to crack the black box white whenever you actually need to know what changed and why.
+
 ## Distinctive mechanisms
 
 A few things already running here that are uncommon elsewhere. Not a feature list.
@@ -33,7 +35,7 @@ Classic vibe coding offloads cognitive load—and then these four things blow up
 | **Dependencies tangle** | Grab libraries, copy foreign repos, scope grows in silence | Read this repo first, choose existing structure, foreign repos for structure only, Delta against silent scope creep |
 | **A tiny change avalanches** | A large change still forced through as a small one | Four lanes (more files / cross-module → promote immediately), **heat** (failed modules get a stronger review next time), regression index, stop-loss |
 
-Guardrails scale in the background by risk: **heat** only strengthens review already on Standard; it does not promote a lane by itself. Day to day you still see one “your next step.” Safety without interrupting you.
+Guardrails scale in the background by risk: **heat** only strengthens review already on Standard; it does not promote a lane by itself. Black in the moment: one-round confirm, Auto, sub-sessions. White after the fact: the doc window. Day to day you still see one “your next step.” Safety without interrupting you.
 
 ## 30-second install, 3-minute fluency
 
