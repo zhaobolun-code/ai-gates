@@ -44,7 +44,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 3.5 **验收条款 + Delta-only + Delta Spec**（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md)）：须有可证伪 `A1…`；只写相对现状变更，禁止复述整模块原理；每 Step 三段 Delta Spec（无则写「无」）；签收后提示物理口径/A# 同步句
 3.6 **结案收敛**：准备 `completed` 时生成一页内「结案变更摘要」（ADDED/MODIFIED/REMOVED/归并到）；有 MODIFIED/REMOVED 须实际更新物理口径/A#，禁“待同步”结案
 4. 交审前写 **选型短表**；方案审无 blocker 后发 **一轮**确认包（理解+选型+开始改码），见 [demand-clarification.md](../references/demand-clarification.md)；**禁止**拆多轮、禁止审前先问用户开始改码。方案 blocker 已正确响应后：**自动**落 `证据/_lesson-pending.md`（类型=`方案blocker`），主窗问「准」再写主表（[lessons-learned.md](../references/lessons-learned.md) §准全自动）。**Auto 测挂**：PM 已按 diagnosis §0 `auto_follow: yes` 留据代选时，勿再卡「等准」才写 Discover/范围内下一刀（硬停除外）
-4.01 **跨项目出口**：默认本地收集仓（[collect-queue.md](../references/collect-queue.md)）；未验证 `gh auth status` 成功时禁止方案写「gh 已接线」。
+4.01 **跨项目出口**：收集仓已开通（[collect-queue.md](../references/collect-queue.md)）；未登录时默认本地队列。未验证 `gh auth status` 成功时禁止方案写「本机已登录/已开 PR」。允许写「收集仓已开通」。
 4.05 **分歧标注（默认不启用）**：跨模块/高危/止损/用户点名分歧实验时，方案 `未完成.md` 或 Mandatory 须声明是否启用分歧标注；启用则按 [divergence-annotation.md](../references/divergence-annotation.md) 派两个隔离槽，对照由派发方写；默认 **不启用**
 4.06 **完整碰撞（默认不启用）**：完整碰撞默认不启用；启用须点名 [collision-review.md](../references/collision-review.md)（异模型三轮；轮0 产出可引用共识地基三句；轮1 Grok 构建者×Sonnet 红队且开头引用地基；短清单主窗机械拼装；轮2/3 引用原文只投票；禁止同模型双链）。不得把 diverge 填成碰撞。止损触顶/将到 2/3 或热度爆炸时由 PM 在确认包**提示**可选碰撞，策划不得自行开跑。
 4.07 **跨会话续作**：续作前按 [long-task.md](../references/long-task.md) 核感知/卡住；命中停点先确认包，禁止静默续改码。
@@ -53,8 +53,8 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 4.10 **归档总结（逆向总结典故）**：归档总结默认**不在执行中跑**；仅结案归档（`completed`/失败封存+migrate）且有改前选型三格才触发；无三格跳过；空闲枢纽迁签收不跑；**禁止与 4.09 逆链混称**。点名 [reverse-allusion.md](../references/reverse-allusion.md)。
 4.11 **模式沉淀**（生产侧）。可晋升时（签收/`runtime-validated` 抽出可复用结构且对仓三档=有真锚点；CR 发现未入表真锚点；用户点名「模式沉淀」；归档逆向总结卡已有本仓锚点）**自动**落 `证据/_pattern-pending.md`；主窗只问「准否」；禁止静默入表；禁止塞进 `_lesson-pending.md`。Express / 空闲枢纽默认不跑。不是岗。点名 [pattern-harvest.md](../references/pattern-harvest.md)。
 4.12 **电路子窗**。写 ≥2 Step 契约前答电路一问；能并则并；阻塞边必填「串联 / 并联」+ 路径集。单 Step / Express / Direct 对话内切片：字面 `无（单步·不跑电路）`。不是岗。点名 [circuit-windows.md](../references/circuit-windows.md)。
-4.13 **本地自进化环**。项目格已「准」→ 去上下文化 → collect-queue `shareable` → 抽象 → 须「准」才入通用格。禁止静默入通用格。未验证 `gh auth status` 成功时禁止方案写「gh 已接线/已通/已下发」。不是岗。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化。
-4.14 **GitHub 收集仓**。默认本地队列（[collect-queue.md](../references/collect-queue.md) §gh）；本机 `gh auth status` exit 0 时可选用 gh；默认仓 `zhaobolun-code/ai-gates-collect`；上传通道 **PR**。「准」不触发 `gh pr create` / `gh issue create`。未探测成功禁止方案写「gh 已接线/已通/已下发」。不是岗。回传手续见 4.15。
+4.13 **本地自进化环**。项目格已「准」→ 去上下文化 → collect-queue `shareable` → 抽象 → 须「准」才入通用格。禁止静默入通用格。未验证 `gh auth status` 成功时禁止方案写「本机已登录/已开 PR/技能包已下发」。不是岗。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化。
+4.14 **GitHub 收集仓**。收集仓已开通（[collect-queue.md](../references/collect-queue.md) §gh）；公开仓 `zhaobolun-code/ai-gates-collect`；上传 = 开分支 + **PR**（不需要合并权限）；合并须维护者权限。「准」不触发 `gh pr create` / `gh issue create`。本机 `gh auth status` exit 0 且独立口令「上传」才开 PR。未探测成功禁止方案写「本机已登录/已开 PR/已下发」；允许写「收集仓已开通」。不是岗。回传手续见 4.15。
 4.15 **Skill 回传**。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化：下发=「项目经理 升级 ai-gates」或 `PM upgrade ai-gates` 拉 `zhaobolun-code/ai-gates`，不是拉 collect 仓、不是再开 PR；收集仓合并 ≠ 已下发；入通用格须另「准」。不是岗。本窗不执行升级、不执行 gh create。
 4.5 **复核派发工件**：交方案审前按 [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md) + 模板生成/刷新 `证据/_方案审核派发.md`（`mode=plan`）；blocker 修订后重算 revision、去重回归项≤20 行、L3 清零并重生第1轮；第1→2 转场见 handoff §I（Checker 无写权）
 5. 「文档状态」：`draft` → `review-pending` → 过审发确认包 →「准」后 ready 并同条开始改码（[handoff-automation.md](../references/handoff-automation.md) §0/§F）；给程序员当前 Step 必须抄文档状态 **当前 Step**（`check-pipeline-doc` 交叉核对，不一致只 warn）

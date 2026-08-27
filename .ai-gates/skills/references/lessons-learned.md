@@ -18,7 +18,7 @@
 | **待准 L1** | 方案夹 `证据/_lesson-pending.md`（模板 → [templates/lesson-pending.md](../templates/lesson-pending.md)） |
 | 落表脚本 | `.cursor/scripts/commit-lesson-pending.ps1` |
 
-与典故正交：坑进本表；结构/共识走 [pattern-harvest.md](./pattern-harvest.md) 四格。禁止把错题行抄成典故词。Skill 自进化（项目错题抽象升通用错题 / 再下发 Skill）见 pattern-harvest §Skill 自进化；**gh 未接线不可实施**。
+与典故正交：坑进本表；结构/共识走 [pattern-harvest.md](./pattern-harvest.md) 四格。禁止把错题行抄成典故词。Skill 自进化（项目错题抽象升通用错题 / 再下发 Skill）见 pattern-harvest §Skill 自进化；**收集仓已开通**（本机上传仍须登录；合并≠已下发）。
 
 ## 准全自动流程（强制）
 

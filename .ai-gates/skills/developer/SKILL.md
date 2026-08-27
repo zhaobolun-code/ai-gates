@@ -56,7 +56,7 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 8.5 **经验/错题（准全自动）**：①失败：**自动** L0；②成功/根因验证后交主窗 PM **自动**落 `证据/_lesson-pending.md`（勿静默写主表）；③用户「准」后 `commit-lesson-pending.ps1 -Apply`（见 [lessons-learned.md](../references/lessons-learned.md)）。禁空话 pending。**格式强制**：教训草稿 `_lesson-pending.md` 必须按模板 [lesson-pending.md](../templates/lesson-pending.md) 用 `yaml` fenced block 撰写——首块必填 `status/date/module/lesson/source/doc/type` + 非空 `cause/fix`；可选 `keywords/prevent/scope/l0_section/outline_bucket`；格式契约以 `commit-lesson-pending.ps1` 函数体为准（`$required` 数组 + cause/fix 非空校验）；交草稿前自检 yaml 块存在——散文/标题格式会被 commit 脚本拒绝（2026-08-13 实测）。
 8.6 **模式沉淀**：成功/发现可复用结构（对仓三档=有真锚点）交主窗 **自动**落 `证据/_pattern-pending.md`；**禁静默写** `design-patterns.md` 词条表；禁塞 `_lesson-pending.md`。点名 [pattern-harvest.md](../references/pattern-harvest.md)。
 8.7 **本地自进化环**：演练/入队只写 `.ai-gates/collect-queue.md` 的 `shareable`；禁静默写 `shared-language.md` / `anti-patterns.md`；禁 bump VERSION。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化。
-8.8 **GitHub 收集仓**：仅用户口令「上传」才允许日后 `gh pr create`；「准」不开 PR、不建 issue；默认仓 `zhaobolun-code/ai-gates-collect`；探测失败不得开 PR。点名 [collect-queue.md](../references/collect-queue.md) §gh。本窗不执行 create。
+8.8 **GitHub 收集仓**：收集仓已开通（公开仓）。仅用户口令「上传」且本机 `gh auth status` exit 0 才允许开分支 + `gh pr create`；「准」不开 PR、不建 issue；默认仓 `zhaobolun-code/ai-gates-collect`；探测失败不得开 PR。禁止 `gh pr merge`、禁止直接改 `main`。点名 [collect-queue.md](../references/collect-queue.md) §gh。未口令不执行 create。
 8.9 **Skill 回传**：下发只走「项目经理 升级 ai-gates」拉 `zhaobolun-code/ai-gates`；禁止拉 collect 仓当下发；收集仓合并 ≠ 已下发；未升级成功禁止自称已下发。点名 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化。本窗不执行升级。
 9. 改动 >3 文件 / 跨模块 / 命中 regression-index → 停，报 PM 升级
 10. CR 有 blocker 先修，不写最终 README

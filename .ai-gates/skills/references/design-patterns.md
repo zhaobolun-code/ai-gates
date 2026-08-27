@@ -38,7 +38,7 @@
 
 仅缺触发症状 → **默认 YAGNI**（见 [anti-patterns.md](./anti-patterns.md)）。无本仓验证实例不再等于不准用（State 快照 / Policy 策略 / Seam Service 除外，见各行结构）。
 
-验证状态档位见 [evidence-levels.md](./evidence-levels.md)。本仓 §晋升闸已接 01-B；跨项目 ≥2 依赖 `collect-queue.md`（本地已签收；gh 未接线则跨项目不可实施）；6 个月自动降级脚本仍不做。
+验证状态档位见 [evidence-levels.md](./evidence-levels.md)。本仓 §晋升闸已接 01-B；跨项目 ≥2 依赖 `collect-queue.md`（收集仓已开通；本机上传仍须登录）；6 个月自动降级脚本仍不做。
 
 ## 晋升闸
 
@@ -49,4 +49,4 @@
 3. **禁用边界必填**：五字段「禁用边界」非空。
 4. **无争议 + 用户「准」**：方案审/CR 无 blocker 后用户「准」才改 skill 级词条。
 
-**跨项目 ≥2**：依赖收集仓同典故词在 ≥2 项目队列出现（depends-on [collect-queue.md](./collect-queue.md) / 窗 `evolution-01-collect`）。本地队列**已签收**；**gh 未接线** → 本条规则可写、**不可实施**。Skill 自进化最终目标（上传 GitHub → 抽象通用级 → 下发 Skill）见 [pattern-harvest.md](./pattern-harvest.md) §Skill 自进化，同样未接线。
+**跨项目 ≥2**：依赖收集仓同典故词在 ≥2 项目队列出现（depends-on [collect-queue.md](./collect-queue.md) / 窗 `evolution-01-collect`）。**收集仓已开通**（[`ai-gates-collect`](https://github.com/zhaobolun-code/ai-gates-collect)）→ 本条可实施，须有收集仓同词证据，禁止空口「已跨项目」。本机上传仍须 `gh auth status` exit 0。Skill 自进化见 [pattern-harvest.md](./pattern-harvest.md) §Skill 自进化（收集仓已开通；回传=升级拉真源；合并≠已下发）。

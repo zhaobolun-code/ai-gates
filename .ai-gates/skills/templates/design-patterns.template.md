@@ -31,7 +31,7 @@
 
 仅缺触发症状 → **默认 YAGNI**（见 [anti-patterns.md](../references/anti-patterns.md)）。无本仓验证实例不再等于不准用（除非本表该行写明不采用）。通用配方见 [shared-language.md](../references/shared-language.md) §典故。
 
-验证状态档位见 [evidence-levels.md](../references/evidence-levels.md)。本仓 §晋升闸已接 01-B；跨项目 ≥2 依赖收集仓（本地已签收；gh 未接线则跨项目不可实施）；6 个月自动降级脚本仍不做。
+验证状态档位见 [evidence-levels.md](../references/evidence-levels.md)。本仓 §晋升闸已接 01-B；跨项目 ≥2 依赖收集仓（收集仓已开通；本机上传仍须登录）；6 个月自动降级脚本仍不做。
 
 ## 晋升闸
 
@@ -42,4 +42,4 @@
 3. **禁用边界必填**：五字段「禁用边界」非空。
 4. **无争议 + 用户「准」**：方案审/CR 无 blocker 后用户「准」才改 skill 级词条。
 
-**跨项目 ≥2**：依赖收集仓同典故词在 ≥2 项目队列出现（depends-on [collect-queue.md](../references/collect-queue.md)）。本地队列**已签收**；**gh 未接线** → 本条规则可写、**不可实施**。Skill 自进化见 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化，同样未接线。
+**跨项目 ≥2**：依赖收集仓同典故词在 ≥2 项目队列出现（depends-on [collect-queue.md](../references/collect-queue.md)）。**收集仓已开通** → 本条可实施，须有收集仓同词证据。本机上传仍须登录。Skill 自进化见 [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化（合并≠已下发）。
