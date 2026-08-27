@@ -6,15 +6,19 @@
 #
 # Packaged scope (see .ai-gates/skills/MAINTAINER.md §目录与同步策略 / project-local-config.md):
 #   包顶层 = .ai-gates/（解压到目标项目根即得中央技能库 .ai-gates/）：
-#     skills/    all files EXCEPT MAINTAINER.md (maintainer-only); CHANGELOG.md at pack root IS shipped for public trust
+#     skills/    all files EXCEPT MAINTAINER.md (maintainer-only); after copy, references/design-patterns.md
+#                is overwritten from templates/design-patterns.template.md (empty table; no 本仓验证 rows)
+#                CHANGELOG.md at pack root IS shipped for public trust
 #     scripts/   *.ps1 / *.sh except Chemical-specific (e.g. ci-pressure-manager-gate.ps1)
 #     rules/ai-dev-pipeline.mdc
 #     hooks.json + hooks/*.ps1 + hooks/codex/*.ps1  (generic Cursor + Codex hooks)
 #     codex/hooks.json + codex/config.toml  (Codex wiring, git-tracked central copy)
 #     link-platform.ps1/.sh  (new-project one-shot portal creation)
 #     METHODOLOGY.md + USER-GUIDE.md + README.md + LICENSE + CHANGELOG.md + PACKAGE-INFO.md
-# Excluded: this script itself, project-context.md, regression-index.yaml, pipeline-*.log,
-#           hooks-log/ (runtime log), skills/MAINTAINER.md, scripts/ci-pressure-manager-gate.ps1
+# Excluded: this script itself, project-context.md (含项目口诀), regression-index.yaml, pipeline-*.log,
+#           hooks-log/ (runtime log), skills/MAINTAINER.md, scripts/ci-pressure-manager-gate.ps1,
+#           lessons-learned.md / lessons-outline.md (错题本, .ai-gates 根, 本就不拷),
+#           filled design-patterns.md 本仓验证行 (staging 用空表模板覆盖)
 
 param(
     [string]$Version,
@@ -106,6 +110,15 @@ try {
     Copy-Item -Path $skillsDir -Destination $stageSkills -Recurse -Force
     Remove-Item -Path (Join-Path $stageSkills "MAINTAINER.md") -Force -ErrorAction SilentlyContinue
 
+    Write-Host "Replacing design-patterns.md with empty-table template (project 本仓验证 rows stay local)..."
+    $dpTemplate = Join-Path $stageSkills "templates/design-patterns.template.md"
+    $dpDest = Join-Path $stageSkills "references/design-patterns.md"
+    if (-not (Test-Path -LiteralPath $dpTemplate)) {
+        Write-Error "skills/templates/design-patterns.template.md missing; refusing to ship filled 本仓验证 rows."
+        exit 1
+    }
+    Copy-Item -LiteralPath $dpTemplate -Destination $dpDest -Force
+
     Write-Host "Copying scripts..."
     $stageScripts = Join-Path $stageRoot "scripts"
     New-Item -ItemType Directory -Force -Path $stageScripts | Out-Null
@@ -181,6 +194,8 @@ try {
         "## 本包不含（按设计，维护者专属）",
         "",
         "- MAINTAINER.md：版本升级策略、RC 转正条件、发布检查清单，含源仓库专属的审计记录，不通用",
+        "- 项目词条本仓验证：进包的 skills/references/design-patterns.md 为空表手续（本机满表不进包）",
+        "- 错题本 / 口诀本：.ai-gates/lessons-*.md、.cursor/project-context.md 本就不拷",
         "",
         "## 本包含变更历史",
         "",

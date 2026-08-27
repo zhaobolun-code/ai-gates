@@ -11,6 +11,13 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-27：通用典故增「整树同形」「叠衣增效」「沿路截办」「换态易行」。不 bump VERSION
+- 2026-08-27：打包排除项目词条本仓验证：进包的 `design-patterns.md` 换成空表模板；错题本/口诀本就不进包。不 bump VERSION
+- 2026-08-27：通用典故续增「可撤销入栈」「共享生命周期」「按类型创建」「外形适配」「同一动作换算法」；对应项目词条加通用配方指针。不 bump VERSION
+- 2026-08-27：通用典故增「订阅推送」（事件分发去上下文化）；项目表保留验证格。不 bump VERSION
+- 2026-08-27：通用典故增「自注册、只认接口」；特效适配器禁用边界改指向该典故。不 bump VERSION
+- 2026-08-27：Policy 词条补蒸发证据 `EvaporationPolicy` + `EvaporationPolicyResolver.Resolve`。不 bump VERSION
+- 2026-08-27：词条表增「倾倒策略」；锚点 `IPourStrategy` + `TopLayerPourStrategy`/`ProportionalPourStrategy`；与 Policy 分列。不 bump VERSION
 - 2026-08-26：通用典故增「使用与入表拆开」；方法论改口语，写清是什么、为什么这么用。不 bump VERSION
 - 2026-08-26：特效适配器词条补邻仓按配方新建 FarmBloomGate（不当本仓复用入口）。不 bump VERSION
 - 2026-08-26：方法论第 8 节补第三次：使用/入表拆开后无本仓验证仍按配方新建；漏接线≠选型失败。不 bump VERSION
