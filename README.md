@@ -1,6 +1,6 @@
 # ai-gates
 
-Chinese → [Chinese README](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md)
+中文 → [中文版 README](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md)
 
 **AI can dump a pile of bad code in seconds. That is why you need gates: you state the demand in your native language; the pipeline carries the process and lowers cognitive load. At key nodes, a person must test and pass.**
 
