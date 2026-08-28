@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v4.5.3（发布 · 收集仓口径收敛 + 外仓对照机制 · patch；前版 4.5.2 定版信息保留）
+**当前 LTS**：v4.5.4（发布 · 根因先于保底 + README 中英瘦身 · patch；前版 4.5.3 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -11,6 +11,8 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-08-28：README 瘦身：三层 + 灰箱；止损含错题/热度；上传须先抽象成通用级；接入三链接；平台一句支持四家 + USER-GUIDE。中英同步。不 bump VERSION
+- 2026-08-28：修 bug 根因先于保底：策划须写根因一句、选型不选保底；程序员写不出根因则只读；CR/方案审挡夹紧/默认/catch/第二条路径藏症状。连败仍走止损。不 bump VERSION
 - 2026-08-27：README 中英：vibe coding 心流 + 低感知护栏；用/不用对照四行（质量/债务/乱麻/雪崩）；热度；补一轮确认/Auto/子窗（当时黑）与文档窗（事后白，快捷/直通可不建夹）。英文 README.en.md。不 bump VERSION
 - 2026-08-27：外仓对照（点名才开）：PM 可提示、用户点名才搜/对照；外仓只作结构参考，禁止复制进本仓。方法论补一次实测（隐去项目细节）。不是岗。不 bump VERSION
 - 2026-08-27：说明文档表面「会生长」：README / USER-GUIDE 写清典故与错题的留下、上传、升级；全世界一起进化，AI 每错一次都是契机。收集仓已开通（公开仓 `zhaobolun-code/ai-gates-collect`：开分支即可交 PR，合并须权限）；本机仍须登录才开 PR；合并≠已下发。不 bump VERSION
@@ -213,6 +215,16 @@
 ### Included changes — 2026-08-27（收集仓口径收敛 · 不 bump）
 
 - **收集仓口径收敛**：把「收集仓已开通=已下发」收回为「本地默认队列 + gh 出口须本机探测 + gh 未接线时跨项目 ≥2 规则可写但不可实施」；说明文档表面「会生长」（README/USER-GUIDE 写清留下/上传/升级，合并≠已下发）；同步：planner / developer / plan-reviewer SKILL + collect-queue / pattern-harvest / lessons-learned / design-patterns（含空表模板）。
+
+## [4.5.4] - 2026-08-28（根因先于保底 + README 中英瘦身 · patch · 发布）
+
+### Included changes — 2026-08-28（根因先于保底 · 不 bump）
+
+- **修 bug 根因先于保底**：planner 1.3——修可见故障/消症状的 Mandatory 须**根因一句**（坏在哪条因果/真源，不是「现象没了」），写不出 → 只读排查不写保底实现，选型短表须有「不选保底」一行；developer 2.11——改码前自检根因一句，写不出 → 停、只读、交 PM，禁止先打补丁，交 CR 须指出根因落点；plan-reviewer 3.23——无根因一句 → major，保底当修复/无「不选保底」 → major，无根因假设定版保底 → blocker；code-reviewer 同步；anti-patterns 补「写保底不写根因」一行。连败仍走 diagnosis-gates 止损，不另开闸。
+
+### Included changes — 2026-08-27/28（README 中英 · 不 bump）
+
+- **README 中英落地**：新增 `README.en.md`（英文版，互链）；中文版改写——vibe coding 心流 + 低感知护栏、用/不用对照表（质量/债务/乱麻/雪崩）、三层 + 灰箱（当时黑=一轮确认/Auto/子窗，事后白=文档窗，快捷/直通可不建夹）、护栏按风险升降（热度只加强已在标准上的审核）、止损含错题/热度、上传须先抽象成通用级、接入三链接、平台一句支持四家；METHODOLOGY 机制清单改指 README「机制表」+「工作流」；USER-GUIDE 同步。
 
 ## [4.5.1] - 2026-08-26（写岗子窗 DENY 改向 + 设计模式使用/入表拆开 · patch · 发布）
 

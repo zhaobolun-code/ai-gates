@@ -14,7 +14,7 @@
 #     hooks.json + hooks/*.ps1 + hooks/codex/*.ps1  (generic Cursor + Codex hooks)
 #     codex/hooks.json + codex/config.toml  (Codex wiring, git-tracked central copy)
 #     link-platform.ps1/.sh  (new-project one-shot portal creation)
-#     METHODOLOGY.md + USER-GUIDE.md + README.md + LICENSE + CHANGELOG.md + PACKAGE-INFO.md
+#     METHODOLOGY.md + USER-GUIDE.md + README.md + README.en.md + LICENSE + CHANGELOG.md + PACKAGE-INFO.md
 # Excluded: this script itself, project-context.md (含项目口诀), regression-index.yaml, pipeline-*.log,
 #           hooks-log/ (runtime log), skills/MAINTAINER.md, scripts/ci-pressure-manager-gate.ps1,
 #           lessons-learned.md / lessons-outline.md (错题本, .ai-gates 根, 本就不拷),
@@ -163,10 +163,11 @@ try {
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/codex/hooks.json") -Destination $stageCodex -Force
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/codex/config.toml") -Destination $stageCodex -Force
 
-    Write-Host "Copying link-platform.* + docs (README/METHODOLOGY/USER-GUIDE/LICENSE/CHANGELOG)..."
+    Write-Host "Copying link-platform.* + docs (README/README.en/METHODOLOGY/USER-GUIDE/LICENSE/CHANGELOG)..."
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/link-platform.ps1") -Destination $stageRoot -Force
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/link-platform.sh") -Destination $stageRoot -Force
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/README.md") -Destination $stageRoot -Force
+    Copy-Item -Path (Join-Path $repoRoot ".ai-gates/README.en.md") -Destination $stageRoot -Force
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/METHODOLOGY.md") -Destination $stageRoot -Force
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/USER-GUIDE.md") -Destination $stageRoot -Force
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/LICENSE") -Destination $stageRoot -Force

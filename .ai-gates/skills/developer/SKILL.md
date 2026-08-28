@@ -36,6 +36,7 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 - **状态分类夹**：若本轮改文档状态至终态（签收/`completed`/失败/回退/空闲离执行中等），**同条必须** `migrate-pipeline-window.ps1`（或 doc-windowing §迁移动作同等）；只改状态字段仍停 `执行中/` → **未结案**（handoff §E）
 2. Read `.cursor/project-context.md`（若存在）+ 模块 README **当前风险短段**（勿整份版本史）+ **真实代码**（**优先反复 `codegraph_explore`**；禁止因 soft budget 弃用；禁止全目录扫读）
 2.1 **复用四问**（改码前，见 [execution-discipline.md](../references/execution-discipline.md)）：核对方案短表；方案漏则自补并报 PM。优先接已有 helper/Service/分支；能删旧轨则写进 diff；禁止复制粘贴第二套同类逻辑。命中 project-context **神类止血/补强三口** 时：落点进 Service、守净增阈/方法预算，交 CR 前写**瘦身一拍**一句
+2.11 **修 bug 根因先于保底**（Direct 同样；Express 机械改除外）：改码前自检写**根因一句**（坏在哪条因果/符号）。写不出 → 停、只读、交 PM，禁止先打补丁。禁止用夹紧、默认值、空 catch、再开一条路、force/suppress 藏症状且不删错因。交 CR 须能指出根因落点。连败禁止换皮再保底，走黑板/止损（[diagnosis-gates.md](../references/diagnosis-gates.md)）。允许根因分两刀。
 2.2 **错题本必读**：若 `未完成.md` 有 `## 错题本必读（给程序员）`，改码前 Read 点名的大纲条/主表行（错因+改正）；按「改正」落点，禁重复「错因」手法；禁全表灌入（[lessons-learned.md](../references/lessons-learned.md)）
 2.3 **证据路径自检（改码前 / 交 CR）**：自检摘要或派发须引用路径——错题本必读点名行 + 黑板最近 ≤3「禁止再做」（或「无黑板（已查路径）」）；无路径不得交 CR
 2.4 **热路径批量回归结案**（读 **`.cursor/project-context.md`** §热路径批量回归，若存在）：本 Step Mandatory 触及该表「路径 glob」时，标 `step-completed` / `runtime-validated` **前**须跑表内「场景 ID」（默认 `run-unity-verify-golden.ps1`；跑前**须关本机 Unity Editor**；可 `-All` 但须点名表内各景 JSON；可用表内核对脚本 + `-RequireSceneIds`）；不跑/红不得标过。**无该节 = 不强制点名黄金景。****禁止**用批量回归绿冒充业务 A# 手测签收（≠有意义≠A#，见 [diagnosis-gates.md](../references/diagnosis-gates.md) §0.2.1）
