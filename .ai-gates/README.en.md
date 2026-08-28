@@ -6,6 +6,8 @@
 
 This skill pack changes AI-assisted coding on three layers: vibe coding keeps the feel and still finishes; self-evolution turns failures into rules; exogenous metacognition is an exploration of the unknown.
 
+You just vibe; ai-gates does the coding.
+
 ## Vibe coding
 
 Flow: skip syntax, skip the docs, skip a complete architecture up front, and build the code by feel, like drawing. Guardrails you barely notice let you move forward; vibe coding goes from a toy to a tool.
