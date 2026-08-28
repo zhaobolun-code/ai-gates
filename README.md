@@ -2,6 +2,8 @@
 
 **AI can ship bad code in seconds. ai-gates is a complete development pipeline: you just state the need, it runs the whole chain (judge → slice → plan → implement → review → accept) and hands you a test plan — you test it, and only then is it done.**
 
+You just vibe; ai-gates does the coding.
+
 ### Signature mechanisms
 
 A few that are rare elsewhere and already running here. Not a feature list.
@@ -28,6 +30,8 @@ Typical failure modes when AI edits complex systems directly, and the mechanism 
 | A log keyword appears, so it counts as "fixed" | Acceptance A# (falsifiable criteria) |
 | The same issue patched over and over, getting messier | Stop-loss chain (forced re-scoping, no same path again) |
 | Special-casing to pass the current demo | Physical constraints (no special-casing for specific scenarios) |
+| Workaround shipped first; the root cause never fixed | Root-cause-before-workaround: name the why first, a bypass patch is a blocker |
+| Judging only by what we did here, never comparing outside | External comparison (on request): cross-check approach/evidence against outside practice — structural reference only, never copy |
 
 ### 30-second install, 3-minute fluency
 
@@ -77,9 +81,9 @@ flowchart LR
 
 | Lane | Shape in the workflow |
 | --- | --- |
-| **Express** (one-line comment/text/constant) | one-sentence slice → confirm → edit → one-line self-check; no isolated CR |
-| **Direct** (small change with behavior change) | in-chat A#/slice (no written window) → confirm → edit → isolated CR |
-| **Standard** (cross-module / API / unclear) | plan-lite first → plan review → confirm → edit → isolated CR |
+| **Express** (one file, mechanical — a comment/text/constant) | one-sentence slice → confirm → edit → one-line self-check; no isolated CR |
+| **Direct** (default small change: ≤3 files, no API/save/cross-module) | in-chat A#/slice (no written window) → confirm → edit → isolated CR |
+| **Standard** (>3 files, or API/save/cross-module, or unclear) | plan-lite first → plan review → confirm → edit → isolated CR |
 | **Full** (stop-loss / heat big change / "full process") | execution doc → plan review → confirm → edit → two-round escalated-model review |
 
 Every step needs acceptance — A# states "what counts as done" up front, judged by what you actually see. If scope grows mid-task (over-scope, heat hit, cross-module), the lane re-judges immediately — no forcing through. Simple/urgent small edits take the Express / Direct fast lane (one-sentence slice, no written window, no redundant steps) — gates scale with risk, not a hurdle for small changes.
@@ -94,6 +98,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Machine-enforced gates** | Dangerous git (e.g. `push --force`) and writes without a fresh PM go-ahead are denied by hooks, not just discouraged (verified on Codex CLI and Claude Code; desktop Codex has a known gap—self-check `.ai-gates/hooks-log/`) |
 | **Four-lane routing** | Express / Direct / Standard / Full auto-picked from the task (Direct: straight through, no written plan window; you can still force Full); escalates mid-task if the scope grows beyond the lane |
 | **Stop-loss chain** | Repeated same-approach fails → forced reassessment / A# reopen—not endless micro-patches |
+| **Root-cause-before-workaround** | A bug fix names the root cause in the plan first; selecting a workaround when you cannot name it is blocked—the why is fixed before the patch, fail-fast is not an escape hatch |
 | **Slice-first** | Even small edits start as a slice—what changes, what counts as passing; one slice at a time, over-scope stops |
 | **Mandatory review, tiered** | Where the lane requires it: no plan-review pass → no coding; CR blocker → not “done” (Express/Direct may skip plan review; Direct still requires isolated CR). Tiers escalate with risk: L1.5 for modules with past failures, L2 cross-module, Full L3, heat hit → L3 plan review / double CR, adversarial CR for high-risk. L1.5 defaults to spec+norm axes; review does not re-run tests the implementer already reported; an agent claim of having tested must name the command |
 | **Round confirmation** | One confirm package per decision (`approve`); no silent start of implement/CR |
@@ -108,6 +113,7 @@ These are not feature checkboxes. They are guardrails—each one exists because 
 | **Blackboard** | Per-window repair log: what changed → why failed → do not repeat |
 | **Lessons** | Cross-window error book; drafts auto, **your `approve`** required before the project table |
 | **Allusion guardrails** | An agreed allusion term instantly recalls a whole shared consensus (registered in the shared-language allusion dictionary; silent redefinition forbidden); survives model or person switches |
+| **External comparison** | Named only when you ask (PM may hint): cross-check an approach or evidence against outside practice (other repos / the collect repo) — structural reference only, never copy into this repo |
 | **Delta Spec** | ADDED / MODIFIED / REMOVED tracked per step; no silent scope creep |
 | **Implementer four-state** | The coding sub-window reports first: done / has doubt / stuck / lacks context; Standard and Full lanes do not dispatch review without this line. Fast lanes keep the one-line self-check, no four-state |
 | **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done. Hot-path regression modules auto-run a smoke check and collect logs/screenshots/test reports as evidence — auto-verification ≠ manual acceptance |
