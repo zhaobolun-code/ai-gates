@@ -1,160 +1,60 @@
-中文文档链接：[https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md)
+# ai-gates
 
-**AI can ship bad code in seconds. ai-gates is a complete development pipeline: you just state the need, it runs the whole chain (judge → slice → plan → implement → review → accept) and hands you a test plan — you test it, and only then is it done.**
+中文 → [中文版 README](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md)
+
+**AI can dump a pile of bad code in seconds. That is why you need gates: you state the demand in your native language; the pipeline carries the process and lowers cognitive load. At key nodes, a person must test and pass.**
+
+This skill pack changes AI-assisted coding on three layers: vibe coding keeps the feel and still finishes; self-evolution turns failures into rules; exogenous metacognition is an exploration of the unknown.
 
 You just vibe; ai-gates does the coding.
 
-### Signature mechanisms
+## Vibe coding
 
-A few that are rare elsewhere and already running here. Not a feature list.
+Flow: skip syntax, skip the docs, skip a complete architecture up front, and build the code by feel, like drawing. Guardrails you barely notice let you move forward; vibe coding goes from a toy to a tool.
 
-- **Delivery loop.** One folder per request; when done it must leave "in progress" (signed off / not passed). A small change, once it has created a folder, must also leave "in progress" once tested or unclaimed — it can't camp on "not tested yet". Replying `approve` = understanding + plan + one-shot go-ahead. Work gets closed out, not just its status word changed.
-- **Error-book loop.** A failed test auto-writes L0 → the fix drafts a pending card → your `approve` moves it into the main table → next planning round reads it → hitting it escalates the review tier. Failures become rules, not chat history.
-- **Task routing.** PM assigns a model per task — light edits take the cheapest tier, planning/implementation the normal tier, code review and acceptance the high tier. Cost comparison (not a bill; relative prices min 1 : normal 2 : high 8): a standard window (plan + plan review + implement + isolated CR + acceptance) costs ≈ 40 all-high vs ≈ 22 routed — roughly 40–50% less high-tier spend. Collision / reverse-chain are exceptional procedures — enabled only when named, not part of the lanes, not counted in daily window cost.
-- **Stop-loss loop.** The same approach failing repeatedly gets archived and re-routed — this path is closed, no endless micro-patches.
+- **Delivery loop**: one folder per demand; when it ends, it moves from In Progress to Signed off. Reply `准` = understand + plan + start, one confirmation. You can still change the plan at each node. Finish means close out.
+- **Stop-loss loop**: the same approach failing repeatedly is stopped and rerouted; “this path is closed” goes into the lesson book. Later edits to that fragile area get a stricter review (heat).
+- **Four lanes + task routing**: the flow is chosen by size of the change—small edits take a few steps, large ones write a plan then review, and more files or a cross-module change tighten on the spot. You do not pick the lane. Planning and coding can use a normal model; review and acceptance can use a stronger one. About 70% less model usage—put the expensive steel on the cutting edge.
 
-The rule layer works on every platform; the range that machine hooks actually deny is covered under Platform below. 30-second install / 3-minute fluency, acceptance is yours.
+Classic vibe coding offloads cognitive load, and with it quality, debt, and dependencies; a small change becomes an avalanche. Gates keep pass criteria, stop points, and human tests at key nodes in the flow.
 
-### Positioning: the project manager for AI coding
+## Gray box
 
-Most tools focus on the code itself; ai-gates adds one more layer — the order of the whole development process (requirement alignment → plan approval → execution → acceptance → retrospective → stop-loss), with past failures auto-escalating into smart rules. Why it is designed this way, plus real usage data: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md).
+The black box lowers cognitive load: day to day you see one “your next step,” reply `准`, and test at key nodes. The white box is for seeing the coding process and how it was implemented: open this demand’s folder for the plan, why it was done this way, which bits of code changed, and the review. Default black, white when you need it—that is the gray box (small edits can skip a folder).
 
-### What it treats (why it works)
+## Self-evolution
 
-Typical failure modes when AI edits complex systems directly, and the mechanism for each:
+This layer is the **lessons loop** and **it grows**. Failures and verified approaches stay, so the next plan can use them.
 
-| Failure mode | Mechanism |
-| --- | --- |
-| Editing without reading the actual code, following habits from other projects — APIs don't line up | Hard gate #1: no changes without reading the real code |
-| Reasons live only in chat; next round re-guesses with old judgments | One-round confirmation + windowed docs (reasons persist to disk) |
-| A log keyword appears, so it counts as "fixed" | Acceptance A# (falsifiable criteria) |
-| The same issue patched over and over, getting messier | Stop-loss chain (forced re-scoping, no same path again) |
-| Special-casing to pass the current demo | Physical constraints (no special-casing for specific scenarios) |
-| Workaround shipped first; the root cause never fixed | Root-cause-before-workaround: name the why first, a bypass patch is a blocker |
-| Judging only by what we did here, never comparing outside | External comparison (on request): cross-check approach/evidence against outside practice — structural reference only, never copy |
+Lessons and allusions (a verified approach: one word recalls the whole agreement) both have a **project** level and a **shared** level. Project: reply `准` into this repo’s lesson book or approach table; only the next plan in this project must read them. To use them everywhere, first **abstract them to the shared level** (drop names and paths that only this project knows), then you may upload to the collect repo. After maintainers pull them into the skill pack, say `项目经理 升级 ai-gates` to use them in other repos.
 
-### 30-second install, 3-minute fluency
+- **Lessons loop**: a failed test is noted first; after a fix, you are asked whether to write it into this project’s lesson book; the next plan reads it; a similar miss later gets a stricter review. The point is not to make the same mistake twice.
+- **It grows**: users evolve the skill together. `准` keeps the project level; after abstracting to shared wording you may “upload”; upgrade brings the shared level back. Every AI mistake is a chance to grow.
 
-Option A hands the install to a single paste; once installed you don't need to memorize the mechanism table. Daily use is just three steps: state the need, reply `approve`, test as prompted.
+## Metacognition (advanced attempt)
 
-**Option A (recommended, zero manual steps):** paste the whole block below into any file-editing agent window (Cursor **Agent** / Codex / Trae / Claude Code):
+A few extra checks exist; they run only if you ask: two assistants look for holes in each other, walk backward from “what counts as fail” to see if the design breaks, or write two views in the same round and compare. These have been tried a few times (they can find issues and breaks; they also cost more time and money). Everyday work still uses ordinary review. This is the skill exploring the unknown—not something that starts reflecting by itself after install.
+
+## 30-second install, 3-minute fluency
+
+Path A hands install to one paste. After that, everyday work is: state the demand, reply `准`, and accept at key nodes against the prompt.
+
+### Path A (recommended · zero manual · same paste on every platform)
+
+Paste the **whole** block to the Agent. It will fetch the latest release, install the library, set up connections, and walk init:
 
 ```text
-Install the ai-gates skill pack (AI development pipeline) into this project from https://github.com/zhaobolun-code/ai-gates, replacing manual download, extraction, and initialization:
-- Take the latest release tag, clone/download it to a temp dir; validate that the root contains `.ai-gates/` and `skills/VERSION` is a valid x.y.z equal to that tag — otherwise stop.
-- Copy `.ai-gates/` contents (skills/hooks/scripts/rules/codex, root docs, hooks.json, link-platform.*, LICENSE) into the project root `.ai-gates/`; if already installed, compare versions and replace only when newer, preserving project state (project-context, mcp.json, hooks-log, tmp, verify, regression-*, pipeline-* etc.).
-- Run link-platform.ps1 (Unix: .sh) to create the portals; write install-info.json.
-- Run pm-init.ps1; say `PM init` and work can start right away (the regression index can be added later), generating `.cursor/project-context.md`.
-- Finally report the version and portal status, and tell me the entry phrase for future requests — `PM + request`.
-Before doing anything, present the plan and wait for my confirmation; on any failure or network outage, do not modify files — explain and give the manual download path.
+Install ai-gates (the AI development pipeline skill pack) from https://github.com/zhaobolun-code/ai-gates into this project, replacing manual download, unzip, and init:
+- Take the latest release tag; clone/download to a temp dir; require a root .ai-gates/ whose skills/VERSION is a legal x.y.z equal to that tag, or stop.
+- Copy temp .ai-gates/ skills/hooks/scripts/rules/codex, root docs, hooks.json, link-platform.*, LICENSE into project-root .ai-gates/; if already installed, compare versions and replace only on update; keep project-context, mcp.json, hooks-log, tmp, verify, regression-*, pipeline-* and other project state.
+- Run link-platform.ps1 (Unix: .sh) to create portals; write install-info.json.
+- Run pm-init.ps1; saying 「项目经理 初始化」 is enough to start (regression index can come later) and generate .cursor/project-context.md.
+- Then report version and portal status, and tell me the later entry is 「项目经理 + 需求」.
+List a plan and wait for my confirm before touching files; on failure or network issues do not change files—give a manual download path.
 ```
 
-**Per-platform quickstart (after install)**
+[Getting started](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) · [Why this design](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md) · [Changelog](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md)
 
-| Platform | How you start |
-| --- | --- |
-| **Cursor Agent** | New Agent-mode chat → paste "PM + request"; portals: `link-platform.ps1` / `.sh` |
-| **Codex CLI** | `codex` at the project root (trust the hooks) → same phrase; CLI-side hooks verified to actually deny |
-| **Codex desktop** | New session → trust project hooks → "PM + request"; `apply_patch` hooks may not fire → self-check `.ai-gates/hooks-log/` after writes |
-| **Trae** | New session → "PM + request"; rules + skill portals only, **no machine hooks** |
-| **Claude Code** | Session at the project root → approve hooks/MCP → "PM + request"; hooks machine-verified end-to-end 2026-08-10 |
+## Platform
 
-**Getting in**: in a new repo, say `PM init` once. The assistant generates the project note and probes the tech stack for your confirmation; the regression index (must-test cases) can be added later — you can start `PM + request` without it, and filling it in makes heat escalation more accurate. CodeGraph is optional and only installed with your consent. First-time setup / install & update / blocked-by-a-gate quick-ref: [USER-GUIDE.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md) (sectioned). Health check? Say `PM doctor`.
-What this is / why it is designed this way: [METHODOLOGY.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/METHODOLOGY.md); version and changes (current version per skills/VERSION): [CHANGELOG.md](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/CHANGELOG.md).
-
-### Workflow: how one request goes through
-
-ai-gates governs process order: judge → slice → plan → implement → review → accept — every round is traceable, stoppable/reversible, and finishes with a close-out. Every request follows one main line; the lane only decides how heavy each step is. You only state what you need — the pipeline carries the rest through by role:
-
-```mermaid
-flowchart LR
-  A[Request] --> B["PM judges the lane"]
-  B --> C[Slice / A#]
-  C --> D["One-round confirm (approve)"]
-  D --> E[Implement]
-  E --> F[Isolated CR]
-  F --> G[You accept]
-  G --> H[Retrospective / close-out]
-```
-
-**Request → `[PM]` judges the lane → slice (what changes / what counts as done) → one-round confirmation (`approve`) → implement → isolated code review → acceptance → retrospective (failures go to the lessons book) → close-out**
-
-| Lane | Shape in the workflow |
-| --- | --- |
-| **Express** (one file, mechanical — a comment/text/constant) | one-sentence slice → confirm → edit → one-line self-check; no isolated CR |
-| **Direct** (default small change: ≤3 files, no API/save/cross-module) | in-chat A#/slice (no written window) → confirm → edit → isolated CR |
-| **Standard** (>3 files, or API/save/cross-module, or unclear) | plan-lite first → plan review → confirm → edit → isolated CR |
-| **Full** (stop-loss / heat big change / "full process") | execution doc → plan review → confirm → edit → two-round escalated-model review |
-
-Every step needs acceptance — A# states "what counts as done" up front, judged by what you actually see. If scope grows mid-task (over-scope, heat hit, cross-module), the lane re-judges immediately — no forcing through. Simple/urgent small edits take the Express / Direct fast lane (one-sentence slice, no written window, no redundant steps) — gates scale with risk, not a hurdle for small changes.
-
-### What's inside
-
-These are not feature checkboxes. They are guardrails—each one exists because that failure mode showed up in real development. **You do not need to memorize this table.**
-
-| Mechanism | What it does |
-| --- | --- |
-| **Regression index + heat** | Modules/files that already failed are tracked; touching them again auto-escalates (minimum Standard + L1.5; heat hit takes the higher tier: L3 plan review / double CR)—past failures raise the bar, not your memory |
-| **Machine-enforced gates** | Dangerous git (e.g. `push --force`) and writes without a fresh PM go-ahead are denied by hooks, not just discouraged (verified on Codex CLI and Claude Code; desktop Codex has a known gap—self-check `.ai-gates/hooks-log/`) |
-| **Four-lane routing** | Express / Direct / Standard / Full auto-picked from the task (Direct: straight through, no written plan window; you can still force Full); escalates mid-task if the scope grows beyond the lane |
-| **Stop-loss chain** | Repeated same-approach fails → forced reassessment / A# reopen—not endless micro-patches |
-| **Root-cause-before-workaround** | A bug fix names the root cause in the plan first; selecting a workaround when you cannot name it is blocked—the why is fixed before the patch, fail-fast is not an escape hatch |
-| **Slice-first** | Even small edits start as a slice—what changes, what counts as passing; one slice at a time, over-scope stops |
-| **Mandatory review, tiered** | Where the lane requires it: no plan-review pass → no coding; CR blocker → not “done” (Express/Direct may skip plan review; Direct still requires isolated CR). Tiers escalate with risk: L1.5 for modules with past failures, L2 cross-module, Full L3, heat hit → L3 plan review / double CR, adversarial CR for high-risk. L1.5 defaults to spec+norm axes; review does not re-run tests the implementer already reported; an agent claim of having tested must name the command |
-| **Round confirmation** | One confirm package per decision (`approve`); no silent start of implement/CR |
-| **grill clarification** | Requirements undecided (vague / large / still split after repeated clarification)? One question at a time until the decision tree is exhausted before writing anything; each question carries a recommended answer; approval stays a single round (`approve`) |
-| **Harness + Auto** | In-session gates constrain the agent; after `approve`, Standard/Full may run implement↔CR until hard-stop or await-verify (Express/Direct: no Auto) |
-| **Recovery phrases** | A reset phrase snaps a derailed session back into process; a rollback phrase reverts code through a confirmed `git checkout` |
-| **Roles** | PM dispatches planner / developer / CR / docs; main chat stays PM when possible |
-| **Subagents** | Prefer isolated sub-sessions for implement/review so the main chat stays PM-only—not one mega-thread |
-| **Model routing** | Three-tier task routing: light edits take the cheapest tier, planning/implementation the normal tier, code review and acceptance the high tier (project-configurable)—not the same cheap model for both review and implementation |
-| **Windowed docs** | One task = one folder (plan / physical spec / evidence / done); status-classified. Express normally creates no window; once a folder exists it must carry a slice + self-check and be migrated away when done |
-| **Physical spec** | Hard constraints + negative constraints + failure criteria (Standard/Full windows) |
-| **Blackboard** | Per-window repair log: what changed → why failed → do not repeat |
-| **Lessons** | Cross-window error book; drafts auto, **your `approve`** required before the project table |
-| **Allusion guardrails** | An agreed allusion term instantly recalls a whole shared consensus (registered in the shared-language allusion dictionary; silent redefinition forbidden); survives model or person switches |
-| **External comparison** | Named only when you ask (PM may hint): cross-check an approach or evidence against outside practice (other repos / the collect repo) — structural reference only, never copy into this repo |
-| **Delta Spec** | ADDED / MODIFIED / REMOVED tracked per step; no silent scope creep |
-| **Implementer four-state** | The coding sub-window reports first: done / has doubt / stuck / lacks context; Standard and Full lanes do not dispatch review without this line. Fast lanes keep the one-line self-check, no four-state |
-| **Acceptance (A#)** | Testable, falsifiable criteria per step. “Log keyword appeared” ≠ done. Hot-path regression modules auto-run a smoke check and collect logs/screenshots/test reports as evidence — auto-verification ≠ manual acceptance |
-| **Repeatable assertions (TDD)** | An external dotnet NUnit test project at the repo root (e.g. `Tests/EditMode/`) is a repeatable regression guard: run it after business changes, green trx required (total≥70, failed=0); assertions green ≠ business accepted — manual testing still applies. Steps with mechanically verifiable acceptance default to writing assertions first (test-first on by default; forced when the plan/PM names it) |
-| **File portals** | One `.ai-gates/` library shared via link-platform portals by Cursor/Codex/Trae/Claude Code — one edit applies everywhere, no four drifting copies |
-| **Cross-session ledger** | Standard/Full lanes switching chats mid-work reconcile the account first; completed steps must not be re-dispatched. Fast lanes keep no ledger |
-
-### Platform
-
-- **Cross-platform (rules / skills / portals)**: rules are plain Markdown, other agents can adapt them; portal scripts ship in pairs — `link-platform.ps1` on Windows, `link-platform.sh` on macOS/Linux (plus `link-trae-skills.sh` for Trae) — all create `.cursor/*`, `.codex`, `.claude`, `.trae/skills`, `.trae/rules`.
-- **One `.ai-gates/` library for Cursor / Codex / Trae / Claude Code**; one `link-platform` run creates all the portals.
-- **Windows: full support.** The machine-enforced hooks (PM write gate, high-risk git deny, Unity compile hints — all PowerShell) are verified on codex-cli 0.146/0.147 and Claude Code (end-to-end machine-verified 2026-08-10); one-command install = "30-second install, 3-minute fluency". Known gap: Codex **desktop** sessions may not fire the `apply_patch` hooks (zero hits even with trust approved) — after critical writes, check `.ai-gates/hooks-log/`.
-- **macOS / Linux (hard prerequisite)**: install, rules, skills, and portals fully supported (`bash .ai-gates/link-platform.sh`). The machine-enforced hooks are **all `.ps1`** — for the denies to actually block, the machine must have **PowerShell 7+ (`pwsh`)** and the agent/hooks must be able to reach it; **no `pwsh` = rule layer only, hooks not wired** (do not claim machine gates are active). No bash hooks yet.
-- **Trae runs soft-layer only** (rules + skills portals, no machine hooks) — the gates still apply as instructions there, but enforcement is not machine-backed.
-- **Single-repo boundary**: gates are scoped to the current repository — cross-repo (multi-repo / microservices) changes are not covered by the machine layer; rely on team discipline there.
-
-### Requirements
-
-- Any agent session that can edit files (agent and platform coverage: see "Platform" above)
-- One-time `PM init` (the regression index can be added later; the pack does **not** ship another team's business windows or CHANGELOG)
-
-### You only do three things
-
-1. **Request**: say `PM` + your need (`PM` = project manager)
-2. **Confirm**: read "your next step", reply `approve`
-3. **Accept**: test as prompted, reply pass/fail
-
-Everything else runs through the pipeline by role. What it does inside vs. what you see:
-
-| Inside the pipeline | What you see |
-| --- | --- |
-| Judges the change scope, picks a lane | one line: "your next step" |
-| Writes plan / execution doc (planner) | a confirmation note — reply "approve" |
-| Implements code per the plan (developer) | progress notes |
-| Isolated code review (code-reviewer) | review summary |
-| Auto-verification + evidence collection | a test plan |
-| Retrospective, failures into the error book | draft auto; reply "approve" when asked |
-| Close-out: sign off, move the folder | you say "pass" and it is done |
-
-The mechanism table is **guardrail reference**, not a checklist to memorize before coding; the assistant runs the gates. Blocked? The deny message carries its own escape steps; full quick-reference: the USER-GUIDE link in "30-second install, 3-minute fluency" above.
-
----
-
-MIT · Proven in production on a physics-simulation codebase (many real tasks closed or deliberately stopped before spinning). Not a silver bullet: every step still needs human acceptance.
+Supports Cursor / Codex / Trae / Claude Code. Platform issues: see [USER-GUIDE](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/USER-GUIDE.md).
