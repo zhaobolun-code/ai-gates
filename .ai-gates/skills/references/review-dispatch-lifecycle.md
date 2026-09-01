@@ -26,7 +26,7 @@ L3 第 1/2 轮用字段 `round`（1|2），**仍属 `mode=plan`**，不算独立
 
 ## 3. 机械版本（公共算法）
 
-参与哈希的文件取**磁盘原始字节** SHA-256（小写 hex）。规范清单：UTF-8、无 BOM、行间单个 `LF`、清单末**保留**结尾 `LF`；字段分隔单个 `TAB`；路径仓库相对、`/`、**升序必须按 ordinal（字节/码点序）**——PowerShell 用 `[Array]::Sort($paths, [StringComparer]::Ordinal)` 或等价；**禁止** `Sort-Object` 默认文化排序（会把 `PressureController.cs` 排到 `PressureController.Pipe*.cs` 前，导致 `review_input_revision` 假 stale）。对清单 UTF-8 字节再 SHA-256。
+参与哈希的文件取**磁盘原始字节** SHA-256（小写 hex）。规范清单：UTF-8、无 BOM、行间单个 `LF`、清单末**保留**结尾 `LF`；字段分隔单个 `TAB`；路径仓库相对、`/`、**升序必须按 ordinal（字节/码点序）**——PowerShell 用 `[Array]::Sort($paths, [StringComparer]::Ordinal)` 或等价；**禁止** `Sort-Object` 默认文化排序（会把 `Foo.cs` 排到 `Foo.Bar.cs` 前，导致 `review_input_revision` 假 stale）。对清单 UTF-8 字节再 SHA-256。
 
 ### 3.1 `target_revision`
 

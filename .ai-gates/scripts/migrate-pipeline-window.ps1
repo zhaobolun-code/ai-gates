@@ -235,6 +235,22 @@ foreach ($md in @(Get-ChildItem -LiteralPath $dstAbs -Recurse -Filter "*.md" -Fi
 }
 Write-Host "Rewrote **方案文件夹** lines: $rewritten"
 
+if ($ToCategory -eq "签收") {
+    $idxCn = Join-Path $dstAbs "已完成\_索引.md"
+    $idxEn = Join-Path $dstAbs "已完成\_index.md"
+    $idxPath = $null
+    if (Test-Path -LiteralPath $idxCn) { $idxPath = $idxCn }
+    elseif (Test-Path -LiteralPath $idxEn) { $idxPath = $idxEn }
+    if (-not $idxPath) {
+        Write-Host "WARN: 签收 but missing 已完成/_索引.md (migrate does not archive steps; see doc-windowing 完成即迁移)" -ForegroundColor Yellow
+    } else {
+        $idxText = [IO.File]::ReadAllText($idxPath, $utf8NoBom)
+        if ($idxText -match "（尚无）" -or $idxText -match "\(尚无\)") {
+            Write-Host "WARN: 签收 but 已完成/_索引.md still 尚无 (folder move != step archive)" -ForegroundColor Yellow
+        }
+    }
+}
+
 if ($ToCategory -ne "执行中") {
     Compress-UnityVerifyLogs -WindowRoot $dstAbs
 } else {

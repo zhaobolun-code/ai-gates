@@ -58,11 +58,7 @@
 
 
 
-用户未指定路径时：根目录 = **project-context 覆盖**（若有）> 通用 `.ai-gates/Doc/`（见 [doc-path-defaults.md](./doc-path-defaults.md)）。  
-
-
-
-本仓库 Chemical 未指定时根为：`Assets/LabSDK/.../化学文档/压力系统/`。
+用户未指定路径时：根目录 = **project-context 覆盖**（若有）> 通用 `.ai-gates/Doc/`（见 [doc-path-defaults.md](./doc-path-defaults.md)）。
 
 
 
@@ -528,6 +524,8 @@ Verify 失败 / CR 收口 / 开始改码后：**同条改写首段**。首段仍
 
 4. 禁止主窗与归档双写  
 
+5. **岗接线**：程序员 Step 收口必做 1～4；CR 查 `_索引.md`；`migrate-pipeline-window` 只搬家、**不**归档 Step。迁到签收后表内仍「尚无」= 漏做本条。Direct/Express 无方案夹则跳过。  
+
 
 
 
@@ -821,7 +819,7 @@ Verify 失败 / CR 收口 / 开始改码后：**同条改写首段**。首段仍
 
 
 
-程序员 / CR：先 `codegraph_explore` 当前符号与调用链，再按需 Read；**禁止**「为谨慎把 PressureManager 全目录读一遍」。  
+程序员 / CR：先 `codegraph_explore` 当前符号与调用链，再按需 Read；**禁止**为谨慎把某个大模块目录全读一遍。  
 
 
 

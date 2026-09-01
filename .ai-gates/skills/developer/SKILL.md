@@ -34,6 +34,8 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 1. 确认车道与范围；Express 须有切片；Standard/Full 须已过方案审，且本轮有一轮确认包下的「准」或 §B 恢复口令（[handoff-automation.md](../references/handoff-automation.md) §0/§F）；须有改前选型；**禁止**零确认改码、先改后补理由、等第二轮确认；多窗只改登记窗
 1.5 **只读白名单**：`未完成.md` + `物理口径.md`（若有）+ `Mandatory-Step*.md`（若有）+ Mandatory 源码；**禁止** Read `已完成/历史全文*` / `证据/**` 全文（见 [doc-windowing.md](../references/doc-windowing.md)）
 - **状态分类夹**：若本轮改文档状态至终态（签收/`completed`/失败/回退/空闲离执行中等），**同条必须** `migrate-pipeline-window.ps1`（或 doc-windowing §迁移动作同等）；只改状态字段仍停 `执行中/` → **未结案**（handoff §E）
+1.55 **完成即迁移**（Standard/Full 有方案夹）：本 Step 收口须按 [doc-windowing.md](../references/doc-windowing.md) §完成即迁移——正文 → `已完成/Step{NN}-短标题.md`，改 `_索引.md`（已有完成 Step 则表内**禁止**仍「尚无」），`未完成.md` 只留摘要。`migrate-pipeline-window` 迁签收 **≠** 本条。Direct/Express 无夹则跳过。
+1.57 **迷雾结构面**（改当前文档窗须读卡片 + 一度边）：本步改某个文档窗 → 按 [fog-map-structure.md](../references/fog-map-structure.md) 读该格状态 + 一度边 + 该格点名的雾。未读邻边不得自称已按 5.0.0 合规。纯代码热修不碰文档窗、Express 机械改、闲聊 → 不读。
 2. Read `.cursor/project-context.md`（若存在）+ 模块 README **当前风险短段**（勿整份版本史）+ **真实代码**（**优先反复 `codegraph_explore`**；禁止因 soft budget 弃用；禁止全目录扫读）
 2.1 **复用四问**（改码前，见 [execution-discipline.md](../references/execution-discipline.md)）：核对方案短表；方案漏则自补并报 PM。优先接已有 helper/Service/分支；能删旧轨则写进 diff；禁止复制粘贴第二套同类逻辑。命中 project-context **神类止血/补强三口** 时：落点进 Service、守净增阈/方法预算，交 CR 前写**瘦身一拍**一句
 2.11 **修 bug 根因先于保底**（Direct 同样；Express 机械改除外）：改码前自检写**根因一句**（坏在哪条因果/符号）。写不出 → 停、只读、交 PM，禁止先打补丁。禁止用夹紧、默认值、空 catch、再开一条路、force/suppress 藏症状且不删错因。交 CR 须能指出根因落点。连败禁止换皮再保底，走黑板/止损（[diagnosis-gates.md](../references/diagnosis-gates.md)）。允许根因分两刀。

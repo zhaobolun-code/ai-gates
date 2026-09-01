@@ -43,7 +43,7 @@
 
 | 典故词 | 压缩包（提词即唤起、不必复述的全文） | 触发 |
 | --- | --- | --- |
-| 神类止血 | 神类（如 PressureManager Controller partial）禁堆逻辑：新逻辑默认落 `*Service` + Controller 一行委托；净增阈（单文件新增−删除 >80 或新增 >120）须落点改写或同窗 REMOVED；新/重写方法体 ≤40 行；Mandatory 用替换句式（仅追加无下沉 → 方案审 major/blocker）；交审前瘦身一拍。出处：`.cursor/project-context.md` §PressureManager 神类止血 | 方案/CR 触及神类文件时点名即唤起，不复述阈值 |
+| 神类止血 | 神类禁堆逻辑：新逻辑默认落 `*Service` + 一行委托；净增过大须落点改写或同窗 REMOVED；新/重写方法体宜短；Mandatory 用替换句式（仅追加无下沉 → 方案审 major/blocker）；交审前瘦身一拍。有 `.cursor/project-context.md` 神类止血节则按该节的阈与落点。 | 方案/CR 触及神类文件时点名即唤起，不复述阈值 |
 | 复用四问 | 已有吗→能复用吗→能少写/不写吗→能删吗；写 Mandatory 前强制，未检索不得写新路径。出处：`.ai-gates/skills/references/execution-discipline.md` §复用四问 | 写方案/改码/扩 README 前点名即唤起 |
 | 双轴 | CR 从两维审：规范轴 = 与仓库规范一致性（CORE / 岗位 SKILL / README 硬约束，应当怎么写）；规格轴 = 与本次规格一致性（A# 覆盖未越界 / Delta Spec 落实 / DO NOT TOUCH 未碰，这次要做什么）；findings 按轴分组输出。出处：`.ai-gates/skills/references/dual-axis-review.md`（与「双轨调用」「Direct」是不同维度，见辨析注记） | CR 场景点名即唤起 |
 | 深模块 | Depth 是接口属性非实现属性；Interface=调用者须知一切；Seam 位置是独立设计决策；删除测试；一个 adapter=假设的 seam、两个=真的；词汇 8 词逐词禁止漂移。出处：`.ai-gates/skills/references/codebase-design.md` | 设计模块形状/找 seam/接口方案对比时点名即唤起 |

@@ -34,8 +34,9 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 1.14 **无命令自称 locally-validated（硬挡）**：Agent 无命令输出却自称 `locally-validated` → **major**（写死 **major**，不是 blocker，不是 nit）。用户口头签收不算这条 major。禁止把用户口头改写成 Agent 已 Play。细则 → [evidence-levels.md](../references/evidence-levels.md)。
 1.145 **有机械 A# 无最小断言（硬挡）**：本 Step A# 含可机械验证项却无最小断言（`证据/test-first/` 或既有测试路径）→ **major**（不可机械项除外）。点名 [test-first.md](../references/test-first.md)。三条反模式命中（测私有实现 / 同一套公式 / 先写完全部测试）→ 判断/major（不得写成全程 TDD 硬挡）。
 1.146 **DONE 无同条命令（硬挡）**：自称 **DONE** 且本步有可跑命令却无同条退出码/失败计数 → **major**；PM 见 DONE 无命令 → 不得当无事派 CR。不新造证据等级。
-1.15 **图谱定向（审核岗）**：**优先 CRG**（diff / `detect-changes` / impact / review context；业务 C# 在 `Assets/LabSDK` 子模块时对子模块根查图，见 [codegraph-probe.md](../references/codegraph-probe.md)）；需 verbatim 或 CRG 未命中符号时再窄用 `codegraph_explore`。**禁止**宣称 CodeGraph「额度已用尽」后整轮改 Grep/Read；禁止全目录扫读；禁止 CRG+CodeGraph 各跑一遍完整影响面。本 Step **仅** Skill/Doc、无业务 C# 时无图谱 → soft risk / 验证缺口，**不得**单独 hard blocker 挡收口
+1.15 **图谱定向（审核岗）**：**优先 CRG**（diff / `detect-changes` / impact / review context；业务 C# 在子模块时对子模块根查图，见 [codegraph-probe.md](../references/codegraph-probe.md)）；需 verbatim 或 CRG 未命中符号时再窄用 `codegraph_explore`。**禁止**宣称 CodeGraph「额度已用尽」后整轮改 Grep/Read；禁止全目录扫读；禁止 CRG+CodeGraph 各跑一遍完整影响面。本 Step **仅** Skill/Doc、无业务 C# 时无图谱 → soft risk / 验证缺口，**不得**单独 hard blocker 挡收口
 1.16 **不重跑实现者已报测试（硬挡）**：CR 默认**不**为「确认报告」重跑同一命令；对照 diff 核查声称。报告缺命令/缺输出 → 记 **验证缺口**，禁止用跑黄金/包级套件来补洞。仅当 diff 让审核者对某断言产生 **点名怀疑** 时，才跑 **聚焦** 命令（单测/单文件）。project-context 热路径黄金回归仍按 **结案/A#**（developer **2.4**）触发，不改成「每次 CR 必跑」。
+1.17 **迷雾结构面**（改当前文档窗须读卡片 + 一度边）：本步改某个文档窗 → 按 [fog-map-structure.md](../references/fog-map-structure.md) 读该格卡片 + 一度边 + 雾。未读邻边不得自称已按 5.0.0 合规。Express 不启用 CR 故不读。
 1.2 **命中文件热度时反推同类隐患**：本次 diff 涉及的文件/模块若命中 `lessons-learned.md`，**不止核对该条教训本身是否复现**，还要用该教训的根因反问一遍当前 diff 是否存在同类风险（参考 L3 多轮独立审的"换角度攻击"思路，如：单位/顺序/因果关系类教训 → 查本次 diff 有无同类隐患，即使触发路径不同）；无同类风险须在 findings 中写一句「已按 [教训一句话] 反推，未发现同类隐患」
 1.25 **复盘写回提议（P2 · 须「准」）**：本次 blocker 满足升级资格（**近 90 天 ≥2 次命中 且 最近命中 ≤30 天**；机器候选见 `scripts/compute-evolution-candidates.ps1`，另须人工确认留痕——同族错误不重复计数、机器候选≠已确认）→ findings 附一行「**复盘写回提议**：<拟补 anti-patterns/lessons 的一句>」；**用户「准」后**才改 Skill（改前 CHANGELOG）。**禁止**静默改规则 / 把一次偶发提为规则（评测 [skill-eval-checklist.md](../references/skill-eval-checklist.md) E2）。
 1.26 **置信标注核验**（见 [evidence-levels.md](../references/evidence-levels.md) §置信标注）：developer 自检/交接中的「确定[有代码证据]」须可回引真实符号/文件位置；标注与实际不符（含按标注回引不到代码位置）→ **major**；未标注断言冒充确定（无据称有据）→ **blocker**（伪称执行同族，`.ai-gates/lessons-learned.md` 2026-08-10 行）。
@@ -50,6 +51,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 8. 不把风格偏好当 blocker
 9. 用户仅咨询时不读 diff
 10. 存在 `Mandatory-Step*.md` 仍去读历史全文 → **major**
+10.5 窗口化：`已完成/_索引.md` 缺、或已有完成 Step / 已迁签收而表内仍「尚无」→ **major**（[doc-windowing.md](../references/doc-windowing.md) §完成即迁移；迁夹 ≠ 归档）
 
 ## 双轴模式（L1.5+ 默认）
 

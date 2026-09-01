@@ -37,7 +37,7 @@ Mandatory 源码：
 上轮 blocker（≤20 行，可无）：【…】
 
 默认可读：未完成.md；物理口径.md（若有）；Mandatory-Step*.md（若有）；上列源码；派发点名的错题行/黑板（≤3）。
-图谱：优先 CRG（detect-changes / impact；业务 C# 用 LabSDK 子模块图）；需原文再窄用 codegraph_explore。禁止全目录扫读；禁止两套完整双跑。
+图谱：优先 CRG（detect-changes / impact；业务 C# 在子模块时用子模块图）；需原文再窄用 codegraph_explore。禁止全目录扫读；禁止两套完整双跑。
 禁止：已完成/ 历史全文与除 _索引 外全文；证据/（派发点名黑板除外）；第二份长方案；主对话长讨论。
 主窗不得在本审结束前改 Mandatory 业务文件（该 Step Mandatory 点名的业务文件）。排除（不算违规）：改文档状态字段 / migrate-pipeline-window.ps1 / 用户「准」之后的口径/A# 复议落盘 / 硬停白名单已等人「准」的改动。
 无四态第一行不得派 CR（Standard/Full）。

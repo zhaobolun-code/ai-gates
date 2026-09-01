@@ -397,6 +397,26 @@ if (Test-Path -LiteralPath $kitMarkerPath) {
     }
 }
 
+# --- 签收但已完成索引仍「尚无」（完成即迁移漏做；迁夹 ≠ 归档） ---
+if ($DocPath -match '签收') {
+    $doneDir = Join-Path $docDirResolved '已完成'
+    $idxCn = Join-Path $doneDir '_索引.md'
+    $idxEn = Join-Path $doneDir '_index.md'
+    $idxPath = $null
+    if (Test-Path -LiteralPath $idxCn) { $idxPath = $idxCn }
+    elseif (Test-Path -LiteralPath $idxEn) { $idxPath = $idxEn }
+    if (-not $idxPath) {
+        Add-Issue "warning" "签收 window missing 已完成/_索引.md — see doc-windowing.md 完成即迁移"
+        if ($Strict) { Add-Issue "error" "Strict: 签收 missing 已完成/_索引.md" }
+    } else {
+        $idxText = Get-Content -LiteralPath $idxPath -Raw -Encoding UTF8
+        if ($idxText -match '（尚无）' -or $idxText -match '\(尚无\)') {
+            Add-Issue "warning" "签收 but 已完成/_索引.md still 尚无 (migrate-pipeline-window does not archive steps) — see doc-windowing.md 完成即迁移"
+            if ($Strict) { Add-Issue "error" "Strict: 签收 index still 尚无" }
+        }
+    }
+}
+
 # --- -CheckLinks: category-prefix links in this single doc ---
 if ($CheckLinks) {
     $repoRootForLinks = git rev-parse --show-toplevel 2>$null

@@ -20,6 +20,7 @@
 | 测挂 L0 / 签收待准错题 / 错题大纲 | `lessons-learned.md`（含 §错题大纲）；项目文件 `.ai-gates/lessons-outline.md` |
 | 签收可复用结构 / CR 未入表真锚点 / 点名「模式沉淀」 | `pattern-harvest.md` |
 | 写 ≥2 Step 契约 / 点名「电路子窗」 | `circuit-windows.md` |
+| 改当前文档窗须读迷雾卡片 + 一度边 / 写方案复用四问「已有吗」/ 问下一窗或文档怎么连 | `fog-map-structure.md`（未读邻边不得自称已按 5.0.0 合规；出图须提示+同意；已有图可给策划/程序结构面；直通账本只在 `.ai-gates/Doc/直通文档/` 查找；挂钉不占格；加载 ≠ 每轮灌整图；Express 机械改 / 纯代码热修不碰文档窗 / 闲聊 → 不读） |
 | 7 天卡住 / 质量趋势停点 | `long-task.md` |
 | 压缩重派 / 跨会话续作账本 | `loop-engineering.md` |
 | 签收效果一行 / 月末汇总 | `retrospective-metrics.md` §效果轻量版 |
@@ -66,6 +67,7 @@
 | 结案归档（completed/失败封存+migrate）且窗内有改前选型三格 **或** 用户点名「逆向总结典故」；加载 ≠ 每个归档必加载；空闲枢纽迁签收不加载；点名「逆向总结」≠启用逆链 | `reverse-allusion.md` |
 | 签收或 runtime-validated 抽出可复用结构且对仓三档=有真锚点 **或** CR 发现本仓已有结构、表里没有 **或** 用户点名「模式沉淀」；加载 ≠ 静默入表；Express / 空闲枢纽不加载；点名「模式沉淀」≠启用逆链 | `pattern-harvest.md` |
 | 写 ≥2 Step 契约 **或** 点名「电路子窗」；**加载 ≠ 减审**；Express / 单 Step 不加载 | `circuit-windows.md` |
+| 改当前文档窗须读迷雾卡片 + 一度边 / 写方案复用四问「已有吗」/ 问下一窗或文档怎么连；未读邻边不得自称已按 5.0.0 合规；出图须提示+同意；已有图可给策划/程序结构面；直通账本只在 `.ai-gates/Doc/直通文档/` 查找；挂钉不占格；加载 ≠ 每轮灌整图；禁止读 HTML；Express 机械改 / 纯代码热修不碰文档窗 / 闲聊 → 不读 | `fog-map-structure.md` |
 | 跨项目沉淀 / 收集仓 / shareable 队列 | `collect-queue.md` |
 | 7 天卡住 / 质量趋势停点 | `long-task.md` |
 | 压缩重派 / 跨会话续作账本 | `loop-engineering.md` |

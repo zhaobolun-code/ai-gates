@@ -17,7 +17,7 @@
 | **岗位模型 slug / 回退链** | **`.cursor/project-context.md`** §模型路由（可选覆盖） | **否** — Skill 只留档位+默认示例（见 [model-routing.md](./model-routing.md)） |
 | 流水线路由、状态机、车道、岗位 | `.cursor/skills/` 或 `~/.cursor/skills/` 下 CORE、references、各 `SKILL.md` | **是** |
 | 设计模式手续 + 空表 | `skills/references/design-patterns.md`（发布态）+ `templates/design-patterns.template.md` | **是** — 空表；本仓验证行不随包 |
-| 项目词条本仓验证（已填行） | **`.ai-gates/skills/references/design-patterns.md`**（本机满表） | **否** — 打包时用空表模板覆盖 |
+| 项目词条本仓验证（已填行） | **`.ai-gates/design-patterns.project.md`** | **否** — 打包不拷；技能表只留症状/结构 |
 | 错题本（主表 / 大纲） | **`.ai-gates/lessons-learned.md`** / **`lessons-outline.md`** | **否** — 根目录本就不拷 |
 | 项目口诀 | **`.cursor/project-context.md`** §项目口诀 | **否** |
 | 执行文档**结构**模板/黄金样例 | `references/execution-doc-template.md`、`执行文档黄金样例.md` | **是** |
@@ -32,7 +32,7 @@
 ## 禁止出现在通用 Skill 中
 
 - 已填写的 `project-context.md`（含模块回归行）
-- 具体 `Assets/LabSDK/...` 等项目路径
+- 具体业务仓路径（写进 project-context）
 - 具体模块名（如某业务系统的真实类名）作为 Skill 正文示例
 - 含项目数据的 `.ai-gates/regression-index.yaml` 写进 Skill 包
 

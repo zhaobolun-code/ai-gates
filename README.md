@@ -20,16 +20,18 @@ Classic vibe coding offloads cognitive load, and with it quality, debt, and depe
 
 ## Gray box
 
-The black box lowers cognitive load: day to day you see one “your next step,” reply `approve`, and test at key nodes. The white box is for seeing the coding process and how it was implemented: open this demand’s folder for the plan, why it was done this way, which bits of code changed, and the review. Default black, white when you need it—that is the gray box (small edits can skip a folder).
+You don’t need to read the process manual every day, but you are not flying blind either. Usually the assistant only tells you what to do next; you agree, it acts, and when it is your turn to test, you test—saving effort, not skipping sense. When you want to see how these tasks connect and what no one has done yet, open the fog map. Very small changes may skip a folder, so they don’t add a tile to the map.
+
+- **Why the fog map exists**: with many tasks, clicking folders one by one doesn’t show “what is related to what, what to do next”. The assistant also tends to stare at only the one folder in front of it. The map draws existing work folders as tiles: a folder exists → it gets a tile; the relation is strong enough → it gets a link. Things only mentioned by name, with no folder yet, are drawn as fog. Empty space itself says work is still missing.
+- **Why it works**: links and empty space are visible at a glance—no need to open dozens of folders one by one. The map is drawn automatically from existing documents, so you don’t maintain another spec. It is only drawn when you say yes; folders never get a map drawn behind your back. For details, go back to the original documents; the map is just an overview.
+- **Opening**: the assistant asks first, you agree, then it generates the map; double-click `.ai-gates/verify/fog-map.html`. Open this file directly—no local web server needed. If an older copy exists in another directory, that one does not count.
 
 ## Self-evolution
 
-This layer is the **lessons loop** and **it grows**. Failures and verified approaches stay, so the next plan can use them.
-
-Lessons and allusions (a verified approach: one word recalls the whole agreement) both have a **project** level and a **shared** level. Project: reply `approve` into this repo’s lesson book or approach table; only the next plan in this project must read them. To use them everywhere, first **abstract them to the shared level** (drop names and paths that only this project knows), then you may upload to the collect repo. After maintainers pull them into the skill pack, say `PM upgrade ai-gates` to use them in other repos.
+Failures are recorded, successes are recorded too, and the next time they are still usable.
 
 - **Lessons loop**: a failed test is noted first; after a fix, you are asked whether to write it into this project’s lesson book; the next plan reads it; a similar miss later gets a stricter review. The point is not to make the same mistake twice.
-- **It grows**: users evolve the skill together. `approve` keeps the project level; after abstracting to shared wording you may “upload”; upgrade brings the shared level back. Every AI mistake is a chance to grow.
+- **It grows**: when an approach works and is verified, it is written down as an “allusion”—one short name; from then on, one mention makes the assistant recall the whole agreement. It stays in this project first; to share it with everyone, first reword it without this project’s names and paths, then say “upload”. After maintainers pull it into the skill pack, other repos only get it when you say `PM upgrade ai-gates`.
 
 ## Metacognition (advanced attempt)
 

@@ -1,6 +1,8 @@
 # 设计模式症状/结构表
 
-> **设计模式症状/结构表**：登记可复用结构的症状、结构与本仓验证实例（**项目典故**）。流程/架构共识词（神类止血、复用四问、双轴、深模块、改坏即错刀、连败先问重设计、一错不二犯）见 [shared-language.md](./shared-language.md) §典故（**通用典故**须架构层抽象，禁止以本仓窗号当压缩包主体）——**禁止同义双挂**。
+> **设计模式症状/结构表**：登记可复用结构的症状与结构（**项目典故**的手续面）。流程/架构共识词（神类止血、复用四问、双轴、深模块、改坏即错刀、连败先问重设计、一错不二犯）见 [shared-language.md](./shared-language.md) §典故（**通用典故**须架构层抽象，禁止以本仓窗号当压缩包主体）——**禁止同义双挂**。
+>
+> **本仓验证**（代码路径、类名）不写在本表，只写在仓库 `.ai-gates/design-patterns.project.md`（有则读；无则本仓无锚点）。该文件不进技能包。
 
 ## 对仓压缩
 
@@ -8,27 +10,27 @@
 
 | 档 | 处理 |
 | --- | --- |
-| 有真锚点（LabSDK 业务代码） | 压成五格提名；用户「准」才写入本表 |
+| 有真锚点（本仓业务代码） | 压成五格提名；用户「准」才写入项目验证表 |
 | 误匹配（平台/第三方/仅像） | 不当本仓验证；不提名 |
 | 本仓没有 | 不沉淀 |
 
-**使用 vs 入表（拆开）**：上表三档只管**入表**（入库仍须真锚点）。**使用词条**不要求本仓已有验证实例：症状命中即可按结构配方落地；第一份落地后可再「准」写入本仓验证。未登记的一次性私有门不算成熟实例。
+**使用 vs 入表（拆开）**：上表三档只管**入表**（入库仍须真锚点）。**使用词条**不要求本仓已有验证实例：症状命中即可按结构配方落地；第一份落地后可再「准」写入项目验证表。未登记的一次性私有门不算成熟实例。
 
 禁止：全量 GoF 图鉴；无锚点入库；把教材优点/开闭原则/异框架示例写进词条；热度满自动入典。不限定行数；仍一次一条、须真锚点、用户「准」才入表。现有词条禁止同义再挂。优点不入库。「不适合」升成禁用边界。「适合」压成触发症状。入表通道=模式沉淀（见 [pattern-harvest.md](./pattern-harvest.md)）。曾用 6 行上限是防把教材 GoF 整本做成图鉴、并逼「一次一条 / 满了进口诀」，不是物理规律；质量闸改回真锚点、一次一条、禁止无锚点图鉴、禁止同义双挂。
 
 ## 词条表
 
-| 典故词 | 触发症状 | 压缩包（适用/结构/本仓验证实例） | 验证状态 | 禁用边界 |
+| 典故词 | 触发症状 | 压缩包（适用/结构） | 验证状态 | 禁用边界 |
 | --- | --- | --- | --- | --- |
-| State 快照 | 同帧临时标志/互斥键散落多处 | **适用**：同帧内须互斥执行或只读快照的判据。**结构**：集中 `*RuntimeState` + 帧级只读/记账 API。无本仓验证 → 不采用（项目典故，不是可移植人类模式）。禁止方案要求空白仓发明 `PressureRuntimeState` / `*Policy` / `*Service`。**本仓验证**：`确定[有代码证据]` `Assets/LabSDK/.../PressureRuntimeState.cs`（帧级字典如 `s_pipeSegmentHandoverExecutedFrameByEndpoint`）+ `Tests/EditMode/PressureRuntimeStateTests.cs`；`推断[有间接证据]` handover 帧互斥模式见 R30 执行中窗 Mandatory（规划落 `PipeSegmentHandoverService`，结构登记不依赖 R30 落地）。 | `static-checked(静态核对)`（见 [evidence-levels.md](./evidence-levels.md)） | 持久业务态；第二套 parallel 字典 |
-| Policy 策略 | 门闸 if/switch 分支膨胀 | **适用**：拓扑/门态/组成判定可枚举化。**结构**：`*Policy`/`Evaluate*`/`Resolve*` 返回枚举态。无本仓验证 → 不采用（项目典故，不是可移植人类模式）。禁止方案要求空白仓发明 `PressureRuntimeState` / `*Policy` / `*Service`。**本仓验证**：`确定[有代码证据]` `BalanceGroupGatePolicy.cs`（`Evaluate`/`ResolveTopology*`）；`确定[有代码证据]` `PressureController.ValveAndTransferCore.cs:86` `EvaluateOneWayValveFsm`；`确定[有代码证据]` `EvaporationPolicy.cs`（`None`/`AqueousSolventOnly`/`BinaryVolatileOrganic`/`PureVolatile`）+ `EvaporationPolicyResolver.Resolve`；`确定[有代码证据]` `EvaporationService` `switch (resolved.Policy)`；`推断[有间接证据]` R30 执行中窗读码复核引用上述符号。 | `static-checked(静态核对)` | 单场景 dead branch；Policy 内 mutation。倾倒扣账可切换算法走「倾倒策略」词条，不要把 `IPourStrategy` 挂进本条。`IEvaporationVaporSink` 不是本条 |
-| Seam Service | 同判据 ≥3 调用点复制 | **适用**：同一物理判据多处重复。**结构**：`*Service` 承载判据+薄 mutation 入口、Controller 一行委托（神类落点写「`*Service` 落点 / 神类止血」指针 [shared-language.md](./shared-language.md) §典故，不得在本表重复登记神类止血词条）。无本仓验证 → 不采用（项目典故，不是可移植人类模式）。禁止方案要求空白仓发明 `PressureRuntimeState` / `*Policy` / `*Service`。**本仓验证**：`确定[有代码证据]` `PipeSegmentHandoverService.cs` / `GasDomainSolver.cs` / `LiquidSealService.cs`（均位于 `Assets/LabSDK/.../` 压力域 Service 目录）；`推断[有间接证据]` 压力域多起执行窗 Mandatory/CR 留痕引用上述 Service（文档留痕，非单次读码）。 | `static-checked(静态核对)` | 定位器式 DI；Service 再堆 Controller 逻辑 |
-| 事件分发（观察者） | 一处交互事实要通知多处，且变更源不关心谁响应、不必拿返回值 | **适用**：订阅-推送。**通用配方**见 [shared-language.md](./shared-language.md) §典故「订阅推送」。**结构**：有 Dispatcher 则复用已有 `ChemicalEquipmentEventDispatcher`（枚举事件 + 成对 `AddListener`/`RemoveListener`/`Dispatch`，分发须快照）。无 Dispatcher 时，C# `event` 即人类模式退路（对象局部一对多）。禁止新开第二套全局总线。不要改成另一套总线。**本仓验证**：`确定[有代码证据]` `Assets/LabSDK/Runtime/Pennon/ExplorationLab/Chemical/Events/ChemicalEquipmentEventDispatcher.cs`；`确定[有代码证据]` `BaseEquipment.OnStateChanged`；`确定[有代码证据]` `ConfigurablePourAbility` 订阅 `PourUIEvent`。平台/第三方（`GlobalEventObserver`、XCharts、AVPro）不当验证实例。 | `static-checked(静态核对)` | 仅通知一个固定对象 → 直调。同帧须保序或拿返回值 → 直调。物理步进/门闸/传质/守恒判定禁止走事件总线。回调内禁止再改主题状态。高频每帧全量广播禁止。订阅必须成对解除 |
-| 命令（撤销） | 用户操作要可撤销/重做，或要把「做了什么」从「当场改场景」拆开再入栈 | **适用**：用户操作须可撤销/重做，或把「做了什么」从当场改场景拆开再入栈。**通用配方**见 [shared-language.md](./shared-language.md) §典故「可撤销入栈」。**结构**：有本仓验证则复用已有 `ICommand`（Execute/Undo/Redo）+ `CommandManager` 双栈；无本仓验证则按配方新建（Execute/Undo/Redo + undo/redo 双栈）。禁止第二套撤销栈。运用模式 ≠ 抄化学仓类名。**本仓验证**：`确定[有代码证据]` `Assets/LabSDK/Runtime/Pennon/ExplorationLab/Chemical/UI/Revocation/ICommand.cs`；`确定[有代码证据]` `Assets/LabSDK/Runtime/Pennon/ExplorationLab/Chemical/UI/Revocation/CommandManager.cs`；`确定[有代码证据]` `ICommand_Move.cs`（及 `ICommand_Delete.cs`）。URP CommandBuffer / `UndoManager`（`IUndoCommand`）/ 第三方不当验证实例。 | `static-checked(静态核对)` | 压力步进/门闸/传质/守恒 → 直调不要包 Command。只要返回值或同帧必须保序 → 直调。一次性内部调用不需要撤销 → 不要套壳。禁止新开第二套 undo/redo 栈 |
-| 能力模板 | 器材之间一种交互（倒液/加热/镊取等）要走同一套「能否交互 → 执行」生命周期，且各器材只差 Execute 体内 | **适用**：器材间交互共享生命周期、差异只在 Execute。**通用配方**见 [shared-language.md](./shared-language.md) §典故「共享生命周期」。**结构**：有本仓验证则继承/复用 `InteractionAbilityBase`，在 `Execute(source,target)` 写该能力，由既有 `InteractionManager` 调度；无本仓验证则按配方新建（共享「能否交互 → 执行」生命周期，差异只在 Execute）。禁止为单一器材新开平行交互管理器。运用模式 ≠ 抄化学仓类名。**本仓验证**：`确定[有代码证据]` `Assets/LabSDK/Runtime/Pennon/ExplorationLab/Chemical/Abilities/Core/InteractionAbilityBase.cs`；`确定[有代码证据]` 子类 `ConfigurablePourAbility` / `SimpleHeatingAbility`（均 `override Execute`）；`确定[有代码证据]` `InteractionManager.StartInteraction` `ability.Execute(source, target)` 与 `InteractionPair.Execute` 内同调。 | `static-checked(静态核对)` | 一次性内部直调、不需要交互生命周期 → 不要新 Ability。热路径/压力/门闸/传质/守恒不要做成 Ability。禁止新开平行 InteractionManager。与 `ICommand` 撤销栈不是同一结构（撤销走命令词条）。倾倒扣账算法走「倾倒策略」词条，不要把 `IPourStrategy` 并进 Policy 或本条。输入设备（鼠标/陀螺仪）不要写进 Ability 体内（输入输出分离，只点名既有 `输入输出分离架构设计.md`，不在本表展开）。视觉特效贴器材走「特效适配器」词条，不要把 Adapter 再挂成策略或能力。 |
-| 简单工厂（按类型创建） | 多处要按类型/配置造出同类对象，调用方不应自己查表再 new | **适用**：按键创建、单一产品类型。**通用配方**见 [shared-language.md](./shared-language.md) §典故「按类型创建」。**结构**：有本仓验证则复用已有单一创建入口（本仓锚点 `ChemicalSubstanceDataFactory.CreateSubstanceData`）；无本仓验证则按配方新建（单一创建入口，查配置再构造）。禁止第二套平行 new。运用模式 ≠ 抄化学仓类名。**本仓验证**：`确定[有代码证据]` `Assets/LabSDK/Runtime/Pennon/ExplorationLab/Chemical/Data/ChemicalSubstanceDataFactory.cs` 的 `CreateSubstanceData`（及 `CreateSubstanceDataByMoles`）：查 `ChemicalDataManager` 配置后 `new ChemicalSubstanceData`。 | `static-checked(静态核对)` | 已知唯一类型的一次性 new；不要升成抽象工厂（物质种类多仍是同一产品 SKU，仓里没有可切换的工厂族）；`SolidParticleFactory`（视觉颗粒 Instantiate）不是本条；器材交互生命周期走「能力模板」词条 |
-| 特效适配器 | 同一种视觉特效要贴到多种器材外形，或新特效类型要进同一套生成入口 | **适用**：特效实例几何/参数须随器材外形适配，且多种特效共用一个生成入口。**通用配方**见 [shared-language.md](./shared-language.md) §典故「外形适配」。**结构**：有本仓验证则复用已有 `IEffectAdapter`（`AdaptEffect`/`UpdateEffect`）+ `EffectSpawner` 按 `EffectType` 注册实现，生成后调用对应适配器；无本仓验证则按配方新建（单一生成入口 + 按类型注册 + Adapt/Update 随外形）。禁止第二套生成器。运用模式 ≠ 抄化学仓类名（空白仓不要引进 `IEffectAdapter` 类型名）。**本仓验证**：`确定[有代码证据]` `Assets/LabSDK/Runtime/Pennon/ExplorationLab/Chemical/Visual/IEffectAdapter.cs`；`确定[有代码证据]` `EffectSpawner.InitializeAdapters` 与 `adapters[effectType].AdaptEffect`（约 `:167`）；`确定[有代码证据]` `BubbleEffectAdapter`（及同目录其余 `*EffectAdapter`）。**邻仓配方落地**：`确定[有代码证据]` `../THYJ/Assets/Scripts/Farm/FarmBloomGate.cs` 的 `Emerge`/`Retarget`/`Adapt`/`Update`；`确定[有代码证据]` `FarmPlotSystem` 成功点直调（锄扬尘 / 浇水花 / 种后水花改挂作物 / 长大 Update / 收割闪光）。不当本仓复用入口；运用模式 ≠ 抄邻仓类名；空白仓仍按配方新建，不要引进 `FarmBloomGate` 类型名。 | `static-checked(静态核对)` | Flexalon `Adapter` / 平台第三方不当验证。压力步进/门闸/传质/守恒不要走 Adapter。禁止新开第二套 `EffectSpawner`。不要把本条再挂成 Policy「策略」或「能力模板」。倾倒扣账走「倾倒策略」词条，不要把 `IPourStrategy` 挂进本条。已知唯一器材+唯一特效的一次性改 Transform 不必套适配器。开放集合接入中央循环走通用典故「自注册、只认接口」，光学 `IOpticsElement` 不是本条。化学仓不要引进 `FarmBloomGate` 类型名。 |
-| 倾倒策略 | 同一动作要按不同算法完成（如倒液只倒最上层 vs 按比例倒全部），调用方不应在体内 if/switch 算法细节 | **适用**：同一动作可换算法，调用方保持一句。**通用配方**见 [shared-language.md](./shared-language.md) §典故「同一动作换算法」。**结构**：有本仓验证则复用已有 `IPourStrategy`（`Pour(source,target,amount)`）+ 实现类；无本仓验证则按配方新建（同一动作接口 + 可替换实现 + 调用方只调接口）。禁止第二套平行 if/switch 算法。运用模式 ≠ 抄化学仓类名。**本仓验证**：`确定[有代码证据]` `Assets/LabSDK/Runtime/Pennon/ExplorationLab/Chemical/Abilities/Pour/IPourStrategy.cs`；`确定[有代码证据]` `TopLayerPourStrategy` / `ProportionalPourStrategy`；`确定[有代码证据]` `ConfigurablePourAbility.ExecutePourLogic` `pourStrategy.Pour(...)`。平台 `HMKJ.Procedure.Strategy`（投屏）不当验证。`EvaporationPolicy` 走 Policy 行。 | `static-checked(静态核对)` | 门闸/拓扑枚举判定走 Policy 词条，不要把本条并进 Policy。器材交互生命周期走「能力模板」。视觉特效走「特效适配器」。输入设备走输入层（`IPourInputProvider` 不是本条）。已知唯一算法的一次性直调不必套策略。压力步进/门闸/传质/守恒不要做成倾倒策略。禁止新开第二套倾倒算法入口。 |
+| State 快照 | 同帧临时标志/互斥键散落多处 | **适用**：同帧内须互斥执行或只读快照的判据。**结构**：集中 `*RuntimeState` + 帧级只读/记账 API。无项目验证表锚点 → 不采用（项目典故，不是可移植人类模式）。 | 见项目验证表 | 持久业务态；第二套 parallel 字典 |
+| Policy 策略 | 门闸 if/switch 分支膨胀 | **适用**：拓扑/门态/组成判定可枚举化。**结构**：`*Policy`/`Evaluate*`/`Resolve*` 返回枚举态。无项目验证表锚点 → 不采用（项目典故，不是可移植人类模式）。 | 见项目验证表 | 单场景 dead branch；Policy 内 mutation。倾倒扣账可切换算法走「倾倒策略」词条。蒸发的 sink 接口不是本条 |
+| Seam Service | 同判据 ≥3 调用点复制 | **适用**：同一物理判据多处重复。**结构**：`*Service` 承载判据+薄 mutation 入口、Controller 一行委托（神类落点写「`*Service` 落点 / 神类止血」指针 [shared-language.md](./shared-language.md) §典故，不得在本表重复登记神类止血词条）。无项目验证表锚点 → 不采用（项目典故，不是可移植人类模式）。 | 见项目验证表 | 定位器式 DI；Service 再堆 Controller 逻辑 |
+| 事件分发（观察者） | 一处交互事实要通知多处，且变更源不关心谁响应、不必拿返回值 | **适用**：订阅-推送。**通用配方**见 [shared-language.md](./shared-language.md) §典故「订阅推送」。**结构**：有项目验证则复用表上的分发器（枚举事件 + 成对订阅/解除/分发，分发须快照）；无则 C# `event`（对象局部一对多）。禁止新开第二套全局总线。 | 见项目验证表 | 仅通知一个固定对象 → 直调。同帧须保序或拿返回值 → 直调。物理步进/门闸/传质/守恒判定禁止走事件总线。回调内禁止再改主题状态。高频每帧全量广播禁止。订阅必须成对解除 |
+| 命令（撤销） | 用户操作要可撤销/重做，或要把「做了什么」从「当场改场景」拆开再入栈 | **适用**：用户操作须可撤销/重做，或把「做了什么」从当场改场景拆开再入栈。**通用配方**见 [shared-language.md](./shared-language.md) §典故「可撤销入栈」。**结构**：有项目验证则复用表上的命令接口（Execute/Undo/Redo）+ 双栈；无则按配方新建。禁止第二套撤销栈。运用模式 ≠ 抄他仓类名。 | 见项目验证表 | 压力步进/门闸/传质/守恒 → 直调不要包 Command。只要返回值或同帧必须保序 → 直调。一次性内部调用不需要撤销 → 不要套壳。禁止新开第二套 undo/redo 栈 |
+| 能力模板 | 器材之间一种交互（倒液/加热/镊取等）要走同一套「能否交互 → 执行」生命周期，且各器材只差 Execute 体内 | **适用**：器材间交互共享生命周期、差异只在 Execute。**通用配方**见 [shared-language.md](./shared-language.md) §典故「共享生命周期」。**结构**：有项目验证则复用表上的能力基类与调度器，在 Execute 写该能力；无则按配方新建。禁止为单一器材新开平行交互管理器。运用模式 ≠ 抄他仓类名。 | 见项目验证表 | 一次性内部直调、不需要交互生命周期 → 不要新 Ability。热路径/压力/门闸/传质/守恒不要做成 Ability。禁止新开平行交互调度器。与命令撤销栈不是同一结构。倾倒扣账算法走「倾倒策略」。输入设备不要写进 Ability 体内。视觉特效贴器材走「特效适配器」。 |
+| 简单工厂（按类型创建） | 多处要按类型/配置造出同类对象，调用方不应自己查表再 new | **适用**：按键创建、单一产品类型。**通用配方**见 [shared-language.md](./shared-language.md) §典故「按类型创建」。**结构**：有项目验证则复用表上的单一创建入口；无则按配方新建（查配置再构造）。禁止第二套平行 new。运用模式 ≠ 抄他仓类名。 | 见项目验证表 | 已知唯一类型的一次性 new；不要升成抽象工厂（多种类仍是同一产品类型、没有可切换的工厂族）；视觉颗粒 Instantiate 不是本条；器材交互生命周期走「能力模板」 |
+| 特效适配器 | 同一种视觉特效要贴到多种器材外形，或新特效类型要进同一套生成入口 | **适用**：特效实例几何/参数须随器材外形适配，且多种特效共用一个生成入口。**通用配方**见 [shared-language.md](./shared-language.md) §典故「外形适配」。**结构**：有项目验证则复用表上的适配器接口 + 按类型注册的生成入口，生成后 Adapt/Update；无则按配方新建。禁止第二套生成器。运用模式 ≠ 抄他仓类名。 | 见项目验证表 | 平台第三方 Adapter 不当验证。压力步进/门闸/传质/守恒不要走 Adapter。禁止新开第二套特效生成器。不要把本条再挂成 Policy 或「能力模板」。倾倒扣账走「倾倒策略」。已知唯一器材+唯一特效的一次性改 Transform 不必套适配器。开放集合接入中央循环走通用典故「自注册、只认接口」。 |
+| 倾倒策略 | 同一动作要按不同算法完成（如倒液只倒最上层 vs 按比例倒全部），调用方不应在体内 if/switch 算法细节 | **适用**：同一动作可换算法，调用方保持一句。**通用配方**见 [shared-language.md](./shared-language.md) §典故「同一动作换算法」。**结构**：有项目验证则复用表上的策略接口 + 实现类；无则按配方新建（同一动作接口 + 可替换实现 + 调用方只调接口）。禁止第二套平行 if/switch 算法。运用模式 ≠ 抄他仓类名。 | 见项目验证表 | 门闸/拓扑枚举判定走 Policy 词条。器材交互生命周期走「能力模板」。视觉特效走「特效适配器」。输入设备走输入层。已知唯一算法的一次性直调不必套策略。压力步进/门闸/传质/守恒不要做成倾倒策略。禁止新开第二套倾倒算法入口。 |
 
 ## 强制选型句（Mandatory 须含）
 
@@ -36,7 +38,7 @@
 采用 {典故词} 模式（触发症状：…；理由：…；词条出处：design-patterns.md §{典故词}）
 ```
 
-仅缺触发症状 → **默认 YAGNI**（见 [anti-patterns.md](./anti-patterns.md)）。无本仓验证实例不再等于不准用（State 快照 / Policy 策略 / Seam Service 除外，见各行结构）。
+仅缺触发症状 → **默认 YAGNI**（见 [anti-patterns.md](./anti-patterns.md)）。无项目验证表锚点不再等于不准用（State 快照 / Policy 策略 / Seam Service 除外，见各行结构）。复用入口以 `.ai-gates/design-patterns.project.md` 为准（若存在）。
 
 验证状态档位见 [evidence-levels.md](./evidence-levels.md)。本仓 §晋升闸已接 01-B；跨项目 ≥2 依赖 `collect-queue.md`（收集仓已开通；本机上传仍须登录）；6 个月自动降级脚本仍不做。
 
@@ -45,7 +47,7 @@
 本仓四条（对外称「晋升闸」）。机器候选 ≠ 已确认；晋升仍须人工留痕 + 用户「准」。
 
 1. **本仓复现**：复用已落地 01-B 钥匙（近 90 天 ≥2 次命中且最近命中 ≤30 天）；机器候选=`compute-evolution-candidates.ps1` → `evolution-candidates.yaml`；**候选≠已确认**。
-2. **去上下文化**：升 skill 级前去掉项目点名。通用 skill 禁止把项目专名写进词条表（禁用示例：PressureManager）。
+2. **去上下文化**：升 skill 级前去掉项目点名。通用 skill 禁止把项目专名写进词条表。
 3. **禁用边界必填**：五字段「禁用边界」非空。
 4. **无争议 + 用户「准」**：方案审/CR 无 blocker 后用户「准」才改 skill 级词条。
 

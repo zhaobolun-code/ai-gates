@@ -167,7 +167,7 @@
 | 热修改执行面不写与另一路径关系 | 并行实现补丁永续 | §2.3 并行实现一句 |
 | 修 bug 反复打补丁 / 写保底（夹紧、默认值、空 catch、第二条路径）不写根因 | 症状暂时没了，错因还在；生产才爆 | 先写根因一句再改码；写不出只读排查；保底未删错因不得当修复（planner 1.3 / developer 2.11） |
 | 并行实现并存却无「删哪条」完成定义 | 补丁循环 | 并行实现收敛闸门 |
-| 为谨慎全目录 Read PressureManager | 源码 token 暴涨 | 日常先 `codegraph_explore`；审核岗先 CRG（LabSDK 子模块图） |
+| 为谨慎全目录 Read 某个大模块 | 源码 token 暴涨 | 日常先 `codegraph_explore`；审核岗先 CRG（业务在子模块则查子模块图） |
 | 交接默认贴大段代码/Console | 对话上下文膨胀 | 短表 + 证据外置 |
 | 把 CodeGraph soft budget 说成「额度已用尽」并整轮弃用 | 误导用户；退回全量 Read/Grep | 本地无付费额度；收窄 query 继续 explore（见 [codegraph-probe.md](./codegraph-probe.md)） |
 

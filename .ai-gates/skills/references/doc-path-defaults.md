@@ -42,7 +42,7 @@
 
 
 
-| **2** | `.cursor/project-context.md` **显式覆盖**文档根（§执行文档存放约定） | **按 project-context**（本仓库 Chemical 已覆盖为 `化学文档/压力系统/`） |
+| **2** | `.cursor/project-context.md` **显式覆盖**文档根（§执行文档存放约定） | **按 project-context** |
 
 
 
@@ -108,14 +108,7 @@
 
 
 
-本仓库（Chemical）未指定时等价于：
-
-```text
-Assets/LabSDK/Runtime/Pennon/ExplorationLab/化学文档/压力系统/
-  执行中/{方案短名}/          ← 新建 / 进行中（禁止停放空闲）
-  签收/{方案短名}/            ← 结案；或空闲枢纽（无活跃 Mandatory）
-  失败|回退|停写|换层/{方案短名或legacy文件}/
-```
+本仓库文档根由 `.cursor/project-context.md` §执行文档存放约定覆盖（若有）。无覆盖则用上文 `.ai-gates/Doc/{主题}/`。
 
 
 
@@ -231,7 +224,7 @@ Assets/LabSDK/Runtime/Pennon/ExplorationLab/化学文档/压力系统/
 
 
 
-- 在通用 Skill 中写死 `Assets/LabSDK/...` 等项目专属路径（举例可放 project-context / 本文件「本仓库」段）
+- 在通用 Skill 中写死具体仓库的业务长路径（举例只放 project-context）
 
 
 
@@ -243,7 +236,7 @@ Assets/LabSDK/Runtime/Pennon/ExplorationLab/化学文档/压力系统/
 
 
 
-- 有 project-context 覆盖时仍默认落到 `.ai-gates/Doc/{主题}/`（压力系统方案）
+- 有 project-context 覆盖时仍默认落到 `.ai-gates/Doc/{主题}/`
 
 
 

@@ -13,7 +13,7 @@
   →【自动】写/刷新 证据/_pattern-pending.md（status: pending + 五格）
   → 主窗 PM「你下一步」一句：回「准」写入词条/口诀 /「不准」作废 /「改：…」修订
   → 用户「准」/`approve`
-  →【须「准」后】Agent 等价写入主表或口诀；pending→committed
+  →【须「准」后】Agent 等价写入词条表（症状/结构）及 `.ai-gates/design-patterns.project.md`（本仓验证）；pending→committed
 ```
 
 | 步骤 | 自动？ | 执行者 |
@@ -28,7 +28,7 @@
 | --- | --- |
 | 机制说明（本文件） | `skills/references/pattern-harvest.md` |
 | 待准 | 方案夹 `证据/_pattern-pending.md`（模板 → [pattern-pending.md](../templates/pattern-pending.md)） |
-| 主表 | **项目典故**：`design-patterns.md` 词条 或 `.cursor/project-context.md` 项目口诀。**通用典故**：`shared-language.md` §典故（架构层，禁本仓窗号当压缩包主体） |
+| 主表 | **项目典故**：`design-patterns.md` 词条（症状/结构）+ 本仓验证 `.ai-gates/design-patterns.project.md`；或 `.cursor/project-context.md` 项目口诀。**通用典故**：`shared-language.md` §典故（架构层，禁本仓窗号当压缩包主体） |
 
 **禁止塞进 `_lesson-pending.md`**（那边强制 cause/fix，五格对不上，`commit-lesson-pending.ps1` 会拒）。
 

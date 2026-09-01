@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>迷雾地图</title>
+<style>
+:root { --bg:#1a2420; --ink:#e8e0c8; --muted:#9aa392; }
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",sans-serif;overflow:hidden}
+#top{position:fixed;top:0;left:0;right:280px;height:48px;display:flex;gap:8px;align-items:center;padding:8px 12px;background:#121a18;border-bottom:1px solid #314038;z-index:5}
+#top input{flex:1;max-width:360px;background:#0e1412;color:var(--ink);border:1px solid #3a4a40;padding:6px 10px}
+#back{display:none;background:#314038;color:var(--ink);border:0;padding:6px 10px;cursor:pointer}
+#hint{color:var(--muted);font-size:12px}
+#side{position:fixed;top:0;right:0;width:280px;bottom:0;background:#121a18;border-left:1px solid #314038;padding:12px;overflow:auto;z-index:5}
+#side h2{margin:0 0 8px;font-size:15px}
+#side .meta{color:var(--muted);font-size:12px;margin-bottom:8px}
+#worldWrap{position:absolute;inset:48px 280px 0 0;overflow:hidden;cursor:grab;background:radial-gradient(ellipse at 40% 30%, #243028 0%, #1a2420 55%, #121a16 100%)}
+#world{position:absolute;transform-origin:0 0}
+svg.roads{position:absolute;left:0;top:0;z-index:1;pointer-events:none;overflow:visible}
+svg.trend-layer{z-index:1;pointer-events:none}
+svg.roads g.relg{pointer-events:none}
+svg.roads g.relg line.hit{pointer-events:stroke;stroke:rgba(0,0,0,0);stroke-width:16;fill:none}
+svg.roads g.relg line.rel{pointer-events:none;opacity:.5;stroke:#6a5a32;stroke-width:1.25;stroke-dasharray:5 6}
+svg.roads g.relg.hi line.rel,svg.roads line.rel.hi{opacity:.88;stroke:#8a7340;stroke-width:1.7;stroke-dasharray:5 6}
+svg.roads g.relg:hover line.rel{stroke:#9a8450;stroke-width:1.7;opacity:.8}
+svg.roads .fogrel{stroke:#d4c48a;stroke-width:2;stroke-dasharray:5 6;opacity:.72;pointer-events:none;fill:none}
+svg.roads .landrel{stroke:#d4c48a;stroke-width:2.1;stroke-dasharray:6 7;opacity:.72;pointer-events:stroke;fill:none}
+#world.ow-hi svg.roads .landrel,#world.ow-hi svg.roads .fogrel{opacity:.12}
+#world.ow-hi svg.roads .landrel.hi,#world.ow-hi svg.roads .fogrel.hi{opacity:1;stroke:#e8d4a0;stroke-width:3.2}
+svg.roads line.trail{fill:none;stroke:#b4c89a;stroke-width:2.6;opacity:.5;pointer-events:none}
+svg.roads g.trendg line.trend{fill:none;stroke:#e4f2cc;stroke-width:4;opacity:0;pointer-events:none}
+#world.focus-on .tile{opacity:.2;filter:saturate(.25);pointer-events:auto}
+#world.focus-on .tile.is-sel{opacity:1;filter:none;z-index:12;box-shadow:0 0 0 3px #f2e6a6,0 4px 0 #0b100e}
+#world.focus-on .tile.is-nb{opacity:.5;filter:none;z-index:10;box-shadow:0 0 0 2px #c4a35a66,0 4px 0 #0b100e}
+#world.focus-on .tile.is-trend{opacity:1;filter:none;z-index:11;box-shadow:0 0 0 2px #c5d4b0,0 4px 0 #0b100e}
+#world.focus-on .tile.fog{opacity:.12}
+#world.focus-on .tile.fog.is-sel,#world.focus-on .tile.fog.is-nb,#world.focus-on .tile.fog.is-trend{opacity:.75}
+#world.focus-on svg.roads g.relg line.rel, #world.focus-on svg.roads line.rel{opacity:.08;stroke-width:1}
+#world.focus-on svg.roads g.relg.hi line.rel, #world.focus-on svg.roads line.rel.hi{opacity:.88;stroke:#8a7340;stroke-width:1.7}
+#world.focus-on svg.roads g.relg:not(.hi) line.hit{pointer-events:none}
+#world.focus-on svg.roads line.trail{opacity:.12}
+#world.focus-on svg.roads g.trendg line.trend{opacity:1}
+.land{position:absolute;z-index:10;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px 14px 16px;color:var(--ink);border:3px solid #2c3830;border-radius:36px;box-shadow:0 4px 0 #0b100e, inset 0 0 18px #0004}
+.land.has-fog{box-shadow:0 4px 0 #0b100e, inset 0 0 22px #5eead466, inset 0 0 48px #5eead4aa, inset 0 0 12px #5eead4}
+.land:hover{filter:brightness(1.12)}
+.land .ln{font-size:13px;line-height:1.3;width:100%;padding:0 2px;overflow:hidden;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.land .lm{font-size:11px;color:var(--muted);margin-top:6px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile{position:absolute;width:120px;height:120px;border:3px solid #2c3830;border-radius:36px;padding:8px 8px 36px;font-size:11px;line-height:1.2;cursor:pointer;box-shadow:0 4px 0 #0b100e, inset 0 0 18px #0004;z-index:10}
+.tile .ord{position:absolute;top:-8px;left:-8px;width:22px;height:22px;border-radius:50%;background:#c4a35a;color:#1a1810;font-size:11px;font-weight:700;line-height:22px;text-align:center;z-index:3}
+.tile .name{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;padding:0 2px}
+.tile .when{position:absolute;left:6px;right:6px;bottom:22px;font-size:10px;color:#b8c4a8;z-index:2;pointer-events:none}
+.s-doing{background:#5a4214;border-color:#f0c040}
+.s-done{background:#145a38;border-color:#3dcc7a}
+.s-pause{background:#143a52;border-color:#4ec4e8}
+.s-fail{background:#6a2218;border-color:#ff6b5a}
+.s-layer{background:#3e1e68;border-color:#c080ff}
+.tile.island{outline:2px dashed #8a7a50}
+.tile.fog{background:#2a3330;opacity:.45;border-style:dashed}
+.land.nation{border-style:dashed;border-width:3px;background:#243038}
+.land.sat{z-index:12;padding:10px 12px}
+.land .land-badges{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:4px;max-width:100%}
+.land .land-badges .badge-cov,.land .land-badges .badge-hot,.land .land-badges .badge-fog{display:inline-block;padding:1px 5px;border-radius:8px;font-size:9px;border:1px solid #3a4a40;line-height:1.25;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.land .land-badges .badge-cov{background:#1e3a32;color:#9ad4b8}
+.land .land-badges .badge-hot{background:#3a2a18;color:#e0b070}
+.land .land-badges .badge-fog{background:#2a5a52;color:#99f6e4;border-color:#f0c040;font-weight:800;font-size:10px;padding:2px 6px;box-shadow:inset 0 0 10px #5eead4aa,0 0 6px #5eead466}
+.tile.flash{box-shadow:0 0 0 3px #f2e6a6}
+.flag{position:absolute;top:-10px;right:4px;color:#f2e6a6}
+.pins{position:absolute;left:4px;right:4px;bottom:3px;display:flex;gap:3px;flex-wrap:wrap;padding:0;justify-content:center;z-index:3}
+.pin{width:9px;height:9px;padding:0;border-radius:50%;border:1px solid #111;cursor:pointer;font-size:0;line-height:0;color:transparent}
+.pin.doc{background:#d4c48a}.pin.dispatch{background:#5b8fd4}
+.pin.report{background:#6cbf7a}.pin.board{background:#d45b5b}
+.pin.lesson{background:#e09a3a}.pin.other{background:#888}
+#legend{font-size:12px;color:var(--muted);margin:0 0 10px;line-height:1.7}
+#legend .badge-cov,#legend .badge-hot,#legend .badge-fog{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;border:1px solid #3a4a40}
+#legend .badge-cov{background:#1e3a32;color:#9ad4b8}
+#legend .badge-hot{background:#3a2a18;color:#e0b070}
+#legend .badge-fog{background:#2a5a52;color:#99f6e4;border-color:#f0c040;font-weight:800;box-shadow:inset 0 0 10px #5eead4aa,0 0 6px #5eead466}
+.card-badge{display:inline-block;margin:0 6px 6px 0;padding:1px 8px;border-radius:10px;font-size:11px;border:1px solid #3a4a40}
+.card-badge.cov{background:#1e3a32;color:#9ad4b8}
+.card-badge.hot{background:#3a2a18;color:#e0b070}
+.card-badge.fog{background:#2a5a52;color:#99f6e4;border-color:#f0c040;font-weight:800;box-shadow:inset 0 0 10px #5eead4aa,0 0 6px #5eead466}
+#minimap{position:absolute;left:10px;bottom:10px;z-index:7;max-width:240px;max-height:42%;overflow:auto;background:#0e1412f2;border:1px solid #3a4a40;border-radius:8px;padding:8px;pointer-events:auto;box-shadow:0 4px 12px #0008}
+#minimap .mm-h{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted);margin:0 0 6px}
+#minimap .mm-x{flex:0 0 auto;width:20px;height:20px;padding:0;border:1px solid #3a4a40;border-radius:4px;background:#1a2220;color:#e8e0c8;font-size:14px;line-height:18px;cursor:pointer}
+#minimap .mm-x:hover{border-color:#c4a35a;color:#f2e6a6}
+#minimap.mm-hidden{display:none}
+#mmOpen{display:none;position:absolute;left:10px;bottom:10px;z-index:7;padding:4px 10px;border:1px solid #3a4a40;border-radius:8px;background:#0e1412f2;color:#e8e0c8;font-size:11px;cursor:pointer;pointer-events:auto;box-shadow:0 4px 12px #0008;font-family:inherit}
+#mmOpen.show{display:inline-block}
+#mmOpen:hover{border-color:#c4a35a;filter:brightness(1.12)}
+#minimap .mm-list{display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start}
+#minimap .mm-chip{display:inline-flex;align-items:center;gap:4px;margin:0;padding:3px 7px;border-radius:8px;border:1px solid #3a3a36;background:#1a2220;color:#e8e0c8;font-size:11px;cursor:pointer;max-width:100%;font-family:inherit}
+#minimap .mm-chip:hover{filter:brightness(1.12);border-color:#c4a35a}
+#minimap .mm-chip .mm-tag{color:#5eead4;font-weight:800}
+#minimap .mm-chip .mm-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px}
+#minimap .mm-empty{font-size:11px;color:var(--muted)}
+svg.roads g.nearg line.nearln{pointer-events:none;opacity:.32;stroke:#6a7a68;stroke-width:1.1;stroke-dasharray:2 8}
+svg.roads g.nearg line.hit{pointer-events:stroke;stroke:rgba(0,0,0,0);stroke-width:16;fill:none}
+#legend .lg{display:flex;align-items:center;gap:6px}
+#legend .lg span.s-doing,#legend .lg span.s-done,#legend .lg span.s-pause,#legend .lg span.s-fail,#legend .lg span.s-layer{display:inline-block;width:16px;height:16px;border:3px solid;border-radius:4px;flex:0 0 16px}
+#reader{display:none;position:fixed;left:12px;right:292px;top:60px;bottom:12px;background:#0e1412;border:1px solid #3a4a40;padding:16px;overflow:auto;z-index:8;white-space:pre-wrap;font-family:Consolas,monospace;font-size:12px}
+#reader.show{display:block}
+#reader .close{position:sticky;top:0;float:right;background:#314038;color:var(--ink);border:0;padding:4px 8px;cursor:pointer}
+#tip{display:none;position:fixed;z-index:9;max-width:260px;padding:8px 10px;background:#0e1412;border:1px solid #c4a35a;border-radius:8px;color:var(--ink);font-size:12px;line-height:1.35;pointer-events:none;box-shadow:0 6px 16px #000a;white-space:normal}
+#tip.show{display:block}
+#tip b{display:block;margin-bottom:4px;color:#f2e6a6}
+</style>
+</head>
+<body>
+<div id="top">
+  <button type="button" id="back">返回大地图</button>
+  <strong>迷雾地图</strong>
+  <input id="q" type="search" placeholder="search id / state"/>
+  <span id="hint"></span>
+</div>
+<aside id="side">
+  <p class="meta">按网络拓扑分簇：有岛的大陆是枢纽，岛在右。雾在小地图，大地图块上用雾徽章。沟里的虚线合成总线，横平竖直各画一遍，不叠线。</p>
+  <div id="legend">
+    <div class="lg"><span class="badge-cov" id="legendCov">覆盖度:无</span></div>
+    <div class="lg"><span class="badge-hot" id="legendHot">热度:无</span></div>
+    <div class="lg"><span class="badge-fog" id="legendFog">雾:未建夹</span></div>
+    <div class="lg"><span class="s-doing"></span> 执行中</div>
+    <div class="lg"><span class="s-done"></span> 签收</div>
+    <div class="lg"><span class="s-pause"></span> 停写</div>
+    <div class="lg"><span class="s-fail"></span> 失败</div>
+    <div class="lg"><span class="s-layer"></span> 换层</div>
+    <div class="lg"><span class="pin doc"></span> 方案正文（未完成 / 物理口径 / Mandatory）</div>
+    <div class="lg"><span class="pin dispatch"></span> 派发 / 方案审</div>
+    <div class="lg"><span class="pin report"></span> 实现 / 代码审核</div>
+    <div class="lg"><span class="pin board"></span> 修复黑板</div>
+    <div class="lg"><span class="pin lesson"></span> 错题 / 教训</div>
+    <div class="lg"><span class="pin other"></span> 其他证据</div>
+  </div>
+  <div id="card">-</div>
+</aside>
+<div id="worldWrap"><div id="world"><svg class="roads" id="roads"></svg><svg class="roads trend-layer" id="trendLayer"></svg></div><div id="minimap"><div class="mm-h"><span>未建夹</span><button type="button" class="mm-x" id="mmClose" title="关闭">×</button></div><div class="mm-list" id="minimapList"></div></div><button type="button" id="mmOpen">未建夹</button></div>
+<div id="reader"><button class="close" id="closeReader">close</button><div id="readerBody"></div></div>
+<div id="tip"></div>
+<script>
+const DATA = __DATA__;
+if (!Array.isArray(DATA.nodes)) DATA.nodes = DATA.nodes ? [DATA.nodes] : [];
+if (!Array.isArray(DATA.edges)) DATA.edges = DATA.edges ? [DATA.edges] : [];
+if (!Array.isArray(DATA.near)) DATA.near = DATA.near ? [DATA.near] : [];
+if (!Array.isArray(DATA.fog)) DATA.fog = DATA.fog ? [DATA.fog] : [];
+function covLabel(n){
+  if(n && n.coverage) return "覆盖度:"+n.coverage;
+  return "覆盖度:无";
+}
+function hotLabel(n){
+  if(n && n.heatBand) return "热度:"+n.heatBand;
+  return "热度:无";
+}
+function pickMemberField(g, key){
+  const mem=(g && g.members)||[];
+  for(let i=0;i<mem.length;i++){
+    const v=mem[i][key];
+    if(v) return v;
+  }
+  return null;
+}
+function groupCovLabel(g){
+  const v=pickMemberField(g,"coverage");
+  return v ? "覆盖度:"+v : "覆盖度:无";
+}
+function groupHotLabel(g){
+  const v=pickMemberField(g,"heatBand");
+  return v ? "热度:"+v : "热度:无";
+}
+function groupFogCount(g){
+  let n=0;
+  fogNodes.forEach(function(fn){
+    if(fn._home===g || (fn._lands||[]).indexOf(g)>=0) n++;
+  });
+  return n;
+}
+function groupFogLabel(g){
+  const n=groupFogCount(g);
+  if(n<=0) return "";
+  return "雾:"+n;
+}
+function groupBadgeHtml(g){
+  let html="<p><span class='card-badge cov'>"+groupCovLabel(g)+"</span><span class='card-badge hot'>"+groupHotLabel(g)+"</span>";
+  const fog=groupFogLabel(g);
+  if(fog) html+="<span class='card-badge fog'>"+fog+"</span>";
+  return html+"</p>";
+}
+function landStatus(g){
+  if(g.fogland) return "未建夹，可能前进方向";
+  if(g.nation) return (g.n||0)+" 座岛 · 无大陆关系";
+  if(g.isolate) return "落单岛 · 连 "+(g._home?landTitle(g._home):"大陆");
+  return (g.n||0)+" 格";
+}
+function edgePartsTip(e){
+  const parts=(e.parts||[]).join(", ");
+  return parts+" ; score "+e.score;
+}
+function nearHoverTip(e){
+  const have=(e.parts||[]).join(", ")||"(none)";
+  const keys=["rel","body","cs","evidence"];
+  const joined=(e.parts||[]).join(" ").toLowerCase();
+  const miss=keys.filter(function(k){ return joined.indexOf(k)<0; }).join("/");
+  const gap=3-(e.score||0);
+  return "差 "+gap+" 分过阈；已有 "+have+"；缺 "+(miss||"无");
+}
+(function initLegendBadges(){
+  const cov=document.getElementById("legendCov");
+  const hot=document.getElementById("legendHot");
+  if(cov) cov.textContent = DATA.coverageSrc ? "覆盖度:coverage-map.yaml" : "覆盖度:无";
+  if(hot) hot.textContent = DATA.heatSrc ? "热度:regression-heat.yaml" : "热度:无";
+})();
+const wrap=document.getElementById("worldWrap");
+const world=document.getElementById("world");
+const roads=document.getElementById("roads");
+const trendLayer=document.getElementById("trendLayer");
+const card=document.getElementById("card");
+const hint=document.getElementById("hint");
+const reader=document.getElementById("reader");
+const readerBody=document.getElementById("readerBody");
+const backBtn=document.getElementById("back");
+const tipBox=document.getElementById("tip");
+function hideMapTip(){
+  if(tipBox) tipBox.classList.remove("show");
+}
+function moveMapTip(ev){
+  if(!tipBox || !tipBox.classList.contains("show") || !ev) return;
+  let x=ev.clientX+14, y=ev.clientY+18;
+  const w=tipBox.offsetWidth||160, h=tipBox.offsetHeight||40;
+  if(x+w>window.innerWidth-8) x=ev.clientX-w-12;
+  if(y+h>window.innerHeight-8) y=ev.clientY-h-12;
+  if(x<4) x=4;
+  if(y<4) y=4;
+  tipBox.style.left=x+"px";
+  tipBox.style.top=y+"px";
+}
+function showMapTip(title, status, ev){
+  if(!tipBox) return;
+  tipBox.textContent="";
+  const b=document.createElement("b");
+  b.textContent=title||"";
+  tipBox.appendChild(b);
+  if(status){
+    const s=document.createElement("span");
+    s.textContent=status;
+    tipBox.appendChild(s);
+  }
+  tipBox.classList.add("show");
+  moveMapTip(ev);
+}
+const TILE=120;
+let scale=1, tx=40, ty=40, drag=false, lx=0, ly=0, view="world";
+let focusId=null, dragMoved=false, localGroup=null, lastCx=null, lastCy=null, trendEl=null;
+const PIN_UI={
+  doc:{ch:"文", tip:"方案正文：未完成.md、物理口径、Mandatory 步骤"},
+  dispatch:{ch:"派", tip:"派发或方案审核记录"},
+  report:{ch:"码", tip:"实现或代码审核记录"},
+  board:{ch:"板", tip:"修复黑板 / 现场记录"},
+  lesson:{ch:"错", tip:"错题 / 教训"},
+  other:{ch:"证", tip:"其他证据文件"}
+};
+function apply(){ world.style.transform="translate("+tx+"px,"+ty+"px) scale("+scale+")"; }
+function centerOn(cx, cy, sc){
+  lastCx=cx; lastCy=cy;
+  if(sc!=null) scale=sc;
+  function go(){
+    const r=wrap.getBoundingClientRect();
+    const vw=r.width||800, vh=r.height||600;
+    tx=vw/2-cx*scale;
+    ty=vh/2-cy*scale;
+    apply();
+  }
+  go();
+  requestAnimationFrame(go);
+}
+window.addEventListener("resize", function(){ if(lastCx!=null) centerOn(lastCx, lastCy); });
+wrap.addEventListener("mousedown", function(e){
+  if(e.target.closest(".pin")||e.target.closest(".tile")||e.target.closest(".land")||e.target.closest("#minimap")||e.target.closest("#mmOpen")) return;
+  drag=true; dragMoved=false; lx=e.clientX; ly=e.clientY; wrap.style.cursor="grabbing";
+});
+window.addEventListener("mouseup", function(){ drag=false; wrap.style.cursor="grab"; });
+window.addEventListener("mousemove", function(e){
+  if(!drag) return;
+  const dx=e.clientX-lx, dy=e.clientY-ly;
+  if(Math.abs(dx)+Math.abs(dy)>6) dragMoved=true;
+  tx+=dx; ty+=dy; lx=e.clientX; ly=e.clientY; apply();
+});
+wrap.addEventListener("click", function(e){
+  if(view!=="local" || dragMoved) return;
+  if(e.target.closest(".tile")||e.target.closest(".pin")||e.target.closest(".land")||e.target.closest("#minimap")||e.target.closest("#mmOpen")) return;
+  clearFocus();
+  if(localGroup) showGroupCard(localGroup);
+});
+wrap.addEventListener("wheel", function(e){
+  if(e.target.closest("#minimap")||e.target.closest("#mmOpen")) return;
+  e.preventDefault();
+  const k=e.deltaY>0?0.92:1.08;
+  const next=Math.min(2.8, Math.max(0.22, scale*k));
+  const r=wrap.getBoundingClientRect();
+  const mx=e.clientX-r.left, my=e.clientY-r.top;
+  const wx=(mx-tx)/scale, wy=(my-ty)/scale;
+  scale=next; tx=mx-wx*scale; ty=my-wy*scale; apply();
+}, {passive:false});
+const nodes=DATA.nodes.map(function(n){
+  if (!Array.isArray(n.pins)) n.pins = n.pins ? [n.pins] : [];
+  const rels = n.rels || n.rel || [];
+  n.rel = Array.isArray(rels) ? rels : (rels ? [rels] : []);
+  n.t = n.discovered || n.t || 0;
+  return Object.assign({}, n, { x:0, y:0 });
+});
+const byId={}; nodes.forEach(function(n){ byId[n.id]=n; });
+DATA.fog.forEach(function(id){
+  if(byId[id]) return;
+  const n={id:id, state:"fog", cls:"fog", island:true, rec:null, evCount:0, preview:null, pins:[], rel:[], t:2147483647, fog:true, x:0, y:0};
+  nodes.push(n); byId[id]=n;
+});
+function familyOf(id){
+  if(!id) return id;
+  const slice=id.indexOf("-切片");
+  if(slice>0) return id.slice(0,slice)+"·切片";
+  const hot=id.indexOf("-热修");
+  if(hot>0) return id.slice(0,hot)+"·热修";
+  const rm=id.match(/^(.*)-R[0-9]+[a-z]?$/);
+  if(rm && rm[1].length>=4) return rm[1];
+  return id;
+}
+function isRelEdge(e){
+  if(!e) return false;
+  const p=e.parts||[];
+  for(let i=0;i<p.length;i++){ if(String(p[i]).indexOf("rel")>=0) return true; }
+  return false;
+}
+function find(p,x){ while(p[x]!==x){ p[x]=p[p[x]]; x=p[x]; } return x; }
+function union(p,a,b){ if(!p[a]||!p[b]) return; a=find(p,a); b=find(p,b); if(a!==b) p[a]=b; }
+function makeGroup(label, members, extra){
+  const real=members.filter(function(n){ return !n.fog; });
+  const hub=(real.length?real:members).slice().sort(function(a,b){ return (a.t||0)-(b.t||0); })[0];
+  const ts=real.map(function(n){ return n.t||0; }).filter(function(t){ return t>0 && t<2147483647; });
+  const counts={}; members.forEach(function(n){ counts[n.cls]=(counts[n.cls]||0)+1; });
+  let dom="done", best=0;
+  Object.keys(counts).forEach(function(c){ if(counts[c]>best){ best=counts[c]; dom=c; } });
+  return Object.assign({
+    id:label, label:label, members:members, hub:hub, n:members.length,
+    t0: ts.length?Math.min.apply(null,ts):0, t1: ts.length?Math.max.apply(null,ts):0,
+    dom:dom, isolate: members.length===1
+  }, extra||{});
+}
+const used={};
+const fam={};
+nodes.filter(function(n){ return !n.fog; }).forEach(function(n){
+  const f=familyOf(n.id);
+  if(!fam[f]) fam[f]=[];
+  fam[f].push(n);
+});
+let groups=[];
+Object.keys(fam).forEach(function(f){
+  if(fam[f].length>=2){
+    groups.push(makeGroup(f, fam[f]));
+    fam[f].forEach(function(n){ used[n.id]=true; });
+  }
+});
+const leftover=nodes.filter(function(n){ return !n.fog && !used[n.id]; });
+const parent={}; leftover.forEach(function(n){ parent[n.id]=n.id; });
+leftover.forEach(function(n){
+  (n.rel||[]).forEach(function(oid){
+    const o=byId[oid];
+    if(!o || o.fog || used[oid] || !parent[oid]) return;
+    const back=(o.rel||[]).indexOf(n.id)>=0;
+    if(back) union(parent, n.id, oid);
+  });
+});
+const bucket={};
+leftover.forEach(function(n){
+  const r=find(parent, n.id);
+  if(!bucket[r]) bucket[r]=[];
+  bucket[r].push(n);
+});
+const isolates=[];
+Object.keys(bucket).forEach(function(k){
+  const members=bucket[k];
+  if(members.length>=2){
+    groups.push(makeGroup(familyOf(members[0].id)+"·互指", members));
+    members.forEach(function(n){ used[n.id]=true; });
+  } else {
+    isolates.push(members[0]);
+  }
+});
+const coarse={};
+isolates.forEach(function(n){
+  const c=n.id.slice(0,3);
+  if(!coarse[c]) coarse[c]=[];
+  coarse[c].push(n);
+});
+const still=[];
+Object.keys(coarse).forEach(function(c){
+  if(coarse[c].length>=2){
+    groups.push(makeGroup(c+"…", coarse[c]));
+    coarse[c].forEach(function(n){ used[n.id]=true; });
+  } else {
+    still.push(coarse[c][0]);
+  }
+});
+if(still.length){
+  function citesGroup(n){
+    return groups.some(function(g){
+      return g.members.some(function(m){
+        return (n.rel||[]).indexOf(m.id)>=0 || (m.rel||[]).indexOf(n.id)>=0;
+      });
+    });
+  }
+  const linked=[], lonely=[];
+  still.forEach(function(n){ (citesGroup(n)?linked:lonely).push(n); });
+  linked.forEach(function(n){ groups.push(makeGroup(n.id, [n], { isolate:true, satellite:true })); });
+  if(lonely.length){
+    groups.push(makeGroup("群岛国家", lonely, { nation:true, isolate:false, dom:"pause" }));
+  }
+}
+const fogNodes=nodes.filter(function(n){ return n.fog; });
+function groupsForFog(fn){
+  const out=[], seen={};
+  function add(g){ if(!g || seen[g.id]) return; seen[g.id]=true; out.push(g); }
+  const fam=familyOf(fn.id);
+  groups.forEach(function(g){
+    if(g.label===fam) add(g);
+    g.members.forEach(function(m){
+      if(familyOf(m.id)===fam) add(g);
+      if((m.rel||[]).indexOf(fn.id)>=0) add(g);
+    });
+  });
+  const mains=out.filter(function(g){ return !g.isolate && !g.nation; });
+  return mains.length ? mains : out.filter(function(g){ return !g.isolate; });
+}
+groups.forEach(function(g){ g.n=g.members.length; });
+groups.sort(function(a,b){ return b.n-a.n; });
+let localSorted=[];
+function fmtT(t){
+  if(!t || t>=2147483647) return "";
+  const d=new Date(t*1000);
+  const m=("0"+(d.getMonth()+1)).slice(-2), day=("0"+d.getDate()).slice(-2);
+  return d.getFullYear()+"-"+m+"-"+day;
+}
+function shortId(id){ return id.length>18 ? id.slice(0,16)+"…" : id; }
+function setWorldSize(w,h){
+  roads.setAttribute("width", w); roads.setAttribute("height", h);
+  trendLayer.setAttribute("width", w); trendLayer.setAttribute("height", h);
+  world.style.width=w+"px"; world.style.height=h+"px";
+}
+function clearWorld(){
+  hideMapTip();
+  Array.prototype.slice.call(world.querySelectorAll(".land,.tile")).forEach(function(el){ el.remove(); });
+  while(roads.firstChild) roads.removeChild(roads.firstChild);
+  while(trendLayer.firstChild) trendLayer.removeChild(trendLayer.firstChild);
+  trendEl=null;
+}
+function neighbors(id){
+  return DATA.edges.filter(function(e){ return e.a===id||e.b===id; }).map(function(e){ return {other: e.a===id?e.b:e.a, e:e}; });
+}
+function mentionedBy(fogId){
+  return nodes.filter(function(n){
+    return !n.fog && (n.rel||[]).indexOf(fogId)>=0;
+  }).map(function(n){ return n.id; });
+}
+function showCard(n){
+  if(n.fog){
+    const from=mentionedBy(n.id);
+    const lands=(n._lands||[]).map(function(g){ return landTitle(g); });
+    card.innerHTML="<h2>"+n.id+"</h2>"+
+      "<p class='meta'>可能前进方向（关系表已点名，尚未建夹）。不是已定路线。大地图上挨着点名次数最多的大陆。</p>"+
+      (lands.length?("<p><b>关联大陆</b><br>"+lands.join("<br>")+"</p>"):"")+
+      "<p><b>点名来自</b><br>"+(from.length?from.map(shortId).join("<br>"):"（扫描到点名，来源窗未写入 rel 列表）")+"</p>";
+    return;
+  }
+  const ix=localSorted.findIndex(function(x){ return x.id===n.id; });
+  const prev=ix>0 ? localSorted[ix-1].id : "（起点）";
+  const next=ix>=0 && ix<localSorted.length-1 ? localSorted[ix+1].id : "（终点）";
+  const nb=neighbors(n.id).filter(function(x){ return isRelEdge(x.e); }).map(function(x){ return x.other; }).join("<br>") || "（无关系表路）";
+  const maybe=(n.rel||[]).filter(function(id){ return byId[id] && byId[id].fog; });
+  const rec=n.rec ? (n.rec.id+" — "+n.rec.why) : "（无）";
+  card.innerHTML="<h2>"+n.id+"</h2>"+
+    "<div class='meta'>"+n.stateLabel+(fmtT(n.t)?" · "+fmtT(n.t):"")+" · 联系 "+(n.deg||0)+"</div>"+
+    "<p><b>走势</b>（时间先后 · 硬链 · 早→晚）<br>"+shortId(prev)+" → 本格 → "+shortId(next)+"<br><span class='meta'>图上浅绿实线+箭头。</span></p>"+
+    "<p><b>关系路</b>（互指/点名 · 无方向）<br>"+nb+"<br><span class='meta'>图上暗金虚线。</span></p>"+
+    (maybe.length?("<p><b>可能方向</b>（未建夹）<br>"+maybe.map(shortId).join("<br>")+"</p>"):"")+
+    "<p><b>下一站</b><br>"+rec+"</p>"+
+    "<p><span class='card-badge cov'>"+covLabel(n)+"</span><span class='card-badge hot'>"+hotLabel(n)+"</span></p>"+
+    (n.preview?("<p><b>证据</b><br>"+n.preview+(n.evCount>1?(" · n="+n.evCount):"")+"</p>"):"");
+}
+function landTitle(g){
+  if(g.fogland) return "未建夹（可能方向）";
+  if(g.nation) return "群岛国家";
+  if(g.archipelago) return "散落群岛";
+  return shortId(g.label || (g.hub && g.hub.id) || g.id);
+}
+function showGroupCard(g){
+  const fogN=g.members.filter(function(m){ return m.fog; }).length;
+  if(g.fogland){
+    card.innerHTML="<h2>"+landTitle(g)+"</h2>"+
+      "<div class='meta'>"+g.n+" 个点名尚未建夹</div>"+
+      groupBadgeHtml(g)+
+      "<p>这些名字出现在已有窗的关系表里，但是还没有文件夹。可以当作<strong>可能</strong>的前进方向，不是已经拍板的下一窗。</p>";
+    return;
+  }
+  if(g.nation){
+    card.innerHTML="<h2>群岛国家</h2>"+
+      "<div class='meta'>"+g.n+" 座岛 · 关系表没有点名任何已成族大陆</div>"+
+      groupBadgeHtml(g)+
+      "<p>这些已建夹彼此不成族、也不连大地图上的大陆，所以收成一个国家。点进去看岛内格子；岛和岛若互指，里面会有暗金虚线。</p>";
+    return;
+  }
+  const nearby=fogNodes.filter(function(fn){ return (fn._lands||[]).indexOf(g)>=0; });
+  const homeLine=g.isolate && g._home ? ("贴在「"+landTitle(g._home)+"」外侧（点名最多）。") : "";
+  const peers=g.isolate ? groups.filter(function(o){ return o.isolate && satPeer(g,o); }) : [];
+  card.innerHTML="<h2>"+landTitle(g)+"</h2>"+
+    "<div class='meta'>"+g.n+" 格"+(g.t0?(" · "+fmtT(g.t0)+" → "+fmtT(g.t1)):"")+(fogN?(" · 未建夹 "+fogN):"")+"</div>"+
+    groupBadgeHtml(g)+
+    (homeLine?("<p class='meta'>"+homeLine+"</p>"):"")+
+    (g.isolate && !g._home ? "<p class='meta'>关系表没有点名任何已成族大陆。"+(peers.length?"但和其他落单窗互指。":"和其他大陆、落单窗都没有关系表互指。")+"</p>" : "")+
+    "<p>浅绿实线+箭头=走势（点进大陆后）。暗金虚线=关系路。悬停加亮连着本块的线。</p>"+
+    (peers.length?("<p><b>岛间互指</b><br>"+peers.map(function(o){ return o.members[0].id; }).join("<br>")+"</p>"):"")+
+    (nearby.length?("<p><b>旁边的未建夹</b>（关系表点过、尚未建夹）<br>"+nearby.map(function(fn){ return fn.id; }).join("<br>")+"</p>"):"");
+}
+const cls={doing:"s-doing", done:"s-done", pause:"s-pause", fail:"s-fail", layer:"s-layer", fog:"fog"};
+function makeTile(n){
+  const el=document.createElement("div");
+  el.className="tile "+(cls[n.cls]||"s-fail")+(n.island?" island":"");
+  el.style.left=n.x+"px"; el.style.top=n.y+"px";
+  el.innerHTML="<div class='ord'></div><div class='name'></div><div class='when'></div><div class='pins'></div>";
+  el.querySelector(".ord").textContent=n.ord||"";
+  el.querySelector(".name").textContent=n.id;
+  el.querySelector(".when").textContent=n.fog ? "可能方向 · 未建夹" : fmtT(n.t);
+  if(n.cls==="doing") el.insertAdjacentHTML("beforeend","<span class='flag'>!</span>");
+  (n.pins||[]).slice(0,10).forEach(function(p){
+    const ui=PIN_UI[p.kind]||PIN_UI.other;
+    const d=document.createElement("span");
+    d.className="pin "+p.kind;
+    d.onmouseenter=function(ev){ ev.stopPropagation(); showMapTip(p.name, ui.tip, ev); };
+    d.onmousemove=function(ev){ ev.stopPropagation(); moveMapTip(ev); };
+    d.onmouseleave=function(ev){ ev.stopPropagation(); hideMapTip(); };
+    d.onclick=function(ev){ ev.stopPropagation(); hideMapTip(); readerBody.textContent=p.name+"\n"+ui.tip+"\n\n"+p.text; reader.classList.add("show"); };
+    el.querySelector(".pins").appendChild(d);
+  });
+  el.onclick=function(){ showCard(n); setFocus(n.id); };
+  world.appendChild(el);
+  n.el=el;
+}
+const linesByNode={};
+function relLinkedIds(id){
+  const linked={}; linked[id]=true;
+  DATA.edges.forEach(function(e){
+    if(!isRelEdge(e)) return;
+    if(e.a===id) linked[e.b]=true;
+    if(e.b===id) linked[e.a]=true;
+  });
+  return linked;
+}
+function ensureRoadMarkers(){
+  if(trendLayer.querySelector("#trendArr")) return;
+  const ns="http://www.w3.org/2000/svg";
+  const defs=document.createElementNS(ns,"defs");
+  function mk(id, fill){
+    const m=document.createElementNS(ns,"marker");
+    m.setAttribute("id", id);
+    m.setAttribute("viewBox","0 0 12 12");
+    m.setAttribute("refX","10");
+    m.setAttribute("refY","6");
+    m.setAttribute("markerWidth","18");
+    m.setAttribute("markerHeight","18");
+    m.setAttribute("orient","auto");
+    m.setAttribute("markerUnits","userSpaceOnUse");
+    const p=document.createElementNS(ns,"path");
+    p.setAttribute("d","M 0 0 L 12 6 L 0 12 L 2.5 6 z");
+    p.setAttribute("fill", fill);
+    p.setAttribute("stroke", "#1a2420");
+    p.setAttribute("stroke-width", "1.2");
+    m.appendChild(p);
+    defs.appendChild(m);
+  }
+  mk("trailArr","rgba(197,212,168,0.55)");
+  mk("trendArr","#e8f6c8");
+  trendLayer.appendChild(defs);
+}
+function timeSeg(a, b, cls, markerId){
+  const x1=a.x+TILE/2, y1=a.y+TILE/2, x2=b.x+TILE/2, y2=b.y+TILE/2;
+  const dx=x2-x1, dy=y2-y1, d=Math.hypot(dx,dy)||1;
+  const inset=TILE/2+10;
+  if(d<=inset*2+4){
+    const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
+    ln.setAttribute("class", cls);
+    ln.setAttribute("x1", x1); ln.setAttribute("y1", y1);
+    ln.setAttribute("x2", x2); ln.setAttribute("y2", y2);
+    ln.setAttribute("marker-end", "url(#"+markerId+")");
+    return ln;
+  }
+  const ux=dx/d, uy=dy/d;
+  const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
+  ln.setAttribute("class", cls);
+  ln.setAttribute("x1", x1+ux*inset); ln.setAttribute("y1", y1+uy*inset);
+  ln.setAttribute("x2", x2-ux*inset); ln.setAttribute("y2", y2-uy*inset);
+  ln.setAttribute("marker-end", "url(#"+markerId+")");
+  return ln;
+}
+function clearFocus(){
+  focusId=null;
+  world.classList.remove("focus-on");
+  localSorted.forEach(function(n){
+    if(!n.el) return;
+    n.el.classList.remove("is-sel","is-nb","is-trend");
+  });
+  if(trendEl){ while(trendEl.firstChild) trendEl.removeChild(trendEl.firstChild); }
+  roads.querySelectorAll("g.relg").forEach(function(g){
+    g.classList.remove("hi");
+  });
+  roads.querySelectorAll("line.rel").forEach(function(ln){
+    ln.classList.remove("hi");
+  });
+}
+function setFocus(id){
+  if(view!=="local") return;
+  if(focusId===id){ clearFocus(); if(localGroup) showGroupCard(localGroup); return; }
+  focusId=id;
+  world.classList.add("focus-on");
+  const linked=relLinkedIds(id);
+  const ix=localSorted.findIndex(function(x){ return x.id===id; });
+  const hop=[];
+  if(ix>0) hop.push(localSorted[ix-1]);
+  if(ix>=0) hop.push(localSorted[ix]);
+  if(ix>=0 && ix<localSorted.length-1) hop.push(localSorted[ix+1]);
+  const hopIds={}; hop.forEach(function(n){ hopIds[n.id]=true; });
+  localSorted.forEach(function(n){
+    if(!n.el) return;
+    n.el.classList.toggle("is-sel", n.id===id);
+    n.el.classList.toggle("is-nb", n.id!==id && !!linked[n.id]);
+    n.el.classList.toggle("is-trend", n.id!==id && !!hopIds[n.id]);
+  });
+  if(trendEl){
+    while(trendEl.firstChild) trendEl.removeChild(trendEl.firstChild);
+    for(let i=0;i<hop.length-1;i++){
+      trendEl.appendChild(timeSeg(hop[i], hop[i+1], "trend", "trendArr"));
+    }
+  }
+  roads.querySelectorAll("g.relg").forEach(function(g){
+    const a=g.getAttribute("data-a"), b=g.getAttribute("data-b");
+    g.classList.toggle("hi", a===id || b===id);
+  });
+}
+function landSide(n){
+  return 112 + Math.sqrt(Math.max(n,1))*52;
+}
+function clearOwHi(){
+  world.classList.remove("ow-hi");
+  roads.querySelectorAll(".landrel, .fogrel").forEach(function(ln){ ln.classList.remove("hi"); });
+}
+function hiOwLines(pred){
+  world.classList.add("ow-hi");
+  roads.querySelectorAll(".landrel, .fogrel").forEach(function(ln){
+    ln.classList.toggle("hi", !!pred(ln));
+  });
+}
+function homeLand(fn){
+  const rels=fn._lands||[];
+  if(!rels.length) return null;
+  let best=rels[0], bestN=-1;
+  rels.forEach(function(g){
+    const n=g.members.filter(function(m){ return (m.rel||[]).indexOf(fn.id)>=0 || familyOf(m.id)===familyOf(fn.id); }).length;
+    if(n>bestN){ bestN=n; best=g; }
+  });
+  return best;
+}
+function satPeer(a,b){
+  if(!a || !b || a===b) return false;
+  const na=a.members[0], nb=b.members[0];
+  if(!na || !nb) return false;
+  return (na.rel||[]).indexOf(nb.id)>=0 || (nb.rel||[]).indexOf(na.id)>=0;
+}
+function homeForSat(g, mains){
+  if(!mains.length) return null;
+  const n=g.members[0];
+  let best=null, bestN=-1;
+  mains.forEach(function(m){
+    if(m.nation) return;
+    let c=0;
+    m.members.forEach(function(x){
+      if((n.rel||[]).indexOf(x.id)>=0 || (x.rel||[]).indexOf(n.id)>=0) c++;
+    });
+    if(c>bestN){ bestN=c; best=m; }
+  });
+  return bestN>0 ? best : null;
+}
+function renderMinimap(){
+  const list=document.getElementById("minimapList");
+  if(!list) return;
+  list.textContent="";
+  if(!fogNodes.length){
+    const empty=document.createElement("div");
+    empty.className="mm-empty";
+    empty.textContent="无";
+    list.appendChild(empty);
+    return;
+  }
+  fogNodes.forEach(function(fn){
+    const chip=document.createElement("button");
+    chip.type="button";
+    chip.className="mm-chip";
+    const tag=document.createElement("span");
+    tag.className="mm-tag";
+    tag.textContent="雾";
+    const name=document.createElement("span");
+    name.className="mm-name";
+    name.textContent=shortId(fn.id);
+    chip.appendChild(tag);
+    chip.appendChild(name);
+    chip.onclick=function(ev){ ev.stopPropagation(); hideMapTip(); showCard(fn); };
+    chip.onmouseenter=function(ev){
+      showMapTip(shortId(fn.id), "未建夹", ev);
+    };
+    chip.onmousemove=function(ev){ moveMapTip(ev); };
+    chip.onmouseleave=function(){ hideMapTip(); };
+    list.appendChild(chip);
+  });
+}
+function showOverworld(){
+  view="world"; backBtn.style.display="none"; localGroup=null; clearFocus(); clearWorld();
+  nodes.forEach(function(n){ n.el=null; });
+  const FOG=68, SAT=132, CX=1400, CY=1000;
+  const mains=groups.filter(function(g){ return !g.isolate; });
+  const sats=groups.filter(function(g){ return g.isolate; });
+  sats.forEach(function(g){
+    g._home=homeForSat(g, mains);
+    g._place=g._home;
+    g.side=SAT;
+  });
+  fogNodes.forEach(function(fn){
+    fn._lands=groupsForFog(fn);
+    fn._home=homeLand(fn);
+  });
+  function satCount(g){
+    let n=0;
+    sats.forEach(function(s){ if(s._home===g) n++; });
+    return n;
+  }
+  function fogCount(g){
+    let n=0;
+    fogNodes.forEach(function(fn){ if(fn._home===g) n++; });
+    return n;
+  }
+  const nations=mains.filter(function(g){ return g.nation; });
+  const lands=mains.filter(function(g){ return !g.nation; });
+  lands.forEach(function(g){ g.side=landSide(g.n); });
+  const inland=lands.filter(function(g){ return satCount(g)===0; });
+  const coastal=lands.filter(function(g){ return satCount(g)>=1; });
+  const springs=[], seenSpr={};
+  function landOf(id){
+    for(let i=0;i<lands.length;i++){
+      const g=lands[i];
+      for(let j=0;j<g.members.length;j++) if(g.members[j].id===id) return g;
+    }
+    return null;
+  }
+  DATA.edges.forEach(function(e){
+    if(!isRelEdge(e)) return;
+    const a=landOf(e.a), b=landOf(e.b);
+    if(!a || !b || a===b) return;
+    const key=a.id<b.id ? a.id+"|"+b.id : b.id+"|"+a.id;
+    if(seenSpr[key]) return;
+    seenSpr[key]=true;
+    springs.push({a:a, b:b});
+  });
+  const CLUSTER=88, LANE=56, COL=22;
+  function nbrs(g){
+    const out=[];
+    springs.forEach(function(s){
+      if(s.a===g) out.push(s.b);
+      if(s.b===g) out.push(s.a);
+    });
+    return out;
+  }
+  function linksCoast(g){
+    const ns=nbrs(g);
+    for(let i=0;i<ns.length;i++) if(coastal.indexOf(ns[i])>=0) return true;
+    return false;
+  }
+  const linkedInland=inland.filter(linksCoast);
+  const loneInland=inland.filter(function(g){ return !linksCoast(g); });
+  function avgY(nodes){
+    if(!nodes.length) return 0;
+    let y=0;
+    nodes.forEach(function(g){ y+=g.y; });
+    return y/nodes.length;
+  }
+  function primaryCoast(g){
+    const rel=nbrs(g).filter(function(n){ return coastal.indexOf(n)>=0; });
+    if(!rel.length) return null;
+    if(rel.length===1) return rel[0];
+    let best=rel[0], bestN=satCount(rel[0])+fogCount(rel[0]);
+    rel.forEach(function(c){
+      const n=satCount(c)+fogCount(c);
+      if(n>bestN){ best=c; bestN=n; }
+    });
+    return best;
+  }
+  coastal.forEach(function(g,i){ g._ord=i; });
+  linkedInland.forEach(function(g,i){ g._ord=i; });
+  let pass;
+  for(pass=0;pass<8;pass++){
+    coastal.forEach(function(g){
+      const rel=nbrs(g).filter(function(n){ return linkedInland.indexOf(n)>=0; });
+      g._bar=rel.length?rel.reduce(function(s,n){ return s+n._ord; },0)/rel.length:g._ord;
+    });
+    coastal.sort(function(a,b){ return a._bar-b._bar; });
+    coastal.forEach(function(g,i){ g._ord=i; });
+    linkedInland.forEach(function(g){
+      const rel=nbrs(g).filter(function(n){ return coastal.indexOf(n)>=0; });
+      g._bar=rel.length?rel.reduce(function(s,n){ return s+n._ord; },0)/rel.length:g._ord;
+    });
+    linkedInland.sort(function(a,b){ return a._bar-b._bar; });
+    linkedInland.forEach(function(g,i){ g._ord=i; });
+  }
+  const loneW=loneInland.reduce(function(m,g){ return Math.max(m,g.side); },120);
+  const linkW=linkedInland.reduce(function(m,g){ return Math.max(m,g.side); },120);
+  const hubW=coastal.reduce(function(m,g){ return Math.max(m,g.side); },120);
+  const xLone=loneInland.length?loneW/2:0;
+  const xLink=linkedInland.length?(loneInland.length?loneW+CLUSTER:0)+linkW/2:0;
+  const xHub=(loneInland.length?loneW+CLUSTER:0)+(linkedInland.length?linkW+CLUSTER:0)+hubW/2;
+  function fanSats(list, leftX, midY){
+    if(!list.length) return {right:leftX, top:midY, bot:midY};
+    const n=list.length;
+    const cols=n<=2?1:n<=6?2:3;
+    const rows=Math.ceil(n/cols);
+    const cell=SAT, hgap=COL, vgap=22;
+    const gridH=rows*cell+(rows-1)*vgap;
+    const top=midY-gridH/2;
+    list.forEach(function(g,i){
+      const col=Math.floor(i/rows);
+      const row=i%rows;
+      g.x=leftX+col*(cell+hgap)+cell/2;
+      g.y=top+row*(cell+vgap)+cell/2;
+    });
+    return {right:leftX+cols*cell+(cols-1)*hgap, top:top, bot:top+gridH};
+  }
+  linkedInland.forEach(function(g){ g.x=null; });
+  let cursorY=0, maxRight=xHub+hubW/2;
+  coastal.forEach(function(hub){
+    const mySats=sats.filter(function(s){ return s._home===hub; });
+    const myLinks=linkedInland.filter(function(g){ return primaryCoast(g)===hub; });
+    const nLink=myLinks.length;
+    let linkH=0;
+    myLinks.forEach(function(g){ linkH+=g.side+18; });
+    if(nLink) linkH-=18;
+    const n=mySats.length;
+    const sc=n<=2?1:n<=6?2:3;
+    const sr=n?Math.ceil(n/sc):0;
+    const satH=sr?sr*SAT+(sr-1)*22:0;
+    const bodyH=Math.max(hub.side, satH, linkH);
+    const rackH=bodyH;
+    const midY=cursorY+bodyH/2;
+    hub.x=xHub; hub.y=midY;
+    if(nLink && linkedInland.length){
+      let ly=midY-linkH/2;
+      myLinks.forEach(function(g){
+        g.x=xLink; g.y=ly+g.side/2;
+        ly+=g.side+18;
+      });
+    }
+    const satBox=fanSats(mySats, hub.x+hub.side/2+LANE, midY);
+    maxRight=Math.max(maxRight, satBox.right);
+    cursorY+=rackH+CLUSTER;
+  });
+  const orphanSats=sats.filter(function(s){ return !s._home; });
+  if(orphanSats.length){
+    const box=fanSats(orphanSats, xHub+hubW/2+LANE, cursorY+SAT);
+    maxRight=Math.max(maxRight, box.right);
+    cursorY=box.bot+CLUSTER;
+  }
+  linkedInland.forEach(function(g){
+    if(g.x!=null) return;
+    const rel=nbrs(g).filter(function(n){ return coastal.indexOf(n)>=0; });
+    g.x=xLink; g.y=rel.length?avgY(rel):cursorY;
+  });
+  if(loneInland.length){
+    let y=0;
+    loneInland.forEach(function(g){
+      g.x=xLone; g.y=y+g.side/2;
+      y+=g.side+28;
+    });
+  }
+  nations.forEach(function(g){
+    g.side=landSide(g.n);
+    g.x=maxRight+CLUSTER+g.side/2;
+    g.y=Math.max(cursorY,1)/2;
+  });
+  function aabbOverlap(a,b,gap){
+    const sa=a.side||FOG, sb=b.side||FOG, g=gap||10;
+    return Math.abs(a.x-b.x)*2<(sa+sb+g) && Math.abs(a.y-b.y)*2<(sa+sb+g);
+  }
+  function separateY(list, gap){
+    let guard=0;
+    while(guard++<80){
+      let moved=false;
+      for(let i=0;i<list.length;i++){
+        for(let j=i+1;j<list.length;j++){
+          const a=list[i], b=list[j];
+          if(!aabbOverlap(a,b,gap)) continue;
+          const need=((a.side||FOG)+(b.side||FOG))/2+gap;
+          if(b.y>=a.y) b.y=a.y+need; else a.y=b.y+need;
+          moved=true;
+        }
+      }
+      if(!moved) break;
+    }
+  }
+  separateY(lands.concat(sats, nations), 16);
+  const allPos=lands.concat(sats, nations);
+  let bx1=1e9, by1=1e9, bx2=-1e9, by2=-1e9;
+  allPos.forEach(function(g){
+    const x=g.x, y=g.y, s=g.side||FOG;
+    bx1=Math.min(bx1, x-s/2); by1=Math.min(by1, y-s/2);
+    bx2=Math.max(bx2, x+s/2); by2=Math.max(by2, y+s/2);
+  });
+  const dx=CX-(bx1+bx2)/2, dy=CY-(by1+by2)/2;
+  allPos.forEach(function(g){ g.x+=dx; g.y+=dy; });
+  let minX=1e9, minY=1e9, maxX=-1e9, maxY=-1e9;
+  function bump(x,y,s){
+    minX=Math.min(minX, x-s/2); minY=Math.min(minY, y-s/2);
+    maxX=Math.max(maxX, x+s/2); maxY=Math.max(maxY, y+s/2);
+  }
+  function drawLand(g, small){
+    if(g.fogland) return;
+    const el=document.createElement("div");
+    el.className="land "+(cls[g.dom]||"s-done")+(small?" sat":"")+(g.nation?" nation":"");
+    const w=g.side, h=g.side;
+    el.style.left=(g.x-w/2)+"px"; el.style.top=(g.y-h/2)+"px";
+    el.style.width=w+"px"; el.style.height=h+"px";
+    el.style.borderRadius=small ? "10px" : (Math.round(w*0.22)+"px");
+    const fs=small ? 12 : (12+Math.min(5, Math.sqrt(g.n)));
+    el.innerHTML="<div class='ln'></div><div class='lm'></div><div class='land-badges'><span class='badge-cov'></span><span class='badge-hot'></span></div>";
+    el.querySelector(".ln").style.fontSize=fs+"px";
+    el.querySelector(".ln").textContent=landTitle(g);
+    el.querySelector(".lm").textContent=small
+      ? ("连 "+(g._home?landTitle(g._home):"大陆"))
+      : (g.nation ? (g.n+" 座岛 · 无大陆关系") : (g.n+" 格"+(g.t0?(" · "+fmtT(g.t0)):"" )));
+    el.querySelector(".badge-cov").textContent=groupCovLabel(g);
+    el.querySelector(".badge-hot").textContent=groupHotLabel(g);
+    const fogLbl=groupFogLabel(g);
+    if(fogLbl){
+      el.classList.add("has-fog");
+      const fogEl=document.createElement("span");
+      fogEl.className="badge-fog";
+      fogEl.textContent=fogLbl;
+      el.querySelector(".land-badges").appendChild(fogEl);
+    }
+    el.onclick=function(){ showLocal(g); };
+    el.onmouseenter=function(ev){
+      showGroupCard(g);
+      showMapTip(landTitle(g), landStatus(g), ev);
+      hiOwLines(function(ln){
+        const ids=(ln.getAttribute("data-ids")||"").split(",");
+        return ids.indexOf(g.id)>=0 || ln.getAttribute("data-a")===g.id || ln.getAttribute("data-b")===g.id || ln.getAttribute("data-land")===g.id;
+      });
+    };
+    el.onmousemove=function(ev){ moveMapTip(ev); };
+    el.onmouseleave=function(){ clearOwHi(); hideMapTip(); };
+    world.appendChild(el);
+    bump(g.x, g.y, g.side);
+  }
+  mains.forEach(function(g){ drawLand(g, false); });
+  sats.forEach(function(g){ drawLand(g, true); });
+  setWorldSize(Math.max(maxX+280, 800), Math.max(maxY+280, 800));
+  const landHit={};
+  DATA.edges.forEach(function(e){
+    if(!isRelEdge(e)) return;
+    let ga=null, gb=null;
+    for(let i=0;i<groups.length;i++){
+      const g=groups[i];
+      for(let j=0;j<g.members.length;j++){
+        if(g.members[j].id===e.a) ga=g;
+        if(g.members[j].id===e.b) gb=g;
+      }
+    }
+    if(!ga || !gb || ga===gb) return;
+    if(ga.isolate || gb.isolate) return;
+    if(ga.nation || gb.nation) return;
+    const key=ga.id<gb.id ? ga.id+"|"+gb.id : gb.id+"|"+ga.id;
+    if(!landHit[key]) landHit[key]={a:ga, b:gb, n:0};
+    landHit[key].n++;
+  });
+  function addLine(clsName, x1,y1,x2,y2, attrs){
+    const dx=x2-x1, dy=y2-y1, d=Math.hypot(dx,dy)||1;
+    const ux=dx/d, uy=dy/d;
+    const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
+    ln.setAttribute("class", clsName);
+    Object.keys(attrs||{}).forEach(function(k){
+      if(k.charAt(0)==="_") return;
+      ln.setAttribute(k, attrs[k]);
+    });
+    const r1=(attrs&&attrs._r1)||0, r2=(attrs&&attrs._r2)||0;
+    ln.setAttribute("x1", x1+ux*r1);
+    ln.setAttribute("y1", y1+uy*r1);
+    ln.setAttribute("x2", x2-ux*r2);
+    ln.setAttribute("y2", y2-uy*r2);
+    roads.appendChild(ln);
+    return ln;
+  }
+  function addRawLine(clsName, x1,y1,x2,y2, ids){
+    const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
+    ln.setAttribute("class", clsName);
+    ln.setAttribute("x1", x1);
+    ln.setAttribute("y1", y1);
+    ln.setAttribute("x2", x2);
+    ln.setAttribute("y2", y2);
+    ln.setAttribute("data-ids", ids.join(","));
+    roads.appendChild(ln);
+    ln.addEventListener("mouseenter", function(){
+      hiOwLines(function(x){
+        const s=(x.getAttribute("data-ids")||"").split(",");
+        for(let i=0;i<ids.length;i++) if(s.indexOf(ids[i])>=0) return true;
+        return false;
+      });
+    });
+    ln.addEventListener("mouseleave", function(){ clearOwHi(); });
+    return ln;
+  }
+  function snap(v,q){ return Math.round(v/q)*q; }
+  function mergeRuns(runs){
+    runs.sort(function(a,b){ return a.s-b.s; });
+    const out=[];
+    runs.forEach(function(r){
+      const last=out[out.length-1];
+      if(last && r.s<=last.e+8){
+        last.e=Math.max(last.e, r.e);
+        r.ids.forEach(function(id){ if(last.ids.indexOf(id)<0) last.ids.push(id); });
+      } else {
+        out.push({s:r.s, e:r.e, ids:r.ids.slice()});
+      }
+    });
+    return out;
+  }
+  function drawAllBuses(){
+    const GAP=6;
+    const stubs=[];
+    const spans=[];
+    function addPair(a,b){
+      if(!a||!b) return;
+      const left=a.x<=b.x?a:b, right=a.x<=b.x?b:a;
+      const ls=left.side||FOG, rs=right.side||FOG;
+      const lR=left.x+ls/2, rL=right.x-rs/2;
+      const ids=[a.id, b.id];
+      if(rL-lR<10){
+        const top=a.y<=b.y?a:b, bot=a.y<=b.y?b:a;
+        const y1=top.y+(top.side||FOG)/2, y2=bot.y-(bot.side||FOG)/2;
+        if(y2-y1>=8){
+          const vx=snap((a.x+b.x)/2, 8);
+          addRawLine("landrel", vx, y1, vx, y2, ids);
+        }
+        return;
+      }
+      const busX=snap((lR+rL)/2, 8);
+      const yL=snap(left.y,1), yR=snap(right.y,1);
+      stubs.push({busX:busX, y:yL, from:lR, side:"L", ids:ids});
+      stubs.push({busX:busX, y:yR, from:rL, side:"R", ids:ids});
+      spans.push({busX:busX, y1:Math.min(yL,yR), y2:Math.max(yL,yR), ids:ids});
+    }
+    Object.keys(landHit).forEach(function(k){
+      const p=landHit[k];
+      addPair(p.a, p.b);
+    });
+    sats.forEach(function(g){ if(g._home) addPair(g, g._home); });
+    const xs=[];
+    stubs.forEach(function(s){ if(xs.indexOf(s.busX)<0) xs.push(s.busX); });
+    xs.sort(function(a,b){ return a-b; });
+    const remap={};
+    for(let i=0;i<xs.length;i++){
+      remap[xs[i]]=(i && xs[i]-xs[i-1]<24) ? remap[xs[i-1]] : xs[i];
+    }
+    stubs.forEach(function(s){
+      s.busX=remap[s.busX];
+      if(s.side==="L"){ s.x0=s.from; s.x1=s.busX-GAP; }
+      else { s.x0=s.busX+GAP; s.x1=s.from; }
+    });
+    spans.forEach(function(s){ s.busX=remap[s.busX]; });
+    const H={};
+    stubs.forEach(function(s){
+      const k=s.busX+"|"+s.y+"|"+s.side;
+      if(!H[k]) H[k]={x0:s.x0, x1:s.x1, y:s.y, ids:s.ids.slice()};
+      else {
+        if(s.side==="L") H[k].x0=Math.min(H[k].x0, s.x0);
+        else H[k].x1=Math.max(H[k].x1, s.x1);
+        s.ids.forEach(function(id){ if(H[k].ids.indexOf(id)<0) H[k].ids.push(id); });
+      }
+    });
+    Object.keys(H).forEach(function(k){
+      const h=H[k];
+      const x1=Math.min(h.x0,h.x1), x2=Math.max(h.x0,h.x1);
+      if(x2-x1<3) return;
+      addRawLine("landrel", x1, h.y, x2, h.y, h.ids);
+    });
+    const byBus={};
+    spans.forEach(function(s){
+      if(!byBus[s.busX]) byBus[s.busX]=[];
+      byBus[s.busX].push(s);
+    });
+    Object.keys(byBus).forEach(function(bx){
+      const list=byBus[bx];
+      const ys=[];
+      list.forEach(function(s){
+        if(ys.indexOf(s.y1)<0) ys.push(s.y1);
+        if(ys.indexOf(s.y2)<0) ys.push(s.y2);
+      });
+      ys.sort(function(a,b){ return a-b; });
+      for(let i=0;i<ys.length-1;i++){
+        const ya=ys[i], yb=ys[i+1];
+        if(yb-ya<2) continue;
+        const ids=[];
+        list.forEach(function(s){
+          if(s.y1<=ya && s.y2>=yb){
+            s.ids.forEach(function(id){ if(ids.indexOf(id)<0) ids.push(id); });
+          }
+        });
+        if(!ids.length) continue;
+        addRawLine("landrel", +bx, ya, +bx, yb, ids);
+      }
+    });
+  }
+  drawAllBuses();
+  renderMinimap();
+  hint.textContent="大陆 "+mains.length+" · 落单 "+sats.length+" · 未建夹 "+fogNodes.length+" · "+DATA.generated;
+  centerOn((minX+maxX)/2, (minY+maxY)/2, 0.58);
+  card.innerHTML="<p class='meta'>每一块有岛的大陆是枢纽。雾在小地图，大地图块上用雾徽章。沟里虚线是总线：横平竖直，共线的只画一遍。</p>";
+}
+function enforceMinGap(list, min){
+  for(let pass=0; pass<80; pass++){
+    let hit=false;
+    for(let i=0;i<list.length;i++){
+      for(let j=i+1;j<list.length;j++){
+        const a=list[i], b=list[j];
+        let dx=a.x-b.x, dy=a.y-b.y, d=Math.hypot(dx,dy);
+        if(d<1){ dx=1; dy=0; d=1; }
+        if(d>=min) continue;
+        hit=true;
+        const push=(min-d)/2;
+        const ux=dx/d, uy=dy/d;
+        a.x+=ux*push; a.y+=uy*push;
+        b.x-=ux*push; b.y-=uy*push;
+      }
+    }
+    if(!hit) break;
+  }
+}
+function showLocal(g){
+  view="local"; backBtn.style.display="inline-block"; localGroup=g; clearFocus(); clearWorld();
+  nodes.forEach(function(n){ n.el=null; });
+  const extra=fogNodes.filter(function(fn){ return groupsForFog(fn).indexOf(g)>=0; });
+  localSorted=g.members.concat(extra).slice().sort(function(a,b){
+    const ta=a.t||0, tb=b.t||0;
+    if(ta!==tb) return ta-tb;
+    return a.id.localeCompare(b.id,"zh");
+  });
+  const idset={}; localSorted.forEach(function(n,i){ idset[n.id]=true; n.ord=i+1; n.deg=0; });
+  const relPairs=[];
+  DATA.edges.forEach(function(e){
+    if(!idset[e.a] || !idset[e.b]) return;
+    relPairs.push(e);
+    byId[e.a].deg=(byId[e.a].deg||0)+1;
+    byId[e.b].deg=(byId[e.b].deg||0)+1;
+  });
+  const nearPairs=[];
+  (DATA.near||[]).forEach(function(e){
+    if(!idset[e.a] || !idset[e.b]) return;
+    nearPairs.push(e);
+  });
+  const GAP=72, MIN=TILE+GAP, REST=MIN+48;
+  const maxDeg=Math.max.apply(null, localSorted.map(function(n){ return n.deg||0; }))||1;
+  const rSpan=80+Math.sqrt(localSorted.length)*70;
+  const cx=520, cy=400;
+  const byHeat=localSorted.slice().sort(function(a,b){
+    const d=(b.deg||0)-(a.deg||0);
+    if(d) return d;
+    return (a.ord||0)-(b.ord||0);
+  });
+  byHeat.forEach(function(n,i){
+    const heat=(n.deg||0)/maxDeg;
+    const ang=i*2.399963;
+    const r=28+(1-heat)*rSpan+Math.sqrt(i)*14;
+    n.x=cx+Math.cos(ang)*r;
+    n.y=cy+Math.sin(ang)*r*0.92;
+  });
+  for(let k=0;k<80;k++){
+    relPairs.forEach(function(e){
+      const a=byId[e.a], b=byId[e.b];
+      const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||1;
+      const f=(d-REST)/d*0.05;
+      a.x+=dx*f; a.y+=dy*f; b.x-=dx*f; b.y-=dy*f;
+    });
+    localSorted.forEach(function(n){
+      const heat=(n.deg||0)/maxDeg;
+      const want=36+(1-heat)*rSpan;
+      const dx=n.x-cx, dy=n.y-cy, d=Math.hypot(dx,dy)||1;
+      const f=(want-d)/d*0.08;
+      n.x+=dx*f; n.y+=dy*f;
+    });
+    enforceMinGap(localSorted, MIN);
+  }
+  enforceMinGap(localSorted, MIN);
+  let minX=1e9, minY=1e9, maxX=0, maxY=0;
+  localSorted.forEach(function(n){
+    minX=Math.min(minX,n.x); minY=Math.min(minY,n.y);
+    maxX=Math.max(maxX,n.x); maxY=Math.max(maxY,n.y);
+  });
+  localSorted.forEach(function(n){ n.x+=80-minX; n.y+=80-minY; });
+  maxX+=80-minX; maxY+=80-minY;
+  setWorldSize(maxX+220, maxY+220);
+  ensureRoadMarkers();
+  Object.keys(linesByNode).forEach(function(k){ delete linesByNode[k]; });
+  relPairs.forEach(function(e){
+    const a=byId[e.a], b=byId[e.b];
+    const x1=a.x+TILE/2, y1=a.y+TILE/2, x2=b.x+TILE/2, y2=b.y+TILE/2;
+    const gEl=document.createElementNS("http://www.w3.org/2000/svg","g");
+    gEl.setAttribute("class", "relg");
+    gEl.setAttribute("data-a", e.a);
+    gEl.setAttribute("data-b", e.b);
+    const tip=edgePartsTip(e);
+    const hit=document.createElementNS("http://www.w3.org/2000/svg","line");
+    hit.setAttribute("class", "hit");
+    hit.setAttribute("x1", x1); hit.setAttribute("y1", y1);
+    hit.setAttribute("x2", x2); hit.setAttribute("y2", y2);
+    hit.setAttribute("title", tip);
+    const line=document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+    line.setAttribute("class", "rel");
+    line.setAttribute("data-a", e.a);
+    line.setAttribute("data-b", e.b);
+    line.setAttribute("title", tip);
+    gEl.appendChild(hit);
+    gEl.appendChild(line);
+    roads.appendChild(gEl);
+    if(!linesByNode[e.a]) linesByNode[e.a]=[];
+    if(!linesByNode[e.b]) linesByNode[e.b]=[];
+    linesByNode[e.a].push(line); linesByNode[e.b].push(line);
+  });
+  nearPairs.forEach(function(e){
+    const a=byId[e.a], b=byId[e.b];
+    if(!a || !b) return;
+    const x1=a.x+TILE/2, y1=a.y+TILE/2, x2=b.x+TILE/2, y2=b.y+TILE/2;
+    const gEl=document.createElementNS("http://www.w3.org/2000/svg","g");
+    gEl.setAttribute("class", "nearg");
+    gEl.setAttribute("data-a", e.a);
+    gEl.setAttribute("data-b", e.b);
+    const tip=nearHoverTip(e);
+    const hit=document.createElementNS("http://www.w3.org/2000/svg","line");
+    hit.setAttribute("class", "hit");
+    hit.setAttribute("x1", x1); hit.setAttribute("y1", y1);
+    hit.setAttribute("x2", x2); hit.setAttribute("y2", y2);
+    hit.setAttribute("title", tip);
+    const line=document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+    line.setAttribute("class", "nearln");
+    line.setAttribute("title", tip);
+    gEl.appendChild(hit);
+    gEl.appendChild(line);
+    roads.appendChild(gEl);
+  });
+  for(let i=0;i<localSorted.length-1;i++){
+    trendLayer.appendChild(timeSeg(localSorted[i], localSorted[i+1], "trail", "trailArr"));
+  }
+  trendEl=document.createElementNS("http://www.w3.org/2000/svg","g");
+  trendEl.setAttribute("class","trendg");
+  trendLayer.appendChild(trendEl);
+  localSorted.forEach(makeTile);
+  hint.textContent=landTitle(g)+" · "+g.n+" 格 · 实线箭头=走势 · 暗金虚线=关系路";
+  showGroupCard(g);
+  centerOn((minX+maxX+TILE)/2, (minY+maxY+TILE)/2, 1);
+}
+backBtn.onclick=function(){ showOverworld(); };
+(function initMinimapToggle(){
+  const mm=document.getElementById("minimap");
+  const mmClose=document.getElementById("mmClose");
+  const mmOpen=document.getElementById("mmOpen");
+  if(!mm || !mmClose || !mmOpen) return;
+  mmClose.onclick=function(ev){
+    ev.stopPropagation();
+    hideMapTip();
+    mm.classList.add("mm-hidden");
+    mmOpen.classList.add("show");
+  };
+  mmOpen.onclick=function(ev){
+    ev.stopPropagation();
+    mm.classList.remove("mm-hidden");
+    mmOpen.classList.remove("show");
+  };
+})();
+document.getElementById("closeReader").onclick=function(){ reader.classList.remove("show"); };
+document.getElementById("q").addEventListener("input", function(e){
+  const s=e.target.value.trim();
+  nodes.forEach(function(n){ if(n.el) n.el.classList.remove("flash"); });
+  if(!s) return;
+  const hit=nodes.find(function(n){ return n.id.indexOf(s)>=0 || (n.stateLabel&&n.stateLabel.indexOf(s)>=0); });
+  if(!hit) return;
+  const g=groups.find(function(gr){ return gr.members.some(function(m){ return m.id===hit.id; }); });
+  if(g && view==="world") showLocal(g);
+  else if(g && view==="local" && !hit.el) showLocal(g);
+  if(hit.el){
+    hit.el.classList.add("flash");
+    showCard(hit);
+    setFocus(hit.id);
+    tx = wrap.clientWidth/2 - (hit.x+TILE/2)*scale;
+    ty = wrap.clientHeight/2 - (hit.y+TILE/2)*scale;
+    apply();
+  }
+});
+showOverworld();
+</script>
+</body>
+</html>

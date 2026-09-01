@@ -30,9 +30,9 @@ codegraph init
 uv tool install code-review-graph   # 或: pip install code-review-graph
 code-review-graph install --platform cursor --no-instructions --no-hooks --no-skills
 # 子模块仓须分别 build（CRG 按 git ls-files，父仓看不到子模块内文件）
-code-review-graph register <父仓> --alias chemical
-code-review-graph register <LabSDK子模块根> --alias labsdk
-code-review-graph build --repo <LabSDK子模块根>
+code-review-graph register <父仓> --alias parent
+code-review-graph register <业务子模块根> --alias module
+code-review-graph build --repo <业务子模块根>
 ```
 
 ## 工具探测与优先级（本流水线）
@@ -89,7 +89,7 @@ CodeGraph 是**本地索引**，**没有**付费次数额度。
 
 | 车道 | 处理方式 |
 | --- | --- |
-| **Full** | **hard blocker**：审核岗未检测到 **CRG 且未检测到 CodeGraph** 则无法完成影响面分析；给出 LabSDK `code-review-graph build` / `codegraph init` / 重载 MCP；不得伪称「未发现 blocker / 可交给文档」 |
+| **Full** | **hard blocker**：审核岗未检测到 **CRG 且未检测到 CodeGraph** 则无法完成影响面分析；给出业务仓 `code-review-graph build` / `codegraph init` / 重载 MCP；不得伪称「未发现 blocker / 可交给文档」 |
 | **Standard** | **soft risk**：可继续；须声明「未做图谱影响面分析」并附修复步骤 |
 | **Express** | 允许 diff + README + Grep/Read；开头声明未做图谱分析 |
 | 用户仅咨询 | 不必探测工具 |
