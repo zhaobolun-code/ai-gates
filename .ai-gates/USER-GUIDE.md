@@ -60,7 +60,7 @@
 | 在 Unity 里测 | 点播放 → 按步骤操作 → 看控制台 → 停播放 → 回复通过/不通过 |
 | 跑自动化测试（TDD 单测） | 仓库根有 `Tests/EditMode/` 时：项目根 PowerShell 跑 `powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/run-dotnet-editmode-tests.ps1`（trx 判定：total≥70 且 failed=0 方绿；秒级、不占 Unity） |
 | 它说本步不用开编辑器 | 看它给的核对结论，再回通过/不通过 |
-| 打开或更新迷雾地图 | 想看这些工作怎么连在一起、哪块还没做时用。助手问过、你同意之后再生成，然后双击 `.ai-gates/verify/fog-map.html`。直接打开文件，不要另开网页服务，也不要改这张网页；别的目录里的旧图不要用 |
+| 打开或更新迷雾地图 | 文档状态变了（新建、签收、停写等）之后，助手会问「是否创建迷雾地图」或「是否更新迷雾地图」。你同意后再生成。然后双击 `.ai-gates/verify/fog-map.html`（或主题夹里那份）。直接打开文件，不要另开网页服务，也不要改这张网页；别的目录里的旧图不要用 |
 
 ## 三步走完
 

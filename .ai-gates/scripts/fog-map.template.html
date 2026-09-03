@@ -20,14 +20,22 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1
 svg.roads{position:absolute;left:0;top:0;z-index:1;pointer-events:none;overflow:visible}
 svg.trend-layer{z-index:1;pointer-events:none}
 svg.roads g.relg{pointer-events:none}
-svg.roads g.relg line.hit{pointer-events:stroke;stroke:rgba(0,0,0,0);stroke-width:16;fill:none}
+svg.roads g.relg line.hit,svg.roads g.relg polyline.hit{pointer-events:stroke;stroke:rgba(0,0,0,0);stroke-width:16;fill:none}
 svg.roads g.relg line.rel{pointer-events:none;opacity:.5;stroke:#6a5a32;stroke-width:1.25;stroke-dasharray:5 6}
 svg.roads g.relg.hi line.rel,svg.roads line.rel.hi{opacity:.88;stroke:#8a7340;stroke-width:1.7;stroke-dasharray:5 6}
 svg.roads g.relg:hover line.rel{stroke:#9a8450;stroke-width:1.7;opacity:.8}
 svg.roads .fogrel{stroke:#d4c48a;stroke-width:2;stroke-dasharray:5 6;opacity:.72;pointer-events:none;fill:none}
-svg.roads .landrel{stroke:#d4c48a;stroke-width:2.1;stroke-dasharray:6 7;opacity:.72;pointer-events:stroke;fill:none}
-#world.ow-hi svg.roads .landrel,#world.ow-hi svg.roads .fogrel{opacity:.12}
+svg.roads .landrel{stroke:#d4c48a;stroke-width:2.1;stroke-dasharray:6 7;opacity:.72;pointer-events:none;fill:none}
+svg.roads .zone{fill:none;stroke-width:2.2;stroke-dasharray:12 10;opacity:.42;pointer-events:none}
+svg.roads .zone-red{stroke:#ff6b5a}
+svg.roads .zone-yellow{stroke:#f0c040}
+svg.roads .zone-green{stroke:#3dcc7a}
+svg.roads .zone-blue{stroke:#4ec4e8}
+svg.roads .river{stroke-width:2.6;stroke-dasharray:12 10;opacity:.38;fill:none;pointer-events:none}
+#world.ow-hi svg.roads .landrel,#world.ow-hi svg.roads .fogrel{opacity:0}
 #world.ow-hi svg.roads .landrel.hi,#world.ow-hi svg.roads .fogrel.hi{opacity:1;stroke:#e8d4a0;stroke-width:3.2}
+#world.ow-hi .land{opacity:.22}
+#world.ow-hi .land.ow-on{opacity:1;z-index:14}
 svg.roads line.trail{fill:none;stroke:#b4c89a;stroke-width:2.6;opacity:.5;pointer-events:none}
 svg.roads g.trendg line.trend{fill:none;stroke:#e4f2cc;stroke-width:4;opacity:0;pointer-events:none}
 #world.focus-on .tile{opacity:.2;filter:saturate(.25);pointer-events:auto}
@@ -101,7 +109,7 @@ svg.roads g.nearg line.hit{pointer-events:stroke;stroke:rgba(0,0,0,0);stroke-wid
 #reader{display:none;position:fixed;left:12px;right:292px;top:60px;bottom:12px;background:#0e1412;border:1px solid #3a4a40;padding:16px;overflow:auto;z-index:8;white-space:pre-wrap;font-family:Consolas,monospace;font-size:12px}
 #reader.show{display:block}
 #reader .close{position:sticky;top:0;float:right;background:#314038;color:var(--ink);border:0;padding:4px 8px;cursor:pointer}
-#tip{display:none;position:fixed;z-index:9;max-width:260px;padding:8px 10px;background:#0e1412;border:1px solid #c4a35a;border-radius:8px;color:var(--ink);font-size:12px;line-height:1.35;pointer-events:none;box-shadow:0 6px 16px #000a;white-space:normal}
+#tip{display:none;position:fixed;z-index:40;max-width:260px;padding:8px 10px;background:#0e1412;border:1px solid #c4a35a;border-radius:8px;color:var(--ink);font-size:12px;line-height:1.35;pointer-events:none;box-shadow:0 6px 16px #000a;white-space:normal}
 #tip.show{display:block}
 #tip b{display:block;margin-bottom:4px;color:#f2e6a6}
 </style>
@@ -114,7 +122,7 @@ svg.roads g.nearg line.hit{pointer-events:stroke;stroke:rgba(0,0,0,0);stroke-wid
   <span id="hint"></span>
 </div>
 <aside id="side">
-  <p class="meta">按网络拓扑分簇：有岛的大陆是枢纽，岛在右。雾在小地图，大地图块上用雾徽章。沟里的虚线合成总线，横平竖直各画一遍，不叠线。</p>
+  <p class="meta">从左到右：大陆、岛屿、群岛。悬停看关联。雾在小地图。</p>
   <div id="legend">
     <div class="lg"><span class="badge-cov" id="legendCov">覆盖度:无</span></div>
     <div class="lg"><span class="badge-hot" id="legendHot">热度:无</span></div>
@@ -133,7 +141,7 @@ svg.roads g.nearg line.hit{pointer-events:stroke;stroke:rgba(0,0,0,0);stroke-wid
   </div>
   <div id="card">-</div>
 </aside>
-<div id="worldWrap"><div id="world"><svg class="roads" id="roads"></svg><svg class="roads trend-layer" id="trendLayer"></svg></div><div id="minimap"><div class="mm-h"><span>未建夹</span><button type="button" class="mm-x" id="mmClose" title="关闭">×</button></div><div class="mm-list" id="minimapList"></div></div><button type="button" id="mmOpen">未建夹</button></div>
+<div id="worldWrap"><div id="world"><svg class="roads" id="roads"></svg><svg class="roads trend-layer" id="trendLayer"></svg></div><div id="minimap" class="mm-hidden"><div class="mm-h"><span>未建夹</span><button type="button" class="mm-x" id="mmClose" title="关闭">×</button></div><div class="mm-list" id="minimapList"></div></div><button type="button" id="mmOpen" class="show">未建夹</button></div>
 <div id="reader"><button class="close" id="closeReader">close</button><div id="readerBody"></div></div>
 <div id="tip"></div>
 <script>
@@ -292,8 +300,8 @@ wrap.addEventListener("click", function(e){
 wrap.addEventListener("wheel", function(e){
   if(e.target.closest("#minimap")||e.target.closest("#mmOpen")) return;
   e.preventDefault();
-  const k=e.deltaY>0?0.92:1.08;
-  const next=Math.min(2.8, Math.max(0.22, scale*k));
+  const k=e.deltaY>0?0.90:1.12;
+  const next=Math.min(6, Math.max(0.22, scale*k));
   const r=wrap.getBoundingClientRect();
   const mx=e.clientX-r.left, my=e.clientY-r.top;
   const wx=(mx-tx)/scale, wy=(my-ty)/scale;
@@ -545,7 +553,6 @@ const linesByNode={};
 function relLinkedIds(id){
   const linked={}; linked[id]=true;
   DATA.edges.forEach(function(e){
-    if(!isRelEdge(e)) return;
     if(e.a===id) linked[e.b]=true;
     if(e.b===id) linked[e.a]=true;
   });
@@ -644,14 +651,68 @@ function setFocus(id){
 function landSide(n){
   return 112 + Math.sqrt(Math.max(n,1))*52;
 }
+function dropTempLines(){
+  roads.querySelectorAll("line.bridge, line.stub").forEach(function(ln){
+    const g=ln.parentNode;
+    if(g && g.getAttribute && g.getAttribute("class")==="relg") g.remove();
+    else ln.remove();
+  });
+}
 function clearOwHi(){
   world.classList.remove("ow-hi");
   roads.querySelectorAll(".landrel, .fogrel").forEach(function(ln){ ln.classList.remove("hi"); });
+  dropTempLines();
+  world.querySelectorAll(".land.ow-on").forEach(function(n){ n.classList.remove("ow-on"); });
+}
+function addHiSeg(clsName, x1,y1,x2,y2, bus){
+  const gEl=document.createElementNS("http://www.w3.org/2000/svg","g");
+  gEl.setAttribute("class", "relg");
+  const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
+  ln.setAttribute("class", clsName);
+  ln.setAttribute("x1", x1); ln.setAttribute("y1", y1);
+  ln.setAttribute("x2", x2); ln.setAttribute("y2", y2);
+  if(bus!=null) ln.setAttribute("data-bus", String(bus));
+  gEl.appendChild(ln);
+  roads.appendChild(gEl);
+  return ln;
 }
 function hiOwLines(pred){
   world.classList.add("ow-hi");
+  dropTempLines();
+  const onIds={};
+  world.querySelectorAll(".land.ow-on").forEach(function(el){
+    const id=el.getAttribute("data-gid");
+    if(id) onIds[id]=true;
+  });
   roads.querySelectorAll(".landrel, .fogrel").forEach(function(ln){
-    ln.classList.toggle("hi", !!pred(ln));
+    if(ln.classList.contains("bridge") || ln.classList.contains("stub")){
+      ln.classList.remove("hi");
+      return;
+    }
+    const ids=(ln.getAttribute("data-ids")||"").split(",").filter(Boolean);
+    const both=ids.length===2 && !!onIds[ids[0]] && !!onIds[ids[1]];
+    if(ln.classList.contains("spine")){
+      ln.classList.toggle("hi", both);
+      return;
+    }
+    const y1=+ln.getAttribute("y1"), y2=+ln.getAttribute("y2");
+    const isH=Math.abs(y1-y2)<0.5;
+    ln.classList.toggle("hi", !!(isH && (both || (ids.length===2 && !!pred(ln)))));
+  });
+  const groups={};
+  roads.querySelectorAll(".landrel.hi, .fogrel.hi").forEach(function(ln){
+    if(ln.classList.contains("spine")) return;
+    const bus=ln.getAttribute("data-bus");
+    if(bus==null || bus==="") return;
+    const y=(+ln.getAttribute("y1")+ +ln.getAttribute("y2"))/2;
+    if(!groups[bus]) groups[bus]=[];
+    groups[bus].push(y);
+  });
+  Object.keys(groups).forEach(function(bus){
+    const ys=groups[bus];
+    const y0=Math.min.apply(null, ys), y1=Math.max.apply(null, ys);
+    if(y1-y0<1) return;
+    addHiSeg("landrel hi bridge", +bus, y0, +bus, y1, bus);
   });
 }
 function homeLand(fn){
@@ -717,9 +778,9 @@ function renderMinimap(){
   });
 }
 function showOverworld(){
-  view="world"; backBtn.style.display="none"; localGroup=null; clearFocus(); clearWorld();
+  view="world"; backBtn.style.display="none"; localGroup=null; clearFocus(); clearOwHi(); world.classList.remove("focus-on"); clearWorld();
   nodes.forEach(function(n){ n.el=null; });
-  const FOG=68, SAT=132, CX=1400, CY=1000;
+  const FOG=68, SAT=148, CLUSTER=88, LANE=28, COL=22;
   const mains=groups.filter(function(g){ return !g.isolate; });
   const sats=groups.filter(function(g){ return g.isolate; });
   sats.forEach(function(g){
@@ -730,6 +791,7 @@ function showOverworld(){
   fogNodes.forEach(function(fn){
     fn._lands=groupsForFog(fn);
     fn._home=homeLand(fn);
+    fn.side=FOG;
   });
   function satCount(g){
     let n=0;
@@ -763,7 +825,6 @@ function showOverworld(){
     seenSpr[key]=true;
     springs.push({a:a, b:b});
   });
-  const CLUSTER=88, LANE=56, COL=22;
   function nbrs(g){
     const out=[];
     springs.forEach(function(s){
@@ -822,7 +883,7 @@ function showOverworld(){
   function fanSats(list, leftX, midY){
     if(!list.length) return {right:leftX, top:midY, bot:midY};
     const n=list.length;
-    const cols=n<=2?1:n<=6?2:3;
+    const cols=1;
     const rows=Math.ceil(n/cols);
     const cell=SAT, hgap=COL, vgap=22;
     const gridH=rows*cell+(rows-1)*vgap;
@@ -845,12 +906,11 @@ function showOverworld(){
     myLinks.forEach(function(g){ linkH+=g.side+18; });
     if(nLink) linkH-=18;
     const n=mySats.length;
-    const sc=n<=2?1:n<=6?2:3;
-    const sr=n?Math.ceil(n/sc):0;
+    const sc=1;
+    const sr=n;
     const satH=sr?sr*SAT+(sr-1)*22:0;
-    const bodyH=Math.max(hub.side, satH, linkH);
-    const rackH=bodyH;
-    const midY=cursorY+bodyH/2;
+    const rackH=Math.max(hub.side, satH, linkH);
+    const midY=cursorY+rackH/2;
     hub.x=xHub; hub.y=midY;
     if(nLink && linkedInland.length){
       let ly=midY-linkH/2;
@@ -907,15 +967,28 @@ function showOverworld(){
     }
   }
   separateY(lands.concat(sats, nations), 16);
+  const drawLinks=[];
+  springs.forEach(function(s){ drawLinks.push({a:s.a, b:s.b, w:1}); });
+  sats.forEach(function(s){ if(s._home) drawLinks.push({a:s._home, b:s, w:1.2}); });
+  for(let i=0;i<sats.length;i++){
+    for(let j=i+1;j<sats.length;j++){
+      const a=sats[i], b=sats[j];
+      if(!satPeer(a,b) || a._home!==b._home) continue;
+      drawLinks.push({a:a, b:b, w:1});
+    }
+  }
   const allPos=lands.concat(sats, nations);
-  let bx1=1e9, by1=1e9, bx2=-1e9, by2=-1e9;
+  let x1=1e9, y1=1e9, x2=-1e9, y2=-1e9;
   allPos.forEach(function(g){
-    const x=g.x, y=g.y, s=g.side||FOG;
-    bx1=Math.min(bx1, x-s/2); by1=Math.min(by1, y-s/2);
-    bx2=Math.max(bx2, x+s/2); by2=Math.max(by2, y+s/2);
+    const h=(g.side||FOG)/2;
+    x1=Math.min(x1, g.x-h); y1=Math.min(y1, g.y-h);
+    x2=Math.max(x2, g.x+h); y2=Math.max(y2, g.y+h);
   });
-  const dx=CX-(bx1+bx2)/2, dy=CY-(by1+by2)/2;
-  allPos.forEach(function(g){ g.x+=dx; g.y+=dy; });
+  if(!allPos.length){ x1=0; y1=0; x2=800; y2=600; }
+  const MARGIN=140;
+  const shiftX=MARGIN-x1, shiftY=MARGIN-y1;
+  allPos.forEach(function(g){ g.x+=shiftX; g.y+=shiftY; });
+  x1+=shiftX; y1+=shiftY; x2+=shiftX; y2+=shiftY;
   let minX=1e9, minY=1e9, maxX=-1e9, maxY=-1e9;
   function bump(x,y,s){
     minX=Math.min(minX, x-s/2); minY=Math.min(minY, y-s/2);
@@ -947,74 +1020,51 @@ function showOverworld(){
       el.querySelector(".land-badges").appendChild(fogEl);
     }
     el.onclick=function(){ showLocal(g); };
+    el.setAttribute("data-gid", g.id);
+    g.el=el;
     el.onmouseenter=function(ev){
       showGroupCard(g);
-      showMapTip(landTitle(g), landStatus(g), ev);
+      world.querySelectorAll(".land.ow-on").forEach(function(n){ n.classList.remove("ow-on"); });
+      el.classList.add("ow-on");
+      drawLinks.forEach(function(L){
+        let other=null;
+        if(L.a===g) other=L.b;
+        else if(L.b===g) other=L.a;
+        if(other && other.el) other.el.classList.add("ow-on");
+      });
       hiOwLines(function(ln){
         const ids=(ln.getAttribute("data-ids")||"").split(",");
         return ids.indexOf(g.id)>=0 || ln.getAttribute("data-a")===g.id || ln.getAttribute("data-b")===g.id || ln.getAttribute("data-land")===g.id;
       });
     };
-    el.onmousemove=function(ev){ moveMapTip(ev); };
-    el.onmouseleave=function(){ clearOwHi(); hideMapTip(); };
+    el.onmouseleave=function(){ clearOwHi(); };
     world.appendChild(el);
     bump(g.x, g.y, g.side);
   }
   mains.forEach(function(g){ drawLand(g, false); });
   sats.forEach(function(g){ drawLand(g, true); });
-  setWorldSize(Math.max(maxX+280, 800), Math.max(maxY+280, 800));
-  const landHit={};
-  DATA.edges.forEach(function(e){
-    if(!isRelEdge(e)) return;
-    let ga=null, gb=null;
-    for(let i=0;i<groups.length;i++){
-      const g=groups[i];
-      for(let j=0;j<g.members.length;j++){
-        if(g.members[j].id===e.a) ga=g;
-        if(g.members[j].id===e.b) gb=g;
-      }
-    }
-    if(!ga || !gb || ga===gb) return;
-    if(ga.isolate || gb.isolate) return;
-    if(ga.nation || gb.nation) return;
-    const key=ga.id<gb.id ? ga.id+"|"+gb.id : gb.id+"|"+ga.id;
-    if(!landHit[key]) landHit[key]={a:ga, b:gb, n:0};
-    landHit[key].n++;
-  });
-  function addLine(clsName, x1,y1,x2,y2, attrs){
-    const dx=x2-x1, dy=y2-y1, d=Math.hypot(dx,dy)||1;
-    const ux=dx/d, uy=dy/d;
-    const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
-    ln.setAttribute("class", clsName);
-    Object.keys(attrs||{}).forEach(function(k){
-      if(k.charAt(0)==="_") return;
-      ln.setAttribute(k, attrs[k]);
-    });
-    const r1=(attrs&&attrs._r1)||0, r2=(attrs&&attrs._r2)||0;
-    ln.setAttribute("x1", x1+ux*r1);
-    ln.setAttribute("y1", y1+uy*r1);
-    ln.setAttribute("x2", x2-ux*r2);
-    ln.setAttribute("y2", y2-uy*r2);
-    roads.appendChild(ln);
-    return ln;
-  }
-  function addRawLine(clsName, x1,y1,x2,y2, ids){
+  const boxW=(x2-x1)+2*MARGIN, boxH=(y2-y1)+2*MARGIN;
+  setWorldSize(boxW, boxH);
+  function addRawLine(clsName, x1,y1,x2,y2, ids, opts){
+    opts=opts||{};
+    const gEl=document.createElementNS("http://www.w3.org/2000/svg","g");
+    gEl.setAttribute("class", "relg");
+    const hit=document.createElementNS("http://www.w3.org/2000/svg","line");
+    hit.setAttribute("class", "hit");
+    hit.setAttribute("x1", x1); hit.setAttribute("y1", y1);
+    hit.setAttribute("x2", x2); hit.setAttribute("y2", y2);
+    hit.style.pointerEvents="none";
     const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
     ln.setAttribute("class", clsName);
     ln.setAttribute("x1", x1);
     ln.setAttribute("y1", y1);
     ln.setAttribute("x2", x2);
     ln.setAttribute("y2", y2);
-    ln.setAttribute("data-ids", ids.join(","));
-    roads.appendChild(ln);
-    ln.addEventListener("mouseenter", function(){
-      hiOwLines(function(x){
-        const s=(x.getAttribute("data-ids")||"").split(",");
-        for(let i=0;i<ids.length;i++) if(s.indexOf(ids[i])>=0) return true;
-        return false;
-      });
-    });
-    ln.addEventListener("mouseleave", function(){ clearOwHi(); });
+    ln.setAttribute("data-ids", (ids||[]).join(","));
+    if(opts.bus!=null) ln.setAttribute("data-bus", String(opts.bus));
+    gEl.appendChild(hit);
+    gEl.appendChild(ln);
+    roads.appendChild(gEl);
     return ln;
   }
   function snap(v,q){ return Math.round(v/q)*q; }
@@ -1025,105 +1075,139 @@ function showOverworld(){
       const last=out[out.length-1];
       if(last && r.s<=last.e+8){
         last.e=Math.max(last.e, r.e);
-        r.ids.forEach(function(id){ if(last.ids.indexOf(id)<0) last.ids.push(id); });
+        (r.ids||[]).forEach(function(id){ if(last.ids.indexOf(id)<0) last.ids.push(id); });
       } else {
-        out.push({s:r.s, e:r.e, ids:r.ids.slice()});
+        out.push({s:r.s, e:r.e, ids:(r.ids||[]).slice()});
       }
     });
     return out;
   }
-  function drawAllBuses(){
-    const GAP=6;
-    const stubs=[];
-    const spans=[];
-    function addPair(a,b){
-      if(!a||!b) return;
+  const clusterBusX=[];
+  function drawClusterBus(hub, sats){
+    if(!hub || !sats || !sats.length) return;
+    const hubR=hub.x+hub.side/2;
+    let minL=1e9, yMin=hub.y, yMax=hub.y;
+    sats.forEach(function(sat){
+      minL=Math.min(minL, sat.x-sat.side/2);
+      yMin=Math.min(yMin, sat.y);
+      yMax=Math.max(yMax, sat.y);
+    });
+    let busX=(hubR+minL)/2;
+    if(minL-hubR<8) busX=hubR+8;
+    sats.forEach(function(sat){
+      const pair=[hub.id, sat.id];
+      addRawLine("landrel", hubR, hub.y, busX, hub.y, pair, {bus:busX});
+      addRawLine("landrel", sat.x-sat.side/2, sat.y, busX, sat.y, pair, {bus:busX});
+    });
+    if(yMax-yMin>=1) addRawLine("landrel spine", busX, yMin, busX, yMax, [], {bus:busX});
+    clusterBusX.push(busX);
+  }
+  function drawBus(pairs, clsName){
+    const ch={};
+    const col=[];
+    pairs.forEach(function(p){
+      const a=p.a, b=p.b;
+      if(!a || !b) return;
+      const ids=[a.id, b.id];
+      const as=a.side||FOG, bs=b.side||FOG;
       const left=a.x<=b.x?a:b, right=a.x<=b.x?b:a;
       const ls=left.side||FOG, rs=right.side||FOG;
       const lR=left.x+ls/2, rL=right.x-rs/2;
-      const ids=[a.id, b.id];
-      if(rL-lR<10){
-        const top=a.y<=b.y?a:b, bot=a.y<=b.y?b:a;
-        const y1=top.y+(top.side||FOG)/2, y2=bot.y-(bot.side||FOG)/2;
-        if(y2-y1>=8){
-          const vx=snap((a.x+b.x)/2, 8);
-          addRawLine("landrel", vx, y1, vx, y2, ids);
-        }
+      if(Math.abs(a.x-b.x)<40 || rL<=lR+4){
+        col.push({a:a, b:b, ids:ids, as:as, bs:bs});
         return;
       }
-      const busX=snap((lR+rL)/2, 8);
-      const yL=snap(left.y,1), yR=snap(right.y,1);
-      stubs.push({busX:busX, y:yL, from:lR, side:"L", ids:ids});
-      stubs.push({busX:busX, y:yR, from:rL, side:"R", ids:ids});
-      spans.push({busX:busX, y1:Math.min(yL,yR), y2:Math.max(yL,yR), ids:ids});
+      const key=snap(left.x, 80)+"|"+snap(right.x, 80);
+      if(!ch[key]) ch[key]={pairs:[], maxLR:-1e9, minRL:1e9, ls:snap(left.x,80), rs:snap(right.x,80)};
+      ch[key].pairs.push({lR:lR, rL:rL, yL:left.y, yR:right.y, ids:ids});
+      ch[key].maxLR=Math.max(ch[key].maxLR, lR);
+      ch[key].minRL=Math.min(ch[key].minRL, rL);
+    });
+    function stubLand(g, side, busX, ids){
+      const L=g.x-side/2, R=g.x+side/2;
+      const x=busX<=(L+R)/2 ? L : R;
+      addRawLine(clsName, x, g.y, busX, g.y, ids, {bus:busX});
     }
-    Object.keys(landHit).forEach(function(k){
-      const p=landHit[k];
-      addPair(p.a, p.b);
+    const channels=Object.keys(ch).map(function(k){
+      const c=ch[k];
+      c.busX=(c.maxLR+c.minRL)/2;
+      return c;
     });
-    sats.forEach(function(g){ if(g._home) addPair(g, g._home); });
-    const xs=[];
-    stubs.forEach(function(s){ if(xs.indexOf(s.busX)<0) xs.push(s.busX); });
-    xs.sort(function(a,b){ return a-b; });
-    const remap={};
-    for(let i=0;i<xs.length;i++){
-      remap[xs[i]]=(i && xs[i]-xs[i-1]<24) ? remap[xs[i-1]] : xs[i];
-    }
-    stubs.forEach(function(s){
-      s.busX=remap[s.busX];
-      if(s.side==="L"){ s.x0=s.from; s.x1=s.busX-GAP; }
-      else { s.x0=s.busX+GAP; s.x1=s.from; }
-    });
-    spans.forEach(function(s){ s.busX=remap[s.busX]; });
-    const H={};
-    stubs.forEach(function(s){
-      const k=s.busX+"|"+s.y+"|"+s.side;
-      if(!H[k]) H[k]={x0:s.x0, x1:s.x1, y:s.y, ids:s.ids.slice()};
-      else {
-        if(s.side==="L") H[k].x0=Math.min(H[k].x0, s.x0);
-        else H[k].x1=Math.max(H[k].x1, s.x1);
-        s.ids.forEach(function(id){ if(H[k].ids.indexOf(id)<0) H[k].ids.push(id); });
-      }
-    });
-    Object.keys(H).forEach(function(k){
-      const h=H[k];
-      const x1=Math.min(h.x0,h.x1), x2=Math.max(h.x0,h.x1);
-      if(x2-x1<3) return;
-      addRawLine("landrel", x1, h.y, x2, h.y, h.ids);
-    });
-    const byBus={};
-    spans.forEach(function(s){
-      if(!byBus[s.busX]) byBus[s.busX]=[];
-      byBus[s.busX].push(s);
-    });
-    Object.keys(byBus).forEach(function(bx){
-      const list=byBus[bx];
-      const ys=[];
-      list.forEach(function(s){
-        if(ys.indexOf(s.y1)<0) ys.push(s.y1);
-        if(ys.indexOf(s.y2)<0) ys.push(s.y2);
+    function rightBusX(g, side){
+      const sx=snap(g.x, 80);
+      const R=g.x+side/2;
+      let best=null, bestD=1e9;
+      channels.forEach(function(c){
+        if(c.ls!==sx) return;
+        const bx=c.busX;
+        if(bx<R-2) return;
+        const d=Math.abs(bx-R);
+        if(d<bestD){ bestD=d; best=bx; }
       });
-      ys.sort(function(a,b){ return a-b; });
-      for(let i=0;i<ys.length-1;i++){
-        const ya=ys[i], yb=ys[i+1];
-        if(yb-ya<2) continue;
-        const ids=[];
-        list.forEach(function(s){
-          if(s.y1<=ya && s.y2>=yb){
-            s.ids.forEach(function(id){ if(ids.indexOf(id)<0) ids.push(id); });
-          }
-        });
-        if(!ids.length) continue;
-        addRawLine("landrel", +bx, ya, +bx, yb, ids);
-      }
+      clusterBusX.forEach(function(bx){
+        if(bx<R-2) return;
+        const d=Math.abs(bx-R);
+        if(d<bestD){ bestD=d; best=bx; }
+      });
+      if(best!=null) return best;
+      return R+LANE/2;
+    }
+    function paintBus(busX, pairs, extra){
+      const V=[];
+      pairs.forEach(function(p){
+        addRawLine(clsName, p.lR, p.yL, busX, p.yL, p.ids, {bus:busX});
+        addRawLine(clsName, busX, p.yR, p.rL, p.yR, p.ids, {bus:busX});
+        if(Math.abs(p.yL-p.yR)>2) V.push({s:Math.min(p.yL,p.yR), e:Math.max(p.yL,p.yR), ids:p.ids.slice()});
+      });
+      (extra||[]).forEach(function(p){
+        stubLand(p.a, p.as, busX, p.ids);
+        stubLand(p.b, p.bs, busX, p.ids);
+        if(Math.abs(p.a.y-p.b.y)>1) V.push({s:Math.min(p.a.y,p.b.y), e:Math.max(p.a.y,p.b.y), ids:p.ids.slice()});
+      });
+      mergeRuns(V).forEach(function(r){
+        if(r.e-r.s<1) return;
+        addRawLine(clsName+" spine", busX, r.s, busX, r.e, [], {bus:busX});
+      });
+    }
+    channels.forEach(function(c){ paintBus(c.busX, c.pairs, []); });
+    const og={};
+    col.forEach(function(p){
+      const sx=snap((p.a.x+p.b.x)/2, 80);
+      if(!og[sx]) og[sx]=[];
+      og[sx].push(p);
+    });
+    Object.keys(og).forEach(function(sx){
+      const list=og[sx];
+      paintBus(rightBusX(list[0].a, list[0].as), [], list);
     });
   }
-  drawAllBuses();
+  mains.forEach(function(hub){
+    const mySats=sats.filter(function(s){ return s._home===hub; });
+    if(mySats.length) drawClusterBus(hub, mySats);
+  });
+  const busPairs=[];
+  drawLinks.forEach(function(L){
+    const a=L.a, b=L.b;
+    if(!a || !b) return;
+    if(b._home===a || a._home===b) return;
+    if(a._home && a._home===b._home) return;
+    busPairs.push({a:a, b:b});
+  });
+  drawBus(busPairs, "landrel");
   renderMinimap();
   hint.textContent="大陆 "+mains.length+" · 落单 "+sats.length+" · 未建夹 "+fogNodes.length+" · "+DATA.generated;
-  centerOn((minX+maxX)/2, (minY+maxY)/2, 0.58);
-  card.innerHTML="<p class='meta'>每一块有岛的大陆是枢纽。雾在小地图，大地图块上用雾徽章。沟里虚线是总线：横平竖直，共线的只画一遍。</p>";
+  const cBoxX=(x1+x2)/2, cBoxY=(y1+y2)/2;
+  const vr=wrap.getBoundingClientRect();
+  const vw=vr.width||800, vh=vr.height||600;
+  let sc=Math.min(vw/boxW, vh/boxH)*0.9;
+  if(sc<0.22) sc=0.22;
+  if(sc>6) sc=6;
+  centerOn(cBoxX, cBoxY, sc);
+  card.innerHTML="<p class='meta'>有岛的大陆做枢纽。左：无岛；中：连枢纽；右：小岛。沟里虚线横平竖直并成总线。悬停看关联。雾在小地图。</p>";
+  clearOwHi();
+  world.classList.remove("focus-on");
 }
+
 function enforceMinGap(list, min){
   for(let pass=0; pass<80; pass++){
     let hit=false;
@@ -1165,38 +1249,35 @@ function showLocal(g){
     if(!idset[e.a] || !idset[e.b]) return;
     nearPairs.push(e);
   });
-  const GAP=72, MIN=TILE+GAP, REST=MIN+48;
-  const maxDeg=Math.max.apply(null, localSorted.map(function(n){ return n.deg||0; }))||1;
-  const rSpan=80+Math.sqrt(localSorted.length)*70;
-  const cx=520, cy=400;
-  const byHeat=localSorted.slice().sort(function(a,b){
-    const d=(b.deg||0)-(a.deg||0);
-    if(d) return d;
-    return (a.ord||0)-(b.ord||0);
+  const GAP=36, MIN=TILE+GAP, REST=TILE+28;
+  const nAll=localSorted.length;
+  const cols=Math.max(2, Math.ceil(Math.sqrt(nAll)));
+  const colW=TILE+GAP, rowH=TILE+GAP;
+  localSorted.forEach(function(n,i){
+    n.x=(i%cols)*colW;
+    n.y=Math.floor(i/cols)*rowH;
   });
-  byHeat.forEach(function(n,i){
-    const heat=(n.deg||0)/maxDeg;
-    const ang=i*2.399963;
-    const r=28+(1-heat)*rSpan+Math.sqrt(i)*14;
-    n.x=cx+Math.cos(ang)*r;
-    n.y=cy+Math.sin(ang)*r*0.92;
-  });
-  for(let k=0;k<80;k++){
+  for(let k=0;k<120;k++){
     relPairs.forEach(function(e){
       const a=byId[e.a], b=byId[e.b];
       const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||1;
-      const f=(d-REST)/d*0.05;
+      const f=(d-REST)/d*0.12;
       a.x+=dx*f; a.y+=dy*f; b.x-=dx*f; b.y-=dy*f;
-    });
-    localSorted.forEach(function(n){
-      const heat=(n.deg||0)/maxDeg;
-      const want=36+(1-heat)*rSpan;
-      const dx=n.x-cx, dy=n.y-cy, d=Math.hypot(dx,dy)||1;
-      const f=(want-d)/d*0.08;
-      n.x+=dx*f; n.y+=dy*f;
     });
     enforceMinGap(localSorted, MIN);
   }
+  extra.forEach(function(fn){
+    const nbr=[];
+    relPairs.forEach(function(e){
+      if(e.a===fn.id && byId[e.b] && !byId[e.b].fog) nbr.push(byId[e.b]);
+      if(e.b===fn.id && byId[e.a] && !byId[e.a].fog) nbr.push(byId[e.a]);
+    });
+    if(!nbr.length) return;
+    let sx=0, sy=0;
+    nbr.forEach(function(n){ sx+=n.x; sy+=n.y; });
+    fn.x=sx/nbr.length+TILE+24;
+    fn.y=sy/nbr.length;
+  });
   enforceMinGap(localSorted, MIN);
   let minX=1e9, minY=1e9, maxX=0, maxY=0;
   localSorted.forEach(function(n){
@@ -1231,6 +1312,11 @@ function showLocal(g){
     gEl.appendChild(hit);
     gEl.appendChild(line);
     roads.appendChild(gEl);
+    gEl.addEventListener("mouseenter", function(ev){
+      showMapTip(shortId(e.a)+" — "+shortId(e.b), edgePartsTip(e), ev);
+    });
+    gEl.addEventListener("mousemove", function(ev){ moveMapTip(ev); });
+    gEl.addEventListener("mouseleave", function(){ hideMapTip(); });
     if(!linesByNode[e.a]) linesByNode[e.a]=[];
     if(!linesByNode[e.b]) linesByNode[e.b]=[];
     linesByNode[e.a].push(line); linesByNode[e.b].push(line);
@@ -1257,6 +1343,11 @@ function showLocal(g){
     gEl.appendChild(hit);
     gEl.appendChild(line);
     roads.appendChild(gEl);
+    gEl.addEventListener("mouseenter", function(ev){
+      showMapTip(shortId(e.a)+" — "+shortId(e.b), nearHoverTip(e), ev);
+    });
+    gEl.addEventListener("mousemove", function(ev){ moveMapTip(ev); });
+    gEl.addEventListener("mouseleave", function(){ hideMapTip(); });
   });
   for(let i=0;i<localSorted.length-1;i++){
     trendLayer.appendChild(timeSeg(localSorted[i], localSorted[i+1], "trail", "trailArr"));

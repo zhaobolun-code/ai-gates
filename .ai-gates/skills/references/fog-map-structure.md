@@ -20,7 +20,7 @@ Express 机械改、纯代码热修不碰文档窗、闲聊 → **不读** 本�
 
 ## 出图门 / 直通账本
 
-- **出图门**：同一主题根内关联/步骤已**能形成大地图**才**提示用户**生成。缺图 → PM 提示用户，用户同意后再跑 `.ai-gates/scripts/generate-fog-map.ps1`。禁止有夹自动出图；禁止未提示、未同意就跑 generate。禁止手编边。
+- **出图门**：文档状态改变后（新建窗口，或迁 `执行中` / `签收` / `停写` / `失败` / `换层` / `回退`）PM 必须过门，禁止静默 generate。看**该主题根**有没有 `fog-map.html`：① 无图 → 先判断同一主题是否已能形成大地图；能则问用户 **「是否创建迷雾地图」**，不能成图不问。② 有图 → 问用户 **「是否更新迷雾地图」**。用户同意后再跑 `.ai-gates/scripts/generate-fog-map.ps1`（主题旁用 `-DocRoot` + `-OutFile`；总图无 `-OutFile` 落 `.ai-gates/verify/fog-map.html`）。禁止有夹自动出图；禁止未提示、未同意就跑 generate。禁止手编边。
 - **默认人看图落点**：无 `-OutFile` 时 HTML 默认 `.ai-gates/verify/fog-map.html`（瘦 JSON 同目录 `fog-map.json`）。4.x 主题旁 `{DocRoot}/fog-map.html` 是显式 `-OutFile` 试点，不能顶替默认 verify。
 - **已有图**：将改的系统文档夹里已有 `fog-map.html` 时，考虑把结构面（本页按短名取一度边）给策划或程序员。仍禁止每轮灌整份 JSON / Read HTML。
 - **直通账本**：`.ai-gates/Doc/直通文档/{模块名}/DIRECTLOG.md`（模块名由 PM 写）。生成或关联只在 `.ai-gates/Doc/直通文档/` 下找。挂钉不占格：DIRECTLOG **不是图块**、不是方案夹（不要 `未完成.md`）。禁止为挂接扫 `LabSDK` / `Assets`。
@@ -28,7 +28,7 @@ Express 机械改、纯代码热修不碰文档窗、闲聊 → **不读** 本�
 
 ## 怎么查
 
-1. 默认读 `.ai-gates/verify/fog-map.json`（与默认 HTML 同目录）。若用户显式 `-OutFile` 到主题旁，则读该 HTML 同目录 JSON。缺图 → PM 提示用户，用户同意后再跑 generate（同一主题根能形成大地图才提示；禁止有夹自动出图）。
+1. 默认读 `.ai-gates/verify/fog-map.json`（与默认 HTML 同目录）。若用户显式 `-OutFile` 到主题旁，则读该 HTML 同目录 JSON。缺图或图落后于文档状态 → 按出图门问「是否创建迷雾地图」或「是否更新迷雾地图」，同意后再跑 generate。禁止有夹自动出图。
 2. `ConvertFrom-Json` → 按窗短名取 `nodes[]`（`id`）。
 3. 一度边：该节点 `neighbors`（或过滤 `edges` 的 `a|b`）。未过阈的 `near` 与雾名不是邻格卡片行。
 4. 雾：该格关系点名且落入顶层 `fog` 的名字。
