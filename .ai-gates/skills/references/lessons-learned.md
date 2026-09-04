@@ -92,6 +92,10 @@
 ## 脚本用法
 
 ```powershell
+# 失败输出起草（不写主表；须「准」后才 -Apply）
+powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/draft-lesson-pending.ps1 `
+  -FailPath "{fail.txt}" -OutPath "{方案夹}/证据/_lesson-pending.md"
+
 # dry-run
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/commit-lesson-pending.ps1 `
   -PendingPath "{方案夹}/证据/_lesson-pending.md"

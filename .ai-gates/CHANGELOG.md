@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v5.0.1（README 对齐差异化 + 出图门细化 + METHODOLOGY 编排整治 · patch；前版 5.0.0 定版信息保留）
+**当前 LTS**：v5.0.2（门禁补洞 + 错题自动起草 + 迷雾卡片查询 · minor；前版 5.0.1 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -11,6 +11,7 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-09-04：周报 skill 按定稿模板加厚「不懂项目也能看懂」：正式汇报语气；黑话须译成现象/能力白话；禁止材料来源元话术入正文；示例对齐 8/31–9/4 周报口径。不 bump VERSION
 - 2026-09-04：session-dash Direct 热修：`Render-DetailsPreview` 每行先 Clip-Text 200；assert 增 A8（html Length<100000）。不 bump VERSION
 - 2026-09-04：失败输出起草错题pending Step 1：新增 `.ai-gates/scripts/draft-lesson-pending.ps1`（从 `[FAIL] token ::` 抽第一 token 进 keywords，填 pending 七字段+非空 cause/fix；不把 `-Apply` 传给 commit）；developer 8.5 / CR 1.5 / 机制页 `lessons-learned.md` 各 +1 指针点名 `draft-lesson-pending`。不 bump VERSION
 - 2026-09-03：说明书三处交代 Step 1：§4 读数口径点名机器打点 17 条、首过率分母 13、止损叫停回退 17 窗不是同一集合；新增「已知局限」（门禁空洞 / 碰撞不必再试同类 / 模型不自发「我不知道」）；§3.5 岗位行补齐六岗。不 bump VERSION
@@ -217,6 +218,24 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [5.0.2] - 2026-09-04（门禁补洞 + 错题自动起草 + 迷雾卡片查询 · minor · 发布）
+
+### Included changes — 2026-09-04（周报加厚 + session-dash + 错题自动起草 · 不 bump）
+
+- **周报 skill 加厚**：「不懂项目也能看懂」——正式汇报语气；黑话须译成现象/能力白话；禁止材料来源元话术入正文。
+- **session-dash Direct 热修**：`Render-DetailsPreview` 每行先 Clip-Text 200；assert 增 A8（html Length<100000）。
+- **失败输出起草错题 pending Step 1**：新增 `scripts/draft-lesson-pending.ps1`（从 `[FAIL] token ::` 抽第一 token 进 keywords，填 pending 七字段 + 非空 cause/fix；不把 `-Apply` 传给 commit）；developer 8.5 / CR 1.5 / lessons-learned 机制页 +1 指针点名。
+
+### Included changes — 2026-09-03（说明书交代 + 查法入口 + 评测 + 门禁补洞 · 不 bump）
+
+- **说明书三处交代 Step 1**：§4 读数口径点名机器打点 17 条、首过率分母 13、止损叫停回退 17 窗不是同一集合；新增「已知局限」（门禁空洞 / 碰撞不必再试同类 / 模型不自发「我不知道」）；§3.5 岗位行补齐六岗。
+- **迷雾结构面查法入口**：新增 `scripts/query-fog-card.ps1`（按短名打一张卡，禁止整表 ConvertFrom-Json / Read 整份 fog-map.json）；fog-map-structure.md「怎么查」点名。
+- **规则翻错本评测 Step 1**：正例/负例各 ≥5 挂 reference-routing.md 触发表文件名；零 API 词面打分 `scripts/eval-reference-routing.ps1`；skill-eval-checklist 附录指针。
+- **碰撞洞回灌日常审 Step 1**：方案审 checklist 默认抽检四类洞（失败句/字段钉死/条款与清单同句/机器绿≠人看见的现象），指针 3.55；碰撞仍点名才开。修轮 1：断言紧邻前缀 ≤4 字、切点未命中必红、常规与不启用须同行、major 只认 3.51 行。
+- **门禁补洞 Step 1**：机器放行改标 `window_pm_not_this_turn`（120 分钟窗口 ≠ 本条已判定）；Unix 无 `pwsh` 时 check-hooks-policy / pm-init 报 `hooks_not_wired_no_pwsh`（解释器可用 ≠ 该客户端已接线）；CORE / README / USER-GUIDE 点名 Codex 桌面 / Trae / 无 pwsh 缺口。
+- **草窗与签收**：AI流水线落四份进化草案窗（门禁补洞 / 碰撞洞回灌日常审 / 规则翻错本评测 / 说明书三处交代）；主题根 `迷雾地图-5.0.0-草案.md` 迁入 `签收/迷雾地图-5.0.0-上线/`，原路径留已签收指针。
+- **迷雾大地图热修系列**：同列先横后竖接到右侧沟（左边无跨列关联不画）；悬停 classList force 必须布尔（缺键 `&&` undefined 不再误点亮竖脊）；去掉大地图悬浮框（悬停线与发亮图块对齐，两端都亮才亮横线再接竖段）；小地图点选后虚线邻格 50% 透明；用户点名给 `.ai-gates/Doc/AI流水线` 出主题旁迷雾地图。
 
 ## [5.0.1] - 2026-09-03（README 对齐差异化 + 出图门细化 + METHODOLOGY 编排整治 · patch · 发布）
 
