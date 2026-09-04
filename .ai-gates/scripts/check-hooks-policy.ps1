@@ -12,6 +12,30 @@
 # 注意：本文件故意不用 param() 块，避免被 . 点源时因 PowerShell 大小写不敏感
 # 覆盖调用方的 $repoRoot。
 
+function Get-HooksRuntimeStatus {
+    # Interpreter availability ≠ this client has machine hooks (Trae = soft layer).
+    # Override for tests / Unix doctor from a machine that can run ps1:
+    #   $env:AI_GATES_HOOKS_RUNTIME = 'hooks_not_wired_no_pwsh'
+    $forced = [string]$env:AI_GATES_HOOKS_RUNTIME
+    if (-not [string]::IsNullOrWhiteSpace($forced)) {
+        $code = $forced.Trim()
+        $ok = ($code -ne 'hooks_not_wired_no_pwsh')
+        return [ordered]@{ Interpreter = $ok; Wired = $ok; Code = $code }
+    }
+    $onWindows = $false
+    if ($env:OS -eq 'Windows_NT') { $onWindows = $true }
+    elseif ($PSVersionTable.PSEdition -eq 'Desktop') { $onWindows = $true }
+    elseif ($PSVersionTable.Platform -eq 'Win32NT') { $onWindows = $true }
+    if ($onWindows) {
+        return [ordered]@{ Interpreter = $true; Wired = $true; Code = 'windows_powershell' }
+    }
+    $pwsh = Get-Command pwsh -ErrorAction SilentlyContinue
+    if ($pwsh) {
+        return [ordered]@{ Interpreter = $true; Wired = $true; Code = 'unix_pwsh' }
+    }
+    return [ordered]@{ Interpreter = $false; Wired = $false; Code = 'hooks_not_wired_no_pwsh' }
+}
+
 function Get-HooksPolicyReport {
     param(
         [Parameter(Mandatory = $true)][string]$RepoRoot,
@@ -69,6 +93,9 @@ function Get-HooksPolicyReport {
         if ($pmGateRaw -notmatch 'parse_failed_fail_open' -and $pmGateRaw -notmatch 'fail-open') {
             $issues.Add("pm-gate-check must fail-open on parse errors") | Out-Null
         }
+        if ($pmGateRaw -notmatch 'window_pm_not_this_turn') {
+            $issues.Add("pm-gate-check must name window_pm_not_this_turn (120-min window is not this_turn_pm)") | Out-Null
+        }
     }
 
     if (-not (Test-Path -LiteralPath $driftHookPath)) {
@@ -107,9 +134,15 @@ function Get-HooksPolicyReport {
         }
     }
 
+    $runtime = Get-HooksRuntimeStatus
+    if (-not $runtime.Wired) {
+        $issues.Add("hooks_not_wired_no_pwsh: macOS/Linux machine hooks need PowerShell 7+ (pwsh); do not report hooks wired") | Out-Null
+    }
+
     return [ordered]@{
         Ok        = ($issues.Count -eq 0)
         Issues    = @($issues)
+        Runtime   = $runtime
         CheckedAt = (Get-Date).ToUniversalTime().ToString("o")
     }
 }
@@ -133,6 +166,8 @@ if ($MyInvocation.InvocationName -ne '.') {
         }
     }
     $report = Get-HooksPolicyReport -RepoRoot $cliRoot
+    $rtCode = if ($report.Runtime) { [string]$report.Runtime.Code } else { "unknown" }
+    Write-Host ("machine-hooks: {0}" -f $rtCode)
     if ($asJson) {
         $report | ConvertTo-Json -Compress -Depth 5
     } else {

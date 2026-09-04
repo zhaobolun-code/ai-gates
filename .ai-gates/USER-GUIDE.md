@@ -61,6 +61,7 @@
 | 跑自动化测试（TDD 单测） | 仓库根有 `Tests/EditMode/` 时：项目根 PowerShell 跑 `powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/run-dotnet-editmode-tests.ps1`（trx 判定：total≥70 且 failed=0 方绿；秒级、不占 Unity） |
 | 它说本步不用开编辑器 | 看它给的核对结论，再回通过/不通过 |
 | 打开或更新迷雾地图 | 文档状态变了（新建、签收、停写等）之后，助手会问「是否创建迷雾地图」或「是否更新迷雾地图」。你同意后再生成。然后双击 `.ai-gates/verify/fog-map.html`（或主题夹里那份）。直接打开文件，不要另开网页服务，也不要改这张网页；别的目录里的旧图不要用 |
+| 打开会话看板 | 跑 `powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/generate-session-dash.ps1` 生成后，双击 `.ai-gates/verify/session-dash.html`。直接打开文件，不要另开网页服务，也不要改这张网页；这不是账单 |
 
 ## 三步走完
 
@@ -142,7 +143,7 @@ AI 每测挂一次、每留下一条验过的结构，都是一次进化契机�
 - 一条命令（开发者/批量）：项目根 PowerShell 运行 `powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"`（macOS/Linux 暂无对应命令，用方式 A 或手动；无 git 时本命令会自动走 zip 下载）
 - 手动（备选）：从 GitHub [Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest) 下载 `ai_dev_<版本号>.7z`（版本以 skills/VERSION 为准），解压到项目根（包内是 `.ai-gates/`，不要解进 `.cursor/`）；解压后说 `项目经理 检查健康` 由 Agent 建好传送门（手动运行 `link-platform.ps1` / `.sh` 亦可，非必需）
 - 已装升级：说 `项目经理 升级 ai-gates`（联网比对、有新版才替换）；下载后 Windows 提示「无法运行，拒绝访问」→ 把报错原文粘贴给项目经理处理
-- **macOS / Linux 机器 hooks**：脚本全是 `.ps1`，须本机有 **PowerShell 7+（`pwsh`）**；没有 `pwsh` 时只靠规则自觉，**不要当成 hooks 已接线**
+- **macOS / Linux 机器 hooks**：脚本全是 `.ps1`，须本机有 **PowerShell 7+（`pwsh`）**；没有 `pwsh` 时只靠规则自觉。说 `项目经理 检查健康` 时，`pm-init` / `check-hooks-policy` 须出现 `hooks_not_wired_no_pwsh` 或 `machine-hooks: not-wired`，**不要当成 hooks 已接线**
 - 版本历史见 `.ai-gates/CHANGELOG.md`；体检说 `项目经理 检查健康`
 
 **它乱改、没告诉你下一步？** 回 **`按 CORE 重来`**。
@@ -153,11 +154,13 @@ AI 每测挂一次、每留下一条验过的结构，都是一次进化契机�
 
 | 现象 | 原因 | 做法 |
 | --- | --- | --- |
-| 写入被 deny，提示 `no fresh [PM] marker` | 本会话最近 120 分钟没有过 PM 判定 | 回一句带 `[PM]` 的话（如「[PM] 判定：…」），等打点后重试；或人工确认后放 `.ai-gates/hooks-log/pm-gate-disabled` 临时放行 |
+| 写入被 deny，提示 `no window_pm` / `no fresh [PM]` | 本会话 120 分钟窗口内没有 `[PM]` 打点（机器层叫 window_pm，不是「本条已判定」） | 回一句带 `[PM]` 的话，等打点后重试；或放 `.ai-gates/hooks-log/pm-gate-disabled` 临时放行 |
+| 窗口内放过了，但流程仍说缺判定 | 机器放行 ≠ 本条 this_turn_pm（CORE 硬门禁 #7） | 本条回复仍须带结构化 `[PM]` 和「你下一步」；不要把 120 分钟窗口当成已经判过 |
 | 写入被 deny，提示 `Level-1` / `CHANGELOG` | 改 `.cursor` / `.ai-gates` 设施前没写 CHANGELOG | 先写 `.ai-gates/CHANGELOG.md`（Included 条目）再重试 |
 | Bash 写文件被 deny，提示 `Bash write gate` | 显式写文件没走 PM 门禁 | 改用 apply_patch；或先发 `[PM]` 待打点后重试 |
 | `git push --force` / `reset --hard` 被 deny | 高危 git 被机器层硬拦 | 确认安全后在终端手动执行，或临时移除对应 hook 条目 |
-| 写完没见到任何门禁痕迹 | 桌面端 apply_patch 钩子可能不触发 | 自查 `.ai-gates/hooks-log/`，或临时用 CLI 会话验证 |
+| 写完没见到任何门禁痕迹 | **Codex 桌面**对 `apply_patch` 钩子可能不触发（Cursor 桌面一般会触发） | 自查 `.ai-gates/hooks-log/`，或临时用 CLI 会话验证 |
+| Trae 里改文件没有机器 deny | Trae 没有机器 hooks，只靠规则自觉 | 仍须本条带 `[PM]`；不要把 Windows 上「powershell 可用」当成 Trae 已接线 |
 | 流程乱了、想重来 | 没按流程走 | 回 **`按 CORE 重来`** |
 
 ## 技术负责人可选
@@ -165,5 +168,5 @@ AI 每测挂一次、每留下一条验过的结构，都是一次进化契机�
 | 用途 | 怎么做 |
 | --- | --- |
 | 新建任务文件夹 / 结束后挪文件夹（签收） | **项目经理自动完成**，无需用户对话 |
-| 检查文档是否合规 | 对项目经理说：`项目经理 检查健康`（=`doctor`；Agent 运行 check-pipeline-doc / validate-pipeline） |
+| 检查文档是否合规 | 对项目经理说：`项目经理 检查健康`（=`doctor`；Agent 运行 check-pipeline-doc / validate-pipeline / check-hooks-policy；Unix 无 pwsh 须见到 hooks_not_wired_no_pwsh） |
 | 提交前检查、安装与打包 | 见 README「快速开始」（下载 / 升级 / 零手动安装） |

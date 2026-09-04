@@ -61,6 +61,19 @@ elseif ($cgDirOk) { Write-Status "CodeGraph" "partial" ".codegraph/ exists; CLI 
 elseif ($cgCli) { Write-Status "CodeGraph" "partial" "CLI found; run: codegraph init" }
 else { Write-Status "CodeGraph" "missing" "need: codegraph install --platform cursor && codegraph init" }
 
+$policyScript = Join-Path $scriptDir "check-hooks-policy.ps1"
+if (Test-Path -LiteralPath $policyScript) {
+    . $policyScript
+    $rt = Get-HooksRuntimeStatus
+    if ($rt.Code -eq "hooks_not_wired_no_pwsh") {
+        Write-Status "machine-hooks" "not-wired" "hooks_not_wired_no_pwsh — no pwsh; do not report hooks wired"
+    } else {
+        Write-Status "machine-hooks" "interpreter-ok" "$($rt.Code); interpreter available ≠ this client wired (Trae=soft)"
+    }
+} else {
+    Write-Status "machine-hooks" "unknown" "check-hooks-policy.ps1 missing"
+}
+
 if (-not $Apply) {
     Write-Host ""
     Write-Host "Probe only. Re-run with -Apply to create missing context/doc dirs." -ForegroundColor DarkGray

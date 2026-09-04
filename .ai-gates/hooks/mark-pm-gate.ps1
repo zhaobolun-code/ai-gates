@@ -18,7 +18,8 @@
 # "当前这条正在生成、还没说完的回复里同条先 [PM] 了"——这是 Cursor Hooks 当前公开
 # 文档确认的限制（preToolUse 拿不到本轮尚未完成的助手文本），不是本脚本的 bug。
 # 效果上等价于把 CORE 硬门禁 #7 的"同条先 PM"，退化成机械可查的"最近 N 分钟内这个
-# 会话有没有 PM 判定过"——比完全没有机械层强，但不是精确的同条校验。
+# 会话有没有 PM 判定过"（window_pm_not_this_turn）。比完全没有机械层强，但不是
+# this_turn_pm / 本条结构化判定——preToolUse 拿不到尚未完成的助手文本。
 #
 # 2026-08-03 健壮化（真演修复）：真实 Cursor 环境对超大 AgentResponse payload
 # （agent 长回复，可达数十 KB）时，PS5.1 的 Console.In.ReadToEnd() + ConvertFrom-Json

@@ -1,10 +1,15 @@
 ﻿# pm-gate-check.ps1
 # preToolUse hook (matcher: Write|StrReplace|EditNotebook) -- 支柱 D。
 #
-# 目的：机械化 CORE.md 硬门禁 #7 的近似版本——"最近 N 分钟内这个会话（conversation_id）
+# 目的：机械化 CORE.md 硬门禁 #7 的**窗口层**近似——"最近 N 分钟内这个会话（conversation_id）
 # 有没有出现过 [PM] 标记"，标记由 mark-pm-gate.ps1（afterAgentResponse）写入
-# .ai-gates/hooks-log/pm-gate.json。已知局限见该脚本头部注释：这是"最近判定过"而不是
-# "同条判定"的机械近似，不是精确复刻 CORE 文字规则。
+# .ai-gates/hooks-log/pm-gate.json。
+#
+# 两层不得混名（门禁补洞 A2）：
+#   window_pm / window_pm_not_this_turn = 本 hook 能证明的：窗口内曾打点。
+#   this_turn_pm = CORE #7「本条已完成结构化判定」。Cursor preToolUse 拿不到
+#   正在生成的助手文本，机器层做不到 this_turn_pm。允许写入时 reason 必须带
+#   window_pm_not_this_turn，禁止写成 this_turn_pm / 同条已判定。
 #
 # 行为（与 MAINTAINER §Cursor Hooks 一致）：
 #   业务路径（非 .cursor/**）且无新鲜 [PM] 标记 → permission=deny + user_message 逃生提示。
@@ -121,7 +126,8 @@ function Get-PathFromRaw {
 function Emit-Allow {
     param([string]$Reason)
     Write-Audit "ALLOW reason=$Reason"
-    Write-Output '{"permission":"allow"}'
+    $payload = @{ permission = "allow"; reason = $Reason }
+    Write-Output ($payload | ConvertTo-Json -Compress)
 }
 
 function Emit-Deny {
@@ -133,7 +139,7 @@ function Emit-Deny {
     # BaseMsg 分场景：业务路径提示 [PM] 标记；Level 1 提示 CHANGELOG 流水
     # （2026-08-03 真演教训：统一文案误导 agent 以为发 [PM] 能解锁 Level 1）。
     if (-not $BaseMsg) {
-        $BaseMsg = "PM gate deny detail=$Detail : no fresh [PM] marker detected. Escape: emit [PM] in reply / edit .cursor path / place hooks-log/pm-gate-disabled, then retry."
+        $BaseMsg = "PM gate deny detail=$Detail : no window_pm (no [PM] marker within $FreshnessMinutes min). This is the 120-min window, NOT this_turn_pm / CORE #7 same-turn judgment. Escape: emit [PM] in reply / edit .cursor path / place hooks-log/pm-gate-disabled, then retry."
     }
     if ($UserHint) {
         $userMsg = "$BaseMsg $UserHint"
@@ -240,12 +246,12 @@ function Get-InheritedParentPmReason {
             $parentPmUtc = [DateTime]::Parse($parentEntry.lastPmAtUtc).ToUniversalTime()
             $parentAgeMinutes = ([DateTime]::UtcNow - $parentPmUtc).TotalMinutes
             if ($parentAgeMinutes -le $FreshnessMinutes) {
-                return ("inherited_parent_pm_age={0}min parent={1}" -f [Math]::Round($parentAgeMinutes, 1), $parentId)
+                return ("window_pm_not_this_turn_inherited_parent_pm_age={0}min parent={1}" -f [Math]::Round($parentAgeMinutes, 1), $parentId)
             }
         } catch { }
     }
     if (Test-ParentTranscriptHasRecentPm -ParentId $parentId) {
-        return ("inherited_parent_pm_transcript parent={0}" -f $parentId)
+        return ("window_pm_not_this_turn_inherited_parent_pm_transcript parent={0}" -f $parentId)
     }
     return $null
 }
@@ -394,4 +400,4 @@ if ($ageMinutes -gt $FreshnessMinutes) {
     return
 }
 
-Emit-Allow ("fresh_pm_marker_age={0}min" -f [Math]::Round($ageMinutes,1))
+Emit-Allow ("window_pm_not_this_turn_age={0}min" -f [Math]::Round($ageMinutes,1))

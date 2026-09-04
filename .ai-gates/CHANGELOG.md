@@ -11,6 +11,14 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-09-04：session-dash Direct 热修：`Render-DetailsPreview` 每行先 Clip-Text 200；assert 增 A8（html Length<100000）。不 bump VERSION
+- 2026-09-04：失败输出起草错题pending Step 1：新增 `.ai-gates/scripts/draft-lesson-pending.ps1`（从 `[FAIL] token ::` 抽第一 token 进 keywords，填 pending 七字段+非空 cause/fix；不把 `-Apply` 传给 commit）；developer 8.5 / CR 1.5 / 机制页 `lessons-learned.md` 各 +1 指针点名 `draft-lesson-pending`。不 bump VERSION
+- 2026-09-03：说明书三处交代 Step 1：§4 读数口径点名机器打点 17 条、首过率分母 13、止损叫停回退 17 窗不是同一集合；新增「已知局限」（门禁空洞 / 碰撞不必再试同类 / 模型不自发「我不知道」）；§3.5 岗位行补齐六岗。不 bump VERSION
+- 2026-09-03：迷雾结构面查法入口：新增 `.ai-gates/scripts/query-fog-card.ps1`（按短名打一张卡，禁止整表 ConvertFrom-Json / Read 整份 fog-map.json）；`fog-map-structure.md`「怎么查」点名该脚本。不 bump VERSION
+- 2026-09-03：规则翻错本评测 Step 1：正例/负例各≥5 挂 `reference-routing.md` 触发表文件名；零 API 词面打分 `.ai-gates/scripts/eval-reference-routing.ps1`；`skill-eval-checklist.md` 附录指针。不 bump VERSION
+- 2026-09-03：碰撞洞回灌日常审 Step 1：方案审现行 checklist 默认抽检四类洞（失败句/字段钉死/条款与清单同句/机器绿≠人看见的现象），指针 3.55；碰撞仍点名才开。修轮 1：断言紧邻前缀≤4字、切点 `3.55 **` 未命中必红、常规与不启用须同行、major/3.55 只认 3.51 行；入口表头改为示意。不 bump VERSION
+- 2026-09-03：门禁补洞 Step 1：机器放行改标 `window_pm_not_this_turn`（120 分钟窗口 ≠ 本条已判定）；Unix 无 `pwsh` 时 `check-hooks-policy` / `pm-init` 报 `hooks_not_wired_no_pwsh`（可用 `AI_GATES_HOOKS_RUNTIME` 注入测到该字面；解释器可用 ≠ 该客户端已接线）；CORE / README / USER-GUIDE 点名 Codex 桌面 / Trae / 无 pwsh 缺口。不 bump VERSION
+- 2026-09-03：AI流水线落四份进化草案窗（执行中：门禁补洞 / 碰撞洞回灌日常审 / 规则翻错本评测 / 说明书三处交代）；主题根 `迷雾地图-5.0.0-草案.md` 迁入 `签收/迷雾地图-5.0.0-上线/`，原路径留已签收指针。Skill/Doc-only，不 bump VERSION
 - 2026-09-03：METHODOLOGY 编排整治（内容不改主张、不动数据）：①§5.2/§6.2/§8.2 多列宽表转纵排短列表——原表存在 400–1132 字符单行，GitHub 横向溢出致核心「打到」列实际读不到；②新增无编号节「下面五节的共同口径」，把五节共有口径（点名启用/§8 例外、花费自估口径、「我不知道」须提示才报、洞察须回灌日常检查、脱敏、是使用记录非对照实验）集中讲一次；③删三重复述——摘要 5 段试验缩写压成 1 段指路、各节「能不能增加元认知」与 §x.4 尾句、§11 五条重复的脱敏声明。词频依据：点名 37/普通方案审 14/无账单 12/已隐去 11/我不知道 11。不 bump VERSION
 - 2026-09-03：README 对齐现行 skill 并补差异化定位：新增「和同类技能包比，差别在哪」（跨平台一份真源 / 三档证据防伪绿 / 四车道自动选 / 跨项目自进化 / Reference 预算）；补「分岗派活」「机器门禁不只靠自觉」「不测不算通过」；灰箱写明对人/对助手的帮助；安装段补齐三种方式（原「方式 A」孤条）。表述只用仓内可核实事实，不引外部 star 数。同轮修正两处被外部摘要暴露的缺陷：①「典故」原标签为比喻「会生长」且无通用对标，摘要器只抓到「错题本」→ 标签术语化 + 与错题本成对命名 + 补一句具体收益；②「少用 70% 模型用量」全仓仅 README 一处、无度量出处 → 改为机制表述，不留无法复现的定量宣称。不 bump VERSION
 - 2026-09-03：出图门：文档状态改变后，无图则判断能否成图并问「是否创建迷雾地图」；有图则问「是否更新迷雾地图」。不 bump VERSION

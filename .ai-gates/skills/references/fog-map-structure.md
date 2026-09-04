@@ -28,11 +28,10 @@ Express 机械改、纯代码热修不碰文档窗、闲聊 → **不读** 本�
 
 ## 怎么查
 
-1. 默认读 `.ai-gates/verify/fog-map.json`（与默认 HTML 同目录）。若用户显式 `-OutFile` 到主题旁，则读该 HTML 同目录 JSON。缺图或图落后于文档状态 → 按出图门问「是否创建迷雾地图」或「是否更新迷雾地图」，同意后再跑 generate。禁止有夹自动出图。
-2. `ConvertFrom-Json` → 按窗短名取 `nodes[]`（`id`）。
-3. 一度边：该节点 `neighbors`（或过滤 `edges` 的 `a|b`）。未过阈的 `near` 与雾名不是邻格卡片行。
-4. 雾：该格关系点名且落入顶层 `fog` 的名字。
-5. 下一站：`rec` 一行（`{id,why}` 或 `null`）。
+1. 禁止用 Read 打开 `fog-map.json` / `fog-map.html`；禁止把 `ConvertFrom-Json` 的 `nodes`/`edges` 整表贴进对话。
+2. 按短名打一张卡：跑 `.ai-gates/scripts/query-fog-card.ps1 -Id <窗短名>`。默认 JSON=仓库 `.ai-gates/verify/fog-map.json`；主题旁图用 `-JsonPath` 或 `-DocRoot`（读该目录 `fog-map.json`）。stdout 只有这一张卡（`id`/`state`/`neighbors`/`rec`；可附 `generated`/`jsonPath`）。找不到节点 → 输出含 `MISSING`。
+3. 邻格各 ≤1 行写入对话；`rec` 一行。未过阈的 `near` 与雾名不是邻格卡片行。
+4. 缺图或图落后于文档状态 → 按出图门问「是否创建迷雾地图」或「是否更新迷雾地图」，同意后再跑 generate。禁止有夹自动出图。
 
 ## 预算
 

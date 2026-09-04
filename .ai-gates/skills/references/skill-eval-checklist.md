@@ -227,3 +227,12 @@
 | 2026-07-21 | v3.1.4（v3.2发布前） | Agent隔离 | H1～H6a + A1～A5/B1～B4/D2/F1/F1l/F1m **27/27 Pass** | 0% | 无 | Strict 退出0；H6最终版本单源闸留待Step10/11 |
 | 2026-07-21 | v3.2.0（+支柱A/B/C/D+预授权，本会话追加，不 bump） | 人工+Agent（本会话内走读，非新开 Chat 真演） | I1～I4 **7/8 Pass**（I2b Fail） | 0% | `机械门禁自绕过`（I2b） | I2b 如实记录本会话内 Agent 曾手动重放 `mark-pm-gate.ps1` 诊断（全程向用户公开，非隐瞒绕过），仍按字面标准判 Fail，不因动机豁免；I1/I1b/I1c 尚缺真实 Full 车道项目案例，留待补真演；`pm-gate-check.ps1` 已由 `deny` 降级为 `ask`，降低此类死锁复发概率 |
 | 2026-08-10 | v4.0.0 | 人工+Agent | A1三态/D1/D7/D8/F1n/H1(+反例) **9/10 Pass**（真演 10 · 走读 0；Y=可触发数，N/A 排除） | 0%（0/10） | `Direct未隔离CR`（S6） | 增量聚焦 v4.0.0 变更剧本 + 关联回归（A2/A3/F1b 字面/validate 四车道检查）；S6 伪称隔离 CR 如实判 Fail（I2b 先例扩展，事后补派不追溯改判 Pass）；隔离 CR 由 PM 补派；夹具 `.ai-gates/Doc/_examples/skill-eval-v4/`；不 bump |
+
+## 附录 · 规则翻错本（触发路由 · 零 API）
+
+人跑剧本仍用上文 A–K。本附录只加不烧大模型钱的触发评测：对照 [reference-routing.md](./reference-routing.md) 触发表，用词面打分检查该读的有没有排前、不该读的有没有抢第一。
+
+- 用例表：方案夹 `证据/test-first/routing-cases.json`（主题短名：规则翻错本评测；正例/负例；owner = 触发表内文件名）
+- 跑测：`.ai-gates/scripts/eval-reference-routing.ps1`（exit 0 全绿，错配 exit 1）
+
+不新开评测岗；失败标签仍用上文枚举。

@@ -35,6 +35,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 3.06 **阻塞边（blocking edges）**：≥2 Step **必填**「串联 / 并联」+ 路径集。缺边 → **major**；假串联 → **major**；路径相交却标并联 → **blocker**。日常单 Step / Express / Direct 对话内切片写「无（单步·不跑电路）」→ 不硬拦。旧句「缺失不硬拦」作废。点名 [circuit-windows.md](../references/circuit-windows.md)。
 3.07 **共享语言**：方案两套叫法并存或术语未登记而歧义 → **major**（细则 [shared-language.md](../references/shared-language.md)）
 3.5 **验收条款 + Delta-only + Delta Spec**（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md)）：无 `A1…`、条款不可证伪、Step 未引用 A#、文档复述整模块原理、或缺 Delta Spec 三段 → **blocker**，不得定版
+3.51 **默认抽检四类洞（思考碰撞回灌）**：日常方案审（L1.5+，Skill/Doc 与业务方案均适用）默认抽检失败句能否抓到自报、字段钉死、条款与清单同句、机器绿 vs 人看见的现象。命中任一条 → **major**（细则指针 3.55，禁止把 3.55 长文再贴一份）。碰撞仍点名才开（[collision-review.md](../references/collision-review.md)）；禁止日常自动碰撞
 3.55 **Analyze 对表（P2）**：交审时核对三表——A# ↔ Mandatory（Code Changes / Delta）↔ 预期 Console 关键词（回归索引 / 验收信号）；缺任一或对不上 → **major**（缺 A# 直接 blocker，见 3.5）。细则 → [acceptance-and-delta.md](../references/acceptance-and-delta.md) §Analyze 对表。**条款可证伪（思考碰撞回灌）**命中任一条 → **major**：①成功句有机器源，失败句只禁某种做法、抓不到「自报 / 不读该源 / 缺字段」；②机器检查只写「计数字段/脚本绿」未点名要比对的字段或行键；③Mandatory 入口接线（某 SKILL +1 行等）未写入对应 A#；④手工红线与脚本证据不同句，脚本绿可单独冒充该红线已过
 3.56 **置信标注核验**（见 [evidence-levels.md](../references/evidence-levels.md) §置信标注）：方案/答复中关键行为断言（如「既有 X 流程会…」「状态已是…」「已核对调用链」）缺置信标注（`确定[有代码证据]`/`推断[有间接证据]`/`猜测[无证据]`）→ **major**；「猜测」冒充「确定」（无据称有据）→ **blocker**（伪称执行同族，`.ai-gates/lessons-learned.md` 2026-08-10 行）。核验方法=按标注回引代码位置/依据，回引不实 → 同判
 3.6 **Agent 易错语义**：每 Step 须有该字段（Full 在 Pitfalls）；有记录则核对符号、实际语义及代码证据，写「未发现」时须列已检查的关键符号；缺字段、无证据或为凑数编造 → **blocker**

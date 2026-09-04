@@ -1,6 +1,7 @@
 # 诊断方案闸门（止损 / 热修 / 并行实现 / 结案 / Verify 失败决策）
 
 > 权威：本文件。降 **步骤膨胀** 与间接降 token。窗口化 → [doc-windowing.md](./doc-windowing.md)。
+> 人读对照（提醒 / 升级信号 / 硬停）→ [止损热度对照](./stop-loss-heat-compare.md)。
 > 多选推荐话术 → [demand-clarification.md](./demand-clarification.md) §多选决策。
 > 借鉴 Loop：**Verify 失败先回 Discover**，不是只回 Execute 打补丁。
 > **2026-07-15**：热修计入止损、现象计数不可用「新切片」随便清零、放行合取、热修并行实现一句。

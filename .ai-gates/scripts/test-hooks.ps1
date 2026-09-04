@@ -268,6 +268,7 @@ try {
 
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $childWithPm } | ConvertTo-Json -Compress)
     Assert-Test "A5c pm-gate-check: unique parent with fresh [PM] -> allow inherit" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    Assert-Test "A5c pm-gate-check: inherit reason is window_pm_not_this_turn" ($r.Stdout -match "window_pm_not_this_turn") "stdout=$($r.Stdout)"
 
     # 父从 gate 去掉，transcript 仍无 [PM] → 子窗 DENY 不得叫子窗自己发 [PM]
     $gateStripped = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -313,6 +314,7 @@ try {
     # A5：新鲜标记 → allow
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $convFresh } | ConvertTo-Json -Compress)
     Assert-Test "A5 pm-gate-check: fresh marker -> allow" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    Assert-Test "A5 pm-gate-check: allow reason is window_pm_not_this_turn (not this_turn_pm)" ($r.Stdout -match "window_pm_not_this_turn") "stdout=$($r.Stdout)"
 
     $r = Invoke-HookScript -ScriptName "mark-pm-gate.ps1" -StdinJson (@{ text = "这轮没有 PM 标记，纯闲聊"; conversation_id = $convNone } | ConvertTo-Json -Compress)
     $gateNow2 = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -570,6 +572,26 @@ try {
             [System.IO.File]::WriteAllText($compileLog, $compileLogBackup, $utf8Bom)
         } elseif (Test-Path -LiteralPath $compileLog) {
             Remove-Item -LiteralPath $compileLog -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    # A3：无 pwsh 不得报已接线——真实 Unix 无 pwsh 跑不了本 .ps1，用注入接缝测字面量
+    $prevRuntime = $env:AI_GATES_HOOKS_RUNTIME
+    try {
+        $policyPath = Join-Path $scriptDir "check-hooks-policy.ps1"
+        . $policyPath
+        $env:AI_GATES_HOOKS_RUNTIME = "hooks_not_wired_no_pwsh"
+        $rtForced = Get-HooksRuntimeStatus
+        Assert-Test "A3 Get-HooksRuntimeStatus: override -> hooks_not_wired_no_pwsh" ($rtForced.Code -eq "hooks_not_wired_no_pwsh") "code=$($rtForced.Code)"
+        $env:AI_GATES_HOOKS_RUNTIME = $null
+        Remove-Item Env:AI_GATES_HOOKS_RUNTIME -ErrorAction SilentlyContinue
+        $rtDefault = Get-HooksRuntimeStatus
+        Assert-Test "A3 Get-HooksRuntimeStatus: default on this host is not hooks_not_wired_no_pwsh" ($rtDefault.Code -ne "hooks_not_wired_no_pwsh") "code=$($rtDefault.Code)"
+    } finally {
+        if ($null -eq $prevRuntime -or $prevRuntime -eq "") {
+            Remove-Item Env:AI_GATES_HOOKS_RUNTIME -ErrorAction SilentlyContinue
+        } else {
+            $env:AI_GATES_HOOKS_RUNTIME = $prevRuntime
         }
     }
 
