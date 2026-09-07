@@ -45,7 +45,7 @@
 ## Skill 默认表（无 project-context 覆盖时才用 · 示例）
 
 > 下列 slug 仅为**缺省示例**。若仓库有 `.cursor/project-context.md` §模型路由，**整表以项目节为准**。  
-> **统一三档**（无 project-context 时用；覆盖旧「两档 / Composer 首选」）：最低 = Grok 4.5（`cursor-grok-4.5-high`；**禁止**把 `cursor-grok-4.5-medium-fast` / `cursor-grok-4.5-high-fast` 当首选）；普通 = Grok 4.6（`cursor-grok-4.6-high`）；高级 = Opus 5 → GPT 5.6 Sol（`claude-opus-5-thinking-high` → `gpt-5.6-sol-medium`，再回退 Grok 4.6）。Composer `composer-2.5-fast` **不再作为任何岗首选**，仅可作链末应急并标注「未按模型路由」。档内链用尽 → 下一档。
+> **统一三档（2026-09-07 用户改档，覆盖 2026-08-25）**（无 project-context 时用；覆盖旧「两档 / Composer 首选」）：最低 = Grok 4.5（`cursor-grok-4.5-high`）；普通 = Grok 4.6（`cursor-grok-4.6-high`）；高级 = Opus 5 → GPT 5.6 Sol（`claude-opus-5-thinking-high` → `gpt-5.6-sol-medium`，再回退 Grok 4.6）。**任何 `*-fast` 都不得当首选**（含 `cursor-grok-4.6-high-fast` / `cursor-grok-4.5-medium-fast` / `cursor-grok-4.5-high-fast` / `composer-2.5-fast`）。`*-fast` 仅当非 fast 链尽且白名单只剩 fast 时，才可链末应急并标注「未按模型路由」。平台把 `cursor-grok-4.6-high` 显示/解析成 `cursor-grok-4.6-high-fast` 时须标「未按模型路由」，不得把 `-fast` 当正规首选去传。档内链用尽 → 下一档。
 
 | 岗位 / 场景 | 场所 | 档位 | Task `model`（首选 → 回退） |
 | --- | --- | --- | --- |

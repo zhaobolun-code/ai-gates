@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v5.0.2（门禁补洞 + 错题自动起草 + 迷雾卡片查询 · minor；前版 5.0.1 定版信息保留）
+**当前 LTS**：v5.0.3（会话交接拆两半 + 重构候选栏 + 禁 fast 首选 · minor；前版 5.0.2 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -11,6 +11,12 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-09-07：会话交接拆开「提示换窗」与「执行交接」：用户发言≥20 轮才提示回「换窗」（每窗一次；≠自动吐八段）；触顶/压缩不另开提示阈值；禁「2 轮实现+审核」。session-handover / handoff-automation §J / agent-entry-route PM 格。不 bump VERSION
+- 2026-09-07：模型路由总禁任何 `*-fast` 当首选（含 `cursor-grok-4.6-high-fast` / 4.5-*-fast / `composer-2.5-fast`）；仅非 fast 链尽且白名单只剩 fast 时链末应急并标「未按模型路由」。project-context §模型路由 + skills/references/model-routing.md。不 bump VERSION
+- 2026-09-07：会话交接附加「新窗第一句」复制块（7 字段）+ 触发词换窗/卡了/卡了换窗；session-handover / templates / handoff-automation §J。不 bump VERSION
+- 2026-09-07：确认包加【重构候选】短栏；「准」不含抽离，另口令「准, 抽离」/「准, 另开抽离窗」才抽；未点抽离禁止整段搬家，CR 记规格轴越出 A#。不 bump VERSION
+- 2026-09-07：A1 用户可见主句去手续黑话：CORE §用户可见输出加总则；demand-clarification 一次确认包/续链合并包模板改人话，Express 连做说明移入岗位要点。不 bump VERSION
+- 2026-09-07：复用四问第 4 问最低证据改为三选一（REMOVED 点名 / 无可删+不能删原因 / 能删须进 Delta REMOVED）；方案审 3.10 抓第 4 问填空为 blocker；planner 1.1 与 plan-lite / express-slice 能删占位对齐；developer 2.1 短表能删且 caller 仍通断不得自称完成。不 bump VERSION
 - 2026-09-04：周报 skill 按定稿模板加厚「不懂项目也能看懂」：正式汇报语气；黑话须译成现象/能力白话；禁止材料来源元话术入正文；示例对齐 8/31–9/4 周报口径。不 bump VERSION
 - 2026-09-04：session-dash Direct 热修：`Render-DetailsPreview` 每行先 Clip-Text 200；assert 增 A8（html Length<100000）。不 bump VERSION
 - 2026-09-04：失败输出起草错题pending Step 1：新增 `.ai-gates/scripts/draft-lesson-pending.ps1`（从 `[FAIL] token ::` 抽第一 token 进 keywords，填 pending 七字段+非空 cause/fix；不把 `-Apply` 传给 commit）；developer 8.5 / CR 1.5 / 机制页 `lessons-learned.md` 各 +1 指针点名 `draft-lesson-pending`。不 bump VERSION
@@ -218,6 +224,17 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [5.0.3] - 2026-09-07（会话交接拆两半 + 重构候选栏 + 禁 fast 首选 · minor · 发布）
+
+### Included changes — 2026-09-07（会话交接 / 重构候选 / A1 人话 · 不 bump）
+
+- **会话交接拆两半**：「提示换窗」与「执行交接」拆开——用户发言 ≥20 轮才提示回「换窗」（每窗一次；≠自动吐八段）；触顶/压缩不另开提示阈值；禁「2 轮实现+审核」。session-handover / handoff-automation §J / agent-entry-route PM 格接线。
+- **新窗第一句复制块**：会话交接附加 7 字段「新窗第一句」块 + 触发词（换窗/卡了/卡了换窗）；session-handover / 模板 / handoff-automation §J。
+- **模型路由禁 fast 首选**：任何 `*-fast` 不得当首选（含 `cursor-grok-4.6-high-fast` / 4.5-*-fast / `composer-2.5-fast`）；仅非 fast 链尽且白名单只剩 fast 时链末应急并标「未按模型路由」。project-context §模型路由 + model-routing.md。
+- **确认包【重构候选】短栏**：「准」不含抽离；「准, 抽离」/「准, 另开抽离窗」才抽离；未点抽离禁止整段搬家，CR 记规格轴越出 A#。
+- **A1 用户可见主句去手续黑话**：CORE §用户可见输出加总则；demand-clarification 一次确认包/续链合并包模板改人话，Express 连做说明移入岗位要点。
+- **复用四问第 4 问最低证据三选一**（REMOVED 点名 / 无可删+不能删原因 / 能删须进 Delta REMOVED）；方案审 3.10 抓填空为 blocker；planner 1.1 与 plan-lite / express-slice 能删占位对齐；developer 2.1 能删且 caller 仍通断不得自称完成。
 
 ## [5.0.2] - 2026-09-04（门禁补洞 + 错题自动起草 + 迷雾卡片查询 · minor · 发布）
 

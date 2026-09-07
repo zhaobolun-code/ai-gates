@@ -37,7 +37,7 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 1.55 **完成即迁移**（Standard/Full 有方案夹）：本 Step 收口须按 [doc-windowing.md](../references/doc-windowing.md) §完成即迁移——正文 → `已完成/Step{NN}-短标题.md`，改 `_索引.md`（已有完成 Step 则表内**禁止**仍「尚无」），`未完成.md` 只留摘要。`migrate-pipeline-window` 迁签收 **≠** 本条。Direct/Express 无夹则跳过。
 1.57 **迷雾结构面**（改当前文档窗须读卡片 + 一度边）：本步改某个文档窗 → 按 [fog-map-structure.md](../references/fog-map-structure.md) 读该格状态 + 一度边 + 该格点名的雾。未读邻边不得自称已按 5.0.0 合规。纯代码热修不碰文档窗、Express 机械改、闲聊 → 不读。
 2. Read `.cursor/project-context.md`（若存在）+ 模块 README **当前风险短段**（勿整份版本史）+ **真实代码**（**优先反复 `codegraph_explore`**；禁止因 soft budget 弃用；禁止全目录扫读）
-2.1 **复用四问**（改码前，见 [execution-discipline.md](../references/execution-discipline.md)）：核对方案短表；方案漏则自补并报 PM。优先接已有 helper/Service/分支；能删旧轨则写进 diff；禁止复制粘贴第二套同类逻辑。命中 project-context **神类止血/补强三口** 时：落点进 Service、守净增阈/方法预算，交 CR 前写**瘦身一拍**一句
+2.1 **复用四问**（改码前，见 [execution-discipline.md](../references/execution-discipline.md)）：核对方案短表；方案漏则自补并报 PM。优先接已有 helper/Service/分支；禁止复制粘贴第二套同类逻辑。短表写「能删」则本 Step diff 的 Delta REMOVED 须点名对应符号；生产 caller 仍通断 → 不得自称本 Step 完成。命中 project-context **神类止血/补强三口** 时：落点进 Service、守净增阈/方法预算，交 CR 前写**瘦身一拍**一句
 2.11 **修 bug 根因先于保底**（Direct 同样；Express 机械改除外）：改码前自检写**根因一句**（坏在哪条因果/符号）。写不出 → 停、只读、交 PM，禁止先打补丁。禁止用夹紧、默认值、空 catch、再开一条路、force/suppress 藏症状且不删错因。交 CR 须能指出根因落点。连败禁止换皮再保底，走黑板/止损（[diagnosis-gates.md](../references/diagnosis-gates.md)）。允许根因分两刀。
 2.2 **错题本必读**：若 `未完成.md` 有 `## 错题本必读（给程序员）`，改码前 Read 点名的大纲条/主表行（错因+改正）；按「改正」落点，禁重复「错因」手法；禁全表灌入（[lessons-learned.md](../references/lessons-learned.md)）
 2.3 **证据路径自检（改码前 / 交 CR）**：自检摘要或派发须引用路径——错题本必读点名行 + 黑板最近 ≤3「禁止再做」（或「无黑板（已查路径）」）；无路径不得交 CR
@@ -45,7 +45,7 @@ AFK 子代理委托书规范见 [agent-brief.md](../references/agent-brief.md)�
 2.5 **覆盖度**：若引用覆盖度，必须来自 `.ai-gates/coverage-map.yaml` 或刚跑的 `compute-coverage-map.ps1` 输出；禁止自报百分比。
 3. **只改说定的文件**；一次一个 Step/切片；**只为实现所引验收条款 A#**（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md)）；**Auto 下同样**一次一 Step、遵守微循环，未测签收不得进下一 Step（见 [loop-engineering.md](../references/loop-engineering.md)）
 3.05 **电路子窗路径集**：只改本子窗路径集；看见并联组不得改邻 Step 文件。点名 [circuit-windows.md](../references/circuit-windows.md)。
-4. **精简优先（YAGNI）**：只做需求所需的最小实现，不顺手加方案外抽象/配置项；改动路径上的废弃方法/字段/死代码顺手清理或交接说明未清理原因；本步神类只增不减须在交接说明是否建议抽离
+4. **精简优先（YAGNI）**：只做需求所需的最小实现，不顺手加方案外抽象/配置项；改动路径上的废弃方法/字段/死代码顺手清理或交接说明未清理原因；KEEP 且已写不能删原因的旧轨不算残留；短表能删却仍通断 = 未完成，不是「顺手清理」；本步神类只增不减须在交接说明是否建议抽离。未出现用户口令「准, 抽离」/「准, 另开抽离窗」时，禁止本 Step 整段搬家/新抽象。人点了抽离：本步停或只做完已准范围，抽离进新短窗，禁止同一刀既交原 A# 又推倒重来
 4.5 **Reflexion 微循环（P1.5）**：按「改一段 → 自检 → 修正 → 继续」推进，禁止攒到整 Step 结束才第一次检查。自检至少含：① **真编译**（`dotnet build` 相关 csproj，或 [unity-editor-log.md](../references/unity-editor-log.md) §A Editor.log 无新增错误；**新增/改动 `out` 参数必须在方法入口（任何早退之前）定值**，防 CS0177 definite-assignment）；② 本段语义三问（见 5.5）。业务 C# Step 交 CR 前的**最小验证**=**真编译零错误**（dotnet build 相关 csproj 或 Unity Editor.log 无新增错误）+ 可执行 Unity 验收步骤/预期关键词；**禁以静态 grep/括号平衡充当编译通过**；UNITY_EXE 未配置时用 dotnet build 兜底。仓库根存在 `Tests/EditMode/` 外部 dotnet NUnit 工程时（TDD 设施，Assets 外不编入 Assembly-CSharp），可加跑 `.ai-gates/scripts/run-dotnet-editmode-tests.ps1`（trx 判定 total≥70 且 failed=0 方绿，防伪绿）作为增量验证层——不替代 golden/手测。Skill/文档用静态核对+假需求，不伪造 Unity。单个 Step 内 **≥50%** 小改动块须留自检痕迹。
 4.6 **test-first 默认**：本 Step 验收**含可机械验证项**（纯逻辑 / 状态机 / 确定性算法，可写成 EditMode / PlayMode 或脚本化断言）时，**先写最小可执行断言再实现至绿**，见 [test-first.md](../references/test-first.md)；方案点名或 PM 指定仍强制；断言绿 ≠ 业务 A# 通过，golden/手测照常。
 5. 方案/切片与代码冲突 → 停，报差异，**禁止臆测**；越出 A# 范围同样停报

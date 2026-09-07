@@ -27,7 +27,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 ## Checklist
 
 1. Read `.cursor/project-context.md`（若存在）+ 范围内 README + 真实代码入口 + **先** `.ai-gates/lessons-outline.md`（若存在，按桶扫）**再** `.ai-gates/lessons-learned.md`（点名行：模块/症状/作用域；命中则 Pitfalls + 更新「最近命中」；近 6 月命中 → 至少 L1.5，见 [plan-review-tiers.md](../references/plan-review-tiers.md)；细则 [lessons-learned.md](../references/lessons-learned.md)）。**强制**在 `未完成.md` 写 **`## 错题本必读（给程序员）`**：大纲桶 + 主表锚点（日期/模块/关键词）≤5 条，或「无（已扫大纲·{桶}）」；条目须能落到错因/改正
-1.1 **复用四问**（写 Mandatory 前强制，见 [execution-discipline.md](../references/execution-discipline.md)）：已有吗→能复用吗→能少写/不写吗→能删吗；每 Step 落 ≤6 行短表（可并入选型短表）；未检索不得写新路径。若 project-context 有 **神类止血/补强三口**：Mandatory 须用**替换句式**，超净增阈/方法预算须 Service·拆分·REMOVED 或豁免句
+1.1 **复用四问**（写 Mandatory 前强制，见 [execution-discipline.md](../references/execution-discipline.md)）：已有吗→能复用吗→能少写/不写吗→能删吗；每 Step 落 ≤6 行短表（可并入选型短表）；未检索不得写新路径。第 4 问最低证据须三选一：① Delta Spec **REMOVED** 点名本步要删的符号；或 ② 写「本步无可删」且改动路径上已点名旧轨各有不能删原因（谁还调用 / 口径要留；路径上无已点名旧轨则可只写「本步无可删」）；或 ③ 写了「能删」则 Delta REMOVED 必须点名对应符号——生产 caller 仍通断 = 第 4 问未完成。禁止「能删 X；Y 不删」无原因即满足。神类只增不减句不得替代三选一。若 project-context 有 **神类止血/补强三口**：Mandatory 须用**替换句式**，超净增阈/方法预算须 Service·拆分·REMOVED 或豁免句
 1.15 **迷雾结构面**（改当前文档窗须读卡片 + 一度边）：写方案 / 复用四问「已有吗」涉及文档窗 → 按 [fog-map-structure.md](../references/fog-map-structure.md) 读当前格卡片 + 一度边 + 雾（点名未建夹）。未读邻边不得自称已按 5.0.0 合规。Express 机械改 / 纯代码热修不碰文档窗 / 闲聊 → 不读
 1.2 **设计模式一问（扫症状）**：写 Mandatory 前扫 [design-patterns.md](../references/design-patterns.md) 词条表「触发症状」列。复用入口若存在 `.ai-gates/design-patterns.project.md` 则读该表（代码路径只在那份项目文件里）。命中 → 强制选型句（有成熟实例复用 / 无则人类模式配方 / State·Policy·Seam 无锚点不采用）；禁止因无本仓路径写成不采用。未命中 → 字面 `本步不采用 design-patterns 词条`。显式采用或不采用；禁止优先套用；无症状不得新抽象（YAGNI）。主窗派发不得预填采用/不采用结论；扫症状由本岗完成。细则 [execution-discipline.md](../references/execution-discipline.md) §设计模式一问
 1.3 **修 bug / 消现象（根因先于保底）**：本步是修可见故障或消症状时，Mandatory（Direct=对话内切片）须有**根因一句**（坏在哪条因果/哪条真源，不是「现象没了」）。写不出 → 只读排查，不写保底实现。选型短表须有「不选保底」一行（Why Not：夹紧/默认值/空 catch/第二条路径若未删错因=藏症状）。允许根因分两刀。禁止无根因假设就写保底。连败仍走 [diagnosis-gates.md](../references/diagnosis-gates.md) 止损与典故「连败先问重设计」，不另开手续。
@@ -74,6 +74,9 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 3. **改前**写清【本步方案】【为什么】【不选的】。  
 4. 「准」→ 同条定版并开始改码；写入 `未完成.md`。  
 5. **禁止**先改码再补理由；**禁止**单独先问「理解正确」再发包。
+6. 发确认包时扫症状才写【重构候选】；无症状省略或一行「无」。
+7. 推荐句永远「本步不抽，抽离另准」；「准」不含抽离。
+8. 禁止「应该重构」「做成框架更优雅」。
 
 细则 → [demand-clarification.md](../references/demand-clarification.md)；需求未定 / 大需求 / 多次澄清仍分歧 → 先按其中 **grill 访谈** 节一次一问澄清，分支穷尽再写切片；「准」确认仍只 1 轮
 
