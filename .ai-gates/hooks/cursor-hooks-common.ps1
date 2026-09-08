@@ -6,6 +6,7 @@
 # （子脚本点源本文件后仍会走此缓存，避免第二个门禁读到已耗尽的流）。
 # 读取实现与 mark-changelog-write 的健壮模式一致（OpenStandardInput + StreamReader 显式
 # UTF-8），避免超大 payload 时 PS5.1 Console.In.ReadToEnd 解析失败。
+# 不在此函数内自旋等待：宿主 hooks.json 的 timeout 为底线；stdin 无 EOF 时由 timeout 杀进程。
 
 function Read-HookStdin {
     if ($null -ne $global:AI_GATES_HOOK_STDIN_CACHE) { return $global:AI_GATES_HOOK_STDIN_CACHE }

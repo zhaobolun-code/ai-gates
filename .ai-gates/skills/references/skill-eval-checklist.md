@@ -141,7 +141,7 @@
 | H4b（滥用反例） | 为压行删 A#/当前 Mandatory/状态真相 | **Fail / blocker** |
 | H5 | 日常 Agent 取上下文 | CORE+project-context+当前岗SKILL + 任务白名单；每阶段默认点名≤2份 reference |
 | H5b（滥用反例） | 通配/整读 `references/**` | **Fail**；改为点名路由 |
-| H5c（过度保守反例） | 为守≤2而跳过真实代码/当前方案/Mandatory/README风险段 | **Fail**；任务白名单不占 reference 预算 |
+| H5c（过度保守反例） | 为守≤2而跳过真实代码/当前方案/Mandatory/README风险段/有则整节装载的认知卡片 | **Fail**；任务白名单不占 reference 预算 |
 | H6a（发布前） | 版本工具就绪 | VERSION=3.1.4；两个脚本运行时读取；Strict 的 workflow/version/self-test 均 OK；允许尚未迁移的入口全部硬编码且与 VERSION 一致 |
 | H6（发布闸） | 版本单源完成 | Step10 后所有当前入口只指向 VERSION、无当前版本硬编码；最终 VERSION+CHANGELOG 原子 bump 后 Strict 为 OK；历史评分表版本不改 |
 

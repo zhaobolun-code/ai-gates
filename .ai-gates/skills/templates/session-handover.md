@@ -23,6 +23,7 @@
 【未完成】
 【禁区】
 【先读】
+（可含当前 `未完成.md` / Mandatory；有认知卡片节则写 `.cursor/project-context.md` 该节。禁止在本块粘贴 F/R/A/S。）
 【旧窗检索】
 【请直接做】
 ```

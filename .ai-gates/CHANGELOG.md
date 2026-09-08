@@ -2,15 +2,18 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v5.0.3（会话交接拆两半 + 重构候选栏 + 禁 fast 首选 · minor；前版 5.0.2 定版信息保留）
+**当前 LTS**：v5.0.4（代码认知地图 + 承重句 canary · minor；前版 5.0.3 定版信息保留）
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。  
+格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
 
 ---
 
 ## 最近迭代（最新在上）
 
+- 2026-09-08：Skill 承重句 canary + 四问第 4 问升级触发 + 一次性 skill 合同 + 修 bug 共享点一次 + 规范轴一行句式 + hook `timeout` 必填。新脚本 `check-rule-invariants.ps1` 进 `validate-pipeline`；入口/shared-language/MAINTAINER 发布清单接线；不把四问扩成档位。不 bump VERSION
+- 2026-09-08：代码认知地图入 skill（借鉴 AOCI Whole-Index 读法）：新页 `code-cognition-map.md`；入口/迷雾/策划/程序员/方案审/CR/交接/路由/MAINTAINER/shared-language 接线。全图一次装载；禁止 CodeGraph 冒充；R 打开邻居源码；压缩禁止摘要 FRAS；改卡优先于「仍准」。CR 后补：触发词「用户点名」+ planner 卡片仍准义务 + 双表一致句。不 bump VERSION
+- 2026-09-08：本仓 `install-info.json` 的 tag 与本地 `skills/VERSION` 对齐为 v5.0.3（消除 Claude drift / CheckUpdate 假「有更新」）。不是远程重装，不覆盖 skills/hooks。不 bump VERSION
 - 2026-09-07：会话交接拆开「提示换窗」与「执行交接」：用户发言≥20 轮才提示回「换窗」（每窗一次；≠自动吐八段）；触顶/压缩不另开提示阈值；禁「2 轮实现+审核」。session-handover / handoff-automation §J / agent-entry-route PM 格。不 bump VERSION
 - 2026-09-07：模型路由总禁任何 `*-fast` 当首选（含 `cursor-grok-4.6-high-fast` / 4.5-*-fast / `composer-2.5-fast`）；仅非 fast 链尽且白名单只剩 fast 时链末应急并标「未按模型路由」。project-context §模型路由 + skills/references/model-routing.md。不 bump VERSION
 - 2026-09-07：会话交接附加「新窗第一句」复制块（7 字段）+ 触发词换窗/卡了/卡了换窗；session-handover / templates / handoff-automation §J。不 bump VERSION
@@ -224,6 +227,14 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [5.0.4] - 2026-09-08（代码认知地图 + 承重句 canary · minor · 发布）
+
+### Included changes — 2026-09-08（代码认知地图 + 承重句 canary · 不 bump）
+
+- **代码认知地图入 skill**：新增 `skills/references/code-cognition-map.md`（借鉴 AOCI Whole-Index 的读法与分工，不安装 aoci、不抄 FRAS 词法/MCP/CAS）；project-context 有认知卡片节时整节一次装载，禁止 CodeGraph/搜索冒充全图、禁止摘要 FRAS、R 打开邻居源码。接线：入口路由 / reference-routing（**双轨调用**注解——岗位 user-invoked vs references model-invoked，新增行仅入触发表且须双表一致）/ codegraph-probe / anti-patterns / 交接 / CR 1.18（未装载自称已理解热路径 = major；改卡优先于「仍准」）/ shared-language / MAINTAINER。
+- **Skill 承重句 canary**：新增 `scripts/check-rule-invariants.ps1`（CORE / 入口路由 / AGENTS.md / always-on .mdc 关键子串检查，缺即红，可注入 `-RepoRoot`）进 validate-pipeline；hook `timeout` 必填（check-hooks-policy / cursor-hooks-common 文案同步）；四问第 4 问升级触发（不扩成档位）；一次性 skill 合同；修 bug 共享点一次；规范轴气味一行一句。
+- **本机对齐（不进包）**：install-info.json tag → v5.0.3（消除 Claude drift / CheckUpdate 假「有更新」；不覆盖 skills/hooks）。
 
 ## [5.0.3] - 2026-09-07（会话交接拆两半 + 重构候选栏 + 禁 fast 首选 · minor · 发布）
 

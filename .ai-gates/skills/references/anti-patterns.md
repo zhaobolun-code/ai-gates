@@ -170,6 +170,7 @@
 | 为谨慎全目录 Read 某个大模块 | 源码 token 暴涨 | 日常先 `codegraph_explore`；审核岗先 CRG（业务在子模块则查子模块图） |
 | 交接默认贴大段代码/Console | 对话上下文膨胀 | 短表 + 证据外置 |
 | 把 CodeGraph soft budget 说成「额度已用尽」并整轮弃用 | 误导用户；退回全量 Read/Grep | 本地无付费额度；收窄 query 继续 explore（见 [codegraph-probe.md](./codegraph-probe.md)） |
+| 用 CodeGraph/搜索/只读一张卡冒充已装载认知全图；或把迷雾「一张卡」套到热路径卡片 | 行动前没有跟版本绑定的系统认知；改错邻居 | 有该节则整节一次装载；R 打开邻居源码；图谱只补结构边（[code-cognition-map.md](./code-cognition-map.md)） |
 
 ## 团队使用
 

@@ -251,12 +251,22 @@ try {
             . $policyScript
             $policyReport = Get-HooksPolicyReport -RepoRoot $repoRoot
             if ($policyReport.Ok) {
-                Write-Host "hooks policy: OK (ask + all failClosed=false + sessionStart drift)" -ForegroundColor Green
+                Write-Host "hooks policy: OK (ask + all failClosed=false + timeout + sessionStart drift)" -ForegroundColor Green
             } else {
                 Write-Host "hooks policy: FAILED (drift):" -ForegroundColor Red
                 $policyReport.Issues | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
                 $exitCode = 1
             }
+        }
+
+        Write-Host "`n--- rule invariants (承重句 canary) ---" -ForegroundColor Cyan
+        $invariantsPath = Join-Path $scriptDir "check-rule-invariants.ps1"
+        if (-not (Test-Path -LiteralPath $invariantsPath)) {
+            Write-Host "rule invariants: FAILED (check-rule-invariants.ps1 missing)" -ForegroundColor Red
+            $exitCode = 1
+        } else {
+            & powershell -NoProfile -ExecutionPolicy Bypass -File $invariantsPath -RepoRoot $repoRoot
+            if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
         }
 
         Write-Host "`n--- hooks 行为回归 (支柱 C) ---" -ForegroundColor Cyan

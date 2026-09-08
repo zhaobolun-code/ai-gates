@@ -64,6 +64,10 @@ function Get-HooksPolicyReport {
                     if ([bool]$entry.failClosed) {
                         $issues.Add(("failClosed=true not allowed ({0}: {1})" -f $ev.Name, $cmd)) | Out-Null
                     }
+                    $timeoutVal = $entry.timeout
+                    if ($null -eq $timeoutVal -or [int]$timeoutVal -le 0) {
+                        $issues.Add(("timeout missing or <=0 ({0}: {1})" -f $ev.Name, $cmd)) | Out-Null
+                    }
                     if ($ev.Name -eq "sessionStart" -and $cmd -match 'check-hooks-drift\.ps1') {
                         $hasSessionDrift = $true
                     }

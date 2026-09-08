@@ -2,6 +2,7 @@
 
 > 人看默认 `.ai-gates/verify/fog-map.html`。助手改当前文档窗须读当前格卡片 + 一度边（默认同目录 `fog-map.json`）。地图是索引，不能替代文档窗真源（`未完成.md` / `物理口径.md` / Mandatory）。
 > **加载 ≠ 每轮灌整图。** 禁止把 `fog-map.json` 列入默认必读。禁止 Read `fog-map.html`、截图、布局坐标、把 HTML 注入上下文。禁止要求描述图块坐标。本页是 5.0 正式结构面。
+> **迷雾图 ≠ 代码认知地图。** 迷雾 = 文档窗，一张卡 + 一度边。代码认知 = 受管对象全图，有 project-context 该节则**整节一次装载**（读法相反，见 [code-cognition-map.md](./code-cognition-map.md)）。禁止把本页「不灌整图」套到热路径认知卡片。
 
 ## 脊骨
 

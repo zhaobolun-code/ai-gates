@@ -19,6 +19,8 @@
 | 策划 / 程序员 / Discover / PM 钉符号 | **CodeGraph** | CRG 不可用时不必硬等 |
 | 方案审核 / 代码审核（含对抗 CR） | **CRG** | 需 verbatim 源码或 CRG 未覆盖符号时，再用 CodeGraph 窄 query；**禁止**两套各跑一遍完整影响面 |
 
+结构图 **不能**冒充代码认知全图。project-context 有「热路径认知卡片 / 代码认知卡片」节时，先按 [code-cognition-map.md](./code-cognition-map.md) 整节装载，再用本页工具补调用边与原文。
+
 ## 安装
 
 ```bash

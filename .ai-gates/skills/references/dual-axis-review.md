@@ -18,4 +18,4 @@
 
 ## 输出
 
-findings 短表按轴分组：`[规范轴]` / `[规格轴]` 前缀；集成维照常必扫。双轴一致无 blocker → 按 [handoff-automation.md](./handoff-automation.md) §C 收口。
+findings 短表按轴分组：`[规范轴]` / `[规格轴]` 前缀；集成维照常必扫。规范轴气味优先一行：`<path>:L<line>: <气味>: <现状>. <替换>.` 禁止用净减行数当收口或规格轴 blocker。双轴一致无 blocker → 按 [handoff-automation.md](./handoff-automation.md) §C 收口。

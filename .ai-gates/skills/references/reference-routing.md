@@ -5,7 +5,7 @@
 ## 默认读取预算
 
 1. **基线**：`agent-entry-route.md` + `.cursor/project-context.md`（若有）+ 当前岗 `SKILL.md` checklist；**CORE 全文不在基线**。
-2. **任务白名单**：当前 `未完成.md` / Mandatory、模块 README 风险短段、真实源码/diff、命中的 lessons 行；这些不是 reference 预算，不得为省 Token 跳过。
+2. **任务白名单**：当前 `未完成.md` / Mandatory、模块 README 风险短段、真实源码/diff、命中的 lessons 行、**有则整节装载的认知卡片**（project-context「热路径认知卡片 / 代码认知卡片」）；这些不是 reference 预算，不得为省 Token 跳过。
 3. **Reference**：每个阶段默认最多点名 1～2 份；新需要出现时优先替换已完成用途的 reference，不累积整包。确有硬规则冲突可超出，但交接须写理由与文件名。
 
 ## 日常按触发加载
@@ -21,6 +21,7 @@
 | 签收可复用结构 / CR 未入表真锚点 / 点名「模式沉淀」 | `pattern-harvest.md` |
 | 写 ≥2 Step 契约 / 点名「电路子窗」 | `circuit-windows.md` |
 | 改当前文档窗须读迷雾卡片 + 一度边 / 写方案复用四问「已有吗」/ 问下一窗或文档怎么连 | `fog-map-structure.md`（未读邻边不得自称已按 5.0.0 合规；出图须提示+同意；已有图可给策划/程序结构面；直通账本只在 `.ai-gates/Doc/直通文档/` 查找；挂钉不占格；加载 ≠ 每轮灌整图；Express 机械改 / 纯代码热修不碰文档窗 / 闲聊 → 不读） |
+| 用户点名「代码认知地图」 / 热路径认知卡片装载 / 分析热路径代码前装载全图 | `code-cognition-map.md`（有该节则整节一次装载；≠迷雾一张卡；CodeGraph 不得冒充；加载 ≠ 灌迷雾 JSON；禁止摘要 FRAS；Express 机械改 / 无该节 → 不读） |
 | 7 天卡住 / 质量趋势停点 | `long-task.md` |
 | 压缩重派 / 跨会话续作账本 | `loop-engineering.md` |
 | 签收效果一行 / 月末汇总 | `retrospective-metrics.md` §效果轻量版 |
@@ -38,7 +39,7 @@
 
 ## 模型自动触发（model-invoked references）
 
-> 本表为既有「日常按触发加载」行的**调用维度注解**，不改既有触发行为。调用权限维度（**双轨调用**；与 [dual-axis-review.md](./dual-axis-review.md) 的 CR「双轴（规范轴/规格轴）」是不同维度，术语登记见 [shared-language.md](./shared-language.md)）：岗位 SKILL = **user-invoked**（口令触发，模型不得自动执行岗，机器可读声明见各岗 `agents/openai.yaml` 的 `policy.allow_implicit_invocation: false`）；下表 references = **model-invoked**——满足触发语义时由模型**自动加载**，无需用户点名。既有 8 行与「日常按触发加载」对应；**新增行按 agent-brief / out-of-scope 先例仅入本表**（模型自动触发），不进「日常按触发加载」表；新增行仍须同步 [MAINTAINER.md](../MAINTAINER.md)「技能元数据规范」，否则视为设施漂移。
+> 本表为既有「日常按触发加载」行的**调用维度注解**，不改既有触发行为。调用权限维度（**双轨调用**；与 [dual-axis-review.md](./dual-axis-review.md) 的 CR「双轴（规范轴/规格轴）」是不同维度，术语登记见 [shared-language.md](./shared-language.md)）：岗位 SKILL = **user-invoked**（口令触发，模型不得自动执行岗，机器可读声明见各岗 `agents/openai.yaml` 的 `policy.allow_implicit_invocation: false`）；下表 references = **model-invoked**——满足触发语义时由模型**自动加载**，无需用户点名。日常表已有的行（含 fog-map / circuit-windows / pattern-harvest / code-cognition-map）须**双表一致**。仅 model-invoked、不进日常表的先例仍是 agent-brief / out-of-scope 一类。新增行仍须同步 [MAINTAINER.md](../MAINTAINER.md)「技能元数据规范」，否则视为设施漂移。
 
 | 触发语义（模型自动加载） | 点名 reference |
 | --- | --- |
@@ -68,6 +69,7 @@
 | 签收或 runtime-validated 抽出可复用结构且对仓三档=有真锚点 **或** CR 发现本仓已有结构、表里没有 **或** 用户点名「模式沉淀」；加载 ≠ 静默入表；Express / 空闲枢纽不加载；点名「模式沉淀」≠启用逆链 | `pattern-harvest.md` |
 | 写 ≥2 Step 契约 **或** 点名「电路子窗」；**加载 ≠ 减审**；Express / 单 Step 不加载 | `circuit-windows.md` |
 | 改当前文档窗须读迷雾卡片 + 一度边 / 写方案复用四问「已有吗」/ 问下一窗或文档怎么连；未读邻边不得自称已按 5.0.0 合规；出图须提示+同意；已有图可给策划/程序结构面；直通账本只在 `.ai-gates/Doc/直通文档/` 查找；挂钉不占格；加载 ≠ 每轮灌整图；禁止读 HTML；Express 机械改 / 纯代码热修不碰文档窗 / 闲聊 → 不读 | `fog-map-structure.md` |
+| 用户点名「代码认知地图」 / 热路径认知卡片装载 / 分析热路径代码前装载全图；有该节则整节一次装载；CodeGraph 不得冒充；加载 ≠ 灌迷雾 JSON；禁止摘要 FRAS；Express 机械改 / 无该节 → 不读 | `code-cognition-map.md` |
 | 跨项目沉淀 / 收集仓 / shareable 队列 | `collect-queue.md` |
 | 7 天卡住 / 质量趋势停点 | `long-task.md` |
 | 压缩重派 / 跨会话续作账本 | `loop-engineering.md` |
@@ -76,8 +78,8 @@
 ## 按岗加载
 
 - **策划/方案审**：当前缺口优先在 `acceptance-and-delta`、`doc-windowing`、`diagnosis-gates`、`execution-discipline`（复用四问）中点名 1～2 份；术语歧义加 `shared-language`；Full 策划前可加 `architecture-health-check`；接口设计 / 找 seam / 方案对比加 `codebase-design`；超大任务可加 `decision-map`。主窗派调研子窗加 `research-task`；用户点名「外仓对照」加 `external-compare`（加载 ≠ 启用）；有「只能人做」的步骤加 `human-wizard`。
-- **程序员**：优先 `unity-editor-log`；Auto/修复计数需要时加 `loop-engineering`；精简/净增加 `execution-discipline`（或 project-context 止血节）；test-first（含可机械验证项默认启用；方案点名强制）。
-- **代码审核**：优先 `codegraph-probe`；派发或隔离问题时二选一加载 `review-dispatch-lifecycle` / `isolated-review`；双轴模式加 `dual-axis-review`；seam / 设计相关评审加 `codebase-design`。
+- **程序员**：优先 `unity-editor-log`；改热路径且有认知卡片节时加 `code-cognition-map`（先全图再 CodeGraph）；Auto/修复计数需要时加 `loop-engineering`；精简/净增加 `execution-discipline`（或 project-context 止血节）；test-first（含可机械验证项默认启用；方案点名强制）。
+- **代码审核**：优先 `codegraph-probe`（结构图 ≠ 认知全图）；派发或隔离问题时二选一加载 `review-dispatch-lifecycle` / `isolated-review`；双轴模式加 `dual-axis-review`；seam / 设计相关评审加 `codebase-design`。
 - **文档/周报**：只读岗位 SKILL 点名的 README/周报规则，不因“参考完整”扫目录。
 
 ## 维护者专用
