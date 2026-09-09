@@ -182,5 +182,25 @@ if ($hasPmMarker) {
 
 Write-MarkAudit "conversation=$conversationId field=$fieldUsed hasPm=$hasPmMarker wrote=$wrote"
 
+# Session-end scan: observation only. try/catch swallow; must not change exit 0 / block Play.
+try {
+    $scan = Join-Path (Split-Path $logDir -Parent) "scripts\scan-session-errors.ps1"
+    if (Test-Path -LiteralPath $scan) {
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "powershell"
+        $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$scan`" -LogDir `"$logDir`""
+        $psi.UseShellExecute = $false
+        $psi.CreateNoWindow = $true
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $sp = [System.Diagnostics.Process]::Start($psi)
+        if (-not $sp.WaitForExit(8000)) {
+            try { $sp.Kill() } catch { }
+        }
+    }
+} catch {
+    # swallow: afterAgentResponse remains observation only
+}
+
 # afterAgentResponse 无 permission 字段语义；正常退出即可
 exit 0

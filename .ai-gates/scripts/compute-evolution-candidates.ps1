@@ -2,6 +2,7 @@
 .SYNOPSIS
   从 .ai-gates/lessons-learned.md 主表解析「连续触发晋升」升级候选，输出 .ai-gates/evolution-candidates.yaml。
   （机制 B：近 90 天 ≥2 次命中且最近命中 ≤30 天 + 晋升列为空 → 升级候选；候选≠已确认，须人工确认留痕 + 用户「准」。）
+  技能/规则涨幅见 `check-skill-growth.ps1`；本脚本不覆盖真源。
 
 .DESCRIPTION
   - 表头用包含匹配定位列（真实表头第 3 列为「教训（一句话）」，用 -like 匹配，不硬编码列号）

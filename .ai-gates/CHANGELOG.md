@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v5.0.4（代码认知地图 + 承重句 canary · minor；前版 5.0.3 定版信息保留）
+**当前 LTS**：v5.0.5（工程回灌：发布闸/会话扫错/涨幅闸 + 岗位与 references 演进 · minor；前版 5.0.4 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,18 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-09-09：打包补 Claude 接线（`hooks/claude/*.ps1` + `claude/` settings/agents/mcp）与迷雾模板（`scripts/fog-map.template.html`）；与 Codex 对称进包。不 bump VERSION
+
+- 2026-09-09：窗目标删旧主人时第 4 问不得走②完成态；Discover-only 须点名下一刀 REMOVED+替代边；3.10/2.1/CR 接线。不 bump VERSION
+
+- 2026-09-08：evolution-08-ge7-borrow 签收：词条「一脚本三入口发布闸」入 `design-patterns.md`（create；锚点 `scripts/test-publish-reject.ps1:Fail-Reject`）；项目验证表同步；不 bump VERSION
+
+- 2026-09-08：evolution-08-ge7-borrow Step4 CR 热修：`summarize-session-trace.ps1` 删写死短名 `evolution-08-ge7-borrow`；默认输出目录与 `scan-session-errors.ps1` 的 `Get-OutDir` 对齐（`AI_GATES_WINDOW` → `执行中/` 下唯一 `未完成.md` → tmp）。不改 mark-pm-gate；不 bump VERSION
+- 2026-09-08：evolution-08-ge7-borrow Step4 轨迹摘要+会话末扫错：新脚本 `scan-session-errors.ps1` / `summarize-session-trace.ps1`；三端 mark-pm-gate 打点后 try 内调扫错，KEEP Cursor `exit 0` 与 Claude/Codex `Emit-StopEmpty`；不改 failClosed；不 bump VERSION
+- 2026-09-08：evolution-08-ge7-borrow Step3 涨幅闸：新脚本 `check-skill-growth.ps1`（行>15%/字节>20%/净增>80 或结构坏 → exit 2 另存 FailDir，不覆盖真源）；`compute-evolution-candidates.ps1` 仅加指针；不 bump VERSION
+- 2026-09-08：evolution-08-ge7-borrow Step2 发布闸+三动作：新脚本 `test-publish-reject.ps1`；pattern-pending 加 `action:`（improve/optimize_description/create）；commit/draft 过闸失败非 0；shareable 缺 origin 拒收；不 bump VERSION
+- 2026-09-08：evolution-08-ge7-borrow Step1 验证环收紧：Skill/Doc 点名脚本须同条命令+退出码；developer §6.06/§7 与 CR 1.14/1.146 扩到点名 `.ai-gates/scripts/*.ps1`；连续静态绿无命令停测；不 bump VERSION
 
 - 2026-09-08：Skill 承重句 canary + 四问第 4 问升级触发 + 一次性 skill 合同 + 修 bug 共享点一次 + 规范轴一行句式 + hook `timeout` 必填。新脚本 `check-rule-invariants.ps1` 进 `validate-pipeline`；入口/shared-language/MAINTAINER 发布清单接线；不把四问扩成档位。不 bump VERSION
 - 2026-09-08：代码认知地图入 skill（借鉴 AOCI Whole-Index 读法）：新页 `code-cognition-map.md`；入口/迷雾/策划/程序员/方案审/CR/交接/路由/MAINTAINER/shared-language 接线。全图一次装载；禁止 CodeGraph 冒充；R 打开邻居源码；压缩禁止摘要 FRAS；改卡优先于「仍准」。CR 后补：触发词「用户点名」+ planner 卡片仍准义务 + 双表一致句。不 bump VERSION
@@ -227,6 +239,16 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [5.0.5] - 2026-09-09（工程回灌：发布闸/会话扫错/涨幅闸 · minor · 定版）
+
+### Included changes（2026-09-08/09 工程演进回灌发布仓）
+
+- **发布与进化闸**：新增 scripts/test-publish-reject.ps1、check-skill-growth.ps1；compute-evolution-candidates.ps1 / commit-lesson-pending.ps1 接线。
+- **会话末扫错与轨迹摘要**：新增 scripts/scan-session-errors.ps1、summarize-session-trace.ps1；hooks/mark-pm-gate.ps1（及 hooks/codex/）会话末打点。
+- **岗位与 references/templates**：code-reviewer / developer / planner / plan-reviewer SKILL 与多份 references、templates 同步工程仓（不含项目态）。
+- **CHANGELOG**：归并 09-08 evolution-08 签收与 09-09 迭代条目；design-patterns.md 发布面仍为空表模板。
+- **未纳入本版 7z**：claude/、hooks/claude/、og-map.template.html（package-release 扩面另议）。
 
 ## [5.0.4] - 2026-09-08（代码认知地图 + 承重句 canary · minor · 发布）
 

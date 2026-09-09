@@ -18,6 +18,7 @@ prevent: "防再发一句（可与 fix 互补；含 # 须双引号）"
 scope: 作用域路径前缀
 l0_section: false    # true 时「准」后把未完成.md 中 L0 标为已晋升L1
 outline_bucket: ""   # 可选：补进大纲的桶名，如 压力 / 门闸与传质
+evidence: ""         # 可选：证据指针；无则 cause/fix 视为证据
 ```
 
 ## 给用户

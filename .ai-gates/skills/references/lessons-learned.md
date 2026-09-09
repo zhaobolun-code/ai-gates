@@ -42,7 +42,7 @@
 | 写入 `.ai-gates/lessons-learned.md` | **否** | 仅用户「准」后：`commit-lesson-pending.ps1 -Apply` 或等价追加 |
 | 默认准 / 超时入库 | **不做** | 避免脏表 |
 
-**硬律**：禁止测失败同条写 L1/pending 当成功经验；禁止空话「本次无特别经验」充 pending；禁止未「准」改主表；「准」只授权落表。
+**硬律**：禁止测失败同条写 L1/pending 当成功经验；禁止空话「本次无特别经验」充 pending；禁止未「准」改主表；「准」只授权落表。pending 手续指向发布闸 `.ai-gates/scripts/test-publish-reject.ps1`（与 `commit-lesson-pending.ps1` dry-run）；禁止第二套主表。过闸 ≠ 入表。
 
 ## L0 / L1 / pending
 
@@ -95,6 +95,10 @@
 # 失败输出起草（不写主表；须「准」后才 -Apply）
 powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/draft-lesson-pending.ps1 `
   -FailPath "{fail.txt}" -OutPath "{方案夹}/证据/_lesson-pending.md"
+
+# 发布闸拒收（无证据/空话/缺 origin 或 create 无 anchor → 非 0；不写主表）
+powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/test-publish-reject.ps1 `
+  -PendingPath "{方案夹}/证据/_lesson-pending.md"
 
 # dry-run
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/commit-lesson-pending.ps1 `

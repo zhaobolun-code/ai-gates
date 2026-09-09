@@ -8,6 +8,8 @@
 
 触发时**自动**起草 pending；主窗只问「准否」；写入 `design-patterns.md`（**项目典故**）或 `shared-language.md` §典故（**通用典故**）或项目口诀 **须「准」**。**禁止静默入表**。**不准默认超时入库**。
 
+三动作（与 `destination` 并列，不替换）：`action: improve` 改正文 / `action: optimize_description` 只改触发描述 / `action: create` 须非空 `anchor`。禁止无证据 create。过闸 ≠ 入表（仍须「准」）。
+
 ```text
 可复用结构 + 对仓三档=有真锚点
   →【自动】写/刷新 证据/_pattern-pending.md（status: pending + 五格）

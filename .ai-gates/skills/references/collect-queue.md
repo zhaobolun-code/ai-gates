@@ -32,7 +32,7 @@
 
 人工提名，或 01-B 候选经**用户确认**后写入。禁止扫主表 / `evolution-candidates.yaml` 自动入仓。禁止「准」自动入仓。
 
-**本地环**：项目格已「准」条目 → 去上下文化（去掉本仓窗号/场景名/模块专名）→ 写入默认载体 `.ai-gates/collect-queue.md` 且 `state=shareable` → 抽象成通用级草稿仍停在队列 → 仍须用户「准」才入通用格。三态 `draft/shareable/promoted` 不变。写入 `shareable` 后抽象草稿停队列；入通用格须另一次「准」。禁止第二套队列页。
+**本地环**：项目格已「准」条目 → 去上下文化（去掉本仓窗号/场景名/模块专名）→ 写入默认载体 `.ai-gates/collect-queue.md` 且 `state=shareable` → 抽象成通用级草稿仍停在队列 → 仍须用户「准」才入通用格。三态 `draft/shareable/promoted` 不变。写入 `shareable` 前须过发布闸（`test-publish-reject.ps1`）；过闸 ≠ `promoted` ≠ 已下发；仍须另「准」才入通用格。写入 `shareable` 后抽象草稿停队列；入通用格须另一次「准」。禁止第二套队列页。
 
 ## gh（收集仓已开通；本机仍须探测）
 

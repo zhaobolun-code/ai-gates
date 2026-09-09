@@ -115,6 +115,27 @@ if ($cause.Trim().Length -lt 4 -or $fix.Trim().Length -lt 4) {
     throw "cause/fix too short"
 }
 
+$rejectScript = Join-Path $PSScriptRoot "test-publish-reject.ps1"
+if (-not (Test-Path -LiteralPath $rejectScript)) {
+    throw "missing test-publish-reject.ps1"
+}
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.FileName = "powershell"
+$psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$rejectScript`" -PendingPath `"$PendingPath`""
+$psi.UseShellExecute = $false
+$psi.RedirectStandardOutput = $true
+$psi.RedirectStandardError = $true
+$psi.CreateNoWindow = $true
+$rp = [System.Diagnostics.Process]::Start($psi)
+$rout = $rp.StandardOutput.ReadToEnd()
+$rerr = $rp.StandardError.ReadToEnd()
+$rp.WaitForExit()
+if ($rout) { Write-Host $rout.TrimEnd() }
+if ($rp.ExitCode -ne 0) {
+    if ($rerr) { Write-Host $rerr.TrimEnd() }
+    throw "publish-reject 无证据/空话/缺字段 exit=$($rp.ExitCode)"
+}
+
 $date = [string]$map["date"]
 $module = [string]$map["module"]
 $source = [string]$map["source"]

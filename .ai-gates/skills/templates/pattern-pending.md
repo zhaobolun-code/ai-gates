@@ -12,6 +12,7 @@ verify_status: "static-checked(静态核对)"
 forbid: "禁用边界：什么情况不要套"
 anchor: "本仓真锚点 path:symbol"
 destination: design-patterns   # design-patterns | maxim | maxim-generic | allusion
+action: improve   # improve | optimize_description | create（create 须非空 anchor）
 # maxim=项目口诀；maxim-generic=通用典故（架构层，pack 禁写本仓窗号）
 doc: 关联方案夹或文档相对路径
 ```

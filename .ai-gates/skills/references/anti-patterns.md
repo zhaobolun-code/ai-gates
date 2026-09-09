@@ -125,6 +125,7 @@
 | Full 车道改**业务 C#**（Runtime/Editor）无 CodeGraph/CRG 仍宣布 CR 通过 | 影响面未知、回归遗漏 | **hard blocker**；安装图谱或降级车道并声明范围。**Skill/Doc-only**（无业务 C#）无图谱 → soft risk，不挡无-blocker 收口（见 [loop-engineering.md](./loop-engineering.md)） |
 | 为「以后可能用到」预先加抽象层/配置项/通用化参数，本次需求不需要 | 理解成本上升、无人验证的代码路径堆积 | **YAGNI**：只实现当前需求；真正复用场景出现再重构 |
 | 未检索 README/代码/同主题方案就写 Mandatory 或新开并行实现 | 重复造轮、并行实现、神类只增不减 | **复用四问**（已有→复用→少写/不写→能删）；方案审缺表/可复用却并行实现 → blocker；见 [execution-discipline.md](./execution-discipline.md) |
+| 窗目标含删除旧主人语义时，第 4 问用选项②「本步无可删」当完成态（无下一刀 REMOVED） | 表绿、旧主人永不删 | 第 4 问须点名 REMOVED 或下一刀 REMOVED+替代边；走②无下一刀符号 → 方案审 blocker |
 | 派发 `review_input_revision` 用文化敏感路径排序（如 PS `Sort-Object` 默认）或 L3 转场改了非排除节却不重生 | 假 `stale_dispatch`、审不进内容 | 路径 **Ordinal** 升序；转场只改排除三节；见 [review-dispatch-lifecycle.md](./review-dispatch-lifecycle.md) §3/§5 |
 | 改动路径遗留废弃方法/字段/`using`/注释掉的死代码未清理 | 类文件越滚越大，可读性与合并冲突风险上升 | 顺手清理；不确定则在交接说明「未清理原因」 |
 | 单个类/文件长期只增不减、职责混杂无人评估拆分 | 最终形成数千行"神类"，改动与审查成本集中失控 | CR 发现明显膨胀信号时标记 `major`，建议策划评估拆分方案 |
