@@ -76,6 +76,10 @@ ai-gates 的取法是**流程由它选，停点由你说**。下面几条决定�
 动手前先列计划等我确认；失败或网络问题不要改文件，给出手动下载方案。
 ```
 
+### 方式 D（Cursor 市场）
+
+公开仓根放 `cursor-marketplace/` 内文件（`.cursor-plugin/plugin.json`、元技能、`plugin-hooks.json`）后提交市场。装上并打开项目会种 `.ai-gates/`。岗位技能走项目传送门；升级仍说 `项目经理 升级 ai-gates`。插件与项目 hooks 可同时声明，项目 hooks 落地后插件门禁空跑。
+
 ### 方式 B / C（备选）
 
 - **一条命令**（Windows PowerShell，适合批量装）：`powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/scripts/install-ai-gates.ps1 | iex"`

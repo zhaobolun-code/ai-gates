@@ -32,8 +32,9 @@
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 
+. (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
 $utf8Bom = New-Object System.Text.UTF8Encoding($true)
-$repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$repoRoot = Get-AiGatesProjectRoot
 $logDir = Join-Path $repoRoot ".ai-gates\hooks-log"
 if (-not (Test-Path $logDir)) {
     New-Item -ItemType Directory -Path $logDir -Force | Out-Null

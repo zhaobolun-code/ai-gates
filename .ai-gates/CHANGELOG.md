@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v5.0.5（工程回灌：发布闸/会话扫错/涨幅闸 + 岗位与 references 演进 · minor；前版 5.0.4 定版信息保留）
+**当前 LTS**：v5.0.6（Cursor 市场插件适配 · patch；前版 5.0.4 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,12 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-09-10：bump `skills/VERSION` → **5.0.6**（市场插件壳 + 双通道 hooks 去重；`plugin.json` version 同步）。含 09-09 未独立发版条目（PM init 根 AGENTS.md、打包补 Claude 接线、窗目标删第 4 问不得走②）。
+
+- 2026-09-10：Cursor 市场插件适配（种库壳 + 双通道 hooks 去重）：`cursor-marketplace/` 为公开仓根文件（`.cursor-plugin/plugin.json`、元技能、`plugin-hooks.json`）；插件 `sessionStart` 跑 `ensure-plugin-seed.ps1`；门禁入口 `hooks/plugin/invoke.ps1` 在项目 `.cursor/hooks.json` 已落地时 allow 空跑；`Get-AiGatesProjectRoot` 优先 `CURSOR_PROJECT_DIR`。
+
+- 2026-09-09：PM init -Apply 从 `skills/templates/AGENTS.md` 生成根 `AGENTS.md`（已存在则 Skip 不覆盖）；根 `AGENTS.md` 仍不进 7z。不 bump VERSION
 
 - 2026-09-09：打包补 Claude 接线（`hooks/claude/*.ps1` + `claude/` settings/agents/mcp）与迷雾模板（`scripts/fog-map.template.html`）；与 Codex 对称进包。不 bump VERSION
 
@@ -240,15 +246,18 @@
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
 
-## [5.0.5] - 2026-09-09（工程回灌：发布闸/会话扫错/涨幅闸 · minor · 定版）
+## [5.0.6] - 2026-09-10（Cursor 市场插件适配 · patch · 发布）
 
-### Included changes（2026-09-08/09 工程演进回灌发布仓）
+### Included changes — 2026-09-10（市场种库壳 + 双通道 hooks 去重）
 
-- **发布与进化闸**：新增 scripts/test-publish-reject.ps1、check-skill-growth.ps1；compute-evolution-candidates.ps1 / commit-lesson-pending.ps1 接线。
-- **会话末扫错与轨迹摘要**：新增 scripts/scan-session-errors.ps1、summarize-session-trace.ps1；hooks/mark-pm-gate.ps1（及 hooks/codex/）会话末打点。
-- **岗位与 references/templates**：code-reviewer / developer / planner / plan-reviewer SKILL 与多份 references、templates 同步工程仓（不含项目态）。
-- **CHANGELOG**：归并 09-08 evolution-08 签收与 09-09 迭代条目；design-patterns.md 发布面仍为空表模板。
-- **未纳入本版 7z**：claude/、hooks/claude/、og-map.template.html（package-release 扩面另议）。
+- **Cursor 市场插件**：新增 `.ai-gates/cursor-marketplace/`（拷到公开仓根）：`.cursor-plugin/plugin.json`（version 与 `skills/VERSION` 同步）、元技能 `skills/ai-gates/SKILL.md`、`plugin-hooks.json`、`assets/logo.svg`。岗位树仍只在 `.ai-gates/skills/`。
+- **种库**：插件 `sessionStart` → `scripts/ensure-plugin-seed.ps1`（复用 `install-ai-gates.ps1`）；已有 `CORE.md` 不覆盖；插件 VERSION 较新则提示 `PM upgrade ai-gates`。本机写 `.cursor/ai-gates-runtime.json`（`owner=project`，不进 Git）。
+- **双通道 hooks 只跑一遍**：`hooks/plugin/invoke.ps1` 在 `CURSOR_PLUGIN_ROOT` 且项目 `.cursor/hooks.json` + `pre-write-gate.ps1` 已落地时 `allow` 空跑；项目 `.cursor/hooks.json` 仍是执行方。`Get-AiGatesProjectRoot` 优先 `CURSOR_PROJECT_DIR`。夹具 `scripts/test-plugin-hook-skip.ps1`。
+- **09-09 未独立发版并入**：PM init -Apply 生成根 `AGENTS.md`（已存在 Skip）；打包补 Claude 接线与迷雾模板；窗目标删第 4 问不得走②完成态。
+
+### Included changes — 2026-09-08（代码认知地图 + 承重句 canary · 不 bump；已随 5.0.4 发布）
+
+见下节 [5.0.4]。
 
 ## [5.0.4] - 2026-09-08（代码认知地图 + 承重句 canary · minor · 发布）
 

@@ -126,7 +126,7 @@ function Get-HooksPolicyReport {
     # 本文件自身也在扫描范围（自举：改动后须保持 BOM）。
     if (-not $HooksDir) { $HooksDir = Join-Path $RepoRoot ".cursor/hooks" }
     if (-not $ScriptsDir) { $ScriptsDir = Join-Path $RepoRoot ".cursor/scripts" }
-    foreach ($dir in @($HooksDir, (Join-Path $HooksDir "codex"), $ScriptsDir)) {
+    foreach ($dir in @($HooksDir, (Join-Path $HooksDir "codex"), (Join-Path $HooksDir "plugin"), $ScriptsDir)) {
         if (-not (Test-Path -LiteralPath $dir)) { continue }
         foreach ($psFile in (Get-ChildItem -LiteralPath $dir -Filter *.ps1 -File)) {
             $bytes = [System.IO.File]::ReadAllBytes($psFile.FullName)

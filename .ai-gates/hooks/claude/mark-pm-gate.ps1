@@ -145,4 +145,24 @@ if ($hasPmMarker) {
     Write-HookAudit -LogDir $LogDir -FileName 'mark-pm-gate.log' -Line ("session={0} field={1} hasPm=False wrote=none" -f $sessionId, $fieldUsed)
 }
 
+# Session-end scan: observation only. try/catch swallow; KEEP Emit-StopEmpty.
+try {
+    $scan = Join-Path (Split-Path $LogDir -Parent) "scripts\scan-session-errors.ps1"
+    if (Test-Path -LiteralPath $scan) {
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = "powershell"
+        $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$scan`" -LogDir `"$LogDir`""
+        $psi.UseShellExecute = $false
+        $psi.CreateNoWindow = $true
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError = $true
+        $sp = [System.Diagnostics.Process]::Start($psi)
+        if (-not $sp.WaitForExit(8000)) {
+            try { $sp.Kill() } catch { }
+        }
+    }
+} catch {
+    # swallow: Stop remains observation only
+}
+
 Emit-StopEmpty

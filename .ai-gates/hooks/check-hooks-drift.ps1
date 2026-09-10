@@ -10,11 +10,12 @@
 
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+. (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
 
 function Write-Audit {
     param([string]$Line)
     try {
-        $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+        $repoRoot = Get-AiGatesProjectRoot
         $logDir = Join-Path $repoRoot ".ai-gates\hooks-log"
         if (-not (Test-Path $logDir)) {
             New-Item -ItemType Directory -Path $logDir -Force | Out-Null
@@ -80,14 +81,16 @@ try {
     # drain stdin (sessionStart may send JSON; ignore content)
     $null = [Console]::In.ReadToEnd()
 
-    $cursorRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-    $repoRoot = (Resolve-Path (Join-Path $cursorRoot "..")).Path
+    $repoRoot = Get-AiGatesProjectRoot
     $logDir = Join-Path $repoRoot ".ai-gates\hooks-log"
     if (-not (Test-Path $logDir)) {
         New-Item -ItemType Directory -Path $logDir -Force | Out-Null
     }
     $driftFile = Join-Path $logDir "hooks-policy-drift.json"
-    $policyScript = Join-Path $cursorRoot "scripts\check-hooks-policy.ps1"
+    $policyScript = Join-Path $repoRoot ".ai-gates\scripts\check-hooks-policy.ps1"
+    if (-not (Test-Path -LiteralPath $policyScript)) {
+        $policyScript = Join-Path $repoRoot ".cursor\scripts\check-hooks-policy.ps1"
+    }
 
     if (-not (Test-Path -LiteralPath $policyScript)) {
         Write-Audit "WARN policy_script_missing"

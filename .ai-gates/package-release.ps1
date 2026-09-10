@@ -11,15 +11,18 @@
 #                本仓验证在仓库根 design-patterns.project.md（不拷）
 #                CHANGELOG.md at pack root IS shipped for public trust
 #     scripts/   *.ps1 / *.sh except Chemical-specific (e.g. ci-pressure-manager-gate.ps1)
+#                + point-named scripts/fog-map.template.html (if present; not all non-scripts)
 #     rules/ai-dev-pipeline.mdc
-#     hooks.json + hooks/*.ps1 + hooks/codex/*.ps1  (generic Cursor + Codex hooks)
+#     hooks.json + hooks/*.ps1 + hooks/codex/*.ps1 + hooks/claude/*.ps1  (Cursor + Codex + Claude hooks)
 #     codex/hooks.json + codex/config.toml  (Codex wiring, git-tracked central copy)
+#     claude/settings.json + claude/agents/ + claude/mcp.json  (Claude wiring; exclude settings.local.json)
 #     link-platform.ps1/.sh  (new-project one-shot portal creation)
 #     METHODOLOGY.md + USER-GUIDE.md + README.md + LICENSE + CHANGELOG.md + PACKAGE-INFO.md
 # Excluded: this script itself, project-context.md (含项目口诀), regression-index.yaml, pipeline-*.log,
 #           hooks-log/ (runtime log), skills/MAINTAINER.md, scripts/ci-pressure-manager-gate.ps1,
 #           lessons-learned.md / lessons-outline.md (错题本, .ai-gates 根, 本就不拷),
-#           design-patterns.project.md（本仓验证，.ai-gates 根, 本就不拷）
+#           design-patterns.project.md（本仓验证，.ai-gates 根, 本就不拷）,
+#           claude/settings.local.json（机器本地，若有）,
 #           skills/references/design-patterns.md staging 用空表模板覆盖
 
 param(
@@ -130,6 +133,11 @@ try {
     Get-ChildItem -Path (Join-Path $scriptsDir "*") -Include *.ps1, *.sh -File -ErrorAction SilentlyContinue |
         Where-Object { $scriptExclude -notcontains $_.Name } |
         Copy-Item -Destination $stageScripts -Force
+    # Point-named non-script dependency of generate-fog-map.ps1 (do not ship all non-scripts).
+    $fogMapTemplate = Join-Path $scriptsDir "fog-map.template.html"
+    if (Test-Path -LiteralPath $fogMapTemplate) {
+        Copy-Item -LiteralPath $fogMapTemplate -Destination (Join-Path $stageScripts "fog-map.template.html") -Force
+    }
 
     Write-Host "Copying rules/ai-dev-pipeline.mdc..."
     $mdcPath = Join-Path $rulesDir "ai-dev-pipeline.mdc"
@@ -139,7 +147,7 @@ try {
         Copy-Item -Path $mdcPath -Destination $stageRules -Force
     }
 
-    Write-Host "Copying hooks.json + hooks/*.ps1 + hooks/codex/*.ps1..."
+    Write-Host "Copying hooks.json + hooks/*.ps1 + hooks/codex/*.ps1 + hooks/claude/*.ps1..."
     $hooksJsonPath = Join-Path $repoRoot ".ai-gates/hooks.json"
     $hooksDir = Join-Path $repoRoot ".ai-gates/hooks"
     if (Test-Path $hooksJsonPath) {
@@ -157,6 +165,13 @@ try {
             Get-ChildItem -Path (Join-Path $codexHooksDir "*") -Include *.ps1 -File -ErrorAction SilentlyContinue |
                 Copy-Item -Destination $stageCodexHooks -Force
         }
+        $claudeHooksDir = Join-Path $hooksDir "claude"
+        if (Test-Path $claudeHooksDir) {
+            $stageClaudeHooks = Join-Path $stageHooks "claude"
+            New-Item -ItemType Directory -Force -Path $stageClaudeHooks | Out-Null
+            Get-ChildItem -Path (Join-Path $claudeHooksDir "*") -Include *.ps1 -File -ErrorAction SilentlyContinue |
+                Copy-Item -Destination $stageClaudeHooks -Force
+        }
     }
 
     Write-Host "Copying codex wiring (hooks.json + config.toml)..."
@@ -164,6 +179,29 @@ try {
     New-Item -ItemType Directory -Force -Path $stageCodex | Out-Null
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/codex/hooks.json") -Destination $stageCodex -Force
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/codex/config.toml") -Destination $stageCodex -Force
+
+    Write-Host "Copying claude wiring (settings.json + agents/ + mcp.json; exclude settings.local.json)..."
+    $claudeDir = Join-Path $repoRoot ".ai-gates/claude"
+    if (Test-Path $claudeDir) {
+        $stageClaude = Join-Path $stageRoot "claude"
+        New-Item -ItemType Directory -Force -Path $stageClaude | Out-Null
+        $claudeSettings = Join-Path $claudeDir "settings.json"
+        if (Test-Path -LiteralPath $claudeSettings) {
+            Copy-Item -LiteralPath $claudeSettings -Destination $stageClaude -Force
+        }
+        $claudeMcp = Join-Path $claudeDir "mcp.json"
+        if (Test-Path -LiteralPath $claudeMcp) {
+            Copy-Item -LiteralPath $claudeMcp -Destination $stageClaude -Force
+        }
+        $claudeAgents = Join-Path $claudeDir "agents"
+        if (Test-Path $claudeAgents) {
+            $stageClaudeAgents = Join-Path $stageClaude "agents"
+            New-Item -ItemType Directory -Force -Path $stageClaudeAgents | Out-Null
+            Get-ChildItem -Path (Join-Path $claudeAgents "*") -File -ErrorAction SilentlyContinue |
+                Copy-Item -Destination $stageClaudeAgents -Force
+        }
+        # Intentionally skip settings.local.json (machine-local) if present.
+    }
 
     Write-Host "Copying link-platform.* + docs (README/METHODOLOGY/USER-GUIDE/LICENSE/CHANGELOG)..."
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/link-platform.ps1") -Destination $stageRoot -Force
@@ -173,6 +211,12 @@ try {
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/USER-GUIDE.md") -Destination $stageRoot -Force
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/LICENSE") -Destination $stageRoot -Force
     Copy-Item -Path (Join-Path $repoRoot ".ai-gates/CHANGELOG.md") -Destination $stageRoot -Force
+
+    $marketplaceSrc = Join-Path $repoRoot ".ai-gates/cursor-marketplace"
+    if (Test-Path -LiteralPath $marketplaceSrc) {
+        Write-Host "Copying cursor-marketplace/ (copy to GitHub repo root for Cursor Marketplace)..."
+        Copy-Item -Path $marketplaceSrc -Destination (Join-Path $stageRoot "cursor-marketplace") -Recurse -Force
+    }
 
     # 2026-08-04：显式排除 tmp 文件夹（防御性）。中间产物暂存区在 .ai-gates/tmp/，
     # 本就不在打包源内；此步兜底——即使未来 tmp 出现在被拷贝的目录里（如 skills/tmp），
@@ -207,8 +251,8 @@ try {
         "",
         "## 首次接入新项目",
         "",
-        "1. 解压本包到目标仓库根：包顶层 = 中央技能库 .ai-gates/ 的内容（skills/、hooks/、scripts/、rules/、codex/、link-platform.* 等），无需额外嵌套",
-        "2. 在 Agent 窗口粘贴「项目经理 升级 ai-gates」（=PM upgrade ai-gates），由 Agent 建好传送门（自动建 .cursor/*、.codex、.trae/skills 软连接；手动运行 .ai-gates/link-platform.ps1 亦可，非必需）",
+        "1. 解压本包到目标仓库根：包顶层 = 中央技能库 .ai-gates/ 的内容（skills/、hooks/（含 hooks/codex 与 hooks/claude）、scripts/（含 fog-map.template.html）、rules/、codex/、claude/、link-platform.* 等），无需额外嵌套",
+        "2. 在 Agent 窗口粘贴「项目经理 升级 ai-gates」（=PM upgrade ai-gates），由 Agent 建好传送门（自动建 .cursor/*、.codex、.claude、.trae/skills 软连接；手动运行 .ai-gates/link-platform.ps1 亦可，非必需）",
         "3. 先读 .ai-gates/README.md（30 秒看懂 + 安装）→ .ai-gates/USER-GUIDE.md（口令与第一次接入）→ 需要时再读 .ai-gates/METHODOLOGY.md（为什么这么设计）",
         "4. Codex 用户：按源仓库示例创建根级 AGENTS.md（入口路由；本包不含，项目相关），再在 Agent 粘贴「项目经理 初始化」（项目经理=PM，初始化=init，升级=upgrade，检查健康=doctor），填写 project-context 后提需求",
         "",

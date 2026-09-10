@@ -70,6 +70,7 @@ Hook 合同：每条 `hooks.json` 须 `timeout`>0 且 `failClosed: false`；读 
 | --- | --- | --- |
 | 中央技能库（Skill + 说明文档 + LICENSE） | `.ai-gates/skills/`（规则/角色/CHANGELOG/VERSION）、`.ai-gates/`（SKILLS/METHODOLOGY/USER-GUIDE 说明文档）、`.ai-gates/README.md` | Git 跟踪（**通用**，可复制到其他项目）；**唯一真源** |
 | Cursor Hooks 配置 + 脚本 | `.ai-gates/hooks.json`、`.ai-gates/hooks/` | Git 跟踪（**通用**，随包分发）；运行时日志 `.ai-gates/hooks-log/` 不提交 |
+| Cursor 市场插件根文件 | `.ai-gates/cursor-marketplace/` | 拷到公开仓**根**（与 `.ai-gates/` 并列）：`.cursor-plugin/plugin.json`、元技能、`plugin-hooks.json`。岗位树仍在 `.ai-gates/skills/` |
 | Codex 接线 | `.ai-gates/codex/hooks.json` + `config.toml` | Git 跟踪；`.codex/` 为传送门 |
 | 传送门（软连接） | `.cursor/skills\|hooks\|scripts\|rules`、`.cursor/hooks.json`、`.codex`、`.trae/skills` | **不入库**；`link-platform.ps1` / `link-platform.sh` 一键创建（Windows 用 Junction，无需管理员） |
 | 平台脚本 | `.ai-gates/scripts/` | Git 跟踪（**通用**）；`.cursor/scripts/` 为传送门 |
@@ -248,7 +249,7 @@ powershell -ExecutionPolicy Bypass -File .ai-gates/package-release.ps1
 powershell -ExecutionPolicy Bypass -File .ai-gates/package-release.ps1 -Version "v$((Get-Content .ai-gates/skills/VERSION -Raw).Trim())"
 ```
 
-输出 `.ai-gates/releases/ai_dev_<版本号>.7z`，打包范围来自**中央技能库 `.ai-gates/`**，**包顶层 = 中央技能库内容**（解压到目标项目根即得 `.ai-gates/`）：`skills/`（**排除** `MAINTAINER.md`；拷完后用 `templates/design-patterns.template.md` **覆盖** `references/design-patterns.md`，本仓验证行不进包）+ `scripts/*.ps1|*.sh` + 点名 `scripts/fog-map.template.html`（文件存在才拷）+ `rules/ai-dev-pipeline.mdc` + `hooks.json`/`hooks/*.ps1` + `hooks/codex/*.ps1` + `hooks/claude/*.ps1` + `codex/hooks.json` + `codex/config.toml`（Codex 接线）+ `claude/settings.json` + `claude/agents/` + `claude/mcp.json`（Claude 接线；**不拷** `settings.local.json`）+ `METHODOLOGY.md`/`USER-GUIDE.md`（新人说明文档）+ 根 `CHANGELOG.md`（供公开增信）+ `link-platform.ps1/.sh` + `README.md` + `LICENSE`；**不含** `.trae/`、脚本自身（`package-release.ps1`）、`project-context.md`（含项目口诀）、`regression-index.yaml`、`hooks-log/`（运行时日志）、`AGENTS.md`（项目相关，Codex 用户按 §Codex Hooks 自建）、`.ai-gates/lessons-learned.md` / `lessons-outline.md`（错题本，根目录本就不拷）等。**新项目接入三步**：解压到项目根 → 跑 `link-platform.ps1`（建 `.cursor/*`、`.codex`、`.claude`、`.trae/skills` 传送门）→ 按需建 `AGENTS.md`。若目标项目用 Trae，`.trae/rules/ai-dev-pipeline.md` 与 `.trae/skills/` 联接需按 [MAINTAINER §目录与同步策略](#目录与同步策略) 单独处理（`link-trae-skills.ps1`/`.sh` 已随包）。依赖本机已安装 7-Zip（`7z.exe` 在 PATH 或默认安装目录）。**打包前默认强制 `validate-pipeline.ps1 -Strict`**（2026-08-03 Step 3）：红 → `Write-Error` 拒绝句「已拒绝打包」+ `exit 1`；`-SkipValidate` 为显式逃生（打印醒目警告后跳过，维护者签字级），`-ValidateScriptPath` 可注入替代校验脚本（测试用）。
+输出 `.ai-gates/releases/ai_dev_<版本号>.7z`，打包范围来自**中央技能库 `.ai-gates/`**，**包顶层 = 中央技能库内容**（解压到目标项目根即得 `.ai-gates/`）：`skills/`（**排除** `MAINTAINER.md`；拷完后用 `templates/design-patterns.template.md` **覆盖** `references/design-patterns.md`，本仓验证行不进包）+ `scripts/*.ps1|*.sh` + 点名 `scripts/fog-map.template.html`（文件存在才拷）+ `rules/ai-dev-pipeline.mdc` + `hooks.json`/`hooks/*.ps1` + `hooks/codex/*.ps1` + `hooks/claude/*.ps1` + `hooks/plugin/invoke.ps1` + `cursor-marketplace/`（市场仓根文件，拷到公开仓根）+ `codex/hooks.json` + `codex/config.toml`（Codex 接线）+ `claude/settings.json` + `claude/agents/` + `claude/mcp.json`（Claude 接线；**不拷** `settings.local.json`）+ `METHODOLOGY.md`/`USER-GUIDE.md`（新人说明文档）+ 根 `CHANGELOG.md`（供公开增信）+ `link-platform.ps1/.sh` + `README.md` + `LICENSE`；**不含** `.trae/`、脚本自身（`package-release.ps1`）、`project-context.md`（含项目口诀）、`regression-index.yaml`、`hooks-log/`（运行时日志）、`AGENTS.md`（项目相关，Codex 用户按 §Codex Hooks 自建）、`.ai-gates/lessons-learned.md` / `lessons-outline.md`（错题本，根目录本就不拷）等。**新项目接入三步**：解压到项目根 → 跑 `link-platform.ps1`（建 `.cursor/*`、`.codex`、`.claude`、`.trae/skills` 传送门）→ 按需建 `AGENTS.md`。若目标项目用 Trae，`.trae/rules/ai-dev-pipeline.md` 与 `.trae/skills/` 联接需按 [MAINTAINER §目录与同步策略](#目录与同步策略) 单独处理（`link-trae-skills.ps1`/`.sh` 已随包）。依赖本机已安装 7-Zip（`7z.exe` 在 PATH 或默认安装目录）。**打包前默认强制 `validate-pipeline.ps1 -Strict`**（2026-08-03 Step 3）：红 → `Write-Error` 拒绝句「已拒绝打包」+ `exit 1`；`-SkipValidate` 为显式逃生（打印醒目警告后跳过，维护者签字级），`-ValidateScriptPath` 可注入替代校验脚本（测试用）。
 
 ## Cursor Hooks（机器强制层 · observe/ask 模式）
 
@@ -269,6 +270,8 @@ powershell -ExecutionPolicy Bypass -File .ai-gates/package-release.ps1 -Version 
 （mark-changelog-write + check-unity-compile）——单进程内依次执行原门禁脚本，stdin 预读共享；
 deny 短路语义与分开挂载一致，进程 spawn 减半（Write/StrReplace/EditNotebook 事件
 preToolUse 2→1、postToolUse 2→1）。原单门禁脚本保留（供测试与单独排查）。
+
+**Cursor 市场插件**：`cursor-marketplace/plugin-hooks.json` 与项目 `.cursor/hooks.json` 允许同时声明。插件门禁入口 `hooks/plugin/invoke.ps1`：进程有 `CURSOR_PLUGIN_ROOT` 且项目 `.cursor/hooks.json` + `pre-write-gate.ps1` 已在 → `allow` 空跑（日志 `plugin-hook-skip.log`）。种库 `sessionStart` → `ensure-plugin-seed.ps1`。升级仍走「项目经理 升级 ai-gates」。
 
 **已知限制 / 后续升级路径**：
 

@@ -7,8 +7,9 @@
 #
 # Default is probe-only (zero side effects). -Apply runs guided init:
 #   1) create missing project-context (via init-project-context.ps1, never overwrites)
-#   2) create missing doc root dirs
-#   3) print "next-step checklist": rules alignment (link-trae-skills) + optional CodeGraph.
+#   2) create missing root AGENTS.md (from skills/templates/AGENTS.md, never overwrites)
+#   3) create missing doc root dirs
+#   4) print "next-step checklist": rules alignment (link-trae-skills) + optional CodeGraph.
 # -InstallCodeGraph only after explicit user consent. No npm involved.
 
 param(
@@ -34,6 +35,9 @@ function Write-Status([string]$Name, [string]$State, [string]$Detail = "") {
 
 $ctx = Join-Path $repoRoot ".cursor/project-context.md"
 $yaml = Join-Path $repoRoot ".ai-gates/regression-index.yaml"
+$agentsMd = Join-Path $repoRoot "AGENTS.md"
+$agentsTemplateAiGates = Join-Path $repoRoot ".ai-gates/skills/templates/AGENTS.md"
+$agentsTemplateCursor = Join-Path $repoRoot ".cursor/skills/templates/AGENTS.md"
 $codegraphDir = Join-Path $repoRoot ".codegraph"
 $docAbs = Join-Path $repoRoot $DocRoot
 $weeklyAbs = Join-Path $docAbs "Weekly"
@@ -50,6 +54,9 @@ Write-Status "project-context" $ctxState $ctx
 
 $yamlState = if (Test-Path -LiteralPath $yaml) { "present" } else { "missing" }
 Write-Status "regression-index.yaml" $yamlState $yaml
+
+$agentsState = if (Test-Path -LiteralPath $agentsMd) { "present" } else { "missing" }
+Write-Status "AGENTS.md" $agentsState $agentsMd
 
 $docState = if (Test-Path -LiteralPath $docAbs) { "present" } else { "missing" }
 Write-Status "doc-root" $docState $DocRoot
@@ -76,7 +83,7 @@ if (Test-Path -LiteralPath $policyScript) {
 
 if (-not $Apply) {
     Write-Host ""
-    Write-Host "Probe only. Re-run with -Apply to create missing context/doc dirs." -ForegroundColor DarkGray
+    Write-Host "Probe only. Re-run with -Apply to create missing context/doc dirs/AGENTS.md (missing AGENTS.md will be copied from templates)." -ForegroundColor DarkGray
     Write-Host "After user consent, add -InstallCodeGraph to attempt CodeGraph setup." -ForegroundColor DarkGray
     exit 0
 }
@@ -106,6 +113,26 @@ if ($ctxState -eq "missing") {
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 } else {
     Write-Host "Skip context create (already exists)." -ForegroundColor DarkGray
+}
+
+# AGENTS.md：缺则从模板拷贝；已存在永不覆盖（与 init-project-context 同模式）
+$agentsCreated = $false
+if ($agentsState -eq "missing") {
+    $agentsTemplate = $null
+    if (Test-Path -LiteralPath $agentsTemplateAiGates) {
+        $agentsTemplate = $agentsTemplateAiGates
+    } elseif (Test-Path -LiteralPath $agentsTemplateCursor) {
+        $agentsTemplate = $agentsTemplateCursor
+    }
+    if (-not $agentsTemplate) {
+        Write-Error "Missing AGENTS.md template: tried $agentsTemplateAiGates and $agentsTemplateCursor"
+        exit 1
+    }
+    Copy-Item -LiteralPath $agentsTemplate -Destination $agentsMd -Force
+    Write-Host "Created AGENTS.md from template: $agentsTemplate" -ForegroundColor Green
+    $agentsCreated = $true
+} else {
+    Write-Host "Skip AGENTS.md create (already exists)." -ForegroundColor DarkGray
 }
 
 if (-not (Test-Path -LiteralPath $docAbs)) {
@@ -155,11 +182,14 @@ Write-Host "=== 下一步清单（引导式 init） ===" -ForegroundColor Cyan
 # 1. project-context（-Apply 已自动创建/跳过；幂等不覆盖）
 $ctxText = if ($ctxState -eq "missing") { "已调用 init-project-context.ps1 生成（不覆盖已有文件）" } else { "已存在，跳过（不覆盖）" }
 Write-Host "1. [done] init-project-context：.cursor/project-context.md $ctxText；打开填写技术栈 / Express 升级表 / 回归索引。"
-# 2. rules 对齐（提示/调用 link-trae-skills；只做联接不做内容改写）
+# 2. AGENTS.md（-Apply 缺则从 templates 拷贝；已存在永不覆盖）
+$agentsText = if ($agentsCreated) { "已创建（从 templates/AGENTS.md 拷贝）" } else { "已存在跳过" }
+Write-Host "2. [done] AGENTS.md：$agentsText（不覆盖已有）。"
+# 3. rules 对齐（提示/调用 link-trae-skills；只做联接不做内容改写）
 if ($rulesAligned) {
-    Write-Host "2. [done] rules 对齐：.trae/skills 已联接 .cursor/skills；.trae/rules/ai-dev-pipeline.md 已存在。"
+    Write-Host "3. [done] rules 对齐：.trae/skills 已联接 .cursor/skills；.trae/rules/ai-dev-pipeline.md 已存在。"
 } else {
-    Write-Host "2. [todo] rules 对齐（.mdc ↔ .trae）：" -ForegroundColor Yellow
+    Write-Host "3. [todo] rules 对齐（.mdc ↔ .trae）：" -ForegroundColor Yellow
     if (-not $traeSkillsLinked) {
     Write-Host "   - 运行联接（Trae 用）：powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/link-trae-skills.ps1（或 .ai-gates/link-platform.ps1 一次建齐所有传送门）"
     }
@@ -167,16 +197,16 @@ if ($rulesAligned) {
         Write-Host "   - 复制规则：copy .cursor/rules/ai-dev-pipeline.mdc → .trae/rules/ai-dev-pipeline.md"
     }
 }
-# 3. CodeGraph（可选；保持须用户同意，未自动执行）
+# 4. CodeGraph（可选；保持须用户同意，未自动执行）
 if ($cgDirOk -and $cgCli) {
-    Write-Host "3. [done] CodeGraph：.codegraph/ + CLI 已就绪（必要时重载 Cursor）。"
+    Write-Host "4. [done] CodeGraph：.codegraph/ + CLI 已就绪（必要时重载 Cursor）。"
 } elseif ($cgDirOk) {
-    Write-Host "3. [todo·可选] CodeGraph：.codegraph/ 已存在但 CLI/MCP 需重载 Cursor；如安装：codegraph install --platform cursor"
+    Write-Host "4. [todo·可选] CodeGraph：.codegraph/ 已存在但 CLI/MCP 需重载 Cursor；如安装：codegraph install --platform cursor"
 } else {
-    Write-Host "3. [todo·可选] CodeGraph 安装（须用户同意后执行）：codegraph install --platform cursor && codegraph init"
+    Write-Host "4. [todo·可选] CodeGraph 安装（须用户同意后执行）：codegraph install --platform cursor && codegraph init"
 }
-# 4. 人工填写
-Write-Host "4. [人工] 填写 .cursor/project-context.md 的回归索引（≥1~2 行），然后运行：powershell -ExecutionPolicy Bypass -File .cursor/scripts/sync-regression-index.ps1 -Apply"
+# 5. 人工填写
+Write-Host "5. [人工] 填写 .cursor/project-context.md 的回归索引（≥1~2 行），然后运行：powershell -ExecutionPolicy Bypass -File .cursor/scripts/sync-regression-index.ps1 -Apply"
 Write-Host ""
 Write-Host "按清单逐步确认后，用「项目经理 + 需求」开工（未初始化前 Agent 走 CORE §无 project-context 冷启动，保守 Standard）。" -ForegroundColor DarkGray
 exit 0

@@ -35,7 +35,7 @@
 在助手里粘贴 `项目经理 初始化`。助手会生成项目说明、对齐传送门；技术栈由它探测后请你确认。回归索引（必测场景）可后补——不填也能 `项目经理 + 需求` 开工，填了热度升档更准。CodeGraph 可选，须你同意再装。
 
 完整命令与排查 → [tl-onboarding.md](skills/references/tl-onboarding.md)  
-**前提**：用能改文件的 Agent 模式（Cursor / Codex / Trae 同理）；要验业务现象时，通常要能在编辑器里跑起来（例如 Unity 点 Play）。
+**前提**：用能改文件的 Agent 模式（Cursor / Codex / Trae 同理）；要验业务现象时，通常要能在编辑器里跑起来（例如 Unity 点 Play）。从 Cursor 市场安装时，打开项目后会种 `.ai-gates/`；之后升级仍说 `项目经理 升级 ai-gates`。
 
 ## 对你意味着什么
 

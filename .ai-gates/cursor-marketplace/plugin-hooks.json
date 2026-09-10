@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CURSOR_PLUGIN_ROOT}/.ai-gates/scripts/ensure-plugin-seed.ps1\"",
+        "failClosed": false,
+        "timeout": 30
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CURSOR_PLUGIN_ROOT}/.ai-gates/hooks/plugin/invoke.ps1\" -Target git-safety-check",
+        "failClosed": false,
+        "timeout": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CURSOR_PLUGIN_ROOT}/.ai-gates/hooks/plugin/invoke.ps1\" -Target pre-write-gate",
+        "matcher": "Write|StrReplace|EditNotebook",
+        "failClosed": false,
+        "timeout": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CURSOR_PLUGIN_ROOT}/.ai-gates/hooks/plugin/invoke.ps1\" -Target post-write-gate",
+        "matcher": "Write|StrReplace|EditNotebook",
+        "failClosed": false,
+        "timeout": 10
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CURSOR_PLUGIN_ROOT}/.ai-gates/hooks/plugin/invoke.ps1\" -Target mark-pm-gate",
+        "matcher": "AgentResponse",
+        "failClosed": false,
+        "timeout": 10
+      }
+    ]
+  }
+}
