@@ -35,7 +35,7 @@
 - **无本轮 `[PM]` 判定不得创建/修改交付物**（代码 / 执行文档 / README）；直接叫岗位也必须同条先 `[PM]`。纯问答/只读咨询 → 主窗直接答，不建窗、不生成文档。
 - 改代码前必须读 `.cursor/project-context.md`；只实现当前 Step / 切片范围，验收以 A# 为准；Unity 未测不标「已通过」。
 - Express 先有一句话切片；Direct 无方案审但须隔离 CR；Standard 先过方案审；CR 有 blocker 不收口、不写最终 README。
-- 主窗只当 PM：策划 / 方案审 / 程序员 / CR / 文档优先子代理（Subagent），派发必须显式传 `model=`（Codex 模型映射见 project-context §模型路由；Codex 桌面 0.146 实测：任务须随 spawn 初始消息，`fork_turns=all` 继承父模型、以送达优先并标注，详见 model-routing §Codex 桌面派发实测）；周报例外，当前窗直接做。
+- 主窗只当 PM：方案审 / CR / 文档优先子代理（Subagent）。Express / 简单 Direct 实现可主窗（须标「主窗执行（未开子窗）」）；CR 仍必须隔离子窗。派发必须显式传 `model=`（Codex 模型映射见 project-context §模型路由；Codex 桌面 0.146 实测：任务须随 spawn 初始消息，`fork_turns=all` 继承父模型、以送达优先并标注，详见 model-routing §Codex 桌面派发实测）；周报例外，当前窗直接做。
 
 ## 冷启动
 

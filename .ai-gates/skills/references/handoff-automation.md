@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | 开始改码（含 Express / Direct） | §一次确认包（理解+选型+开始改码） | ready → in-progress → `[developer]` 改码 |
 | 续链开下一窗 | §续链合并包（开窗+本步方案+开始改码） | 建窗 → 写 Mandatory → 方案审（若需）无 blocker → 改码 |
-| Verify 失败选型 | §0 多选（推荐+为什么） | 按推荐派 Discover/热修/止损/开窗 |
+| Verify 失败选型 | §0 多选（推荐+为什么） | 同 A# **第一次**（有意义=有且根因钉死）→ 同条热修不发菜单；**第二次+** 按推荐派 Discover/热修/止损/开窗 |
 | 需求歧义澄清 | ≤3 条追问（条件触发） | 按答或「你决定」判车道 |
 | 知识缺口 open 条目（窗内 `证据/_knowledge-gap.md`） | **并入**当轮确认包批量追问（不另开一轮） | 用户答后标 `answered` 归档；阻塞级仍须停（入队不豁免） |
 
@@ -52,7 +52,7 @@
 1. `implementation-ready`，`可交给程序员`=是
 2. `in-progress`
 3. Standard/Full：默认启用 Auto（§H；`auto_steps_done=0`），除非用户用了退出句；Express / Direct：**不**启用 Auto
-4. `[developer]` 立即改码（仅当前 Step / 登记窗）：**必须** Task 子窗，并按 [model-routing.md](./model-routing.md) 解析后的首选 slug **显式**传 `model=`（project-context §模型路由优先）
+4. `[developer]` 立即改码（仅当前 Step / 登记窗）：Express / Direct 且 PM 已写清 A# → **可主窗**（须标「主窗执行（未开子窗）」）；Standard/Full **必须** Task 子窗。均按 [model-routing.md](./model-routing.md) 解析后的首选 slug **显式**传 `model=`（project-context §模型路由优先）。Direct CR 仍必须隔离子窗。
 
 **派策划 Task**：提示词禁点名典故 / 「很像某某模式」；扫 `design-patterns.md` 触发症状由策划完成。细则 [execution-discipline.md](./execution-discipline.md) §设计模式一问。
 

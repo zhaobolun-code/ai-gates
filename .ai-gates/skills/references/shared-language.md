@@ -22,10 +22,11 @@
 | 术语 | 定义（可观察 / 可证伪） | 对应代码符号 | 别名（禁） |
 | --- | --- | --- | --- |
 | [术语] | [现象/行为，一句话] | [类/方法/字段] | [同义异名，禁止再用] |
-| Direct（直通道） | **车道**语义（四车道之一）：行为小改（≤3 文件、无 API/持久/跨模块）、策划子窗对话内出 A#/切片**不落盘**、单会话完成；跨会话/改不完自动升 Standard | `CORE.md` §四车道判定 步骤 2；PM YAML `lane: Direct` | 「轻量模式」等 v1 旧称 |
+| Direct（直通道） | **车道**语义（四车道之一）：行为小改（≤3 文件、无 API/持久/跨模块）、**PM 写**对话内 A#/切片（不清才派策划）、不落盘、实现可主窗、**CR 必须隔离子窗**、单会话完成；跨会话/改不完自动升 Standard | `CORE.md` §四车道判定 步骤 2；PM YAML `lane: Direct` | 「轻量模式」等 v1 旧称 |
 | 双轨调用 | 技能/文档的**调用权限**维度：岗位 SKILL=user-invoked（口令触发，模型不得自动执行岗）；references=model-invoked（触发表按触发自动加载） | `agents/openai.yaml` 的 `policy.allow_implicit_invocation`；`reference-routing.md`「模型自动触发」小表 | 「双轴」（CR 规范轴/规格轴，`dual-axis-review.md`）；「Direct/直通道」（车道语义，`lane-glossary.md`） |
 | 并行实现 | 实现层并存路径（同一可观察行为 ≥2 条执行链并存）：互斥 / 降级 / 收敛定义须在 Mandatory/CR 写明 | diagnosis-gates §2.3「并行实现一句」/ §3「并行实现收敛闸门」（流程对象） | 旧词形已全部并入本词（清单见审计决策表 #1 / audit-double-meaning.md） |
-| 电路子窗 | 策划写契约时强制拆串联/并联的手续（不是岗）；加速来自墙钟重叠 | `circuit-windows.md` | 「并行实现」（diagnosis-gates §3 代码双轨） |
+| 电路子窗 | 策划写契约时强制拆串联/并联的手续（不是岗）；加速来自墙钟重叠；同窗同口径连续刀可走战役模式 | `circuit-windows.md` | 「并行实现」（diagnosis-gates §3 代码双轨） |
+| 战役模式 | 同一方案夹、同一物理口径、选型/A# 契约未变的连续刀：不重复方案审；每刀仍隔离 CR；完成即迁移可批到签收 | `circuit-windows.md` §战役模式 | 「减审」（禁止：战役不减 CR） |
 | 门闸 | 代码路径判断点（放行 / 拦截 / 就绪信号所在处，如 `*_not_ready` 信号） | diagnosis-gates §0.8 预扫链「跳」；与「调用边」成对使用 | 旧词形已并入本词（清单见审计决策表 #2 / audit-double-meaning.md） |
 | 瘦身一拍 | 交审前删本 Step 新写/整段重写代码冗余（删除 ≥ 新增）；与技能包「收敛与精简」区分（v3.2 文档精简） | developer SKILL §2.1「瘦身一拍」；project-context 补强三口 | — |
 | 代码认知地图 | 跟当前代码版本绑定的受管对象全图（F/R/A/S 卡 + index/observe/exclude）。有则**整节一次装载**；R 决定还要打开的邻居源码 | `code-cognition-map.md`；project-context「热路径认知卡片 / 代码认知卡片」 | 「迷雾图」（文档窗）；「CodeGraph/CRG」（结构边） |

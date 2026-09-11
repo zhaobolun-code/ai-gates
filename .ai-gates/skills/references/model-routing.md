@@ -45,7 +45,7 @@
 ## Skill 默认表（无 project-context 覆盖时才用 · 示例）
 
 > 下列 slug 仅为**缺省示例**。若仓库有 `.cursor/project-context.md` §模型路由，**整表以项目节为准**。  
-> **统一三档（2026-09-07 用户改档，覆盖 2026-08-25）**（无 project-context 时用；覆盖旧「两档 / Composer 首选」）：最低 = Grok 4.5（`cursor-grok-4.5-high`）；普通 = Grok 4.6（`cursor-grok-4.6-high`）；高级 = Opus 5 → GPT 5.6 Sol（`claude-opus-5-thinking-high` → `gpt-5.6-sol-medium`，再回退 Grok 4.6）。**任何 `*-fast` 都不得当首选**（含 `cursor-grok-4.6-high-fast` / `cursor-grok-4.5-medium-fast` / `cursor-grok-4.5-high-fast` / `composer-2.5-fast`）。`*-fast` 仅当非 fast 链尽且白名单只剩 fast 时，才可链末应急并标注「未按模型路由」。平台把 `cursor-grok-4.6-high` 显示/解析成 `cursor-grok-4.6-high-fast` 时须标「未按模型路由」，不得把 `-fast` 当正规首选去传。档内链用尽 → 下一档。
+> **统一三档（2026-09-07 用户改档，覆盖 2026-08-25）**（无 project-context 时用；覆盖旧「两档 / Composer 首选」）：最低 = Grok 4.5（`cursor-grok-4.5-high`）；普通 = Grok 4.6（`cursor-grok-4.6-high`）；高级 = Opus 5 → GPT 5.6 Sol（`claude-opus-5-thinking-high` → `gpt-5.6-sol-medium`，再回退 Grok 4.6）。**任何 `*-fast` 都不得当首选**（含 `cursor-grok-4.6-high-fast` / `cursor-grok-4.5-medium-fast` / `cursor-grok-4.5-high-fast` / `composer-2.5-fast`）。`*-fast` 仅当非 fast 链尽且白名单只剩 fast 时，才可链末应急并标「未按模型路由」；**UI 已显示 Fast 时不得把该次当正规完成**（作废重派优先于应急采用）。**UI Fast → 作废重派（判定面=UI 显示名，不看请求 slug）**：子窗 UI 出现 `High Fast` / 任何 `*-fast` / Composer Fast（含请求 `cursor-grok-4.6-high` 但 UI 为 `Grok 4.6 High Fast`）→ 该子窗作废（结论/findings/改码不采用；打断）；**主窗 PM** 新开 Task，按该岗链上下一非 fast 档重派；禁止用刚 remap 的同一 slug 再派指望不 Fast。审核/方案审/CR/验收同规。档内链用尽 → 下一档。
 
 | 岗位 / 场景 | 场所 | 档位 | Task `model`（首选 → 回退） |
 | --- | --- | --- | --- |
@@ -69,6 +69,7 @@
 2. **次选**：Subagent 失败 → 提示用户**手动新开 Chat**粘贴派发块（写明岗位 + 应选模型）  
 3. **降级**：仅当用户书面要求主窗做、或 Subagent 与手动新开均不可用 → 主窗临时代行，**必须**标 **「主窗执行（未开子窗 · 非独立）」**；不得冒充已隔离  
 4. **`model` 失败**：按下表/项目覆盖链回退，最终 `inherit`，标 **「未按模型路由」**，不得停流程  
+5. **UI Fast 作废重派**：判定面=**UI 显示名**（`High Fast` / 任何 `*-fast` / Composer Fast），不看请求 slug。命中 → 该子窗作废（结论/findings/改码不采用；打断）→ **仅主窗 PM** 新开 Task，按该岗链上下一非 fast 档重派；禁止同一 remap slug 再派；禁止子窗自重派。全岗适用。链末只剩 fast 的应急仍须标「未按模型路由」，且 UI 已 Fast 时不得当正规完成（作废重派优先）。
 
 子窗交回短结论；主窗 PM 更新「你下一步」与确认包。审核子窗默认只读。
 
@@ -149,3 +150,5 @@
 - 未「准」仅因「要开实现子窗」而提前改码  
 - 向子窗塞主对话长讨论或归档全文  
 - 把**项目专属**模型偏好写进通用 Skill（须进 project-context）  
+- **非 PM 子窗再 Task 派方案审/CR**（套娃；是 remap→Fast 的常见触发面）  
+- UI 已 Fast 却只标「未按模型路由」、不打断、不主窗下一非 fast 重派；或用刚 remap 的同一 slug 再派指望不 Fast；或让子窗自己再派 

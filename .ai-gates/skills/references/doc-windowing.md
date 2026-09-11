@@ -524,7 +524,7 @@ Verify 失败 / CR 收口 / 开始改码后：**同条改写首段**。首段仍
 
 4. 禁止主窗与归档双写  
 
-5. **岗接线**：程序员 Step 收口必做 1～4；CR 查 `_索引.md`；`migrate-pipeline-window` 只搬家、**不**归档 Step。迁到签收后表内仍「尚无」= 漏做本条。Direct/Express 无方案夹则跳过。  
+5. **岗接线**：非战役时程序员 Step 收口必做 1～4；**战役模式**可批到签收或每 N 刀一批（见 [circuit-windows.md](./circuit-windows.md)）。CR 查 `_索引.md`；`migrate-pipeline-window` 只搬家、**不**归档 Step。迁到签收后表内仍「尚无」= 漏做本条（战役未到签收批次除外）。Direct/Express 无方案夹则跳过。  
 
 
 

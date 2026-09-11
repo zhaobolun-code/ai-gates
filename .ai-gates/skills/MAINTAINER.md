@@ -1,7 +1,17 @@
 # AI 开发流水线 — 维护者手册
 
-> 面向修改 `.cursor/skills/` 的维护者。
+> 面向修改 `.cursor/skills/` 的维护者。版本以 [VERSION](./VERSION) 为准。
 > **团队用户** → [USER-GUIDE.md](../USER-GUIDE.md) · **Agent/TL 日常** → [agent-entry-route.md](./references/agent-entry-route.md)
+
+## 改 skill 五步
+
+动手改 `.ai-gates/skills/`（`.cursor/skills` 为传送门，同一份）或配套 hooks/scripts 时按此顺序。论文 [METHODOLOGY.md](../METHODOLOGY.md) 不替代本页。被拦见 [USER-GUIDE.md](../USER-GUIDE.md)「被拦了怎么办」。
+1. **写 CHANGELOG** — 先在 [CHANGELOG.md](../CHANGELOG.md) 加 Included 条目（CHANGELOG 自身 Level 0，不看 `[PM]`）。本会话 120 分钟内无此打点，改 `skills/` / `hooks/` / `scripts/` / `rules/` 会被 Level 1 deny。
+2. **改目标文件** — 只改本刀范围：岗位 `SKILL.md` / `CORE.md` / `references/` / `hooks/` / `scripts/`。项目专属只进 `.cursor/project-context.md`，不进 skills。改 CORE 后同步 `.mdc` / Trae rules / 各岗指针。
+3. **跑校验** — `powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/validate-pipeline.ps1 -Strict`（含 hooks policy、BOM、承重句 canary）。红则先修，不发布。
+4. **升版才评测** — 不 bump：步骤 3 绿即可收。bump 或改口令/门禁语义：新开 Chat 跑 [skill-eval-checklist.md](./references/skill-eval-checklist.md) §A–D，Pass≥90% 再 bump。
+5. **bump 只动两处** — 只原子改 [VERSION](./VERSION) + CHANGELOG 顶行「当前 LTS」。禁止把版本号复制进 README / CORE / 本文件。
+改 `pm-gate-check` 或同类 hook：必须同步 `hooks/`、`hooks/claude/`、`hooks/codex/` 三份；业务路径放行 reason 字面须含 `window_pm_not_this_turn`（禁止写成 `this_turn_pm`，也禁止用 `fresh_pm_marker_age` 冒充本条已判定）。
 
 ## 稳定版本（LTS）
 
@@ -197,7 +207,7 @@ powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/compute-coverage-map.
 
 1. 文件夹名英文；岗位调用名中文。
 2. 新规则写「原则 + 例外 + 输出要求」，少堆 checklist。
-3. 改岗位 Skill 后更新 CHANGELOG；若 bump，只原子修改 `VERSION` + CHANGELOG。
+3. 改岗位 Skill 后更新 CHANGELOG；若 bump，只原子修改 `VERSION` + CHANGELOG。顺序见文首 **改 skill 五步**（先 CHANGELOG 再改目标；不要只改 skills 指望 deny 文案当说明书）。
 4. 项目专属内容只进 **`.cursor/project-context.md`** 与 **`.ai-gates/regression-index.yaml`**；不写进 `.cursor/skills/`（见 [project-local-config.md](./references/project-local-config.md)）。
 5. README/CORE/本文件/`.mdc`/Trae/校验与打包脚本只指向或读取 `VERSION`，禁止复制当前版本值。
 6. 更新 **`.cursor/project-context.md`** 回归索引表后，运行 `sync-regression-index.ps1 -Apply` **自动重新生成** `.ai-gates/regression-index.yaml`（v2.1.0 起不再手工双写；`-Strict` 仍可用于纯校验/CI）。
@@ -251,17 +261,17 @@ powershell -ExecutionPolicy Bypass -File .ai-gates/package-release.ps1 -Version 
 
 输出 `.ai-gates/releases/ai_dev_<版本号>.7z`，打包范围来自**中央技能库 `.ai-gates/`**，**包顶层 = 中央技能库内容**（解压到目标项目根即得 `.ai-gates/`）：`skills/`（**排除** `MAINTAINER.md`；拷完后用 `templates/design-patterns.template.md` **覆盖** `references/design-patterns.md`，本仓验证行不进包）+ `scripts/*.ps1|*.sh` + 点名 `scripts/fog-map.template.html`（文件存在才拷）+ `rules/ai-dev-pipeline.mdc` + `hooks.json`/`hooks/*.ps1` + `hooks/codex/*.ps1` + `hooks/claude/*.ps1` + `hooks/plugin/invoke.ps1` + `cursor-marketplace/`（市场仓根文件，拷到公开仓根）+ `codex/hooks.json` + `codex/config.toml`（Codex 接线）+ `claude/settings.json` + `claude/agents/` + `claude/mcp.json`（Claude 接线；**不拷** `settings.local.json`）+ `METHODOLOGY.md`/`USER-GUIDE.md`（新人说明文档）+ 根 `CHANGELOG.md`（供公开增信）+ `link-platform.ps1/.sh` + `README.md` + `LICENSE`；**不含** `.trae/`、脚本自身（`package-release.ps1`）、`project-context.md`（含项目口诀）、`regression-index.yaml`、`hooks-log/`（运行时日志）、`AGENTS.md`（项目相关，Codex 用户按 §Codex Hooks 自建）、`.ai-gates/lessons-learned.md` / `lessons-outline.md`（错题本，根目录本就不拷）等。**新项目接入三步**：解压到项目根 → 跑 `link-platform.ps1`（建 `.cursor/*`、`.codex`、`.claude`、`.trae/skills` 传送门）→ 按需建 `AGENTS.md`。若目标项目用 Trae，`.trae/rules/ai-dev-pipeline.md` 与 `.trae/skills/` 联接需按 [MAINTAINER §目录与同步策略](#目录与同步策略) 单独处理（`link-trae-skills.ps1`/`.sh` 已随包）。依赖本机已安装 7-Zip（`7z.exe` 在 PATH 或默认安装目录）。**打包前默认强制 `validate-pipeline.ps1 -Strict`**（2026-08-03 Step 3）：红 → `Write-Error` 拒绝句「已拒绝打包」+ `exit 1`；`-SkipValidate` 为显式逃生（打印醒目警告后跳过，维护者签字级），`-ValidateScriptPath` 可注入替代校验脚本（测试用）。
 
-## Cursor Hooks（机器强制层 · observe/ask 模式）
+## Cursor Hooks（机器强制层 · deny + 逃生）
 
-`.cursor/hooks.json` + `.cursor/hooks/*.ps1`，克隆仓库后 Cursor 自动加载，**不需要用户手动安装**（跟 pre-commit 不同，pre-commit 需要 TL 手动跑安装命令）。当前落地七个 hook，**均遵循"先观察/问询，不做硬 deny"的设计**（`pm-gate-check.ps1` 2026-07-21 前曾短暂是 `deny`，因下文「已知限制」第 1 条降级为 `ask`，详见 CHANGELOG 2026-07-09 P2 / 2026-07-21 记录；2026-08-03 再改为对 `.cursor/**` 分级豁免的轻门禁）：
+`.cursor/hooks.json` + `.cursor/hooks/*.ps1`，克隆仓库后 Cursor 自动加载，**不需要用户手动安装**（跟 pre-commit 不同，pre-commit 需要 TL 手动跑安装命令）。当前落地七个 hook。业务路径与 Level 1 设施写：**`permission: deny` + `user_message` 逃生**（Cursor 2.2+ `ask` 不弹窗、形同放行，见已知限制第 1 条）。审计类 hook 恒 allow。全部 `failClosed: false`。改 skill / hooks 顺序见文首 **改 skill 五步**。
 
 | Hook | 事件 | 行为 | 文件 |
 | --- | --- | --- | --- |
-| Hooks 声明漂移检测 | `sessionStart` | 比对 MAINTAINER observe/ask 声明 ↔ `hooks.json` / `pm-gate-check.ps1` / 本 hook 齐套；漂移 → 写 `.ai-gates/hooks-log/hooks-policy-drift.json` 并注入 `additional_context`（不拦截会话）；共享逻辑 `.cursor/scripts/check-hooks-policy.ps1` | `check-hooks-drift.ps1` |
+| Hooks 声明漂移检测 | `sessionStart` | 比对 MAINTAINER deny/`failClosed` 声明 ↔ `hooks.json` / `pm-gate-check.ps1` / 本 hook 齐套；漂移 → 写 `.ai-gates/hooks-log/hooks-policy-drift.json` 并注入 `additional_context`（不拦截会话）；共享逻辑 `.cursor/scripts/check-hooks-policy.ps1` | `check-hooks-drift.ps1` |
 | Git 高危命令确认 | `beforeShellExecution` | 命中 `git push --force`/`reset --hard`/`clean -f*`/`checkout --`/`branch -D` 等 → `permission: deny` + user_message 逃生提示（2026-08-03 由 ask 改：Cursor 2.2+ hook `ask` 无效是官方确认 bug）；其余命令 `allow` | `git-safety-check.ps1` |
 | 交付物改动审计 | `preToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 记录 `时间戳 \| tool \| session \| path` 一行到 `.ai-gates/hooks-log/write-audit.log`（不提交 Git）；**始终 `allow`，不拦截** | `pre-write-gate.ps1` |
 | PM 判定标记打点 | `afterAgentResponse`（matcher: `AgentResponse`） | 回复文本命中 `[PM]` → 把 `{conversation_id: {lastPmAtUtc, snippet}}` 写入 `.ai-gates/hooks-log/pm-gate.json`；纯观测，无 `permission` 语义 | `mark-pm-gate.ps1` |
-| PM 门禁机械检查（支柱 D） | `preToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 业务路径按 `conversation_id` 查 `pm-gate.json` 里最近 120 分钟内有无 `[PM]` 标记；`.cursor/**` **分级豁免**——**Level 0 全豁免** `allow`（kill switch / `CHANGELOG.md` 自身 / `hooks-log/**` 运行时 / 项目专属文件 project-context.md、regression-index.yaml、lessons-* 等）；**Level 1 轻门禁**（`.cursor/skills\|hooks\|scripts\|rules\|hooks.json` 写操作：会话内最近 120 分钟有 CHANGELOG 写记录 → `allow`，无 → `permission: deny` + user_message 逃生提示——先写 CHANGELOG / kill switch / 手动编辑；2026-08-03 由 ask 改，Cursor 2.2+ hook `ask` 无效是官方确认 bug；打点文件缺失 → 同 `deny`（初始状态 = 无任何会话有流水）；损坏/时间戳不可解析 → fail-open `allow`）；**其余 `.cursor/**` 兜底 `allow`**（package-release.ps1、README.md、mcp.json、ai_dev_*.7z、`_release_staging/` 等）；标记缺失/过期 → `permission: deny`（逃生：发 `[PM]` / kill switch / 手动编辑）；解析异常 fail-open 为 `allow` | `pre-write-gate.ps1` |
+| PM 门禁机械检查（支柱 D） | `preToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 业务路径按 `conversation_id` 查 `pm-gate.json` 里最近 120 分钟内有无 `[PM]` 标记；`.cursor/**` **分级豁免**——**Level 0 全豁免** `allow`（kill switch / `CHANGELOG.md` 自身 / `hooks-log/**` 运行时 / 项目专属文件 project-context.md、regression-index.yaml、lessons-* 等）；**Level 1 轻门禁**（`.cursor/skills\|hooks\|scripts\|rules\|hooks.json` 写操作：会话内最近 120 分钟有 CHANGELOG 写记录 → `allow`，无 → `permission: deny` + user_message 逃生提示——先写 CHANGELOG / kill switch / 手动编辑，顺序见文首 **改 skill 五步**；2026-08-03 由 ask 改，Cursor 2.2+ hook `ask` 无效是官方确认 bug；打点文件缺失 → 同 `deny`（初始状态 = 无任何会话有流水）；损坏/时间戳不可解析 → fail-open `allow`）；**其余 `.cursor/**` 兜底 `allow`**（package-release.ps1、README.md、mcp.json、ai_dev_*.7z、`_release_staging/` 等）；标记缺失/过期 → `permission: deny`（逃生：主窗发 `[PM]`；子窗不要发 `[PM]` / kill switch / 手动编辑）；解析异常 fail-open 为 `allow` | `pre-write-gate.ps1`（内调 `pm-gate-check`） |
 | 写后编译错误提示（写后质量门） | `postToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 命中 `.cs`/`.lua` 路径 → 扫最近 Unity `Editor.log` 的 `error CS\d{4}` 编译错误；命中 → 注入 `additional_context`（+ `additionalContext` 兼容）+ 审计一行 `.ai-gates/hooks-log/unity-compile-check.log`；**恒 `allow` 不拦截**；日志缺失/解析异常/非代码路径 → 静默放行；不做 batchmode / 业务断言（归黄金验窗） | `post-write-gate.ps1` |
 | CHANGELOG 写打点（轻门禁数据源） | `postToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 写 `.ai-gates/CHANGELOG.md`（路径以 `changelog.md` 结尾即可，大小写不敏感）时把 `{conversation_id: {lastChangelogWriteAtUtc}}` 原子写入 `.ai-gates/hooks-log/changelog-writes.json`（复用 mark-pm-gate 的 Write-GateAtomic 原子写模式）；非 CHANGELOG 路径仅审计；纯观测恒 `allow`，一切异常 exit 0（fail-open）；供 pm-gate-check Level 1 轻门禁读取 | `post-write-gate.ps1` |
 
@@ -275,7 +285,7 @@ preToolUse 2→1、postToolUse 2→1）。原单门禁脚本保留（供测试�
 
 **已知限制 / 后续升级路径**：
 
-1. **`pm-gate-check.ps1` 的落地经验（2026-07-21）**：先做过 `permission: deny` 的"硬门禁 7 机械版"，真实会话验证时发现 `mark-pm-gate.ps1` 落盘时机不可靠——`afterAgentResponse` 用 Cursor **Execution Log** 面板能看到确实触发过（真实 payload 含 `conversation_id`/`generation_id`/`model` 等字段），但同一会话连续 3 次完整回复里出现 `[PM]`，标记文件都没能按预期写出；`deny` 在这种情况下会把人逼进死路（只能靠 kill switch 或手动重放脚本）。**已降级为 `ask`**：标记缺失/过期时转人工确认而不是硬拒绝，既保留"提示未检测到标记"的机械层，又不产生死路。**2026-08-03 再反转**：Cursor 2.2+ 的 hook `permission: ask` 是官方确认的 bug——不弹窗、命令/工具直接放行（forum.cursor.com/t/hooks-ask-permission-broken-in-2-4-21 / t/hook-return-value-ask-has-no-practical-effect），ask 在真实环境形同 allow；真演「没弹 ask 窗口」即此根因（脚本侧字节级验证 stdout 为干净 `{"permission":"ask"}`，是 Cursor 吞掉）。**改回 `permission: deny` + user_message 逃生路径**（业务：发 `[PM]` / kill switch / 手动编辑；Level 1：先写 CHANGELOG / kill switch / 手动编辑）——逃生通道兜底，不逼死路。根因（真实 `text` 字段的落地时机/内容）尚未定位；有余力时应优先在 Cursor **设置 → Hooks** 面板核对 `afterAgentResponse` 的完整 payload，而不是继续靠猜测修。
+1. **`pm-gate-check.ps1` 的落地经验（2026-07-21 → 2026-08-03）**：**现行是 `permission: deny` + `user_message` 逃生，不是 ask。** 先做过 deny，因 `mark-pm-gate` 落盘时机不可靠、怕逼死路而降为 `ask`；Cursor 2.2+ 的 hook `permission: ask` 是官方确认 bug（不弹窗、工具直接放行，forum.cursor.com/t/hooks-ask-permission-broken-in-2-4-21），ask 形同 allow，故改回 deny + 逃生（业务：主窗发 `[PM]`，子窗不要发 `[PM]` / kill switch / 手动编辑；Level 1：先写 CHANGELOG，见文首 **改 skill 五步**）。根因（真实 `text` 字段落地时机）尚未定位；有余力时优先在 Cursor **设置 → Hooks** 核对 `afterAgentResponse` 完整 payload。
 2. 全部 hook 脚本都用 PowerShell 写（Windows 环境），且**手动验证过 UTF-8 BOM 编码**——本机控制台代码页是 GBK(936)，脚本文件若不带 BOM，PowerShell 5.1 会按系统代码页误读中文字符串导致语法错误（历史踩坑同 `check-pipeline-doc.ps1`）；新增/修改 hook 脚本后务必用 `[System.IO.File]::WriteAllText($path, $content, (New-Object System.Text.UTF8Encoding($true)))` 方式重存，并在脚本内显式设置 `[Console]::InputEncoding`/`[Console]::OutputEncoding` 为 UTF8。**已机械化（2026-08-03）**：`check-hooks-policy.ps1` 的 BOM 扫描段遍历 hooks/ + scripts/ 下 *.ps1 首 3 字节，非 `EF BB BF` → issue "UTF-8 BOM missing"，`validate-pipeline -Strict` 自动受益（本文件自身也在扫描范围，须保持 BOM）
 3. 全部 hook `hooks.json` 均设 `failClosed: false`——脚本报错/超时时默认放行，不会因为 hook 本身出 bug 而误拦正在进行的工作
 4. `test-hooks.ps1`（支柱 C）是**注入式**（构造小 JSON 直接喂给脚本），覆盖不到真实 Cursor 协议形态——第 1 条那次误判就是踩了这个盲区。**2026-08-03 已补协议级仿真**：`simulate-cursor-session.ps1` 按 Cursor 2.2 schema 构造完整会话序列 + 大 payload（≥80KB、中文/特殊字符），机械化验证打点链路与门禁流转（发布闸「真演证据」自动化，见发布检查清单）；但仿真仍无法覆盖 Cursor 侧「事件是否触发、`additional_context` 注入竞态」——首次发布或重大 hook 变更后，仍应到 Cursor **设置 → Hooks** 面板或 **Execution Log** 确认实际生效，不能只看 `test-hooks.ps1` / `simulate-cursor-session.ps1` 通过就当作已生效
@@ -342,7 +352,7 @@ check-unity-compile）——单进程内依次执行原门禁脚本，stdin 预�
   F1-F2 / G1，覆盖 deny/allow/分级豁免/kill switch/打点/漂移）。
 - 真实 `codex exec` 端到端（D:\Work\Chemical 真实接线）：无标记 apply_patch 被拦截
   （`Command blocked by PreToolUse hook: PM gate deny ...`）；回复 `[PM]` 后 `Stop` 打点
-  → resume 同会话写文件放行（`ALLOW fresh_pm_marker_age=0.4min`）；`git push --force`
+   → resume 同会话写文件放行（`ALLOW window_pm_not_this_turn_age=0.4min`）；`git push --force`
   被 git-safety-check 拦截；`SessionStart` 漂移 hook 无漂移。
 - 仿真/注入仍覆盖不了桌面端"事件是否触发 + 信任批准"，首次接 Codex 仍需真实会话核验一次。
 

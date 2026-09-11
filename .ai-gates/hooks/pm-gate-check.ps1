@@ -139,7 +139,7 @@ function Emit-Deny {
     # BaseMsg 分场景：业务路径提示 [PM] 标记；Level 1 提示 CHANGELOG 流水
     # （2026-08-03 真演教训：统一文案误导 agent 以为发 [PM] 能解锁 Level 1）。
     if (-not $BaseMsg) {
-        $BaseMsg = "PM gate deny detail=$Detail : no window_pm (no [PM] marker within $FreshnessMinutes min). This is the 120-min window, NOT this_turn_pm / CORE #7 same-turn judgment. Escape: emit [PM] in reply / edit .cursor path / place hooks-log/pm-gate-disabled, then retry."
+        $BaseMsg = "PM gate deny detail=$Detail : no window_pm (no [PM] marker within $FreshnessMinutes min). This is the 120-min window, NOT this_turn_pm / CORE #7 same-turn judgment. Escape: main window emit [PM] in reply; if this is a child session do NOT emit [PM]. Or place hooks-log/pm-gate-disabled / manual edit, then retry."
     }
     if ($UserHint) {
         $userMsg = "$BaseMsg $UserHint"
@@ -232,6 +232,11 @@ function Get-ChildSessionDenyHint {
     return "子窗不要发 [PM]，也不要把 [PM] 写进 resume 提示词。主窗须在自己的回复里发出 [PM]，等 afterAgentResponse 写入 pm-gate.json 后再派或续写。或主窗代写并标明未开子窗。或放置 hooks-log/pm-gate-disabled / 手动编辑。"
 }
 
+function Get-MaybeChildDenyHint {
+    param([string]$MainHint)
+    return ($MainHint.TrimEnd() + " 若本窗是子窗：不要发 [PM]，也不要把 [PM] 写进 resume，等主窗回复打点或主窗代写。")
+}
+
 function Get-InheritedParentPmReason {
     param(
         [string]$ConversationId,
@@ -297,12 +302,12 @@ if (Test-CursorInfraPath -FilePath $filePath) {
     if (Test-CursorLevel1Path -FilePath $filePath) {
         # Level 1 专用 BaseMsg：明确此门禁看 CHANGELOG 写流水、不看 [PM] 标记
         # （2026-08-03 真演教训：统一文案误导 agent 以为发 [PM] 能解锁 Level 1）。
-        $level1BaseMsg = "PM gate Level-1 deny : no fresh CHANGELOG write for this conversation within $FreshnessMinutes min (changing .cursor facilities requires a CHANGELOG entry; this gate does NOT read [PM] markers). Escape: write CHANGELOG first / place hooks-log/pm-gate-disabled / manual edit, then retry."
+        $level1BaseMsg = "PM gate Level-1 deny : no fresh CHANGELOG write for this conversation within $FreshnessMinutes min (changing .cursor facilities requires a CHANGELOG entry; this gate does NOT read [PM] markers). Escape: write CHANGELOG first / place hooks-log/pm-gate-disabled / manual edit, then retry. Order: MAINTAINER.md 「改 skill 五步」."
         # 打点文件缺失 = 系统里还没有任何会话成功写过 CHANGELOG（初始状态）——本会话
         # 必然无流水，与「有文件但无记录」同语义 → deny + 逃生提示（2026-08-03 两连修：
         # 先 fail-open allow → ask；再因 Cursor 2.2+ ask 无效 → deny）。
         if (-not (Test-Path -LiteralPath $changelogFile)) {
-            $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch，临时全放行）后重试；或手动编辑目标文件。"
+            $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch，临时全放行）后重试；或手动编辑目标文件。顺序见 MAINTAINER 文首「改 skill 五步」。"
             Emit-Deny -ConversationId $conversationId -Detail "changelog_writes_missing_level1" -UserHint $hint -BaseMsg $level1BaseMsg
             return
         }
@@ -323,7 +328,7 @@ if (Test-CursorInfraPath -FilePath $filePath) {
         $changelogEntry = $changelog.$conversationId
         if (-not $changelogEntry -or -not $changelogEntry.lastChangelogWriteAtUtc) {
             # 无 CHANGELOG 写记录 → deny（硬拦，Cursor 2.2+ ask 无效），提示逃生路径
-            $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+            $hint = "逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。顺序见 MAINTAINER 文首「改 skill 五步」。"
             Emit-Deny -ConversationId $conversationId -Detail "no_changelog_write_for_conversation_level1" -UserHint $hint -BaseMsg $level1BaseMsg
             return
         }
@@ -335,7 +340,7 @@ if (Test-CursorInfraPath -FilePath $filePath) {
         }
         $changelogAgeMinutes = ([DateTime]::UtcNow - $lastChangelogUtc).TotalMinutes
         if ($changelogAgeMinutes -gt $FreshnessMinutes) {
-            $hint = "逃生：重新写 .ai-gates/CHANGELOG.md（Included 条目）后再试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+            $hint = "逃生：重新写 .ai-gates/CHANGELOG.md（Included 条目）后再试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。顺序见 MAINTAINER 文首「改 skill 五步」。"
             Emit-Deny -ConversationId $conversationId -Detail ("stale_changelog_write_age={0}min_level1" -f [Math]::Round($changelogAgeMinutes,1)) -UserHint $hint -BaseMsg $level1BaseMsg
             return
         }
@@ -350,7 +355,7 @@ if (Test-CursorInfraPath -FilePath $filePath) {
 
 # --- 业务路径：原 PM 标记新鲜度检查不变（ask→deny，Cursor 2.2+ ask 无效） ---
 if (-not (Test-Path -LiteralPath $gateFile)) {
-    $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+    $hint = Get-MaybeChildDenyHint "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "gate_file_missing" -UserHint $hint
     return
 }
@@ -359,7 +364,7 @@ try {
     $gateRaw = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8
     $gate = $gateRaw | ConvertFrom-Json -ErrorAction Stop
 } catch {
-    $hint = "逃生：先在本会话回复中发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+    $hint = Get-MaybeChildDenyHint "逃生：先在本会话回复中发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "gate_file_unreadable" -UserHint $hint
     return
 }
@@ -373,7 +378,7 @@ if (-not $entry -or -not $entry.lastPmAtUtc) {
         Emit-Deny -ConversationId $conversationId -Detail "parent_pm_not_marked" -UserHint (Get-ChildSessionDenyHint) -BaseMsg "PM gate deny detail=parent_pm_not_marked : unique parent transcript found but parent has no fresh [PM]. Child must not emit [PM]."
         return
     }
-    $hint = "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+    $hint = Get-MaybeChildDenyHint "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "no_pm_marker_for_conversation" -UserHint $hint
     return
 }
@@ -381,7 +386,7 @@ if (-not $entry -or -not $entry.lastPmAtUtc) {
 try {
     $lastPmUtc = [DateTime]::Parse($entry.lastPmAtUtc).ToUniversalTime()
 } catch {
-    $hint = "逃生：先在本会话回复中重新发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+    $hint = Get-MaybeChildDenyHint "逃生：先在本会话回复中重新发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail "timestamp_unparseable" -UserHint $hint
     return
 }
@@ -395,7 +400,7 @@ if ($ageMinutes -gt $FreshnessMinutes) {
         Emit-Deny -ConversationId $conversationId -Detail "parent_pm_not_marked" -UserHint (Get-ChildSessionDenyHint) -BaseMsg "PM gate deny detail=parent_pm_not_marked : unique parent transcript found but parent has no fresh [PM]. Child must not emit [PM]."
         return
     }
-    $hint = "逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 $FreshnessMinutes 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
+    $hint = Get-MaybeChildDenyHint "逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 $FreshnessMinutes 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
     Emit-Deny -ConversationId $conversationId -Detail ("stale_pm_marker_age={0}min" -f [Math]::Round($ageMinutes,1)) -UserHint $hint
     return
 }

@@ -41,7 +41,7 @@ pm:
 
 **你下一步**（可 1～2 句，禁只写「等待」）：车道理由 · 下一岗 · 五态 · 用户动作（确认切片 / 等改完 / Unity 测 / 回是否通过）。二选一/多选一另加 **推荐 + 为什么**（≤3 句）→ [demand-clarification.md](references/demand-clarification.md)。缺任一项或推荐 → **缺 PM 结构化判定**。Express 判定**必须**附一句**风险复述 + 升道出口**：「我判定为机械微改（仅 1 个文件），走快车道；若你认为涉及行为变化，请回『直通道』；超过 3 个文件或涉及 API / 存档 / 跨模块，请回『走标准道』。」
 
-**Verify / Unity 失败**：「你下一步」走 [diagnosis-gates.md](references/diagnosis-gates.md) §0（含有意义评审）；禁默认开 Step N+1、静默代选、「新切片」清零止损。
+**Verify / Unity 失败**：「你下一步」走 [diagnosis-gates.md](references/diagnosis-gates.md) §0（含有意义评审；同 A# **第一次**且有意义=有、根因钉死 → 同条热修，第二次才菜单）；禁默认开 Step N+1、「新切片」清零止损。
 
 ### 完整输出（用户可见摘要 + 你下一步）
 
@@ -58,7 +58,7 @@ pm:
 
 **隔离审核**：L1.5 CR / L2 / L3 / 高风险对抗 CR → **优先**主 Agent 拉起 Subagent 隔离会话；高风险**优先异模型**（首选高质量档，失败回退同模型，不硬拦）；失败再提示手动新开 Chat；同 Chat 续审须标非独立。细则 → [isolated-review.md](references/isolated-review.md)。**不校验**用户是否接受隔离/是否换模型。
 
-**主窗仅 PM + 流水线岗子窗（优先 · 不硬拦）**：主窗**只**做 `[PM]`；策划 / 方案审 / 程序员 / CR / 文档 **一律优先 Subagent 子窗**（有能力时禁止主窗兼岗写改）。**周报例外**：用户单独调用，不要求子窗。模型：策划/方案审=高质量；实现/文档=便宜快速；CR 相对实现优先高质量；**具体 slug 以 project-context §模型路由为准**（无则 Skill 默认表）。细则 → [model-routing.md](references/model-routing.md)。
+**主窗仅 PM + 流水线岗子窗（优先 · 不硬拦）**：主窗**只**做 `[PM]`。方案审 / CR / 文档 **一律优先 Subagent**。Express 实现、以及 Direct 且 PM 已写清 A#：实现**可主窗**（须标「主窗执行（未开子窗）」）；CR 仍必须隔离子窗。Standard/Full 实现仍优先子窗。范围不清的 Direct 仍派策划子窗。**周报例外**：用户单独调用，不要求子窗。模型：策划/方案审=高质量；实现/文档=便宜快速；CR 相对实现优先高质量；**具体 slug 以 project-context §模型路由为准**（无则 Skill 默认表）。细则 → [model-routing.md](references/model-routing.md)。
 
 Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr-dispatch-l1.5.md](./templates/cr-dispatch-l1.5.md)（Subagent 派发或手动粘贴）。
 **禁止**未完成内部结构化判定就仅凭白话判车道。
@@ -86,7 +86,7 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 ## 四车道判定（顺序固定）
 
-**判定前**：需求存在 ≥2 种合理解释且影响车道/范围（如"改顺畅点"无验收标准）→ 先追问 ≤3 个关键问题（最多 1 轮，答不全按默认决策继续），细则 → [demand-clarification.md](references/demand-clarification.md)。
+**判定前**：需求存在 ≥2 种合理解释且影响车道/范围（如"改顺畅点"无验收标准）→ 先追问 ≤3 个关键问题（最多 1 轮，答不全按默认决策继续），细则 → [demand-clarification.md](references/demand-clarification.md)。改代码需求：判车道前用**一次**窄 `codegraph_explore`（或已有 diff 文件清单）估**将改业务源文件数**，按将改数判，禁止只按用户口头文件数。
 
 **判定实现顺序（单一优先级，M1）**：**先查步骤 4 Full 强制条**——命中任一即 `lane: Full`；**未命中再按步骤 1 → 步骤 2 → 步骤 3 判定**（等效「取最高命中车道」）；升级链 `Express → Direct → Standard → Full`，过程中命中升级立即改判。**PM 默认直通道**（步骤 2），不要无理由抬到标准。决策树 → [references/full-lane-decision-tree.md](references/full-lane-decision-tree.md)。
 
@@ -104,7 +104,7 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
    · 有**行为变化**（即使 1 个文件），**或**机械改但已是 2～3 个业务源文件
    · ≤3 业务源文件；**无 API / 无持久（存档/序列化）/ 无跨模块**
    · **回归索引 / §车道升级路径 / 文件热度不单独升 Standard**
-   · 策划子窗对话内出 A#/切片，**不落盘**；默认单会话完成，跨会话/改不完自动升 Standard
+   · **PM 本轮写**对话内 A#/切片（不落盘）；范围/口径说不清才派策划子窗。默认单会话完成，跨会话/改不完自动升 Standard
    · 当前为 Express 或 Direct 时命中止损 → **升 Standard**（不是 Full）
    · PM 可改判 Standard（须写一句风险）；用户点名标准/完整从其点名
    · 判定须含一句话 A# + 升道出口（默认「直通道」；架构/API/存档/跨模块/超 3 文件→「走标准道」）
@@ -137,9 +137,9 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 | 车道 | 流程 | 文档 |
 | --- | --- | --- |
-| **Express** | 一句话切片 → **一轮确认** → 子窗程序员 → 一行自检 → Unity 测；无 CR；默认不落盘、不建窗；**一旦已建分类夹** → [doc-windowing.md](references/doc-windowing.md) §与 Express（最小两文件 + 终态须 migrate；不强制 `未完成.md`） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
-| **Direct** | PM → 子窗策划（对话内 A#/切片，不落盘）→ **一轮确认** → 子窗程序员 → 隔离 CR（普通档）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
-| **Standard** | plan-lite → L1/L1.5/L2 → **一轮确认** → `[developer]` → `[CR]` → README | plan-lite；A# + delta-only |
+| **Express** | 一句话切片 → **一轮确认** → 实现（**可主窗**）→ 一行自检 → Unity 测；无 CR；默认不落盘、不建窗；**一旦已建分类夹** → [doc-windowing.md](references/doc-windowing.md) §与 Express（最小两文件 + 终态须 migrate；不强制 `未完成.md`） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
+| **Direct** | **PM 写**对话内 A#/切片（不清才派策划）→ **一轮确认** → 实现（**可主窗**）→ 隔离 CR（**必须子窗**，普通档）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
+| **Standard** | plan-lite → L1/L1.5/L2 → **一轮确认** → `[developer]` → `[CR]` → README。同窗同口径连续刀 → [circuit-windows.md](references/circuit-windows.md) **战役模式**（方案审不每刀重做；每刀仍 CR） | plan-lite；A# + delta-only |
 | **Full** | TL 显式启用；见 [references/](references/) | 执行文档；须含验收 A# |
 
 文档须含可证伪 **验收条款 A1…** 且 Step/切片写 **满足验收：A#**；只写相对现状变更（**delta-only**）。缺则方案审核 blocker。细则 → [acceptance-and-delta.md](references/acceptance-and-delta.md)。回归索引模块相关 Step 验收时：优先用 `scripts/verify-regression-smoke.ps1` 跑冒烟（命中 golden 且 UNITY_EXE 可用则自动跑，否则生成人工 Play 清单），并用 `scripts/collect-acceptance-evidence.ps1` 把日志尾部/截图/测试报告归入窗口 `证据/`（evidence.md）；**自动验证 ≠ 业务手测签收**，A# 仍以你亲眼看为准。
@@ -172,7 +172,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 1. **没读真实代码不改** — 代码与仓库文件（有 git 时辅以 diff）> README > 文档/Express 切片 > 对话推断
 2. **Express 先有一句话切片（PM 判定+一句话 A#）、Direct 先有对话内 A#/切片再改** — 无切片不得 `[developer]`；一次一切片；实改超范围立即升道
-3. **Standard 须方案审；Direct 无方案审但须隔离 CR** — 未过方案审 / 未隔离 CR，不得 `implementation-ready` / 派程序员
+3. **Standard 须方案审**（战役中刀口径/选型/A# 契约未变则免本刀重审，见 circuit-windows）；**Direct 无方案审但须隔离 CR** — 未过方案审 / 未隔离 CR，不得 `implementation-ready` / 派程序员
 4. **CR 有 blocker 不写最终 README**
 5. **Unity 未测不得标「已通过」** — 例外：Skill/Doc AI 验收通过可抬升（见 [handoff-automation.md](references/handoff-automation.md) / [loop-engineering.md](references/loop-engineering.md)；非可不测）
 6. **PM 不替岗** — 不写 Step 规格、不改代码、不替 CR 宣布无 blocker
@@ -203,7 +203,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 | 策划 / 方案审核 / 程序员 / 代码审核 | `planner` / `plan-reviewer` / `developer` / `code-reviewer` 下 `SKILL.md` | `[planner]` / `[plan-reviewer]` / `[developer]` / `[CR]` |
 | 文档 / 周报 | `module-readme` / `weekly-report` 下 `SKILL.md` | `[docs]` / `[weekly]` |
 
-切换岗位前 Read 对应 `SKILL.md`。Express 切片由 **`[PM]`** 输出，**策划不参与**。直叫岗位名须同条先 `[PM]`（硬门禁 #7）；无 slice/plan-lite 且未 ready 不得直接 `[developer]`。一轮确认「准」→ 同条 `[developer]`（[handoff-automation.md](references/handoff-automation.md) §0/§F）。
+切换岗位前 Read 对应 `SKILL.md`。Express 切片由 **`[PM]`** 输出，**策划不参与**。Direct A# 已写清同样不派策划。直叫岗位名须同条先 `[PM]`（硬门禁 #7）；无 slice/plan-lite 且未 ready 不得直接 `[developer]`。一轮确认「准」→ 同条 `[developer]`（[handoff-automation.md](references/handoff-automation.md) §0/§F）。
 
 翻车索引 → [anti-patterns.md](references/anti-patterns.md)（**仅列近 90 天真实命中反模式、上限 15 条**，超限最低命中降级回完整表）。写方案/改码/扩 README 前 → [execution-discipline.md](references/execution-discipline.md) **复用四问**（已有→复用→少写/不写→能删）。测挂修复 → `证据/_repair-blackboard.md`；止损/`repair_rounds` 触顶 → **A#/口径复议**（[diagnosis-gates.md](references/diagnosis-gates.md) §0.6/§0.7），禁同 A# 死磕。错题 → 大纲 `.ai-gates/lessons-outline.md`（错因+改正）+ 方案「错题本必读」指路（[lessons-learned.md](references/lessons-learned.md)）。
 

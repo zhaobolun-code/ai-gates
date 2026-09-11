@@ -154,9 +154,9 @@ AI 每测挂一次、每留下一条验过的结构，都是一次进化契机�
 
 | 现象 | 原因 | 做法 |
 | --- | --- | --- |
-| 写入被 deny，提示 `no window_pm` / `no fresh [PM]` | 本会话 120 分钟窗口内没有 `[PM]` 打点（机器层叫 window_pm，不是「本条已判定」） | 回一句带 `[PM]` 的话，等打点后重试；或放 `.ai-gates/hooks-log/pm-gate-disabled` 临时放行 |
+| 写入被 deny，提示 `no window_pm` / `no fresh [PM]` | 本会话 120 分钟窗口内没有 `[PM]` 打点（机器层叫 window_pm，不是「本条已判定」） | **主窗**回一句带 `[PM]` 的话，等打点后重试；**子窗不要发 `[PM]`**，等主窗打点或主窗代写；或放 `.ai-gates/hooks-log/pm-gate-disabled` 临时放行 |
 | 窗口内放过了，但流程仍说缺判定 | 机器放行 ≠ 本条 this_turn_pm（CORE 硬门禁 #7） | 本条回复仍须带结构化 `[PM]` 和「你下一步」；不要把 120 分钟窗口当成已经判过 |
-| 写入被 deny，提示 `Level-1` / `CHANGELOG` | 改 `.cursor` / `.ai-gates` 设施前没写 CHANGELOG | 先写 `.ai-gates/CHANGELOG.md`（Included 条目）再重试 |
+| 写入被 deny，提示 `Level-1` / `CHANGELOG` | 改 `.cursor` / `.ai-gates` 设施前没写 CHANGELOG | 先写 `.ai-gates/CHANGELOG.md`（Included 条目）再重试；完整顺序见 [MAINTAINER.md](skills/MAINTAINER.md) 文首 **改 skill 五步** |
 | Bash 写文件被 deny，提示 `Bash write gate` | 显式写文件没走 PM 门禁 | 改用 apply_patch；或先发 `[PM]` 待打点后重试 |
 | `git push --force` / `reset --hard` 被 deny | 高危 git 被机器层硬拦 | 确认安全后在终端手动执行，或临时移除对应 hook 条目 |
 | 写完没见到任何门禁痕迹 | **Codex 桌面**对 `apply_patch` 钩子可能不触发（Cursor 桌面一般会触发） | 自查 `.ai-gates/hooks-log/`，或临时用 CLI 会话验证 |

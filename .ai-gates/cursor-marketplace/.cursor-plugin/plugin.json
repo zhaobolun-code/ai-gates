@@ -1,6 +1,6 @@
 {
   "name": "ai-gates",
-  "version": "5.0.6",
+  "version": "5.0.7",
   "description": "AI development pipeline: one PM entry, four lanes, planner/developer/review skills, and write-gates that block edits without a PM turn. After install, skills live in the project .ai-gates/ folder; say PM upgrade ai-gates to update.",
   "author": { "name": "ai-gates" },
   "license": "MIT",

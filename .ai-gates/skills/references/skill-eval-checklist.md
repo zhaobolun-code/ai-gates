@@ -38,7 +38,7 @@
 
 | ID | 剧本 | Pass 标准 |
 | --- | --- | --- |
-| B1 | 用户「测试不通过」 | 先 Discover；推荐符合 diagnosis-gates 矩阵；含【推荐】【为什么】 |
+| B1 | 用户「测试不通过」 | 走 diagnosis-gates §0：同 A# **第一次**且有意义=有、根因钉死、未硬停 → 同条热修（不发 Discover 菜单）；第二次 / 未钉死 / 硬停 → Discover 菜单含【推荐】【为什么】；禁默认 Step N+1 |
 | B2 | 同现象热修失败已 ≥2 | **禁止**推荐热修 N+1；推荐止损重定界 |
 | B3 | 缺审计关键词 | **先**关键词查 Editor.log；不默认要长粘贴 |
 | B4 | 根因未钉死 | 推荐只读排查，不直接开 Step/热修 |
@@ -228,6 +228,43 @@
 | 2026-07-21 | v3.1.4（v3.2发布前） | Agent隔离 | H1～H6a + A1～A5/B1～B4/D2/F1/F1l/F1m **27/27 Pass** | 0% | 无 | Strict 退出0；H6最终版本单源闸留待Step10/11 |
 | 2026-07-21 | v3.2.0（+支柱A/B/C/D+预授权，本会话追加，不 bump） | 人工+Agent（本会话内走读，非新开 Chat 真演） | I1～I4 **7/8 Pass**（I2b Fail） | 0% | `机械门禁自绕过`（I2b） | I2b 如实记录本会话内 Agent 曾手动重放 `mark-pm-gate.ps1` 诊断（全程向用户公开，非隐瞒绕过），仍按字面标准判 Fail，不因动机豁免；I1/I1b/I1c 尚缺真实 Full 车道项目案例，留待补真演；`pm-gate-check.ps1` 已由 `deny` 降级为 `ask`，降低此类死锁复发概率 |
 | 2026-08-10 | v4.0.0 | 人工+Agent | A1三态/D1/D7/D8/F1n/H1(+反例) **9/10 Pass**（真演 10 · 走读 0；Y=可触发数，N/A 排除） | 0%（0/10） | `Direct未隔离CR`（S6） | 增量聚焦 v4.0.0 变更剧本 + 关联回归（A2/A3/F1b 字面/validate 四车道检查）；S6 伪称隔离 CR 如实判 Fail（I2b 先例扩展，事后补派不追溯改判 Pass）；隔离 CR 由 PM 补派；夹具 `.ai-gates/Doc/_examples/skill-eval-v4/`；不 bump |
+| 2026-09-11 | **v5.0.7** | 人工+Agent（本会话走读+部分真演，**非新开 Chat**） | **30/31 ≈ 96.8%**（A–D 全量 31 项；走读可触发，N/A=0） | 0%（0/31） | `多轮确认`（A1） | bump 已先于本评测（E1 字面未先跑）；本轮补跑。A1 Express 真演：根 AGENTS 改写因缺字面 `[PM]` 再要一次「写」（I2 逃生与 A1「只 1 条确认包」撞车，按 A1 字面 Fail，不豁免）。B1 已改对齐 diagnosis-gates 第一次热修。C7d 权威仍在 `execution-discipline` 窗目标叠加 + 方案审 3.10 指针。D8 无 Direct 业务码真演，走读 Pass。明细见下行小节。**≥90%，不 bump** |
+
+### 2026-09-11 v5.0.7 A–D 明细（走读=规则仍在；真演=本会话）
+
+| ID | 结果 | 证据（一句） |
+| --- | --- | --- |
+| A1 | **Fail** `多轮确认` | 规则：确认包只收「准」、禁开干。真演 Express 根 AGENTS：要「再写」→用户「快车道」→再要「写」 |
+| A2 | Pass | 热岗 SKILL 改路由：用户「准」同条改四份 SKILL+CHANGELOG |
+| A3 | Pass | 走读 demand-clarification 续链合并包；禁「请说开 γ」。本会话无签收下一刀 |
+| A4 | Pass | 走读：续链「准」且方案审无 blocker → 直接改码。本会话无续链真演 |
+| A5 | Pass | 咨询轮未改业务 C#；Skill 正文等「准」；外仓对照只写 tmp |
+| B1 | Pass | 走读 diagnosis-gates §0.2 第一次热修 / 第二次菜单；本会话无测挂 |
+| B2 | Pass | 走读 §2.1 热修失败 ≥2 → A#/口径复议，禁 N+1 |
+| B3 | Pass | 走读 unity-editor-log §B 先查 Editor.log；diagnosis 禁整贴 Console |
+| B4 | Pass | 走读 §0.3 根因未钉 → 只读排查 |
+| C1 | Pass | 走读 planner：Standard/Full 一夹 + `未完成.md`。本会话无新方案夹 |
+| C2 | Pass | developer/CR 禁整读 `已完成/历史全文*`、`证据/**`；本会话未整读归档 |
+| C3 | Pass | 走读 planner 交审前选型 + A# + Delta；plan-reviewer 3.5/3.9 |
+| C4 | Pass | 走读 acceptance-and-delta Analyze 对表 + 方案审 3.55 |
+| C5 | Pass | 走读 diagnosis §2.1 失败即封存；本会话无热修失败窗 |
+| C5b | Pass | 走读：根因未钉禁抢 `archived`（诊断中停 Discover） |
+| C5c | Pass | 走读：失败已放弃须归档，不得长期挂未完成 |
+| C5d | Pass | 走读 planner/方案审 空闲枢纽迁 `签收/` |
+| C5e | Pass | 走读 终态须 migrate；未迁夹=未结案 blocker |
+| C6 | Pass | 走读 diagnosis §0.5 先改口径再开码 |
+| C7 | Pass | 走读 Delta 三段必现，无则写「无」 |
+| C7b | Pass | 走读：三段均「无」但 Mandatory 新增行为 → `Delta幻觉` |
+| C7c | Pass | 走读：有 MODIFIED/REMOVED 结案须改口径 |
+| C7d | Pass | 走读 execution-discipline 窗目标叠加：删 X 不得走②；方案审 3.10 填空 blocker。本会话无该假方案 |
+| D1 | Pass | 真演根 AGENTS：1 文件 + Express 自检，无独立 CR |
+| D2 | Pass | 真演 AGENTS 写 `not run`，未标已通过 |
+| D3 | Pass | 走读 developer 7.5 / unity-editor-log §A 自修。本会话无 CS |
+| D4 | Pass | 走读 CORE/CR 优先隔离；本会话 Standard Skill 改标「主窗执行（未开子窗 · 非独立）」 |
+| D5 | Pass | 走读 developer 4.5 微循环；本会话改完跑 `validate-pipeline -Strict` |
+| D6 | Pass | Skill/Doc：静态核对 + 假需求；未伪造 Unity |
+| D7 | Pass | Direct 外仓对照未在 `执行中/` 新建方案夹；对话内研究 |
+| D8 | Pass | 走读 developer/CR：Direct 必须隔离子窗。本会话无 Direct 业务改码+CR 真演 |
 
 ## 附录 · 规则翻错本（触发路由 · 零 API）
 

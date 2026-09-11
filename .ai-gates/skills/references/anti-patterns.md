@@ -171,7 +171,9 @@
 | 为谨慎全目录 Read 某个大模块 | 源码 token 暴涨 | 日常先 `codegraph_explore`；审核岗先 CRG（业务在子模块则查子模块图） |
 | 交接默认贴大段代码/Console | 对话上下文膨胀 | 短表 + 证据外置 |
 | 把 CodeGraph soft budget 说成「额度已用尽」并整轮弃用 | 误导用户；退回全量 Read/Grep | 本地无付费额度；收窄 query 继续 explore（见 [codegraph-probe.md](./codegraph-probe.md)） |
-| 用 CodeGraph/搜索/只读一张卡冒充已装载认知全图；或把迷雾「一张卡」套到热路径卡片 | 行动前没有跟版本绑定的系统认知；改错邻居 | 有该节则整节一次装载；R 打开邻居源码；图谱只补结构边（[code-cognition-map.md](./code-cognition-map.md)） |
+| 用 CodeGraph/搜索/只读一张卡冒充已装载认知全图；或把迷雾「一张卡」套到热路径卡片 | 行动前没有跟版本绑定的系统认知；改错邻居 | 有该节则本会话整节一次；本 Step 按点名对象走 R；图谱只补结构边（[code-cognition-map.md](./code-cognition-map.md)） |
+| Direct A# 已写清仍派策划子窗 | 默认直通道名存实亡；白付一岗上下文 | PM 写对话内切片；范围/口径不清才派策划 |
+| 同窗同口径连续刀每刀重做方案审 / 每 Step 问出图 / 每刀灌认知全图 | 长窗手续农场 | 战役模式不重复方案审（仍每刀 CR）；迷雾/出图仅开窗·签收；认知全图本会话一次 |
 
 ## 团队使用
 

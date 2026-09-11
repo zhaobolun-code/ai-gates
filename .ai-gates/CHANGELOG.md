@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v5.0.6（Cursor 市场插件适配 · patch；前版 5.0.4 定版信息保留）
+**当前 LTS**：v5.0.7（热岗 SKILL 路由 + 车道减负 · patch；前版 5.0.6 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,22 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-09-11：补跑 skill-eval §A–D（v5.0.7；本会话走读+部分真演，非新开 Chat）。有效 **30/31 ≈ 96.8%**（A1 Express 真演 Fail `多轮确认`：缺字面 `[PM]` 后又要一次「写」）。Harness B1 字面「先 Discover」改为对齐 diagnosis-gates §0（第一次可同条热修）。不 bump。
+
+- 2026-09-11：bump `skills/VERSION` → **5.0.7**（热岗 SKILL 路由 + 车道减负；`plugin.json` version 同步）。含 09-10 起未独立发版条目（UI Fast 作废重派、思考碰撞第五次、改 skill 五步、车道减负六条、热岗 SKILL 改路由）。
+
+- 2026-09-11：热岗 SKILL 改路由（不 bump）：程序员 / 策划 / 方案审 / CR 正文改为「条件 → Read 指针」，细则不进 checklist；目标对齐外仓中位（约 2～3k，硬顶 5k）。不抄外仓文件。口令、车道、CR 隔离、战役、迷雾/认知加载条件不变。
+
+- 2026-09-11：改 skill 五步收口剩余项：USER-GUIDE「被拦了怎么办」链到五步并点名子窗不发 `[PM]`；MAINTAINER Hooks 节标题/总述改为现行 deny+逃生（不再写成 observe/ask 总原则）；三份 `pm-gate-check` 找不到父时 hint 兼写子窗禁发 `[PM]`，Level 1 deny 指向五步；Claude/Codex 放行审计改为 `window_pm_not_this_turn_*`。不 bump VERSION
+
+- 2026-09-11：车道减负六条（不 bump）：① Direct 默认 PM 写对话内切片，A#/范围/口径不清才派策划；② 同窗同口径**战役模式**（方案审只在口径/选型/A# 契约变时重做，每刀仍隔离 CR；完成即迁移可批到签收）；③ Express / 简单 Direct 实现可主窗（须标「主窗执行（未开子窗）」），CR 仍必须隔离子窗；④ 迷雾/出图仅开窗·改邻接·签收，认知卡片本会话整节一次、本 Step 按点名受管对象走 R；⑤ 判车道前一次窄 codegraph（或已有 diff 清单）估将改业务文件数；⑥ 同 A# 第一次测挂（有意义=有且根因钉死、未硬停）同条热修，第二次才 Discover 菜单。接线 CORE / 入口 / 决策树 / 术语 / 策划 / 程序员 / 方案审 / CR / handoff / circuit / fog / cognition / diagnosis / doc-windowing / reference-routing / shared-language / AGENTS。
+
+- 2026-09-11：MAINTAINER 文首加「改 skill 五步」（CHANGELOG → 改目标 → `validate-pipeline -Strict` → 升版才评测 → bump 只动 VERSION+CHANGELOG）；维护约定第 3 条回指；METHODOLOGY 阅读顺序加指向。不 bump VERSION
+
+- 2026-09-11：METHODOLOGY §5 补思考碰撞**第五次**并作废「6–8 万 / 约两三倍」自估：第五次 Included 约 442 万；日常单条已是百万级。第五次打到的是条款不可证伪，不是下一处旧边。摘要 4→5 次、十四→十五次。不 bump VERSION
+
+- 2026-09-10：模型路由 **UI Fast → 作废重派**：判定面=UI 显示名（含 High Fast / `*-fast` / Composer Fast，不看请求 slug）→ 该子窗作废；主窗 PM 按下一非 fast 档重派；禁同一 remap slug 再派、禁非 PM 子窗 Task 套娃派方案审/CR。project-context §模型路由 + `skills/references/model-routing.md`。不 bump VERSION
 
 - 2026-09-10：bump `skills/VERSION` → **5.0.6**（市场插件壳 + 双通道 hooks 去重；`plugin.json` version 同步）。含 09-09 未独立发版条目（PM init 根 AGENTS.md、打包补 Claude 接线、窗目标删第 4 问不得走②）。
 
@@ -245,6 +261,17 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [5.0.7] - 2026-09-11（热岗 SKILL 路由 + 车道减负 · patch · 发布）
+
+### Included changes — 2026-09-11
+
+- **热岗 SKILL 改路由**：程序员 / 策划 / 方案审 / CR 正文改为「条件 → Read 指针」，细则不进 checklist。开一岗正文从约 6.5～7.7k 收到约 1.7～2.0k。口令、车道、CR 隔离、战役、迷雾/认知加载条件不变。不抄外仓文件。
+- **车道减负六条**：Direct 默认 PM 写对话内切片；同窗同口径战役模式（方案审只在契约变时重做，每刀仍 CR）；Express / 简单 Direct 实现可主窗（须标「主窗执行（未开子窗）」）；迷雾仅开窗·改邻接·签收；判车道前一次窄 codegraph；同 A# 第一次测挂同条热修。
+- **改 skill 五步收口**：USER-GUIDE「被拦了怎么办」；MAINTAINER Hooks 现行 deny+逃生；三份 `pm-gate-check` 子窗禁发 `[PM]`。
+- **思考碰撞第五次**：作废「6–8 万 / 约两三倍」自估。
+- **09-10 未独立发版并入**：模型路由 UI Fast → 作废重派（判定面=UI 显示名）。
+- **市场插件**：`cursor-marketplace/.cursor-plugin/plugin.json` version 与 `skills/VERSION` 同步为 5.0.7。
 
 ## [5.0.6] - 2026-09-10（Cursor 市场插件适配 · patch · 发布）
 
