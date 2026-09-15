@@ -65,15 +65,7 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 ### 用户可见输出（强制）
 
-**机器层**（hooks / Stop 打点）：回复**必须含**字面 `[PM]` YAML 块。不对团队讲解 `review_tier` 等字段名。YAML 出现在回复里 **不是**「本条已完成结构化判定」的用户可读证明。
-
-**用户可见**：
-
-- 跟人说话用人话；能一句不两句；流程词先译成动作。口令「准」可留。
-- Express 简略（上节全部满足）：只输出白话 **你下一步**（不要摘要表）。YAML 仍写在回复里给机器，不解释给用户。
-- 非 Express：白话摘要表（车道/下一岗/README/进度）+ **你下一步**。
-- 白话与落盘正文跟本会话用户语言（中文可夹英文专名；文件名仍为机器锚）→ [user-visible-states.md](references/user-visible-states.md) §用户语言。
-- 用户追问进度/TL 模式/维护场景时，可展开内部字段；**禁止**无翻译地抛 `review_tier`、`implementation-ready` 等术语。细则 → [user-visible-states.md](references/user-visible-states.md)。
+**机器层**（hooks / Stop 打点）：回复**必须含**字面 `[PM]` YAML 块。YAML 出现在回复里 **不是**「本条已完成结构化判定」。形状、人话、语言与五态 → [user-visible-states.md](references/user-visible-states.md) §对人说话、§用户语言。
 
 ### Full 强制 — 用户可见（强制）
 
@@ -148,25 +140,9 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 **一轮确认硬律** → [handoff-automation.md](references/handoff-automation.md) §0；白话包 → [demand-clarification.md](references/demand-clarification.md)。每决策点 1 条确认包；「准」同条定版/开窗/改码；续链用**合并包**。禁口令门、先改再补理由、零用户句改码。Standard/Full「准」**默认 Auto**（非车道；Express / Direct 不启用；退出「准, 不 Auto」）→ [loop-engineering.md](references/loop-engineering.md) + handoff §H：连跑实现→CR→待测；测挂默认同条跟可自动跟推荐（硬停除外，见 diagnosis §0）；用户停点=待测/AI 验/硬停；每 Step 仍要测（禁攒批）；口令「本窗 Auto」「继续 Auto」。Auto 链受 [loop-engineering.md](references/loop-engineering.md) §4 预算护栏约束（max_auto_steps / max_repair_rounds / 停滞 fuse / 超时硬停 / 可选 token 预算）。
 
-## Standard 加强审核（L1.5）
+## Standard 审核升档（L1.5 / L2）
 
-**仅当已判 Standard**（步骤 4 **未**触 Full）。回归索引 / 热度**不得**把 Express/Direct 拉进 Standard。已判 Standard 且 Mandatory Code Changes 命中 project-context 回归索引**模块** → L1.5；或命中 `.ai-gates/lessons-learned.md` 近 6 个月记录（文件热度），或 `.ai-gates/regression-heat.yaml` 该模块 heat≥medium（机器热度）→ L1.5；**文件/机器热度命中取较高档：L1.5 之上 → 方案审 L3 / 双轮 CR（不整条升 Full）**（热度细则 → [plan-review-tiers.md](references/plan-review-tiers.md)）。
-
-- **方案审核**：须子窗（同会话即可，不强制新 Chat 隔离）；plan-lite 档位 **L1.5**；Regression Validation **须引用**索引行
-- **代码审核**：**优先** Subagent 隔离 + [cr-dispatch-l1.5.md](./templates/cr-dispatch-l1.5.md)；失败再提示手动新开；同 Chat 须标 **「非独立 CR」**
-未触发 L1.5：CR 可同 Chat。
-
-## Standard 交叉审核（L2）
-
-步骤 4 **未**触 Full，且 Mandatory Code Changes **跨 2 个及以上业务模块** → 方案审核档位 **L2**（与 L1.5 可叠加，取较高档）。
-
-- **方案审核**：**优先** Subagent 隔离；失败再提示手动新开；同 Chat 须标 **「L2 非独立复核」**
-- **代码审核**：默认同 Chat；可升隔离
-- plan-lite「方案审核档位」记 **L2**
-
-## Standard 可选独立方案审核
-
-`lane: Standard` 且 `review_tier: L1`（**未**触 L1.5/L2/L3）时，若 plan-lite **≥2 Step** 或改动面较广，PM **须**提示：可选用隔离审核（Subagent 或新开 Chat，可选）。已触发 L1.5/L2/L3 的规则不变。
+**仅当已判 Standard**（步骤 4 **未**触 Full）。回归索引 / 热度**不得**把 Express/Direct 拉进 Standard。已判 Standard 且 Mandatory 命中 project-context 回归索引**模块** → L1.5；或命中 `.ai-gates/lessons-learned.md` 近 6 个月，或 `.ai-gates/regression-heat.yaml` 该模块 heat≥medium → L1.5；热度取较高档：L1.5 之上 → 方案审 L3 / 双轮 CR（不整条升 Full）。Mandatory 跨 ≥2 业务模块 → 方案审 **L2**（与 L1.5 取高）。`review_tier: L1` 且 plan-lite **≥2 Step** 或改动面较广 → PM **须**提示可选隔离。派发与档位细则 → [plan-review-tiers.md](references/plan-review-tiers.md) / [isolated-review.md](references/isolated-review.md)。
 
 ## 硬门禁（7 条）
 
@@ -184,16 +160,12 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 **机器强制层（如实）**：分两层，禁止混名。**window_pm**（机器）：Cursor / Codex CLI / Claude Code 的 hooks 可 deny；放行只证明「本会话 120 分钟内打过 `[PM]` 点」，reason 字面为 `window_pm_not_this_turn`，**不是**本条已完成结构化判定。**this_turn_pm**（硬门禁 #7）：本条须有结构化 `[PM]`，机器做不到（preToolUse 拿不到正在生成的回复）。Codex **桌面**对 `apply_patch` 钩子可能不触发（信任已批准仍零打点，关键写后自查 `.ai-gates/hooks-log/`）。Trae 为软层（规则 + 技能传送门，**无**机器 hooks）。macOS / Linux 无 `pwsh` 时机器 hooks **未接线**，体检须报 `hooks_not_wired_no_pwsh`，不得写成已接线。`failClosed: false`：hook 脚本失败则放行。kill switch `.ai-gates/hooks-log/pm-gate-disabled` 可整条关掉。硬门禁 #7 仍须自觉。
 
-**工作区卫生（非门禁）**：一次性中间产物（revision/hash 计算、压力测试、批量迁移脚本等）只放 **`.ai-gates/tmp/`**（不入库，环节收尾整目录清空）；不得散落在 `.cursor/` 根、`.ai-gates/hooks-log/`（运行时证据）或 `.ai-gates/skills|scripts|hooks|rules`（中央库内容）。细则 → [execution-discipline.md](references/execution-discipline.md) §工作区卫生。
+**工作区卫生（非门禁）**：一次性中间产物只放 **`.ai-gates/tmp/`**。细则 → [execution-discipline.md](references/execution-discipline.md) §工作区卫生。
 
 ## 无 project-context 冷启动
 
 1. 只读咨询 → **不阻塞**。
 2. **改代码** → `missing-coldstart`；**你下一步**须含「未初始化，默认直通道」+ 建议 **`项目经理 初始化`**；未初始化前：Express 仅机械且恰好 1 个业务源文件；行为小改或 2～3 文件默认 Direct（无 API/持久/跨模块）；>3 文件或 API/存档/跨模块 → Standard。细则 → [pm-init.md](references/pm-init.md)。
-
-## 进阶指针（lazy load）
-
-日常入口 → [agent-entry-route.md](references/agent-entry-route.md)（本页+project-context+岗 checklist + 任务白名单）。另按 [reference-routing.md](references/reference-routing.md) 点名≤2份 reference；禁整目录灌入。CORE 全文仅争议/recovery/`按 CORE 重来`。外仓对照（PM 可提示；用户点名才启用）→ [external-compare.md](references/external-compare.md)。
 
 ## 岗位切换
 
@@ -220,6 +192,4 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 **PM 自检**：结构化判定 + **你下一步**；express-slice；A#；L1.5 派发块；子窗首回合核验（空上下文询问 → `fork_turns=all` 重派）；**一轮确认硬律**（handoff §0）；CR/Verify；止损含热修；首段=状态；未夸大 Unity/completed。
 
-## Agent 必读顺序
-
-1. **[agent-entry-route.md](references/agent-entry-route.md)** → 2. **project-context**（若有）→ 3. 当前岗 `SKILL.md` checklist → 4. 任务白名单（方案/Mandatory/README风险/真实代码）→ 5. 按 [reference-routing.md](references/reference-routing.md) 点名≤2份；Express另读slice/self-check。**CORE 全文**仅争议/recovery/`按 CORE 重来`
+日常入口、点名 ≤2 份 reference、外仓对照（点名才启用）→ 文首 + [reference-routing.md](references/reference-routing.md) / [external-compare.md](references/external-compare.md)。

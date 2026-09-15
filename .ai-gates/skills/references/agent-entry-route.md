@@ -3,6 +3,18 @@
 > **默认入口**。日常勿通读 CORE 全文；争议 / recovery / `按 CORE 重来` 再查 [CORE.md](../CORE.md)。  
 > 第二跳：按 [reference-routing.md](./reference-routing.md) 点名 ≤2 份 reference（禁整目录灌入）。
 
+## 对人说话（每轮 · 团队用户）
+
+面向人的正文（不含 `[PM]` YAML；各岗都算）：
+
+1. 首行就是动作。
+2. 可见列表每组最多 5 条。
+3. 每轮一句：现在到哪 / 刚做成什么 / 还剩什么。
+4. 用人话。黑话默认不说；可留口令与典故词，典故词不展开压缩包。
+5. 同一症状连败三轮仍坏 → 先点名哪条假设错了，再给选项。触发才加载 [diagnosis-gates.md](./diagnosis-gates.md) §0.2.3。
+
+细则 → [user-visible-states.md](./user-visible-states.md) §对人说话。
+
 ## 默认必读
 
 1. **本页**
@@ -34,7 +46,7 @@
 
 | 岗 | 子弹 |
 | --- | --- |
-| PM | 内部 YAML（回复须含字面 `[PM]`；120 分钟窗口≠本条已判定）；Express 用户可见只「你下一步」；非 Express=白话摘要表+你下一步；**Direct 判定（PM 写对话内 A#/切片；不清才派策划）**；判车道前一次窄图谱或 diff 清单估将改文件数；同窗同口径战役见 [circuit-windows.md](./circuit-windows.md)；一轮确认硬律「准」；确认包可含【重构候选】；「准」≠ 准抽离；主窗仅 PM（Express/简单 Direct 实现可主窗）；子窗显式 `model=`；**派策划禁点名典故**（[execution-discipline.md](./execution-discipline.md) §设计模式一问）；本仓无同类可**提示**外仓对照（[external-compare.md](./external-compare.md)；提示≠启用）；卡住 → [long-task.md](./long-task.md)；压缩/跨会话续作先 Read 账本 + git log，并扫落盘 Express（无本会话测令→迁停写，不得用 `not run` 抗辩）；已 complete 禁止重派；Standard/Full 无四态第一行不得派 CR；CONCERNS 须 `Ruling:`；**迷雾仅开窗/改邻接/签收**读卡片 + 一度边；未读邻边不得自称已按 5.0.0 合规；Express 机械改 / 纯代码热修不碰文档窗 / 闲聊 → 不读；**出图门**：开窗或迁签收/停写/失败后看该主题根 `fog-map.html`：无图则判断能否成图，能则问「是否创建迷雾地图」；有图则问「是否更新迷雾地图」。禁止有夹自动出图、禁止未提示未同意就跑 generate；将改系统夹已有 `fog-map.html` 时考虑把结构面给策划/程序员（仍禁灌整 JSON / 读 HTML）；有认知卡片节则新对话/压缩后**整节装载一次**（[code-cognition-map.md](./code-cognition-map.md)；≠迷雾一张卡；本 Step 按点名受管对象走 R）；同 A# 第一次测挂（有意义=有且根因钉死）同条热修，第二次才 Discover 菜单；用户发言≥20 轮→提示回「换窗」（每窗一次；≠执行交接；[session-handover.md](./session-handover.md)） |
+| PM | 1. 内部 YAML 须含字面 `[PM]`（120 分钟窗口≠本条已判定）；Express 用户可见只「你下一步」；非 Express=白话摘要表+你下一步<br>2. Direct：PM 写对话内 A#/切片，不清才派策划；判车道前一次窄图谱或 diff 估将改文件数<br>3. 主窗仅 PM（Express/简单 Direct 实现可主窗）；子窗显式 `model=`；派策划禁点名典故 → [execution-discipline.md](./execution-discipline.md) §设计模式一问<br>4. 一轮确认「准」；确认包可含【重构候选】；「准」≠ 准抽离 → [demand-clarification.md](./demand-clarification.md)<br>5. 迷雾仅开窗/改邻接/签收；出图门问是否创建/更新；卡住/压缩/换窗 → [fog-map-structure.md](./fog-map-structure.md) / [long-task.md](./long-task.md) / [session-handover.md](./session-handover.md) |
 | planner | **Express=PM 一句话切片；Direct=PM 已写清则本岗不派，否则对话内 A#/切片不落盘；Standard/Full 落盘**；同窗同口径战役则口径未变不重做方案；复用四问（第4问须升级触发）+选型；错题本必读节；A#+Delta；一轮确认包「准」；确认包填【重构候选】；无症状则无或一行无；写热路径 Mandatory 先装载认知全图 |
 | plan-reviewer | 只读派发白名单；查 A#/Delta/选型/错题节；第4问无触发=填空 blocker；有 blocker 不定版；禁再要一轮确认；战役中刀口径/选型/A# 契约未变 → 不派本岗；默认抽检四类洞（失败句/字段钉死/条款与清单同句/机器绿≠人看见的现象）；碰撞仍点名才开；图谱不得冒充认知全图 |
 | developer | 有「准」/恢复口令才改；只改本 Step A#（**Direct=对话内切片**）；Express/简单 Direct **可主窗**；复用四问；微循环自检；**Direct 完成交隔离 CR（必须子窗）**；Step 收口迁 `已完成/_索引`（战役可批到签收；迁签收≠归档）；分析热路径：①本会话认知全图一次 ②本 Step 点名对象的 R ③CodeGraph ④源码 |

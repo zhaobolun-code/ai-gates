@@ -2,7 +2,7 @@
 
 本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
 
-**当前 LTS**：v5.0.7（热岗 SKILL 路由 + 车道减负 · patch；前版 5.0.6 定版信息保留）
+**当前 LTS**：v5.0.8（入口收敛 + 周报模板迁出 · patch；前版 5.0.7 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,14 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-09-15：bump `skills/VERSION` → **5.0.8**（入口卫生 + 收口 5.0.7 之后未发版条目）。含：CORE ≤200 与入口 PM 格 ≤5、周报细则迁模板、对人说话、weekly-report 定稿重写、skill-eval B1、改 skill 五步收口剩余项。`install-info.json` tag=`v5.0.8`；`plugin.json` version=`5.0.8`。不跑安装脚本。
+
+- 2026-09-15：入口卫生：CORE 复述改指针压到 ≤200 行；入口 PM 格 ≤5 条可见子弹；周报 SKILL 定稿细则迁 `templates/weekly-report.md`。Included：`skills/CORE.md` / `references/agent-entry-route.md` / `weekly-report/SKILL.md` / 新 `templates/weekly-report.md`。不 bump VERSION
+
+- 2026-09-15：对人说话收一层（外仓对照形状，不抄文件）：面向人的正文首行就是动作、可见列表每组≤5、每轮一句状态、发出去前删开场白与客套收尾；人话优先，黑话默认不说，只留口令与典故词（典故词不展开压缩包）。同一可见症状连败三轮仍坏 → 先点名哪条假设错了再给选项（叠在第二次 Discover 菜单之后，不改第一次可热修）。Included：`user-visible-states.md` / `diagnosis-gates.md` §0.2.3 / 入口路由短节 / CORE 人话句 / `demand-clarification.md` 多选前 / `wait-what.md` / USER-GUIDE 语言句 / skill-eval B5。不 bump VERSION
+
+- 2026-09-11：weekly-report SKILL 重写定稿规则：开发转项目管理叙述视角；正文以改码/规则能力为主；「本周工作」只写完成项、禁止当前状态/现象/未完成；条目不写具体日期（仅周期行）；书面语、禁止类名路径刀次；下周保留验收标准。Included：`skills/weekly-report/SKILL.md`（经 `.cursor` 传送门）。不 bump VERSION
 
 - 2026-09-11：补跑 skill-eval §A–D（v5.0.7；本会话走读+部分真演，非新开 Chat）。有效 **30/31 ≈ 96.8%**（A1 Express 真演 Fail `多轮确认`：缺字面 `[PM]` 后又要一次「写」）。Harness B1 字面「先 Discover」改为对齐 diagnosis-gates §0（第一次可同条热修）。不 bump。
 
@@ -261,6 +269,15 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
+
+## [5.0.8] - 2026-09-15（入口收敛 + 周报模板迁出 · patch · 定版）
+
+### Included changes（2026-09-15）
+
+- **入口收敛**：CORE 入口指针压到约 200 行；总控 PM 表 §5 用户可见态改挂周报 SKILL。
+- **周报细规迁模板**：新增 skills/templates/weekly-report.md；weekly-report/SKILL.md 改指针路由。
+- **「说明」层**：字段/对象/状态口径（user-visible-states / diagnosis-gates / demand-clarification / wait-what 等）同步。
+- **版本对齐**：skills/VERSION / plugin.json / install-info（工程）= 5.0.8。
 
 ## [5.0.7] - 2026-09-11（热岗 SKILL 路由 + 车道减负 · patch · 发布）
 
