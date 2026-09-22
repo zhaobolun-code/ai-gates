@@ -409,7 +409,7 @@ try {
     $hasCheck = (@($allHookEntries | Where-Object { $_.Command -match 'pre-write-gate\.ps1' }).Count -ge 1)
     Assert-Test "A6 hooks.json: all hooks failClosed=false (incl. pre-write-gate + sessionStart)" (($allHookEntries.Count -ge 5) -and $hasCheck -and ($anyTrue.Count -eq 0)) "entries=$($allHookEntries | ConvertTo-Json -Compress)"
 
-    # A1.6 集成：postToolUse 含 post-write-gate 且 failClosed:false；MAINTAINER hooks 表 7 行
+    # A1.6 集成：postToolUse 含 post-write-gate 且 failClosed:false；MAINTAINER hooks 表 8 行（含压缩前点亮）
     $markEntry = @($allHookEntries | Where-Object { $_.Command -match 'post-write-gate\.ps1' -and $_.Event -eq 'postToolUse' -and -not $_.FailClosed })
     Assert-Test "A1.6 hooks.json: postToolUse post-write-gate failClosed=false" ($markEntry.Count -ge 1) "entries=$($allHookEntries | ConvertTo-Json -Compress)"
     $maintainerRaw = [System.IO.File]::ReadAllText((Join-Path $repoRoot ".cursor\skills\MAINTAINER.md"), [System.Text.Encoding]::UTF8)
@@ -421,7 +421,7 @@ try {
         elseif ($hooksSecStart -ge 0 -and $maintainerLines[$i] -match '^## ') { $hooksSecEnd = $i; break }
     }
     $hookTableRows = @($maintainerLines[$hooksSecStart..($hooksSecEnd - 1)] | Where-Object { $_ -match '^\|' -and $_ -match '\.ps1' })
-    Assert-Test "A1.6 MAINTAINER: hooks table has 7 rows incl. pre-write-gate" ($hooksSecStart -ge 0 -and $hookTableRows.Count -eq 7 -and $maintainerRaw -match 'pre-write-gate') "rows=$($hookTableRows.Count)"
+    Assert-Test "A1.6 MAINTAINER: hooks table has 8 rows incl. pre-write-gate" ($hooksSecStart -ge 0 -and $hookTableRows.Count -eq 8 -and $maintainerRaw -match 'pre-write-gate') "rows=$($hookTableRows.Count)"
 
     # A7：sessionStart 漂移检测 — 当前仓应无漂移；stdout 为 {} 或无可解析 additional_context
     $driftFile = Join-Path $logDir "hooks-policy-drift.json"

@@ -9,7 +9,8 @@
 #   1) create missing project-context (via init-project-context.ps1, never overwrites)
 #   2) create missing root AGENTS.md (from skills/templates/AGENTS.md, never overwrites)
 #   3) create missing doc root dirs
-#   4) print "next-step checklist": rules alignment (link-trae-skills) + optional CodeGraph.
+#   4) print "next-step checklist": rules alignment (link-trae-skills) + optional CodeGraph
+#      + ask model routing when the section is still the template placeholder.
 # -InstallCodeGraph only after explicit user consent. No npm involved.
 
 param(
@@ -205,8 +206,21 @@ if ($cgDirOk -and $cgCli) {
 } else {
     Write-Host "4. [todo·可选] CodeGraph 安装（须用户同意后执行）：codegraph install --platform cursor && codegraph init"
 }
-# 5. 人工填写
-Write-Host "5. [人工] 填写 .cursor/project-context.md 的回归索引（≥1~2 行），然后运行：powershell -ExecutionPolicy Bypass -File .cursor/scripts/sync-regression-index.ps1 -Apply"
+# 5. 模型路由：占位才询问；已有具体 slug 不覆盖
+$needModelAsk = $true
+if (Test-Path -LiteralPath $ctx) {
+    $ctxBody = [IO.File]::ReadAllText($ctx)
+    if ($ctxBody -notmatch '\[高质量 slug\]' -and $ctxBody -notmatch '\[便宜快速 slug\]' -and $ctxBody -match '## 模型路由') {
+        $needModelAsk = $false
+    }
+}
+if ($needModelAsk) {
+    Write-Host "5. [询问] 高档位和低档位各用哪个模型？答完再写入 .cursor/project-context.md §模型路由（高档位=策划/方案审/代码审核，低档位=程序员和文档）。禁止猜 slug。未答则保持占位。" -ForegroundColor Yellow
+} else {
+    Write-Host "5. [skip] 模型路由：§模型路由已有具体 slug，不再询问、不覆盖。"
+}
+# 6. 人工填写
+Write-Host "6. [人工] 填写 .cursor/project-context.md 的回归索引（≥1~2 行），然后运行：powershell -ExecutionPolicy Bypass -File .cursor/scripts/sync-regression-index.ps1 -Apply"
 Write-Host ""
 Write-Host "按清单逐步确认后，用「项目经理 + 需求」开工（未初始化前 Agent 走 CORE §无 project-context 冷启动，保守 Standard）。" -ForegroundColor DarkGray
 exit 0

@@ -15,7 +15,7 @@ powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply
 # 等价于 init-project-context.ps1 + 创建默认 .ai-gates/Doc/
 ```
 
-2. 编辑 **`.cursor/project-context.md`** — 技术栈、§Express 车道升级、§运行回归索引（至少 1～2 条 Unity 场景）。填完 MD 表后运行 sync 脚本保持一致。
+2. 编辑 **`.cursor/project-context.md`** — 技术栈、§Express 车道升级、§运行回归索引（至少 1～2 条 Unity 场景）。`项目经理 初始化` 会先问高档位和低档位各用哪个模型，答完再写入 §模型路由；手动接时自己填这一节。填完回归表后运行 sync 脚本保持一致。
 3. （可选）复制并编辑 **`.ai-gates/regression-index.yaml`**，与 project-context 回归表保持一致：
 
 ```powershell

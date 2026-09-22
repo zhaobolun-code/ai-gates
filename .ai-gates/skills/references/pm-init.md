@@ -20,14 +20,15 @@
 
 1. **Read** 本文件 + 探测仓库状态（优先跑脚本，见下）。
 2. 若无 `.cursor/project-context.md` → 运行 `init-project-context.ps1`（或 `pm-init.ps1` 的 CreateContext）。
-3. **文档根**：默认 `.ai-gates/Doc/`（见 [doc-path-defaults.md](./doc-path-defaults.md)）。
+3. **模型路由（必问一次）**：§模型路由仍是模板占位（`[高质量 slug]` / `[便宜快速 slug]`），或该节不存在时，先问用户，答完再写入。问法只一句：「高档位和低档位各用哪个模型？」高档位写入策划/方案审/代码审核，低档位写入程序员和文档。没答完不填 slug，不从别的仓库抄。已有具体 slug 则不再问、不覆盖。
+4. **文档根**：默认 `.ai-gates/Doc/`（见 [doc-path-defaults.md](./doc-path-defaults.md)）。
    - 用户本轮指定路径 → 用用户路径，并在 project-context「执行文档存放约定」写覆盖表。
    - 未指定 → 创建默认 `.ai-gates/Doc/` 与 `.ai-gates/Doc/Weekly/`（已存在则跳过）。
-4. **CodeGraph**：
+5. **CodeGraph**：
 - 已有 `.codegraph/` 或 `codegraph` CLI 可用 → 记「已就绪」，提示必要时重载 Cursor（Codex 用户重开会话）。
    - 未安装 → **先征得用户同意**，再执行 `codegraph install --platform cursor` 与 `codegraph init`；失败则给出手动命令与 [codegraph-probe.md](./codegraph-probe.md)。
-5. 输出白话汇总：**已完成 / 跳过 / 失败 / 仍须你填**。
-6. **你下一步**：引导用户编辑 project-context（技术栈、车道升级表、至少 1～2 条回归索引），填完后跑 `sync-regression-index.ps1`；然后可用 `PM + 需求` 开工。**车道升级表**是提示路径、**不封车道**（与 CORE §四车道判定同步）：未初始化前 PM 默认 Direct（≤3 文件、无 API/存档/跨模块）；Express 仅机械且恰好 1 个业务源文件；有行为即使 1 文件 → Direct；>3 或 API/存档/跨模块 → Standard。禁止把车道升级表写成「最低 Standard」。
+6. 输出白话汇总：**已完成 / 跳过 / 失败 / 仍须你填**。模型路由未答时，汇总里必须带上那一句询问。
+7. **你下一步**：模型路由仍是占位时，下一动作就是等用户回答并写入，不要先开工。已答或已有 slug 后，再引导编辑技术栈、车道升级表、至少 1～2 条回归索引，填完后跑 `sync-regression-index.ps1`；然后可用 `PM + 需求` 开工。**车道升级表**是提示路径、**不封车道**（与 CORE §四车道判定同步）：未初始化前 PM 默认 Direct（≤3 文件、无 API/存档/跨模块）；Express 仅机械且恰好 1 个业务源文件；有行为即使 1 文件 → Direct；>3 或 API/存档/跨模块 → Standard。禁止把车道升级表写成「最低 Standard」。
 
 ## 用户可见输出（强制）
 
@@ -37,8 +38,9 @@
 | --- | --- |
 | 探测结果 | project-context / 文档根 / CodeGraph 各一行：已有 / 已创建 / 待装 / 失败 |
 | 已执行 | 实际跑过的脚本与创建的路径 |
-| 下一步清单（引导式） | `-Apply` 后按序输出：① init-project-context（自动，不覆盖）② rules 对齐（link-trae-skills 命令 + `.mdc ↔ .trae` 复制提示）③ CodeGraph 安装命令（可选，须同意）④ 人工填写项目专属项 |
-| 仍须你填 | 技术栈、回归索引（至少 1～2 条）、车道升级表（可选） |
+| 模型路由 | 占位或缺失 → 问高档位和低档位各用哪个模型；已有具体 slug → 跳过 |
+| 下一步清单（引导式） | `-Apply` 后按序输出：① init-project-context（自动，不覆盖）② rules 对齐 ③ CodeGraph（可选，须同意）④ 询问模型路由 ⑤ 人工填写回归索引等 |
+| 仍须你填 | 模型路由（未回答时）、技术栈、回归索引（至少 1～2 条）、车道升级表（可选） |
 | **你下一步** | 明确下一动作（改配置 / 同意装 CodeGraph / 重载 Cursor 或 Codex 重开会话 / 用 `PM + 需求` 开工） |
 
 ## 脚本入口
@@ -48,7 +50,7 @@
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1
 
 # 引导式 Apply：创建缺失的 project-context / 默认文档根（不覆盖已有 context），并输出「下一步清单」
-# （① init-project-context ② rules 对齐 link-trae-skills ③ 可选 CodeGraph ④ 人工填写项）
+# （① init-project-context ② rules 对齐 ③ 可选 CodeGraph ④ 询问模型路由 ⑤ 人工填写项）
 powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply
 
 # 指定文档根（相对仓库根）

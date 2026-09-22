@@ -6,7 +6,7 @@
 ## 改 skill 五步
 
 动手改 `.ai-gates/skills/`（`.cursor/skills` 为传送门，同一份）或配套 hooks/scripts 时按此顺序。论文 [METHODOLOGY.md](../METHODOLOGY.md) 不替代本页。被拦见 [USER-GUIDE.md](../USER-GUIDE.md)「被拦了怎么办」。
-1. **写 CHANGELOG** — 先在 [CHANGELOG.md](../CHANGELOG.md) 加 Included 条目（CHANGELOG 自身 Level 0，不看 `[PM]`）。本会话 120 分钟内无此打点，改 `skills/` / `hooks/` / `scripts/` / `rules/` 会被 Level 1 deny。
+1. **写 CHANGELOG** — 先在 [CHANGELOG.md](../CHANGELOG.md) 加 Included 条目（CHANGELOG 自身 Level 0，不看 `[PM]`）。只记发布包内文件。项目说明、错题本、回归索引、根 `AGENTS.md`、`install-info.json`、本文件都不写进去。本会话 120 分钟内无此打点，改 `skills/` / `hooks/` / `scripts/` / `rules/` 会被 Level 1 deny。
 2. **改目标文件** — 只改本刀范围：岗位 `SKILL.md` / `CORE.md` / `references/` / `hooks/` / `scripts/`。项目专属只进 `.cursor/project-context.md`，不进 skills。改 CORE 后同步 `.mdc` / Trae rules / 各岗指针。
 3. **跑校验** — `powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/validate-pipeline.ps1 -Strict`（含 hooks policy、BOM、承重句 canary）。红则先修，不发布。
 4. **升版才评测** — 不 bump：步骤 3 绿即可收。bump 或改口令/门禁语义：新开 Chat 跑 [skill-eval-checklist.md](./references/skill-eval-checklist.md) §A–D，Pass≥90% 再 bump。
@@ -263,10 +263,11 @@ powershell -ExecutionPolicy Bypass -File .ai-gates/package-release.ps1 -Version 
 
 ## Cursor Hooks（机器强制层 · deny + 逃生）
 
-`.cursor/hooks.json` + `.cursor/hooks/*.ps1`，克隆仓库后 Cursor 自动加载，**不需要用户手动安装**（跟 pre-commit 不同，pre-commit 需要 TL 手动跑安装命令）。当前落地七个 hook。业务路径与 Level 1 设施写：**`permission: deny` + `user_message` 逃生**（Cursor 2.2+ `ask` 不弹窗、形同放行，见已知限制第 1 条）。审计类 hook 恒 allow。全部 `failClosed: false`。改 skill / hooks 顺序见文首 **改 skill 五步**。
+`.cursor/hooks.json` + `.cursor/hooks/*.ps1`，克隆仓库后 Cursor 自动加载，**不需要用户手动安装**（跟 pre-commit 不同，pre-commit 需要 TL 手动跑安装命令）。当前落地八个 hook。业务路径与 Level 1 设施写：**`permission: deny` + `user_message` 逃生**（Cursor 2.2+ `ask` 不弹窗、形同放行，见已知限制第 1 条）。审计类 hook 恒 allow。全部 `failClosed: false`。改 skill / hooks 顺序见文首 **改 skill 五步**。
 
 | Hook | 事件 | 行为 | 文件 |
 | --- | --- | --- | --- |
+| 压缩前点亮 | `preCompact` | 注入三行指针：摘要不是约定；先读入口路由、项目说明里的模型路由、当前任务夹的未完成说明；读完之前不要改代码。不注入技能全文，不触发八段交接。审计一行 `.ai-gates/hooks-log/relight-after-compact.log`（只记载荷键名）。异常返回 `{}` | `relight-after-compact.ps1` |
 | Hooks 声明漂移检测 | `sessionStart` | 比对 MAINTAINER deny/`failClosed` 声明 ↔ `hooks.json` / `pm-gate-check.ps1` / 本 hook 齐套；漂移 → 写 `.ai-gates/hooks-log/hooks-policy-drift.json` 并注入 `additional_context`（不拦截会话）；共享逻辑 `.cursor/scripts/check-hooks-policy.ps1` | `check-hooks-drift.ps1` |
 | Git 高危命令确认 | `beforeShellExecution` | 命中 `git push --force`/`reset --hard`/`clean -f*`/`checkout --`/`branch -D` 等 → `permission: deny` + user_message 逃生提示（2026-08-03 由 ask 改：Cursor 2.2+ hook `ask` 无效是官方确认 bug）；其余命令 `allow` | `git-safety-check.ps1` |
 | 交付物改动审计 | `preToolUse`（matcher: `Write\|StrReplace\|EditNotebook`） | 记录 `时间戳 \| tool \| session \| path` 一行到 `.ai-gates/hooks-log/write-audit.log`（不提交 Git）；**始终 `allow`，不拦截** | `pre-write-gate.ps1` |

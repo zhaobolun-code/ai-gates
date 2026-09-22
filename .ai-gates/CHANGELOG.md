@@ -1,8 +1,8 @@
 # AI 开发流水线 — 变更日志
 
-本文件记录 `.cursor/skills/` 流水线 Skill 的版本变更。
+本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.0.8（入口收敛 + 周报模板迁出 · patch；前版 5.0.7 定版信息保留）
+**当前 LTS**：v5.0.9（模型路由归项目说明 · patch；前版 5.0.8 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -11,7 +11,23 @@
 
 ## 最近迭代（最新在上）
 
-- 2026-09-15：bump `skills/VERSION` → **5.0.8**（入口卫生 + 收口 5.0.7 之后未发版条目）。含：CORE ≤200 与入口 PM 格 ≤5、周报细则迁模板、对人说话、weekly-report 定稿重写、skill-eval B1、改 skill 五步收口剩余项。`install-info.json` tag=`v5.0.8`；`plugin.json` version=`5.0.8`。不跑安装脚本。
+- 2026-09-22：bump `skills/VERSION` → **5.0.9**。收口 5.0.8 之后未发版条目：模型选择只读项目说明、压缩前点亮、初始化只问高档位和低档位。本会话走读评测清单 A–D，32/32 通过（非新开 Chat 真演）。钩子表行数断言改为 8（含压缩前点亮）。`plugin.json` version=`5.0.9`。
+
+- 2026-09-22：初始化加一条询问：高档位和低档位各用哪个模型。占位未填时先问，答完再写入项目说明（高档位写入策划/方案审/代码审核，低档位写入程序员和文档）；禁止猜 slug。已有具体 slug 则跳过、不覆盖。Included：`skills/references/pm-init.md` + `scripts/pm-init.ps1` + `USER-GUIDE.md` + `skills/references/tl-onboarding.md`。不 bump VERSION
+
+- 2026-09-22：模型选择只留在项目说明 §模型路由（含禁止 Fast、碰撞三槽）。`model-routing.md` 取消默认表；`collision-review.md` 取消三槽 slug。两份都改为只读项目节；没有该节则标「未按模型路由」。Included：`skills/references/model-routing.md` + `skills/references/collision-review.md` + `skills/CORE.md` + `skills/project-context.template.md` + `skills/references/project-local-config.md`。不 bump VERSION
+
+- 2026-09-22：压缩前重新点亮。Cursor `sessionStart` 无压缩标记；用 `preCompact` 注入三行指针（摘要不是约定，先读入口 / 模型表 / 未完成），不注入技能全文，不触发八段交接。入口路由写同一句，钩子没吃到时仍先读文件。Included：`hooks/relight-after-compact.ps1` + `hooks.json` + `skills/references/agent-entry-route.md` + `skills/references/session-handover.md`。不 bump VERSION
+
+- 2026-09-22：Skill 调用的 Grok 4.6 及以下一律改为 Grok 4.7 High（`grok-4.7-high`）。最低档与普通档首选都是该 slug；高级档 API 用尽回退也是该 slug。不再调用 `cursor-grok-4.5-high` / `cursor-grok-4.6-high` / `cursor-grok-4.6-xhigh`。Included：`skills/references/model-routing.md` + `skills/references/collision-review.md` Grok 槽。不 bump VERSION
+
+- 2026-09-21：模型路由 API / Other Models 用尽后正规回退 Grok 4.6 High（`cursor-grok-4.6-high`）；禁止再用 Extra High 或 Grok 4.5 High 当正规回退。普通档首选仍 Extra High。Included：`skills/references/model-routing.md`。不 bump VERSION
+
+- 2026-09-21：周报书写方案改为五向专业叙述（查到 → 增加 → 删除 → 改动 → 优化）；正文不写这五个词做小标题；扩写、只写做了什么。用户说「日报」且要求同口径时，今日工作段同法。Included：`skills/templates/weekly-report.md` + `skills/weekly-report/SKILL.md`。不 bump VERSION
+
+- 2026-09-17：模型路由普通档 Grok 4.6 High → Extra High（`cursor-grok-4.6-xhigh`）。最低档仍 `cursor-grok-4.5-high`。Fast 禁令扩到 `cursor-grok-4.6-xhigh-fast` / UI `Extra High Fast`。Included：`skills/references/model-routing.md` + `skills/references/collision-review.md` Grok 槽。不 bump VERSION
+
+- 2026-09-15：bump `skills/VERSION` → **5.0.8**（入口卫生 + 收口 5.0.7 之后未发版条目）。含：CORE ≤200 与入口 PM 格 ≤5、周报细则迁模板、对人说话、weekly-report 定稿重写、skill-eval B1、改 skill 五步收口剩余项。`plugin.json` version=`5.0.8`。不跑安装脚本。
 
 - 2026-09-15：入口卫生：CORE 复述改指针压到 ≤200 行；入口 PM 格 ≤5 条可见子弹；周报 SKILL 定稿细则迁 `templates/weekly-report.md`。Included：`skills/CORE.md` / `references/agent-entry-route.md` / `weekly-report/SKILL.md` / 新 `templates/weekly-report.md`。不 bump VERSION
 
@@ -25,15 +41,15 @@
 
 - 2026-09-11：热岗 SKILL 改路由（不 bump）：程序员 / 策划 / 方案审 / CR 正文改为「条件 → Read 指针」，细则不进 checklist；目标对齐外仓中位（约 2～3k，硬顶 5k）。不抄外仓文件。口令、车道、CR 隔离、战役、迷雾/认知加载条件不变。
 
-- 2026-09-11：改 skill 五步收口剩余项：USER-GUIDE「被拦了怎么办」链到五步并点名子窗不发 `[PM]`；MAINTAINER Hooks 节标题/总述改为现行 deny+逃生（不再写成 observe/ask 总原则）；三份 `pm-gate-check` 找不到父时 hint 兼写子窗禁发 `[PM]`，Level 1 deny 指向五步；Claude/Codex 放行审计改为 `window_pm_not_this_turn_*`。不 bump VERSION
+- 2026-09-11：改 skill 五步收口剩余项：USER-GUIDE「被拦了怎么办」链到五步并点名子窗不发 `[PM]`；三份 `pm-gate-check` 找不到父时 hint 兼写子窗禁发 `[PM]`，Level 1 deny 指向五步；Claude/Codex 放行审计改为 `window_pm_not_this_turn_*`。不 bump VERSION
 
-- 2026-09-11：车道减负六条（不 bump）：① Direct 默认 PM 写对话内切片，A#/范围/口径不清才派策划；② 同窗同口径**战役模式**（方案审只在口径/选型/A# 契约变时重做，每刀仍隔离 CR；完成即迁移可批到签收）；③ Express / 简单 Direct 实现可主窗（须标「主窗执行（未开子窗）」），CR 仍必须隔离子窗；④ 迷雾/出图仅开窗·改邻接·签收，认知卡片本会话整节一次、本 Step 按点名受管对象走 R；⑤ 判车道前一次窄 codegraph（或已有 diff 清单）估将改业务文件数；⑥ 同 A# 第一次测挂（有意义=有且根因钉死、未硬停）同条热修，第二次才 Discover 菜单。接线 CORE / 入口 / 决策树 / 术语 / 策划 / 程序员 / 方案审 / CR / handoff / circuit / fog / cognition / diagnosis / doc-windowing / reference-routing / shared-language / AGENTS。
+- 2026-09-11：车道减负六条（不 bump）：① Direct 默认 PM 写对话内切片，A#/范围/口径不清才派策划；② 同窗同口径**战役模式**（方案审只在口径/选型/A# 契约变时重做，每刀仍隔离 CR；完成即迁移可批到签收）；③ Express / 简单 Direct 实现可主窗（须标「主窗执行（未开子窗）」），CR 仍必须隔离子窗；④ 迷雾/出图仅开窗·改邻接·签收，认知卡片本会话整节一次、本 Step 按点名受管对象走 R；⑤ 判车道前一次窄 codegraph（或已有 diff 清单）估将改业务文件数；⑥ 同 A# 第一次测挂（有意义=有且根因钉死、未硬停）同条热修，第二次才 Discover 菜单。接线 CORE / 入口 / 决策树 / 术语 / 策划 / 程序员 / 方案审 / CR / handoff / circuit / fog / cognition / diagnosis / doc-windowing / reference-routing / shared-language。
 
-- 2026-09-11：MAINTAINER 文首加「改 skill 五步」（CHANGELOG → 改目标 → `validate-pipeline -Strict` → 升版才评测 → bump 只动 VERSION+CHANGELOG）；维护约定第 3 条回指；METHODOLOGY 阅读顺序加指向。不 bump VERSION
+- 2026-09-11：METHODOLOGY 阅读顺序加指向「改 skill 五步」。不 bump VERSION
 
 - 2026-09-11：METHODOLOGY §5 补思考碰撞**第五次**并作废「6–8 万 / 约两三倍」自估：第五次 Included 约 442 万；日常单条已是百万级。第五次打到的是条款不可证伪，不是下一处旧边。摘要 4→5 次、十四→十五次。不 bump VERSION
 
-- 2026-09-10：模型路由 **UI Fast → 作废重派**：判定面=UI 显示名（含 High Fast / `*-fast` / Composer Fast，不看请求 slug）→ 该子窗作废；主窗 PM 按下一非 fast 档重派；禁同一 remap slug 再派、禁非 PM 子窗 Task 套娃派方案审/CR。project-context §模型路由 + `skills/references/model-routing.md`。不 bump VERSION
+- 2026-09-10：模型路由 **UI Fast → 作废重派**：判定面=UI 显示名（含 High Fast / `*-fast` / Composer Fast，不看请求 slug）→ 该子窗作废；主窗 PM 按下一非 fast 档重派；禁同一 remap slug 再派、禁非 PM 子窗 Task 套娃派方案审/CR。`skills/references/model-routing.md`。不 bump VERSION
 
 - 2026-09-10：bump `skills/VERSION` → **5.0.6**（市场插件壳 + 双通道 hooks 去重；`plugin.json` version 同步）。含 09-09 未独立发版条目（PM init 根 AGENTS.md、打包补 Claude 接线、窗目标删第 4 问不得走②）。
 
@@ -45,7 +61,7 @@
 
 - 2026-09-09：窗目标删旧主人时第 4 问不得走②完成态；Discover-only 须点名下一刀 REMOVED+替代边；3.10/2.1/CR 接线。不 bump VERSION
 
-- 2026-09-08：evolution-08-ge7-borrow 签收：词条「一脚本三入口发布闸」入 `design-patterns.md`（create；锚点 `scripts/test-publish-reject.ps1:Fail-Reject`）；项目验证表同步；不 bump VERSION
+- 2026-09-08：evolution-08-ge7-borrow 签收：词条「一脚本三入口发布闸」入 `design-patterns.md`（create；锚点 `scripts/test-publish-reject.ps1:Fail-Reject`）。不 bump VERSION
 
 - 2026-09-08：evolution-08-ge7-borrow Step4 CR 热修：`summarize-session-trace.ps1` 删写死短名 `evolution-08-ge7-borrow`；默认输出目录与 `scan-session-errors.ps1` 的 `Get-OutDir` 对齐（`AI_GATES_WINDOW` → `执行中/` 下唯一 `未完成.md` → tmp）。不改 mark-pm-gate；不 bump VERSION
 - 2026-09-08：evolution-08-ge7-borrow Step4 轨迹摘要+会话末扫错：新脚本 `scan-session-errors.ps1` / `summarize-session-trace.ps1`；三端 mark-pm-gate 打点后 try 内调扫错，KEEP Cursor `exit 0` 与 Claude/Codex `Emit-StopEmpty`；不改 failClosed；不 bump VERSION
@@ -53,11 +69,10 @@
 - 2026-09-08：evolution-08-ge7-borrow Step2 发布闸+三动作：新脚本 `test-publish-reject.ps1`；pattern-pending 加 `action:`（improve/optimize_description/create）；commit/draft 过闸失败非 0；shareable 缺 origin 拒收；不 bump VERSION
 - 2026-09-08：evolution-08-ge7-borrow Step1 验证环收紧：Skill/Doc 点名脚本须同条命令+退出码；developer §6.06/§7 与 CR 1.14/1.146 扩到点名 `.ai-gates/scripts/*.ps1`；连续静态绿无命令停测；不 bump VERSION
 
-- 2026-09-08：Skill 承重句 canary + 四问第 4 问升级触发 + 一次性 skill 合同 + 修 bug 共享点一次 + 规范轴一行句式 + hook `timeout` 必填。新脚本 `check-rule-invariants.ps1` 进 `validate-pipeline`；入口/shared-language/MAINTAINER 发布清单接线；不把四问扩成档位。不 bump VERSION
-- 2026-09-08：代码认知地图入 skill（借鉴 AOCI Whole-Index 读法）：新页 `code-cognition-map.md`；入口/迷雾/策划/程序员/方案审/CR/交接/路由/MAINTAINER/shared-language 接线。全图一次装载；禁止 CodeGraph 冒充；R 打开邻居源码；压缩禁止摘要 FRAS；改卡优先于「仍准」。CR 后补：触发词「用户点名」+ planner 卡片仍准义务 + 双表一致句。不 bump VERSION
-- 2026-09-08：本仓 `install-info.json` 的 tag 与本地 `skills/VERSION` 对齐为 v5.0.3（消除 Claude drift / CheckUpdate 假「有更新」）。不是远程重装，不覆盖 skills/hooks。不 bump VERSION
+- 2026-09-08：Skill 承重句 canary + 四问第 4 问升级触发 + 一次性 skill 合同 + 修 bug 共享点一次 + 规范轴一行句式 + hook `timeout` 必填。新脚本 `check-rule-invariants.ps1` 进 `validate-pipeline`；入口/shared-language 发布清单接线；不把四问扩成档位。不 bump VERSION
+- 2026-09-08：代码认知地图入 skill（借鉴 AOCI Whole-Index 读法）：新页 `code-cognition-map.md`；入口/迷雾/策划/程序员/方案审/CR/交接/路由/shared-language 接线。全图一次装载；禁止 CodeGraph 冒充；R 打开邻居源码；压缩禁止摘要 FRAS；改卡优先于「仍准」。CR 后补：触发词「用户点名」+ planner 卡片仍准义务 + 双表一致句。不 bump VERSION
 - 2026-09-07：会话交接拆开「提示换窗」与「执行交接」：用户发言≥20 轮才提示回「换窗」（每窗一次；≠自动吐八段）；触顶/压缩不另开提示阈值；禁「2 轮实现+审核」。session-handover / handoff-automation §J / agent-entry-route PM 格。不 bump VERSION
-- 2026-09-07：模型路由总禁任何 `*-fast` 当首选（含 `cursor-grok-4.6-high-fast` / 4.5-*-fast / `composer-2.5-fast`）；仅非 fast 链尽且白名单只剩 fast 时链末应急并标「未按模型路由」。project-context §模型路由 + skills/references/model-routing.md。不 bump VERSION
+- 2026-09-07：模型路由总禁任何 `*-fast` 当首选（含 `cursor-grok-4.6-high-fast` / 4.5-*-fast / `composer-2.5-fast`）；仅非 fast 链尽且白名单只剩 fast 时链末应急并标「未按模型路由」。`skills/references/model-routing.md`。不 bump VERSION
 - 2026-09-07：会话交接附加「新窗第一句」复制块（7 字段）+ 触发词换窗/卡了/卡了换窗；session-handover / templates / handoff-automation §J。不 bump VERSION
 - 2026-09-07：确认包加【重构候选】短栏；「准」不含抽离，另口令「准, 抽离」/「准, 另开抽离窗」才抽；未点抽离禁止整段搬家，CR 记规格轴越出 A#。不 bump VERSION
 - 2026-09-07：A1 用户可见主句去手续黑话：CORE §用户可见输出加总则；demand-clarification 一次确认包/续链合并包模板改人话，Express 连做说明移入岗位要点。不 bump VERSION
@@ -110,7 +125,7 @@
 - 2026-08-25：高级档 Sonnet/Terra 改为 Opus 5 / GPT 5.6 Sol；最低档去掉 fast；不 bump VERSION
 - 2026-08-25：复用四问第3问补平台 API 直调 + 少写不得牺牲物理；CR nit（包一层）/方案审 major（包一层≠并行实现 blocker）；不装 Ponytail；不 bump VERSION
 - 2026-08-25：词条表增「特效适配器」；锚点 `IEffectAdapter` + `EffectSpawner`；Flexalon 不当验证。（现行技能）不 bump VERSION
-- 2026-08-25：词条表增「简单工厂（按类型创建）」；锚点 `ChemicalSubstanceDataFactory.CreateSubstanceData`；禁止抽象工厂引申。项目口诀同义条删除以免双挂。（现行技能）不 bump VERSION
+- 2026-08-25：词条表增「简单工厂（按类型创建）」；锚点 `ChemicalSubstanceDataFactory.CreateSubstanceData`；禁止抽象工厂引申。（现行技能）不 bump VERSION
 - 2026-08-25：design-patterns 词条表取消行数上限（原 6 行 / 禁止第 7 行）。仍一次一条、须真锚点、禁止全量 GoF 图鉴与同义双挂；第七岗仍禁。（现行技能）不 bump VERSION
 - 2026-08-24：分歧标注规格改为两隔离槽（不同 id、B 不见 A 的链、对照/未裁由派发方写）；产物回灌 isolated-review 便宜审（第二消费者）。仍非常规、点名才启用、不进车道、不标外源元认知。不 bump VERSION
 - 2026-08-21：METHODOLOGY 增「项目典故试验」一次实测（跨仓库；玩法不写模式名时症状表对上词条并落地；人测后签收已落盘）。不 bump VERSION
@@ -128,7 +143,7 @@
 - 2026-08-19：express-closeout-d2：空壳扫描根扩到 project-context 文档路径的主题父目录（各主题执行中），不再把单一主题当唯一业务根；`.ai-gates/Doc` 仍扫。不 bump VERSION
 - 2026-08-19：express-closeout-d1：Express 一旦落盘须最小两文件（slice+自检）且终态 migrate；日常仍 Chat 切片；不强制未完成.md；CORE 仅派岗表一行指针。不 bump VERSION
 - 2026-08-19：evolution-09-doc-honesty：CORE 钉 hooks 120 分钟[PM]为近似门禁；用户可见输出与摘要表分车道；PACKAGE-INFO 与 MAINTAINER 对齐实物（含手册；LTS=VERSION）。不 bump VERSION
-- 2026-08-19：evolution-08-skill-hygiene：六岗 SKILL `name` 改为目录名；rollback 改为用户终端执行 `git checkout --`；本仓「升级 ai-gates」高危口令写 project-context；清「L1 同 Chat」；Express 中途超 2 交 PM 按判定树重判。不 bump VERSION
+- 2026-08-19：evolution-08-skill-hygiene：六岗 SKILL `name` 改为目录名；rollback 改为用户终端执行 `git checkout --`；清「L1 同 Chat」；Express 中途超 2 交 PM 按判定树重判。不 bump VERSION
 - 2026-08-18：evolution-07-sdd-p18 借口 vs 现实短表（P2-8）：两岗 SKILL 文末各加对照表（developer 4 行、CR 3 行）；不 bump VERSION
 
 - 2026-08-18：evolution-07-sdd-p17 CR 审核不重跑测（P1-7）：默认不为确认报告重跑实现者已报同一命令；缺输出=验证缺口，禁止黄金/包级补洞；点名怀疑才聚焦。不 bump VERSION
@@ -187,7 +202,6 @@
 - 2026-08-15：归档签收 pattern-harvest-observer / pattern-harvest-command / pattern-harvest-ability / project-maxims-context（用户「归档」；逆向总结典故卡已追加、不当新表）；模式沉淀流程另开窗；不 bump VERSION
 
 - 2026-08-15：design-patterns 词条「能力模板」（Standard · Skill/Doc-only）：本仓锚点 InteractionAbilityBase + ConfigurablePourAbility / SimpleHeatingAbility + InteractionManager 调度；热路径/压力/门闸/传质/守恒不做 Ability；与 ICommand 撤销栈区分；禁止新开平行 InteractionManager；不把 IPourStrategy 当本行；不 bump VERSION
-- 2026-08-15：project-context 增「项目口诀」（通断只认闸门 / 判定量同源 / 输入不进能力）；不占 design-patterns 词条表；不 bump VERSION
 - 2026-08-15：design-patterns 词条「命令（撤销）」（Standard · Skill/Doc-only）：本仓锚点 ICommand + CommandManager 双栈；热路径/要返回值直调；无撤销不套壳；禁止第二套栈；不 bump VERSION
 
 - 2026-08-14：设计模式一问改为写 Mandatory 前必扫症状列；未命中须写「本步不采用 design-patterns 词条」；planner +1 / plan-reviewer 3.12 缺句→major；不是优先套用；不 bump VERSION
@@ -243,7 +257,7 @@
 - 2026-08-13：evolution-01-collect Step 1 本地收集仓落地（Standard · Skill/Doc-only · L1.5）：新建 `skills/references/collect-queue.md`（默认载体 `.ai-gates/collect-queue.md`；三态 draft/shareable/promoted；可传、不可静默删；入队须人工确认）+ 空仓表头；KG/「准」/routing/MAINTAINER/planner 各 +1 句/行；gh 为可选探测而非默认接线；「准」不建 issue、不自动入仓；不 bump VERSION
 - 2026-08-13：evolution-01-collect 归档签收（Standard · Skill/Doc-only · L1.5）：用户「准 · 归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-01-collect/`；回写 evolution-01 机制 C「已落地（本地默认）」；gh 仍可选未接线；不 bump VERSION
 - 2026-08-13：evolution-02-diverge 分歧标注小试点落地（Standard · Skill/Doc-only · L1.5）：新建 `skills/references/divergence-annotation.md`（单轮 ≥2 视角推理链 + DA-{nn} → 复用 knowledge-gap 入队；常规不启用；启用=高危/止损/跨模块大改/用户点名分歧实验）；KG「分歧来源」段 + isolated-review 边界行 + reference-routing 模型自动触发 +1 行 + developer/planner/plan-reviewer 各 1 条轻量接线 + MAINTAINER 登记；签收 evolution README/未完成 活跃窗指针强化；**不做**完整碰撞/覆盖度/01-C/D/03跨项目/logits/第二套队列/lessons pending 混表；**不 bump VERSION**
-- 2026-08-13：模型路由三档（最低 Grok4.5 `cursor-grok-4.5-medium-fast` / 普通 Grok4.6 `cursor-grok-4.6-high` / 高级 Sonnet→GPT `claude-sonnet-5-thinking-medium` → `gpt-5.6-terra-medium`）；覆盖 2026-08-12「成本优先 Composer」旧定档；岗位：最低=Express/Direct 实现·Auto 微改·Direct CR·docs；普通=策划·Standard+ 程序员/Auto·方案审 L1/L1.5/L2；高级=Full L3 双轮（round1 Sonnet、round2 GPT Terra）·Standard/Full CR·验收；Composer 不再任何岗首选（仅链末应急并标注）；禁止 `cursor-grok-4.5-high-fast` 当首选；Codex 仍两档 deepseek、不假装有 Grok 4.6；改 `project-context` §模型路由 + `model-routing.md` 默认表；Skill/Doc-only；**不 bump VERSION**
+- 2026-08-13：模型路由三档（最低 Grok4.5 `cursor-grok-4.5-medium-fast` / 普通 Grok4.6 `cursor-grok-4.6-high` / 高级 Sonnet→GPT `claude-sonnet-5-thinking-medium` → `gpt-5.6-terra-medium`）；覆盖 2026-08-12「成本优先 Composer」旧定档；岗位：最低=Express/Direct 实现·Auto 微改·Direct CR·docs；普通=策划·Standard+ 程序员/Auto·方案审 L1/L1.5/L2；高级=Full L3 双轮（round1 Sonnet、round2 GPT Terra）·Standard/Full CR·验收；Composer 不再任何岗首选（仅链末应急并标注）；禁止 `cursor-grok-4.5-high-fast` 当首选；Codex 仍两档 deepseek、不假装有 Grok 4.6；改 `model-routing.md` 默认表；Skill/Doc-only；**不 bump VERSION**
 - 2026-08-13：evolution-02-diverge 分歧标注小试点方案落盘（Standard · Skill/Doc-only · L1.5）：执行中窗 `.ai-gates/Doc/AI流水线/执行中/evolution-02-diverge/`（未完成+物理口径+Mandatory-Step01+方案审派发）；范围=新建 `divergence-annotation.md` + KG/isolated-review/routing 轻量扩表 + 三岗 SKILL 各 1 行；签收 evolution README/未完成 活跃窗+长期真源指针；不做完整碰撞/覆盖度/01-C/D/03跨项目/logits；状态 review-pending；不 bump VERSION
 - 2026-08-13：evolution-03-mvp 归档签收（Standard · Skill/Doc-only · L1.5）：用户「准 · 归档」；执行中窗迁 `.ai-gates/Doc/AI流水线/签收/evolution-03-mvp/`；回写 evolution 签收对照 A/B/C MVP 已落地；不 bump VERSION
 - 2026-08-12：evolution-03 MVP 落地（Standard · Skill/Doc-only · L1.5）：新建 `skills/references/design-patterns.md`（3 条五字段本仓验证实例）+ `execution-discipline` §设计模式一问（复用四问后、强制选型句+YAGNI 兜底）+ `reference-routing` 双表 +1 行 + plan-reviewer/code-reviewer 轻量接线 + MAINTAINER 登记；不 bump VERSION
@@ -269,15 +283,6 @@
 - 2026-08-07：R20 CS0177 修复 + 编译门禁固化
 - 2026-08-07：mattpocock 第二批机制 1-6 落地
 - 2026-08-07：mattpocock-batch1 Step 1-4（双轨调用 / 写作三律 / AGENT-BRIEF / OUT-OF-SCOPE）
-
-## [5.0.8] - 2026-09-15（入口收敛 + 周报模板迁出 · patch · 定版）
-
-### Included changes（2026-09-15）
-
-- **入口收敛**：CORE 入口指针压到约 200 行；总控 PM 表 §5 用户可见态改挂周报 SKILL。
-- **周报细规迁模板**：新增 skills/templates/weekly-report.md；weekly-report/SKILL.md 改指针路由。
-- **「说明」层**：字段/对象/状态口径（user-visible-states / diagnosis-gates / demand-clarification / wait-what 等）同步。
-- **版本对齐**：skills/VERSION / plugin.json / install-info（工程）= 5.0.8。
 
 ## [5.0.7] - 2026-09-11（热岗 SKILL 路由 + 车道减负 · patch · 发布）
 
@@ -317,7 +322,7 @@
 
 - **会话交接拆两半**：「提示换窗」与「执行交接」拆开——用户发言 ≥20 轮才提示回「换窗」（每窗一次；≠自动吐八段）；触顶/压缩不另开提示阈值；禁「2 轮实现+审核」。session-handover / handoff-automation §J / agent-entry-route PM 格接线。
 - **新窗第一句复制块**：会话交接附加 7 字段「新窗第一句」块 + 触发词（换窗/卡了/卡了换窗）；session-handover / 模板 / handoff-automation §J。
-- **模型路由禁 fast 首选**：任何 `*-fast` 不得当首选（含 `cursor-grok-4.6-high-fast` / 4.5-*-fast / `composer-2.5-fast`）；仅非 fast 链尽且白名单只剩 fast 时链末应急并标「未按模型路由」。project-context §模型路由 + model-routing.md。
+- **模型路由禁 fast 首选**：任何 `*-fast` 不得当首选（含 `cursor-grok-4.6-high-fast` / 4.5-*-fast / `composer-2.5-fast`）；仅非 fast 链尽且白名单只剩 fast 时链末应急并标「未按模型路由」。model-routing.md。
 - **确认包【重构候选】短栏**：「准」不含抽离；「准, 抽离」/「准, 另开抽离窗」才抽离；未点抽离禁止整段搬家，CR 记规格轴越出 A#。
 - **A1 用户可见主句去手续黑话**：CORE §用户可见输出加总则；demand-clarification 一次确认包/续链合并包模板改人话，Express 连做说明移入岗位要点。
 - **复用四问第 4 问最低证据三选一**（REMOVED 点名 / 无可删+不能删原因 / 能删须进 Delta REMOVED）；方案审 3.10 抓填空为 blocker；planner 1.1 与 plan-lite / express-slice 能删占位对齐；developer 2.1 能删且 caller 仍通断不得自称完成。
@@ -416,7 +421,7 @@
 ### Included changes — 2026-08-25（模型路由 + 词条表 + 复用四问 · 不 bump）
 
 - **模型路由换档**：高级档 Sonnet/Terra 改为 **Opus 5 / GPT 5.6 Sol**；最低档去掉 fast（model-routing.md + 四岗 SKILL 同步）。
-- **design-patterns 词条表结构调整**：取消行数上限（原 6 行 / 禁止第 7 行），仍一次一条、须真锚点、禁止全量 GoF 图鉴与同义双挂；新增词条「**特效适配器**」（锚点 `IEffectAdapter` + `EffectSpawner`，Flexalon 不当验证）与「**简单工厂**」（锚点 `ChemicalSubstanceDataFactory.CreateSubstanceData`，禁止抽象工厂引申）；项目口诀同义条删除以免双挂；shared-language「入表不是岗」同步。
+- **design-patterns 词条表结构调整**：取消行数上限（原 6 行 / 禁止第 7 行），仍一次一条、须真锚点、禁止全量 GoF 图鉴与同义双挂；新增词条「**特效适配器**」（锚点 `IEffectAdapter` + `EffectSpawner`，Flexalon 不当验证）与「**简单工厂**」（锚点 `ChemicalSubstanceDataFactory.CreateSubstanceData`，禁止抽象工厂引申）；shared-language「入表不是岗」同步。
 - **复用四问第 3 问补句**：平台 API 直调 + 少写不得牺牲物理；定级——CR nit（包一层）/ 方案审 major（包一层≠并行实现 blocker）；不装 Ponytail（execution-discipline + code-reviewer/developer SKILL）。
 
 ### Included changes — 2026-08-24（分歧标注两隔离槽 · 不 bump）
@@ -451,7 +456,7 @@
   - d2：空壳扫描根扩到 project-context 文档路径的主题父目录（各主题执行中），不再把单一主题当唯一业务根；`.ai-gates/Doc` 仍扫。
   - d3：落盘 Express 跨会话无本会话测令视为空闲迁停写，不得用 not run 抗辩；本会话待测仍留执行中；未测不得标通过。
   - d4：check-pipeline-doc 对文档状态 vs 给程序员/关系表交叉核对打 warning；-Strict 不把本刀升 error。
-- **evolution-08-skill-hygiene（规则卫生）**：六岗 SKILL `name` 改为目录名；rollback 改为用户终端执行 `git checkout --`；本仓「升级 ai-gates」高危口令写 project-context；清「L1 同 Chat」；Express 中途超 2 交 PM 按判定树重判。
+- **evolution-08-skill-hygiene（规则卫生）**：六岗 SKILL `name` 改为目录名；rollback 改为用户终端执行 `git checkout --`；清「L1 同 Chat」；Express 中途超 2 交 PM 按判定树重判。
 - **evolution-09-doc-honesty（文档诚实）**：CORE 钉 hooks 120 分钟[PM]为近似门禁；用户可见输出与摘要表分车道；PACKAGE-INFO 与 MAINTAINER 对齐实物（含手册；LTS=VERSION）。
 - **README 机制表补交付闭环/文档窗/审查门禁**，并加跨会话账本、实现者四态；USER-GUIDE 一句 Express 建夹须迁、换对话续做接着上次。
 - **待办对照表已清空**：Superpowers P0–P2 与 Express D1–D4 两份对照清单迁 `Doc/AI流水线/签收/`。
@@ -487,7 +492,6 @@
 - **模式沉淀流程接线（Standard · Skill/Doc-only）**：新建 `skills/references/pattern-harvest.md` + `skills/templates/pattern-pending.md`（status: pending + 五格 + destination）；准全自动起草 `证据/_pattern-pending.md`；主窗只问「准否」；禁止静默入表 / 第七岗 / 第 7 行；routing 双表 + MAINTAINER + 四岗 SKILL（planner 4.11 / plan-reviewer / developer / code-reviewer）轻量接线。
 - **归档签收 pattern-harvest-flow / observer / command / ability / project-maxims-context**（用户「准+归档」/「归档」；逆向总结典故卡追加、不当新表、不转 pattern pending）。
 - **design-patterns 词条「命令（撤销）」「能力模板」**：本仓锚点 ICommand + CommandManager 双栈（`ICommand_Move.cs` / `ICommand_Delete.cs`）/ InteractionAbilityBase + ConfigurablePourAbility / SimpleHeatingAbility + InteractionManager 调度；禁止第二套 undo/redo 栈、禁止平行 InteractionManager；热路径、压力、门闸、传质、守恒不做 Ability；与 ICommand 撤销栈区分；IPourStrategy 不再挂第二条策略。
-- **project-context 增「项目口诀」**（通断只认闸门 / 判定量同源 / 输入不进能力）；不占 design-patterns 词条表。
 
 ### Included changes — 2026-08-14（设计模式一问 + 词条补全 + 逆链节补 · 不 bump）
 
@@ -516,7 +520,7 @@
 - **收集仓落地（evolution-01-collect）**：新建 collect-queue.md（三态 draft/shareable/promoted；可传、不可静默删；入队须人工确认）+ 空仓表头；KG/「准」/routing/MAINTAINER/planner 各 +1；gh 为可选探测；归档签收。
 - **覆盖度表（evolution-02-coverage）**：新建 coverage-map.md + compute-coverage-map.ps1（只读 trx/heat/outcome/.codegraph；-Verify 点名行键且行值）；routing +1；MAINTAINER 登记（heat≠覆盖度）；developer 与 planner 各 +1 句禁自报百分比；归档签收。
 - **晋升闸（evolution-03-promote）**：design-patterns §晋升闸四条；MAINTAINER +1；plan-reviewer：误称四条为「三重闸」→major、假装 gh 已通→blocker；compute-evolution-candidates.ps1 +1 数据源段；归档签收。
-- **模型路由三档**（最低 Grok4.5 / 普通 Grok4.6 / 高级 Sonnet→GPT Terra）；覆盖 2026-08-12「成本优先 Composer」旧定档；改 project-context §模型路由 + model-routing.md 默认表。
+- **模型路由三档**（最低 Grok4.5 / 普通 Grok4.6 / 高级 Sonnet→GPT Terra）；覆盖 2026-08-12「成本优先 Composer」旧定档；改 model-routing.md 默认表。
 - **METHODOLOGY 按论文重写** + 取消行数上限（MAINTAINER 同步）+ 碰撞节补两轮对照与评价 + 使用记录补两次实测。
 - **其他 08-13 归档签收**：evolution-long-task（感知+最小调度已落地；cron 仍搁置）、evolution-03-mvp、evolution-03-promote、evolution-02-coverage、evolution-02-collision、evolution-02-diverge、evolution-01-collect。
 
@@ -737,8 +741,7 @@
   删除「其他平台未正式打包」；Codex 接线（`codex/hooks.json` + `config.toml` + `hooks/codex/*`）
   已实测 deny 拦截。
 - **Codex 桌面子窗派发补丁**：`model-routing.md` 新增 §Codex 桌面派发实测（任务随 spawn 初始消息；
-  `followup_task` 补投不可靠；`fork_turns=all` 继承父模型但送达可靠）；`project-context` 标注
-  `deepseek-v4-pro` 2026-08-04 API 未开放（高级档暂以 flash+max 顶替）；AGENTS / CORE §PM 自检同步。
+  `followup_task` 补投不可靠；`fork_turns=all` 继承父模型但送达可靠）；AGENTS / CORE §PM 自检同步。
 - **运行时中间文件迁移**：`.cursor/` 中间产物 → `.ai-gates/`（hooks-log / tmp / verify / releases /
   项目状态），附带 PARSE_FAIL 根因定位（Cursor 以 GBK 读 UTF-8 stdin → JSON 结构字节被吞）。
 - **顺带修复**：3 处既有死链（CORE 恢复日志路径笔误、CHANGELOG v1.7.3 链接、执行文档黄金样例
@@ -1114,7 +1117,7 @@
   超量 / 跨模块 / 命中升级 / 说不清 → Standard。
 - **核心/回归路径命中加规模门槛**（CORE 第 2 步第 4 条）：功能性改动 + 升级前缀/回归模块，
   规模较大（>3 文件 / 净增删 >~150 行 / 跨模块·API·持久·生成文件）→ Full；小规模 →
-  最低 Standard+L1.5。同步 `project-context.md` §Express 车道升级、
+  最低 Standard+L1.5。同步
   `references/full-lane-decision-tree.md`、`scripts/suggest-pipeline-lane.ps1`
   （Full 提示阈值 >8 → >3）、`references/examples.md`。
 - 不 bump VERSION（随 v3.2.1 包重建）。
@@ -1134,9 +1137,6 @@
   显式 `model=` 覆盖仅对 `fork_turns=none`（或正整数）生效；`fork_turns=all` 继承父模型、
   不接受覆盖，但消息送达可靠（2026-08-04 实证）。首回合疑似空上下文 → 立即用 `fork_turns=all`
   重派（继承父模型并标注），勿反复 `followup_task` 补投。
-- `project-context.md` §Codex 模型映射：标注 `deepseek-v4-pro` 截至 2026-08-04 API 未开放，
-  高级档当前用 `deepseek-v4-flash` + `max` 顶替并标注「未按模型路由」，pro 开放后恢复；
-  同步 spawn 投递经验。
 - `AGENTS.md`：派发规则补 Codex 桌面例外——任务随 spawn 初始消息；`fork_turns=all` 继承
   父模型、以送达优先并标注（不再无条件要求显式 `model=`）。
 - `CORE.md` §PM 自检：新增「子窗派发后核验首回合已收到任务；空上下文询问 →
@@ -1544,7 +1544,7 @@
 
 #### Added
 
-- `project-context.template.md` / Chemical `project-context.md`：**§热路径批量回归**（路径 glob → 场景 ID；Chemical 填 `PressureManager/**` → `G1,G2,G5`）。
+- `project-context.template.md`：**§热路径批量回归**（路径 glob → 场景 ID）。
 - `project-local-config.md`：标明该节属项目专属、禁止 Skill 正文写死场景 ID。
 
 #### Changed
@@ -1782,7 +1782,7 @@
 
 #### Changed
 
-- **模型路由项目化**：`model-routing.md` 改为通用框架（档位 + 默认表示例 + 解析顺序）；**具体 slug/回退链**进 `.cursor/project-context.md` §模型路由（Chemical：实现 Grok→Composer；策划/方案审/CR Sonnet→Grok）。模板 / `project-local-config` / 各岗 SKILL / CORE / TEAM-GUIDE / rules 去业务硬编码；派 Task 仍须显式 `model=`。
+- **模型路由项目化**：`model-routing.md` 改为通用框架（档位 + 默认表示例 + 解析顺序）；**具体 slug/回退链**不进通用 Skill，由各仓库项目说明自备。模板 / `project-local-config` / 各岗 SKILL / CORE / TEAM-GUIDE / rules 去业务硬编码；派 Task 仍须显式 `model=`。
 - **高风险隔离审核优先异模型**：`isolated-review.md` 新增 §高风险审核异模型——L1.5 CR / L2 / L3 / 对抗 / Full 业务 C# 派发 Subagent 时优先与主窗不同模型；**首选 Sonnet 5**（Task `model: claude-sonnet-5-thinking-medium`）；主窗已是 Sonnet 5 则改选另一族；不可用则回退 `inherit` 并标「同模型隔离」，**不硬拦**。CORE / TEAM-GUIDE 同步一句。仍不得夸大为「多模型真人交叉审」。
 - **模型路由（初版 · 已被同日「模型路由项目化」覆盖）**：新增 `references/model-routing.md` 时，Skill **默认表示例**曾为策划/L3=Sonnet、实现=`composer-2.5-fast`（回退 terra/grok/`inherit`）。**勿再当现行约定**；现行=档位框架 + `project-context` §模型路由（见上条）。
 - **策划/实现优先子窗**：`model-routing.md` 升级为「模型路由 + 子窗派发」——主窗默认只做 PM 枢纽；写方案与改码与审核一样**优先 Task/Subagent**（最短派发包）；失败再手动新开 Chat 或标「主窗执行」。Auto 禁止主窗静默连改多 Step。TEAM-GUIDE / planner / developer / CORE 同步。
@@ -1793,7 +1793,7 @@
 - **异现象闸门（`why_multi=scope`）**：`diagnosis-gates.md` §0.1/§0.2/§0.3——Discover 钉死可见症状≠本窗 A#/目标时，默认推荐「挂起本窗 + 另开短窗」；禁并修、禁误烧止损 3/3。
 - **commit-lesson-pending**：引号内保留 `A#` 等字面量，不再当 YAML 注释截断。
 - **复用四问（精简门禁）**：`execution-discipline.md` 强制写文档/方案/改码前答「已有→复用→少写/不写→能删」；plan-lite 每 Step 字段；planner/developer/docs/plan-reviewer/CR/anti-patterns 接线；缺表或可复用却新开轨 → 方案审 blocker。
-- **项目硬阈指针**：`execution-discipline` 指向 `.cursor/project-context.md` 可配 Mandatory 替换句式 / 新方法行数 / 交审瘦身一拍（Chemical 已落 §神类止血·补强三口）。
+- **项目硬阈指针**：`execution-discipline` 指向项目说明里可配的 Mandatory 替换句式 / 新方法行数 / 交审瘦身一拍。
 - **派发 revision Ordinal + L3 转场纪律**：`review-dispatch-lifecycle.md` §3 钉路径排序须 `StringComparer.Ordinal`（禁文化 Sort）；§5 转场仅可改排除三节，改正文须清零重生第1轮——消 `stale_dispatch` 假阳性。
 - **Skill 查漏接线**：TEAM-GUIDE 版本对齐 3.2.0 + 防膨胀 FAQ；`reference-routing` 增加复用四问/派发 Ordinal 触发；planner/developer/plan-reviewer/CR 接线 project-context 补强三口。
 - **每窗兑现半页模板**：TEAM-GUIDE §半页备忘 + `templates/window-fulfillment-halfpage.md`；handoff / retrospective-metrics 指针。
@@ -2178,7 +2178,7 @@
 
 ### Changed
 
-- **`sync-regression-index.ps1` v2.0.1 → v2.1.0**：新增 `-Apply` 模式，从 `project-context.md` MD 表**自动生成** `regression-index.yaml`，消除人工双写漂移风险（原 warn/`-Strict` 校验模式保留，供 CI/pre-commit 场景纯校验用）；`project-context.md`、`MAINTAINER.md`、`anti-patterns.md` 对应措辞同步
+- **`sync-regression-index.ps1` v2.0.1 → v2.1.0**：新增 `-Apply` 模式，从 `project-context.md` MD 表**自动生成** `regression-index.yaml`，消除人工双写漂移风险（原 warn/`-Strict` 校验模式保留，供 CI/pre-commit 场景纯校验用）；`MAINTAINER.md`、`anti-patterns.md` 对应措辞同步
 
 - **pre-commit 提醒默认建议改为 `-Strict`**（`README.md`、`MAINTAINER.md`）：硬门禁缺机器强制易被跳过，改为默认推荐阻断模式，团队摩擦大时可退回 warn-only
 
@@ -2202,13 +2202,11 @@
 
 - **`templates/cr-dispatch-l1.5.md`**：一键生成示例命令硬编码 `-RegressionModule PressureManager` → 改为 `[ModuleName]` 占位符
 
-- **死链「CORE 附录 B」**：`project-context.template.md`、`.cursor/project-context.md` 中残留的「见 CORE 附录 B」指针（附录 A/B 早已迁至 `references/examples.md`，见本文件历史 [3.0.13]）→ 改为指向 `references/examples.md` §Standard + L1.5 / §Full 强制
+- **死链「CORE 附录 B」**：`project-context.template.md` 中残留的「见 CORE 附录 B」指针（附录 A/B 早已迁至 `references/examples.md`，见本文件历史 [3.0.13]）→ 改为指向 `references/examples.md` §Standard + L1.5 / §Full 强制
 
 - **CORE §三车道判定 第 2 步排版消歧**：原嵌套 `·` 列表容易误读为「功能性改动+回归模块」需同时命中其他 Full 条件才算 Full；改为明确「4 条各自独立触发」+ 例外仅对应第 4 条。**不改变判定结果**——经查真实执行文档 `Assets/Doc/压力系统/导管动态相段推进方案.md`，PressureManager 功能性 Step 全程标注「完整模式」，与现行严格判定一致，故未采纳外部审计建议的「默认降级 Standard」方案
 
 - **`references/full-lane-decision-tree.md` §不升 Full**：「已有 plan-lite、2～3 Step → Standard」补充限定「且未命中第 2 步 Full 强制」，避免与第 2 步第 4 条（功能性+回归模块单独触发 Full）冲突
-
-- **`.cursor/project-context.md`**：「功能性改动仍按 CORE 第 2 步判 Full/Standard」读作二选一 → 改为明确「命中第 4 条→Full；否则按其余条判 Standard」
 
 - **`references/examples.md`**：补充「Full 强制（回归索引模块 · 功能性改动）」样例，引用上述真实案例
 
@@ -2569,8 +2567,6 @@
 ### Changed
 
 - **CORE.md**：§PM 脚本改为 lazy load `pm-tooling.md`（行数回落 ≤200 目标）
-
-- **`.cursor/project-context.md`**：PressureManager/Reaction 仅日志改动统一为 **Standard + L1.5**，删除 TL Express 例外
 
 - **`.gitignore`**：忽略 `pipeline-snapshot.log`、`pipeline-recovery-log.md`
 

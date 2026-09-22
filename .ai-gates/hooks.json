@@ -1,6 +1,13 @@
 {
   "version": 1,
   "hooks": {
+    "preCompact": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/relight-after-compact.ps1",
+        "failClosed": false,
+        "timeout": 10
+      }
+    ],
     "sessionStart": [
       {
         "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/check-hooks-drift.ps1",

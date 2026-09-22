@@ -1,6 +1,6 @@
 # 模型路由 + 子窗派发（主窗仅 PM）
 
-> 权威：本文件（通用框架）。**具体 slug 优先**看 `.cursor/project-context.md` §模型路由（若有）。  
+> 权威：本文件只写派发手续。**具体 slug 只读** `.cursor/project-context.md` §模型路由。本文件不列模型、不设默认表。  
 > **优先派发，不硬拦**：Subagent/`model` 失败 → 次选手动新开 Chat → 最后才降级主窗并标注，流程不中断。  
 > 可用 slug 以当期会话 `available_subagent_models` 为准。  
 > 审核隔离细则 → [isolated-review.md](./isolated-review.md)。  
@@ -17,7 +17,7 @@
 ## 目标
 
 - 主窗保持短、稳、可交接；规格与实现上下文不挤进 PM 对话。  
-- 普通档（Grok 4.6）砸**策划**与 Standard 实现 / L1～L2 方案审；高级档（Opus 5 → GPT 5.6 Sol）砸 Full L3 / Standard·Full CR / 验收；最低档（Grok 4.5）走 Express/Direct 实现、Direct CR 与文档。
+- 各岗用哪一档、哪个 slug，只读项目说明 §模型路由。本文件不列模型。
 
 ## 主窗 vs 子窗
 
@@ -34,42 +34,20 @@
 
 ## 解析顺序（强制）
 
-派 Task 前按下列顺序解析该岗 `model` 链（取第一条可用）：
+派 Task 前按下列顺序解析该岗 `model`（取第一条可用）：
 
 1. **用户本轮点名**的模型 / 「主窗做」等覆盖  
-2. **`.cursor/project-context.md` §模型路由**（若存在该节）— **项目专属，不进通用 Skill**  
-3. 本文件下方 **Skill 默认表示例**
+2. **`.cursor/project-context.md` §模型路由** — 岗位表、回退链、禁止 Fast、碰撞三槽都在这一节
 
-解析后 **必须**显式传 `model=` 首选 slug；**禁止**无理由省略 / 一律 `inherit`（省略时常被 UI 显示成某默认快模型）。首选不在白名单或调用失败 → 链上下一档，并标注实际 `model=`。`resume` 沿用原窗模型；要换模型 → **新开** Task。
-
-## Skill 默认表（无 project-context 覆盖时才用 · 示例）
-
-> 下列 slug 仅为**缺省示例**。若仓库有 `.cursor/project-context.md` §模型路由，**整表以项目节为准**。  
-> **统一三档（2026-09-07 用户改档，覆盖 2026-08-25）**（无 project-context 时用；覆盖旧「两档 / Composer 首选」）：最低 = Grok 4.5（`cursor-grok-4.5-high`）；普通 = Grok 4.6（`cursor-grok-4.6-high`）；高级 = Opus 5 → GPT 5.6 Sol（`claude-opus-5-thinking-high` → `gpt-5.6-sol-medium`，再回退 Grok 4.6）。**任何 `*-fast` 都不得当首选**（含 `cursor-grok-4.6-high-fast` / `cursor-grok-4.5-medium-fast` / `cursor-grok-4.5-high-fast` / `composer-2.5-fast`）。`*-fast` 仅当非 fast 链尽且白名单只剩 fast 时，才可链末应急并标「未按模型路由」；**UI 已显示 Fast 时不得把该次当正规完成**（作废重派优先于应急采用）。**UI Fast → 作废重派（判定面=UI 显示名，不看请求 slug）**：子窗 UI 出现 `High Fast` / 任何 `*-fast` / Composer Fast（含请求 `cursor-grok-4.6-high` 但 UI 为 `Grok 4.6 High Fast`）→ 该子窗作废（结论/findings/改码不采用；打断）；**主窗 PM** 新开 Task，按该岗链上下一非 fast 档重派；禁止用刚 remap 的同一 slug 再派指望不 Fast。审核/方案审/CR/验收同规。档内链用尽 → 下一档。
-
-| 岗位 / 场景 | 场所 | 档位 | Task `model`（首选 → 回退） |
-| --- | --- | --- | --- |
-| **PM**（主窗） | 主窗 | 用户所选 | — |
-| Express / Direct 实现与 Auto 微改 | **必须子窗** | 最低 | `cursor-grok-4.5-high` → `cursor-grok-4.6-high` |
-| **代码审** / 对抗（Direct CR） | **必须子窗** | 最低 | `cursor-grok-4.5-high` → `cursor-grok-4.6-high` |
-| **文档** `readme: docs` | **必须子窗** | 最低 | `cursor-grok-4.5-high` → `cursor-grok-4.6-high` |
-| **策划** | **必须子窗** | 普通 | `cursor-grok-4.6-high` → `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` |
-| **程序员** / Auto（Standard 及以上） | **必须子窗** | 普通 | `cursor-grok-4.6-high` → `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` |
-| **方案审** L1 / L1.5 / L2 | **必须子窗** | 普通 | `cursor-grok-4.6-high` → `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` |
-| **方案审** Full L3 round 1 | **必须子窗** | 高级 | `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` → `cursor-grok-4.6-high` |
-| **方案审** Full L3 round 2 | **必须子窗**（须与 round1 **不同子窗**） | 高级 | `gpt-5.6-sol-medium` → `cursor-grok-4.6-high` |
-| **代码审** / 对抗（Standard/Full CR） | **必须子窗** | 高级 | `claude-opus-5-thinking-high` → `gpt-5.6-sol-medium` → `cursor-grok-4.6-high` |
-| **验收/verify** | **必须子窗** | 高级 | 同 Standard/Full CR；**禁止**最低/普通档首发或省略 `model=`；**禁止** Composer 冒充验收首选 |
-| **周报** | **不要求子窗** | 用户所选 | — |
-| Express / Direct 切片文案 | **主窗 PM** 出切片（Express=主窗 PM 一句话切片；Direct=策划子窗对话内 A#/切片、不落盘）；**实现仍必须子窗** | 实现走最低档 | 同上 |
+没有该节，或该岗没有 slug → 标 **「未按模型路由」**，不得用本文件臆造模型。解析后 **必须**显式传 `model=`；**禁止**无理由省略 / 一律 `inherit`。首选不在白名单或调用失败 → 按项目节回退链下一档，并标注实际 `model=`。`resume` 沿用原窗模型；要换模型 → **新开** Task。
 
 ## 派发方式（全岗统一顺序）
 
 1. **优先**：主窗 PM 用 Task/Subagent 拉起目标岗 + **显式**解析后的首选 `model` + **最短派发包**（白名单；禁塞主对话长闲聊、`已完成/` 全文）  
 2. **次选**：Subagent 失败 → 提示用户**手动新开 Chat**粘贴派发块（写明岗位 + 应选模型）  
 3. **降级**：仅当用户书面要求主窗做、或 Subagent 与手动新开均不可用 → 主窗临时代行，**必须**标 **「主窗执行（未开子窗 · 非独立）」**；不得冒充已隔离  
-4. **`model` 失败**：按下表/项目覆盖链回退，最终 `inherit`，标 **「未按模型路由」**，不得停流程  
-5. **UI Fast 作废重派**：判定面=**UI 显示名**（`High Fast` / 任何 `*-fast` / Composer Fast），不看请求 slug。命中 → 该子窗作废（结论/findings/改码不采用；打断）→ **仅主窗 PM** 新开 Task，按该岗链上下一非 fast 档重派；禁止同一 remap slug 再派；禁止子窗自重派。全岗适用。链末只剩 fast 的应急仍须标「未按模型路由」，且 UI 已 Fast 时不得当正规完成（作废重派优先）。
+4. **`model` 失败**：按项目说明 §模型路由的回退链下一档，链尽才 `inherit`，标 **「未按模型路由」**，不得停流程  
+5. **Fast**：只按项目说明 §模型路由。本文件不规定禁不禁、也不写作废步骤。
 
 子窗交回短结论；主窗 PM 更新「你下一步」与确认包。审核子窗默认只读。
 
@@ -82,8 +60,7 @@
 > - 首选：`fork_turns=none` + 显式 `model=` + **完整任务放初始消息**；若首回合回复疑似
 >   空上下文（无任务内容）→ 立即改用 `fork_turns=all` 重派（继承父模型并标注），勿反复
 >   `followup_task` 补投。
-> - 模型可用性以当期 `available_subagent_models` / API 实测为准（2026-08-04：
->   `deepseek-v4-pro` 未开放，高级档用 `deepseek-v4-flash` + `max` 顶替并标注）。
+> - 模型档位只读项目说明的 Codex 小节。本段不指定 slug。
 
 ### 子窗健康检查与有界等待（2026-08-05 实测补 · 2026-08-07 收紧）
 
@@ -150,5 +127,5 @@
 - 未「准」仅因「要开实现子窗」而提前改码  
 - 向子窗塞主对话长讨论或归档全文  
 - 把**项目专属**模型偏好写进通用 Skill（须进 project-context）  
-- **非 PM 子窗再 Task 派方案审/CR**（套娃；是 remap→Fast 的常见触发面）  
-- UI 已 Fast 却只标「未按模型路由」、不打断、不主窗下一非 fast 重派；或用刚 remap 的同一 slug 再派指望不 Fast；或让子窗自己再派 
+- **非 PM 子窗再 Task 派方案审/CR**（套娃）  
+- 在本文件写死「禁止 Fast」或作废重派（这条只进项目说明 §模型路由） 

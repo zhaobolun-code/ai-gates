@@ -20,10 +20,10 @@
 
 > 多语言层、热更新等**项目特有**约束写在本节或「代码审核额外关注点」。
 
-## 模型路由（可选 — 本项目覆盖）
+## 模型路由（必填）
 
-> 覆盖 `references/model-routing.md` 默认表示例。无团队偏好则**删除本节**，沿用 Skill 默认表。  
-> 细则与解析顺序见 `references/model-routing.md`。
+> slug 只写在本节。`references/model-routing.md` 与 `collision-review.md` 不列模型。没有本节则派发标「未按模型路由」。  
+> 细则见 `references/model-routing.md`。碰撞三槽（三个不同模型）也写在本节。
 
 | 岗位 | Task `model`（首选 → 回退） |
 | --- | --- |

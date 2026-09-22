@@ -1,6 +1,6 @@
 ---
 name: weekly-report
-description: 根据执行文档和/或 README 版本记录生成工作周报（供用户向同事做正式汇报）。用户说「周报」时使用。
+description: 根据执行文档和/或 README 版本记录生成工作周报或同口径日报（供用户向同事做正式汇报）。用户说「周报」或「日报」且要求按周报口径时使用。
 ---
 
 # 周报
@@ -11,7 +11,7 @@ description: 根据执行文档和/或 README 版本记录生成工作周报（�
 
 ## 触发
 
-用户说「周报」时启用；不参与 Express/Direct/Standard/Full 路由。本岗一次性产出，不切换流水线模式、不写会话开关。用户借「周报」顺带提代码/README 改动需求时，不在本岗处理——须另起一条先 `[PM]` 判车道（硬门禁 #7）。
+用户说「周报」时启用；说「日报」且要求按周报口径时，本岗同条出日报（见模板 §日报）。不参与 Express/Direct/Standard/Full 路由。本岗一次性产出，不切换流水线模式、不写会话开关。用户借「周报」顺带提代码/README 改动需求时，不在本岗处理——须另起一条先 `[PM]` 判车道（硬门禁 #7）。
 
 ## 模型路由 + 子窗
 
@@ -22,7 +22,7 @@ description: 根据执行文档和/或 README 版本记录生成工作周报（�
 1. Read [weekly-report.md](../templates/weekly-report.md)
 2. 文档路径与日期区间至少一项；都缺则向用户索取
 3. 默认只输出正文，不改执行文档/README/代码
-4. 标题固定 `# 工作周报`；章节名不得改、不得换成别的骨架
+4. 标题固定 `# 工作周报`（日报见模板 §日报）；章节名不得改、不得换成别的骨架
 5. 用户要求保存到文件时才写入；默认 `.ai-gates/Doc/Weekly/`
 
 ## 正文骨架（固定）
@@ -37,4 +37,4 @@ description: 根据执行文档和/或 README 版本记录生成工作周报（�
 ## 下周工作
 ```
 
-章节层级与取材/黑话翻译/自检/示例 → 模板。详细字段 → [retrospective-metrics.md](../references/retrospective-metrics.md)
+章节层级与取材/黑话翻译/自检/示例 → 模板。**本周（或今日）工作**按模板「五向专业叙述」写。详细字段 → [retrospective-metrics.md](../references/retrospective-metrics.md)

@@ -33,13 +33,7 @@
 
 ## 模型配对（硬）
 
-三槽必须是**三个不同模型**（Cursor slug；本机无该槽则按 [model-routing.md](./model-routing.md) 回退，仍须本轮两槽不同；无法异模型 → **终止碰撞**，降级普通隔离审，并标注「未按模型路由」）：
-
-| 槽 | 模型 | slug |
-| --- | --- | --- |
-| Grok | Grok 4.6 | `cursor-grok-4.6-high` |
-| Opus | Opus 5 | `claude-opus-5-thinking-high` |
-| Sol | GPT 5.6 Sol | `gpt-5.6-sol-medium` |
+三槽的 slug **只读** `.cursor/project-context.md` §模型路由 · 碰撞三槽。本文件只保留槽名（Grok / Opus / Sol）和轮次角色，不写模型。读不到该节，或三槽不是三个不同模型 → **终止碰撞**，降级普通隔离审，并标注「未按模型路由」。每一轮两个子窗仍须显式不同 `model=`。
 
 | 轮 | 配对与角色 | 本轮禁止 |
 | --- | --- | --- |
