@@ -11,6 +11,8 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-10-13：打包范围补 `hooks/plugin/*.ps1`。`package-release.ps1` 自 5.0.6 市场插件轮起只拷 `hooks/*.ps1` 顶层 + `hooks/codex/*` + `hooks/claude/*`，`skills/MAINTAINER.md` §打包范围早已明列的 `hooks/plugin/invoke.ps1` 从未进包；而包内 `cursor-marketplace/plugin-hooks.json` 四个门禁 hook 正指向 `${CURSOR_PLUGIN_ROOT}/.ai-gates/hooks/plugin/invoke.ps1`。**已发布的 5.0.10 包缺该文件（新项目接入不受影响，按 7z 搭 Cursor 市场仓会缺）**，从下一版包起带出。同轮更新脚本头注释、拷贝提示与 PACKAGE-INFO 接入说明的 hooks 列举。不 bump VERSION
+
 - 2026-10-13：bump `skills/VERSION` → **5.0.10**。收口 5.0.9 之后未发版条目：通用删债（09-23）；方案只记决定 / 试探不升合同 / 助手裁定标明 / 方案审补建造者缺口 / 流水线会话走偏单独诊断 / Direct 代码审升高级档 `grok-4.7-high` / 改生产代码前须有能打红的信号 / 过度设计只作建议 / 新术语同轮登记（10-12）。补推 `hooks/plugin/invoke.ps1`（5.0.6 市场插件轮漏推的插件门禁入口）。`plugin.json` version=`5.0.10`。
 
 - 2026-10-12：方案只记决定；试探不升合同；助手裁定标明；方案审补建造者缺口；流水线会话走偏单独诊断。当前 Step 只留签名、文件、规格值和验收，不贴函数体和旧 Step 长状态。只读试探标「试探」，留进生产代码须新开一步且用户本轮「准」。不是本轮用户原话的保留写成「助手裁定」。方案审须写建造者还会猜什么，没有则写「没有会改做法的缺口」。用户问会话为何重复、没按方案、太久或太贵时，先写成可观察问题，发现须带路径和行号，不进项目错题本、不顺手改技能。同日补：改生产代码前须有已经跑过、能把这个现象打红的信号（只有人能看的现象则写人可见红句），并写绿了不证明什么；过度设计或建议抽公共函数只作建议，不自动改、不算未通过；提问时说死的新术语同一轮登记进词汇表。同日再补：Direct 代码审改为高级档，与 Standard / Full 代码审同用 `grok-4.7-high`。Direct 仍不默认双轴。Included：`skills/references/execution-discipline.md` + `skills/references/diagnosis-gates.md` + `skills/references/shared-language.md` + `skills/planner/SKILL.md` + `skills/plan-reviewer/SKILL.md` + `skills/code-reviewer/SKILL.md` + `skills/CORE.md` + `skills/references/agent-entry-route.md` + `skills/references/plan-review-tiers.md` + `skills/references/skill-eval-checklist.md` + `skills/references/dual-axis-review.md`。不 bump VERSION
