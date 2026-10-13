@@ -18,7 +18,7 @@
 | 车道 | 默认方案审核档位 | 定版要求 |
 | --- | --- | --- |
 | **Express** | 跳过方案审核 | 不适用 |
-| **Direct** | 无方案审；CR 隔离（普通档） | 隔离 CR（Subagent / 新 Chat，普通档）无 blocker 且用户认可 |
+| **Direct** | 无方案审；CR 隔离（高级档） | 隔离 CR（Subagent / 新 Chat，高级档）无 blocker 且用户认可 |
 | **Standard** | L1；**已判 Standard** 且命中回归索引模块 → **L1.5**；文件/机器热度命中 → **方案审 L3 / 双轮 CR**（不整条升 Full）；未触 Full 且跨 2 模块时升 L2。回归索引/热度不得把 Express/Direct 拉进本行 | L1/L1.5/L2 无 blocker 且用户确认需求后可 `implementation-ready` |
 | **Full** | L3，至少 2 轮 | 多轮均无 blocker 且用户确认 |
 

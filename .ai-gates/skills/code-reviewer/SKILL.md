@@ -18,13 +18,13 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 | 车道 | 本岗 |
 | --- | --- |
 | Express | **不启用** — [express-self-check.md](../express-self-check.md) |
-| Direct | ✓ 必审；**必须子窗**；普通档；同 Chat 标「非独立 CR」 |
+| Direct | ✓ 必审；**必须子窗**；高级档；同 Chat 标「非独立 CR」 |
 | Standard | ✓ **必须子窗**；L1.5 隔离 + 异模型优先。[isolated-review.md](../references/isolated-review.md) / [model-routing.md](../references/model-routing.md) |
 | Full | ✓ 必审；必须子窗。业务 C# 无 CRG 且无 CodeGraph = hard blocker。[codegraph-probe.md](../references/codegraph-probe.md)。Skill/Doc-only 无图谱 = soft risk，不挡收口 |
 
 ## 模型路由 + 子窗
 
-**必须子窗**，**必须** `model=`。Direct CR=普通档；Standard/Full CR=高级档；热度命中 Direct CR 升高级档。禁止主窗出 findings。
+**必须子窗**，**必须** `model=`。Direct CR 与 Standard/Full CR 都是高级档。禁止主窗出 findings。
 
 ## Checklist
 
@@ -47,7 +47,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 1.55 模式沉淀 → [pattern-harvest.md](../references/pattern-harvest.md)
 2. L1.5 经 [cr-dispatch-l1.5.md](../templates/cr-dispatch-l1.5.md) 派发；优先 Subagent
 3. 有图谱则先 CRG 再必要时 CodeGraph
-4. findings 短表：blocker / major / minor / nit。L1.5+ 必须含集成维一句
+4. findings 短表：blocker / major / minor / nit。建议（过度设计、抽公共函数、拆类）单独列出，不自动改，不算未通过。L1.5+ 必须含集成维一句。先红再改 / 过度设计只提醒 → [execution-discipline.md](../references/execution-discipline.md)
 5. 默认不改代码
 6. 证据最高 static-checked 或 locally-validated
 7. 无业务 blocker → [handoff-automation.md](../references/handoff-automation.md) §C。禁止自动 `runtime-validated`

@@ -77,7 +77,7 @@
 | D5 | Developer 微循环：改完一段后先自检（编译/语义）再继续下一段 | 不改完整个 Step 才第一次检查；无大批量编译错堆积；交审前无未发现的语义疑点；**单个 Step 内 ≥50% 的小改动块有自检痕迹即 Pass**；微循环自检不计入 developer §7 的连续修复次数 |
 | D6 | Standard/Full 最小验证 | 业务 C# 交 CR 前有编译或 Editor.log + 可执行 Unity 步骤/关键词；Skill/纯文档走静态核对+假需求，不伪造 Unity |
 | D7 | Direct 假需求：策划子窗对话内给 A#/切片；`执行中/` 无新方案夹、无 `未完成.md` | 对话内切片确认；出现任何落盘执行文档 → Fail，标签 `Direct落盘` |
-| D8 | Direct 改码完成 | 派隔离 CR（Subagent / 新 Chat，普通档，标注「隔离复核」）；无方案审；未隔离 / 自写自审 → Fail，标签 `Direct未隔离CR` |
+| D8 | Direct 改码完成 | 派隔离 CR（Subagent / 新 Chat，高级档，标注「隔离复核」）；无方案审；未隔离 / 自写自审 → Fail，标签 `Direct未隔离CR` |
 
 ## E. Harness / 自我完善（加分）
 

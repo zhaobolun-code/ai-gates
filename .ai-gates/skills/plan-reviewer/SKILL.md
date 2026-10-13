@@ -49,6 +49,8 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 3.9.2 物理口径缺硬句/负面/失败标准 → major
 3.9.3 声明启用逆链 → [reverse-chain.md](../references/reverse-chain.md)
 3.10 复用四问缺短表/第 4 问填空 → blocker。[execution-discipline.md](../references/execution-discipline.md)
+3.10.2 建造者缺口：以没参加讨论的实现者读当前 Step。只列还得猜、并且猜错会改行为或会改删哪段旧符号的问题。没有则写「没有会改做法的缺口」。缺这句 → **major**。这种缺口写成已经确定 → **blocker**
+3.10.3 方案只记决定 / 试探不升合同 / 助手裁定 / 先红再改 → [execution-discipline.md](../references/execution-discipline.md)。代码块盖过决定或旧 Step 长状态进现行合同 → **major**；试探当合同或同一结论第二步只读无新事实 → **blocker**；助手裁定冒充用户原话并留住删债或改范围 → **blocker**；要改生产代码却没有已跑过的红信号，或没写「绿了不证明什么」→ **major**
 3.10.1 确认包该有【重构候选】却缺栏 → major/blocker。「无」或 Express/无症状省略不是缺栏
 3.11 有神类止血节：只追加无 REMOVED → major；超净增阈无收敛 → blocker
 3.12 设计模式外部校验 → [design-patterns.md](../references/design-patterns.md)

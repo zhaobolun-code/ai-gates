@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.0.9（模型路由归项目说明 · patch；前版 5.0.8 定版信息保留）
+**当前 LTS**：v5.0.10（通用删债 + 10-12 迭代收口 · patch；前版 5.0.9 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,12 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-10-13：bump `skills/VERSION` → **5.0.10**。收口 5.0.9 之后未发版条目：通用删债（09-23）；方案只记决定 / 试探不升合同 / 助手裁定标明 / 方案审补建造者缺口 / 流水线会话走偏单独诊断 / Direct 代码审升高级档 `grok-4.7-high` / 改生产代码前须有能打红的信号 / 过度设计只作建议 / 新术语同轮登记（10-12）。补推 `hooks/plugin/invoke.ps1`（5.0.6 市场插件轮漏推的插件门禁入口）。`plugin.json` version=`5.0.10`。
+
+- 2026-10-12：方案只记决定；试探不升合同；助手裁定标明；方案审补建造者缺口；流水线会话走偏单独诊断。当前 Step 只留签名、文件、规格值和验收，不贴函数体和旧 Step 长状态。只读试探标「试探」，留进生产代码须新开一步且用户本轮「准」。不是本轮用户原话的保留写成「助手裁定」。方案审须写建造者还会猜什么，没有则写「没有会改做法的缺口」。用户问会话为何重复、没按方案、太久或太贵时，先写成可观察问题，发现须带路径和行号，不进项目错题本、不顺手改技能。同日补：改生产代码前须有已经跑过、能把这个现象打红的信号（只有人能看的现象则写人可见红句），并写绿了不证明什么；过度设计或建议抽公共函数只作建议，不自动改、不算未通过；提问时说死的新术语同一轮登记进词汇表。同日再补：Direct 代码审改为高级档，与 Standard / Full 代码审同用 `grok-4.7-high`。Direct 仍不默认双轴。Included：`skills/references/execution-discipline.md` + `skills/references/diagnosis-gates.md` + `skills/references/shared-language.md` + `skills/planner/SKILL.md` + `skills/plan-reviewer/SKILL.md` + `skills/code-reviewer/SKILL.md` + `skills/CORE.md` + `skills/references/agent-entry-route.md` + `skills/references/plan-review-tiers.md` + `skills/references/skill-eval-checklist.md` + `skills/references/dual-axis-review.md`。不 bump VERSION
+
+- 2026-09-23：通用删债（不绑领域、不写进项目说明）。窗目标或用户本轮原话点名要删的旧符号即删债。上一刀的「禁止删 / KEEP」不继承。同一笔债只允许一刀只读，下一刀必须 REMOVED 且生产调用断开。换层、改现象名、标已封都不清债；止损到 2/3 或 3/3 时下一刀只能删该符号。删掉该符号时，项目自己的新方法行数上限和净增上限都不套。旧符号还在又加并行实现 → blocker。Included：`skills/references/execution-discipline.md` + `skills/references/diagnosis-gates.md`。不 bump VERSION
 
 - 2026-09-22：bump `skills/VERSION` → **5.0.9**。收口 5.0.8 之后未发版条目：模型选择只读项目说明、压缩前点亮、初始化只问高档位和低档位。本会话走读评测清单 A–D，32/32 通过（非新开 Chat 真演）。钩子表行数断言改为 8（含压缩前点亮）。`plugin.json` version=`5.0.9`。
 

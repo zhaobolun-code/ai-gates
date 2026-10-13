@@ -38,8 +38,8 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 2.1 止损/热修/Verify→Discover → [diagnosis-gates.md](../references/diagnosis-gates.md)。触及 §0.8 信号 → 须 Discover 预扫链
 2.5 `.cursor/skills/**` 改动默认 **L1.5**
 2.7 有 `物理口径.md`：硬句≥1、负面≥1、失败标准≥1
-2.8 术语歧义 → [shared-language.md](../references/shared-language.md)。Full 策划前可选 [architecture-health-check.md](../references/architecture-health-check.md)
-3. 每 Step：冻结表、Mandatory、Delta Spec、满足验收 A#、验证。A#/Delta → [acceptance-and-delta.md](../references/acceptance-and-delta.md)
+2.8 提问里说死的新术语同一轮登记一行 → [shared-language.md](../references/shared-language.md)。Full 策划前可选 [architecture-health-check.md](../references/architecture-health-check.md)
+3. 每 Step：冻结表、Mandatory、Delta Spec、满足验收 A#、验证。A#/Delta → [acceptance-and-delta.md](../references/acceptance-and-delta.md)。当前 Step 只记决定；试探标「试探」；非本轮原话的保留标「助手裁定」→ [execution-discipline.md](../references/execution-discipline.md) §方案只记决定
 4. 交审前选型短表；过审后**一轮**确认包。[demand-clarification.md](../references/demand-clarification.md)。禁止拆轮。确认包/Auto → [handoff-automation.md](../references/handoff-automation.md) §0/§F
 4.05–4.11 默认不启用：分歧 [divergence-annotation.md](../references/divergence-annotation.md)、碰撞 [collision-review.md](../references/collision-review.md)、逆链 [reverse-chain.md](../references/reverse-chain.md)、归档典故 [reverse-allusion.md](../references/reverse-allusion.md)、模式沉淀 [pattern-harvest.md](../references/pattern-harvest.md)。卡住 → [long-task.md](../references/long-task.md)
 4.12 ≥2 Step 须电路一问；战役标战役。[circuit-windows.md](../references/circuit-windows.md)。单步字面 `无（单步·不跑电路）`

@@ -130,7 +130,7 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 | 车道 | 流程 | 文档 |
 | --- | --- | --- |
 | **Express** | 一句话切片 → **一轮确认** → 实现（**可主窗**）→ 一行自检 → Unity 测；无 CR；默认不落盘、不建窗；**一旦已建分类夹** → [doc-windowing.md](references/doc-windowing.md) §与 Express（最小两文件 + 终态须 migrate；不强制 `未完成.md`） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
-| **Direct** | **PM 写**对话内 A#/切片（不清才派策划）→ **一轮确认** → 实现（**可主窗**）→ 隔离 CR（**必须子窗**，普通档）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
+| **Direct** | **PM 写**对话内 A#/切片（不清才派策划）→ **一轮确认** → 实现（**可主窗**）→ 隔离 CR（**必须子窗**，高级档）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
 | **Standard** | plan-lite → L1/L1.5/L2 → **一轮确认** → `[developer]` → `[CR]` → README。同窗同口径连续刀 → [circuit-windows.md](references/circuit-windows.md) **战役模式**（方案审不每刀重做；每刀仍 CR） | plan-lite；A# + delta-only |
 | **Full** | TL 显式启用；见 [references/](references/) | 执行文档；须含验收 A# |
 
