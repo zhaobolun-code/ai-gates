@@ -110,6 +110,12 @@ $changelogWritesBackup = $null
 if (Test-Path -LiteralPath $changelogWritesFile) {
     $changelogWritesBackup = [System.IO.File]::ReadAllText($changelogWritesFile, [System.Text.Encoding]::UTF8)
 }
+$tokenFile = Join-Path $logDir "pm-turn-tokens.json"
+$tokenBackup = $null
+$tokenBackupExisted = Test-Path -LiteralPath $tokenFile
+if ($tokenBackupExisted) {
+    $tokenBackup = [System.IO.File]::ReadAllText($tokenFile, [System.Text.Encoding]::UTF8)
+}
 
 try {
     Write-Host "=== test-hooks (支柱 C) ===" -ForegroundColor Cyan
@@ -311,10 +317,47 @@ try {
     }
     Assert-Test "A4 mark-pm-gate: audit log wrote= after response mark" ($markLogTail2 -match "wrote=pm-gate.json" -and $markLogTail2 -match [Regex]::Escape($convAlt) -and $markLogTail2 -match "field=response") "tail=$markLogTail2"
 
-    # A5：新鲜标记 → allow
-    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $convFresh } | ConvertTo-Json -Compress)
-    Assert-Test "A5 pm-gate-check: fresh marker -> allow" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
-    Assert-Test "A5 pm-gate-check: allow reason is window_pm_not_this_turn (not this_turn_pm)" ($r.Stdout -match "window_pm_not_this_turn") "stdout=$($r.Stdout)"
+    # A4：token 字段落盘，并给下一轮一句可抄的上一轮实测。正文里的同名数字不得盖过载荷末尾。
+    $convTok = "__test__conv-tok-$([Guid]::NewGuid().ToString('N'))"
+    # 与真实 afterAgentResponse 相同：正文在前，计数在文末。正文里的同名数字不得盖过文末。
+    $tokJson = '{"conversation_id":"' + $convTok + '","text":"[PM] decoy \"input_tokens\": 999","input_tokens":11,"output_tokens":22,"cache_read_tokens":33,"cache_write_tokens":44}'
+    $r = Invoke-HookScript -ScriptName "mark-pm-gate.ps1" -StdinJson $tokJson
+    Assert-Test "A4 mark-pm-gate: tokens -> additional_context line" ($r.ExitCode -eq 0 -and $r.Stdout -match "token：上一轮 输入 11 / 输出 22 / 缓存读 33 / 缓存写 44") "stdout=$($r.Stdout)"
+    $tokenFile = Join-Path $logDir "pm-turn-tokens.json"
+    $tokNow = [System.IO.File]::ReadAllText($tokenFile, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+    Assert-Test "A4 mark-pm-gate: token file latest is payload tail" ([int64]$tokNow.latest.input -eq 11 -and [string]$tokNow.latest.conversationId -eq $convTok) "latest=$($tokNow.latest | ConvertTo-Json -Compress)"
+
+    $convBroken = "__test__conv-tokb-$([Guid]::NewGuid().ToString('N'))"
+    $broken = '{"conversation_id":"' + $convBroken + '","text":"[PM] bad' + "`n" + 'line","input_tokens":55,"output_tokens":66,"cache_read_tokens":77,"cache_write_tokens":88}'
+    $r = Invoke-HookScript -ScriptName "mark-pm-gate.ps1" -StdinJson $broken
+    Assert-Test "A4 mark-pm-gate: broken JSON still extracts tail tokens" ($r.ExitCode -eq 0 -and $r.Stdout -match "token：上一轮 输入 55 / 输出 66 / 缓存读 77 / 缓存写 88") "stdout=$($r.Stdout) stderr=$($r.Stderr)"
+
+    # A5：新鲜标记 + 业务 .cs → deny（2026-10-13 起：有自己的 [PM] = 主窗，不得改业务码）；
+    #     非业务路径仍 allow（原 allow 语义保留在还成立的路径上）；
+    #     main-window-exec.json 许可（Express/Direct 车道 + 30 分钟内）→ allow（逃生路径钉死）。
+    # 备份/删除与断言整体用 try/finally 包裹：断言中途抛异常也保证备份回写，
+    # 避免污染真实会话留下的许可文件（测试隔离原则）。
+    $permitFile = Join-Path $logDir "main-window-exec.json"
+    $permitExisted = Test-Path -LiteralPath $permitFile
+    $permitBackup = $null
+    if ($permitExisted) { $permitBackup = [System.IO.File]::ReadAllText($permitFile, [System.Text.Encoding]::UTF8) }
+    try {
+        if ($permitExisted) { Remove-Item -LiteralPath $permitFile -Force }
+        $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $convFresh } | ConvertTo-Json -Compress)
+        Assert-Test "A5 pm-gate-check: fresh marker + business .cs w/o permit -> deny main_window_business_code" ((Get-Permission $r.Stdout) -eq "deny" -and $r.ExitCode -eq 0 -and $r.Stdout -match "main_window_business_code") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+
+        $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Docs/notes.md" }; conversation_id = $convFresh } | ConvertTo-Json -Compress)
+        Assert-Test "A5 pm-gate-check: fresh marker + non-business path -> allow" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+        Assert-Test "A5 pm-gate-check: allow reason is window_pm_not_this_turn (not this_turn_pm)" ($r.Stdout -match "window_pm_not_this_turn") "stdout=$($r.Stdout)"
+
+        $permitJson = @{ conversation_id = $convFresh; lane = "Direct"; at = [DateTime]::UtcNow.ToString("o") } | ConvertTo-Json -Compress
+        [System.IO.File]::WriteAllText($permitFile, $permitJson, $utf8NoBom)
+        $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $convFresh } | ConvertTo-Json -Compress)
+        Assert-Test "A5 pm-gate-check: valid main-window-exec.json permit -> allow" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    } finally {
+        if ($permitExisted) { [System.IO.File]::WriteAllText($permitFile, $permitBackup, $utf8Bom) }
+        elseif (Test-Path -LiteralPath $permitFile) { Remove-Item -LiteralPath $permitFile -Force -ErrorAction SilentlyContinue }
+    }
 
     $r = Invoke-HookScript -ScriptName "mark-pm-gate.ps1" -StdinJson (@{ text = "这轮没有 PM 标记，纯闲聊"; conversation_id = $convNone } | ConvertTo-Json -Compress)
     $gateNow2 = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -349,11 +392,11 @@ try {
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".cursor\project-context.md" }; conversation_id = $convL1None } | ConvertTo-Json -Compress)
     Assert-Test "A1.3 pm-gate-check: project-context.md Level0 exempt -> allow" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
 
-    # A1.4：业务路径回归（原 A5 语义保留）——无标记 deny / 有新鲜标记 allow
+    # A1.4：业务路径回归（原 A5 语义保留）——无标记 deny / 有新鲜标记但无许可 → deny（主窗禁改业务码）
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets\Foo.cs" }; conversation_id = $convNone } | ConvertTo-Json -Compress)
     Assert-Test "A1.4 pm-gate-check: business path no marker -> deny (Cursor 2.2+ ask bug)" ((Get-Permission $r.Stdout) -eq "deny") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets\Foo.cs" }; conversation_id = $convFresh } | ConvertTo-Json -Compress)
-    Assert-Test "A1.4 pm-gate-check: business path fresh marker -> allow (original behavior)" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    Assert-Test "A1.4 pm-gate-check: business path fresh marker w/o permit -> deny (main window)" ((Get-Permission $r.Stdout) -eq "deny" -and $r.Stdout -match "main_window_business_code") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
 
     # A1.5：changelog-writes.json 缺失 = 初始状态（无任何会话有 CHANGELOG 流水）→
     # Level 1 写 skills 设施应 deny（硬拦 + 逃生提示）。2026-08-03 两连修：先 fail-open
@@ -421,7 +464,7 @@ try {
         elseif ($hooksSecStart -ge 0 -and $maintainerLines[$i] -match '^## ') { $hooksSecEnd = $i; break }
     }
     $hookTableRows = @($maintainerLines[$hooksSecStart..($hooksSecEnd - 1)] | Where-Object { $_ -match '^\|' -and $_ -match '\.ps1' })
-    Assert-Test "A1.6 MAINTAINER: hooks table has 8 rows incl. pre-write-gate" ($hooksSecStart -ge 0 -and $hookTableRows.Count -eq 8 -and $maintainerRaw -match 'pre-write-gate') "rows=$($hookTableRows.Count)"
+    Assert-Test "A1.6 MAINTAINER: hooks table has 9 rows incl. pre-write-gate" ($hooksSecStart -ge 0 -and $hookTableRows.Count -eq 9 -and $maintainerRaw -match 'pre-write-gate' -and $maintainerRaw -match 'task-model-gate') "rows=$($hookTableRows.Count)"
 
     # A7：sessionStart 漂移检测 — 当前仓应无漂移；stdout 为 {} 或无可解析 additional_context
     $driftFile = Join-Path $logDir "hooks-policy-drift.json"
@@ -647,6 +690,11 @@ finally {
         } catch {
             if ($changelogWritesBackup) { [System.IO.File]::WriteAllText($changelogWritesFile, $changelogWritesBackup, $utf8Bom) }
         }
+    }
+    if ($tokenBackupExisted) {
+        [System.IO.File]::WriteAllText($tokenFile, $tokenBackup, $utf8Bom)
+    } elseif (Test-Path -LiteralPath $tokenFile) {
+        Remove-Item -LiteralPath $tokenFile -Force -ErrorAction SilentlyContinue
     }
 }
 

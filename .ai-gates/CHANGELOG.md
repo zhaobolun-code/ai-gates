@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.0.10（通用删债 + 10-12 迭代收口 · patch；前版 5.0.9 定版信息保留）
+**当前 LTS**：v5.0.11（任务模型闸 + 短交接与 token 行 · patch；前版 5.0.10 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,14 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-10-16：bump `skills/VERSION` → **5.0.11**。收口 5.0.10 之后未发版条目：派子窗强制写 `model=`、主窗改业务代码须 `main-window-exec.json`（10-13）；`[PM]` 回复加一行上一轮实测 token、阶段结束换新对话走四格短交接（10-16）。同轮带上 5.0.10 尾包遗留的打包范围修复 `hooks/plugin/*.ps1`（自 5.0.6 起漏拷，本版起进包）。`plugin.json` version=`5.0.11`。
+
+- 2026-10-16：阶段结束就换一条新对话。主窗只给四格短交接（决定、文件、风险、下一步）加「你下一步」，不吐八段，旧对话不再续。主窗默认只读当前这一份未完成，不读、不贴其它窗。主窗回复不贴 diff、不贴编译日志、不贴工具原文；程序员交回只写文件、结论、还没证明什么。工具输出用过之后只留路径和这一下的决定。Included：`skills/references/session-handover.md` + `skills/references/execution-discipline.md` + `skills/references/agent-entry-route.md` + `skills/developer/SKILL.md`。不 bump VERSION
+
+- 2026-10-16：带 `[PM]` 的回复在 YAML 后加一行上一轮实测 token（输入、输出、缓存读、缓存写）。本轮账单要等这条回复结束才出现在钩子载荷里，所以这一行是上一轮，不是估算。钩子把数字写入 `pm-turn-tokens.json` 的本会话和 `latest`，并给下一轮注入一句。没有数字就写「上一轮未记到」。Included：`hooks/mark-pm-gate.ps1` + `skills/references/agent-entry-route.md` + `scripts/test-hooks.ps1`。不 bump VERSION
+
+- 2026-10-13：派子窗未写 `model=` 或写成 `inherit`，且岗位是策划、方案审、程序员、代码审、文档或验收时，钩子拒绝。省略模型时 Cursor 复制主窗。主窗自己的会话（已有 `[PM]`、不是子窗继承）再写业务 `.cs`/`.lua` 也拒绝。Express/Direct 要主窗改码，先写 `.ai-gates/hooks-log/main-window-exec.json`（`conversation_id`、`lane`、`at`，30 分钟内）。Included：`hooks/task-model-gate.ps1` + `hooks/pm-gate-check.ps1` + `hooks.json` + `skills/MAINTAINER.md` + `skills/references/model-routing.md` + `skills/developer/SKILL.md` + `scripts/test-hooks.ps1`。不 bump VERSION
 
 - 2026-10-13：打包范围补 `hooks/plugin/*.ps1`。`package-release.ps1` 自 5.0.6 市场插件轮起只拷 `hooks/*.ps1` 顶层 + `hooks/codex/*` + `hooks/claude/*`，`skills/MAINTAINER.md` §打包范围早已明列的 `hooks/plugin/invoke.ps1` 从未进包；而包内 `cursor-marketplace/plugin-hooks.json` 四个门禁 hook 正指向 `${CURSOR_PLUGIN_ROOT}/.ai-gates/hooks/plugin/invoke.ps1`。**已发布的 5.0.10 包缺该文件（新项目接入不受影响，按 7z 搭 Cursor 市场仓会缺）**，从下一版包起带出。同轮更新脚本头注释、拷贝提示与 PACKAGE-INFO 接入说明的 hooks 列举。不 bump VERSION
 

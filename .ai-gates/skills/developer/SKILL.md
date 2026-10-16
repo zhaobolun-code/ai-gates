@@ -27,7 +27,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 
 ## 模型路由 + 子窗
 
-优先子窗 + 便宜快速档，**必须** `model=`。Express / Direct（PM 已写清 A#）**可主窗**，标「主窗执行（未开子窗）」；CR 仍必须隔离子窗。Standard/Full 禁主窗改业务码；降级标「主窗执行（未开子窗 · 非独立）」。AFK → [agent-brief.md](../references/agent-brief.md)。
+优先子窗 + 便宜快速档，**必须** `model=`（Standard 及以上程序员 = 项目说明里的低级 slug）。省略或 `inherit` 会复制主窗，钩子拒绝。Express / Direct（PM 已写清 A#）**可主窗**，标「主窗执行（未开子窗）」；CR 仍必须隔离子窗。Standard/Full 禁主窗改业务码；降级标「主窗执行（未开子窗 · 非独立）」。AFK → [agent-brief.md](../references/agent-brief.md)。
 
 ## Checklist（每次）
 
@@ -63,7 +63,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 ## 回复须含
 
 Express：不加四态，交 express-self-check。
-Direct / Standard/Full：最后一条 **≤15 行**，**第一行必须是** `DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`。有可跑命令却无退出码 → 不得 `DONE`。Direct 禁止落盘报告。Standard/Full 细节进 `证据/_Step{NN}-implement-report.md`。无四态第一行 PM 不得派 CR。
+Direct / Standard/Full：最后一条 **≤15 行**，**第一行必须是** `DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`。有可跑命令却无退出码 → 不得 `DONE`。交回主窗不贴 diff、不贴编译日志，只留改了哪些文件、结论、还没证明什么。Direct 禁止落盘报告。Standard/Full 细节进 `证据/_Step{NN}-implement-report.md`。无四态第一行 PM 不得派 CR。
 修轮：`repair_rounds` 0→1 resume；1→2 新开+高一档。禁止同档连派两次。[handoff-template.md](../references/handoff-template.md)
 
 ## 禁止

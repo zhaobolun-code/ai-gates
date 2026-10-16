@@ -123,6 +123,26 @@ function Get-PathFromRaw {
     return $null
 }
 
+function Test-MainWindowMayEditBusiness {
+    param([string]$ConversationId, [string]$FilePath, [string]$LogDir)
+    if ([string]::IsNullOrWhiteSpace($FilePath)) { return $true }
+    $norm = ($FilePath -replace '\\', '/')
+    if ($norm -notmatch '\.(cs|lua)$') { return $true }
+    if ($norm -match '/\.ai-gates/' -or $norm -match '/\.cursor/') { return $true }
+    $permitPath = Join-Path $LogDir 'main-window-exec.json'
+    if (-not (Test-Path -LiteralPath $permitPath)) { return $false }
+    try {
+        $permit = Get-Content -LiteralPath $permitPath -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
+        if ([string]$permit.conversation_id -ne $ConversationId) { return $false }
+        $lane = [string]$permit.lane
+        if ($lane -ne 'Express' -and $lane -ne 'Direct') { return $false }
+        $at = [DateTime]::Parse([string]$permit.at).ToUniversalTime()
+        return (([DateTime]::UtcNow - $at).TotalMinutes -le 30)
+    } catch {
+        return $false
+    }
+}
+
 function Emit-Allow {
     param([string]$Reason)
     Write-Audit "ALLOW reason=$Reason"
@@ -392,6 +412,10 @@ try {
 }
 
 $ageMinutes = ([DateTime]::UtcNow - $lastPmUtc).TotalMinutes
+if ($ageMinutes -le $FreshnessMinutes -and -not (Test-MainWindowMayEditBusiness -ConversationId $conversationId -FilePath $filePath -LogDir $logDir)) {
+    Emit-Deny -ConversationId $conversationId -Detail "main_window_business_code" -BaseMsg "PM gate deny detail=main_window_business_code : this conversation has its own [PM], so it is the main window. It must not edit business .cs/.lua. Dispatch a subagent with an explicit model= from project-context. Programmer uses cursor-grok-4.6-high. Express/Direct main-window edits need .ai-gates/hooks-log/main-window-exec.json with conversation_id, lane Express or Direct, and at (UTC) within 30 minutes." -UserHint "Do not edit the file in this window."
+    return
+}
 if ($ageMinutes -gt $FreshnessMinutes) {
     $inheritReason = Get-InheritedParentPmReason -ConversationId $conversationId -Gate $gate
     if ($inheritReason) { Emit-Allow $inheritReason; return }

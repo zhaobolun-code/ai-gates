@@ -10,8 +10,12 @@
 # 依次取第一个非空字符串（至少含 text + 备选 response/content/message/output），
 # 避免只认 text 时静默漏标。
 #
-# 审计：每次调用都追加 hooks-log/mark-pm-gate.log（含 field= / hasPm= / wrote=），
+# 审计：每次调用都追加 hooks-log/mark-pm-gate.log（含 field= / hasPm= / wrote= / in= / out=），
 # 便于机器断言落盘是否发生；命中 [PM] 时对 pm-gate.json 做同目录 temp + Replace 原子写。
+# 载荷里的 input_tokens / output_tokens / cache_read_tokens / cache_write_tokens
+# （解析失败时取原文里最后一次出现，避开回复正文里的同名数字）写入
+# hooks-log/pm-turn-tokens.json，并在 stdout 输出 additional_context，供下一轮
+# [PM] 原样抄「上一轮」那一行。本钩子发生在回复结束之后，写不出本轮账单。
 #
 # 已知局限（如实记录，不夸大）：afterAgentResponse 只在"这条助手消息完全生成完毕后"
 # 触发，所以本 hook 写下的标记，只能证明"之前某一轮完整回复里出现过 [PM]"，不能证明
@@ -71,16 +75,17 @@ function Get-AgentText {
 }
 
 function Write-GateAtomic {
-    param([string]$Content)
+    param([string]$Content, [string]$TargetPath)
+    if ([string]::IsNullOrWhiteSpace($TargetPath)) { $TargetPath = $gateFile }
     $tempPath = Join-Path $logDir ("pm-gate.json.tmp." + [Guid]::NewGuid().ToString("N"))
     $bakPath = Join-Path $logDir ("pm-gate.json.bak." + [Guid]::NewGuid().ToString("N"))
     try {
         [System.IO.File]::WriteAllText($tempPath, $Content, $utf8Bom)
-        if (Test-Path -LiteralPath $gateFile) {
-            [System.IO.File]::Replace($tempPath, $gateFile, $bakPath)
+        if (Test-Path -LiteralPath $TargetPath) {
+            [System.IO.File]::Replace($tempPath, $TargetPath, $bakPath)
             Remove-Item -LiteralPath $bakPath -Force -ErrorAction SilentlyContinue
         } else {
-            [System.IO.File]::Move($tempPath, $gateFile)
+            [System.IO.File]::Move($tempPath, $TargetPath)
         }
     } finally {
         if (Test-Path -LiteralPath $tempPath) {
@@ -92,7 +97,22 @@ function Write-GateAtomic {
     }
 }
 
+function Get-LastJsonInt {
+    param([string]$Raw, [string]$Name)
+    if ([string]::IsNullOrEmpty($Raw)) { return $null }
+    $found = [Regex]::Matches($Raw, '"' + [Regex]::Escape($Name) + '"\s*:\s*(-?\d+)')
+    if ($found.Count -eq 0) { return $null }
+    return [int64]$found[$found.Count - 1].Groups[1].Value
+}
+
+function Format-TokenCell {
+    param($Value)
+    if ($null -eq $Value) { return "未记到" }
+    return [string]$Value
+}
+
 $conversationId = "unknown"
+$raw = ""
 $fieldUsed = "none"
 $hasPmMarker = $false
 $wrote = "none"
@@ -181,7 +201,48 @@ if ($hasPmMarker) {
     $wrote = "pm-gate.json"
 }
 
-Write-MarkAudit "conversation=$conversationId field=$fieldUsed hasPm=$hasPmMarker wrote=$wrote"
+$tokenInput = $null
+$tokenOutput = $null
+$tokenCacheRead = $null
+$tokenCacheWrite = $null
+$tokenLine = ""
+try {
+    $tokenInput = Get-LastJsonInt -Raw ([string]$raw) -Name "input_tokens"
+    $tokenOutput = Get-LastJsonInt -Raw ([string]$raw) -Name "output_tokens"
+    $tokenCacheRead = Get-LastJsonInt -Raw ([string]$raw) -Name "cache_read_tokens"
+    $tokenCacheWrite = Get-LastJsonInt -Raw ([string]$raw) -Name "cache_write_tokens"
+    if ($null -ne $tokenInput -and $null -ne $tokenOutput) {
+        $tokenLine = "token：上一轮 输入 $tokenInput / 输出 $tokenOutput / 缓存读 $(Format-TokenCell $tokenCacheRead) / 缓存写 $(Format-TokenCell $tokenCacheWrite)"
+        $tokenFile = Join-Path $logDir "pm-turn-tokens.json"
+        $tokenMap = [ordered]@{}
+        if (Test-Path -LiteralPath $tokenFile) {
+            try {
+                $tokenExisting = [System.IO.File]::ReadAllText($tokenFile, $utf8Bom) | ConvertFrom-Json -ErrorAction Stop
+                $tokenExisting.PSObject.Properties | ForEach-Object { $tokenMap[$_.Name] = $_.Value }
+            } catch {
+                # 旧文件损坏就当空表重建
+            }
+        }
+        $tokenEntry = [ordered]@{
+            conversationId = $conversationId
+            input          = $tokenInput
+            output         = $tokenOutput
+            cacheRead      = $tokenCacheRead
+            cacheWrite     = $tokenCacheWrite
+            atUtc          = [DateTime]::UtcNow.ToString("o")
+            line           = $tokenLine
+        }
+        $tokenMap[$conversationId] = $tokenEntry
+        $tokenMap["latest"] = $tokenEntry
+        Write-GateAtomic -Content ($tokenMap | ConvertTo-Json -Depth 6) -TargetPath $tokenFile
+    }
+} catch {
+    $tokenLine = ""
+}
+
+$inAudit = Format-TokenCell $tokenInput
+$outAudit = Format-TokenCell $tokenOutput
+Write-MarkAudit "conversation=$conversationId field=$fieldUsed hasPm=$hasPmMarker wrote=$wrote in=$inAudit out=$outAudit"
 
 # Session-end scan: observation only. try/catch swallow; must not change exit 0 / block Play.
 try {
@@ -203,5 +264,9 @@ try {
     # swallow: afterAgentResponse remains observation only
 }
 
-# afterAgentResponse 无 permission 字段语义；正常退出即可
+# afterAgentResponse 无 permission 字段语义。有实测数字时把一句交给下一轮，供 [PM] 原样抄。
+if (-not [string]::IsNullOrWhiteSpace($tokenLine)) {
+    $hint = "上一轮回复的实测 token 已记下。若本轮回复含 [PM]，在 YAML 结束后原样另起一行，不要估算本轮，不要改数字：$tokenLine"
+    Write-Output ((@{ additional_context = $hint } | ConvertTo-Json -Compress))
+}
 exit 0

@@ -28,6 +28,12 @@
         "matcher": "Write|StrReplace|EditNotebook",
         "failClosed": false,
         "timeout": 10
+      },
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/task-model-gate.ps1",
+        "matcher": "Task|CallDynamicTool",
+        "failClosed": false,
+        "timeout": 10
       }
     ],
     "postToolUse": [
