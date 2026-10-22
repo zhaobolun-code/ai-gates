@@ -69,9 +69,10 @@ Standard / Full 每个 Step（Express 切片可极简）须相对**当前** `物
 
 1. 三段均须出现；无内容写「无」，禁止省略字段名。
 2. 与 [diagnosis-gates.md](./diagnosis-gates.md) §0.5 规格漂移闸门衔接：Discover 改判后，先改口径/A#，再写下一刀的 Delta Spec。
-3. **签收后口径收敛**：用户「测试通过」或准备标方案 `completed` 时，策划/PM **须**根据本步 Delta Spec 提示「物理口径/A# 需同步的句子」；有 MODIFIED/REMOVED 而口径未改 → 不得标方案 `completed`（可先 `step-completed` 待补口径）。
+3. **签收后口径收敛**：用户「测试通过」或准备标方案 `completed` 时，策划/PM **须**根据本步 Delta Spec 提示「物理口径/A# 需同步的句子」；有 MODIFIED/REMOVED 而口径未改 → 不得标方案 `completed`（可先 `step-completed` 待补口径）。方案审见到未提示，或口径未改仍标 `completed` → blocker，标签 `口径滞后`。
 4. 方案审核：缺 Delta Spec 三段 → **blocker**。
-5. **结案摘要**：准备 `completed` 时，在活跃 `未完成.md` 生成一页内 `## 结案变更摘要`，汇总全案 ADDED/MODIFIED/REMOVED 与“归并到”路径；有 MODIFIED/REMOVED 必须实际更新物理口径/A# 后才能结案，禁止只写“待同步”。
+5. **空三段**：三段都写「无」，但 Mandatory 明显新增行为 → 方案审 **blocker**，标签 `Delta幻觉`，不得定版；新增写进对应段后再审。
+6. **结案摘要**：准备 `completed` 时，在活跃 `未完成.md` 生成一页内 `## 结案变更摘要`，汇总全案 ADDED/MODIFIED/REMOVED 与“归并到”路径；有 MODIFIED/REMOVED 必须实际更新物理口径/A# 后才能结案，禁止只写“待同步”。
 
 ```markdown
 ## 结案变更摘要
@@ -99,7 +100,7 @@ Standard / Full 每个 Step（Express 切片可极简）须相对**当前** `物
 | 岗位 | 动作 |
 | --- | --- |
 | 策划 / PM（Express 切片） | 写 A# + Delta Spec（ADDED/MODIFIED/REMOVED）；Step 引用 A#；签收后提示口径同步 |
-| 方案审核 | 查：可证伪、Step 未越界、无整模块复述、**有 Delta Spec 三段** |
+| 方案审核 | 查：可证伪、Step 未越界、无整模块复述、**有 Delta Spec 三段**；三段都写「无」但 Mandatory 明显新增 → `Delta幻觉` blocker |
 | 程序员 | 只为实现所引 A#；冲突停报；按微循环自检 |
 | CR / Express 自检 | 对照 A#；越界或未覆盖 → blocker / 不通过 |
 
@@ -112,4 +113,5 @@ Standard / Full 每个 Step（Express 切片可极简）须相对**当前** `物
 | plan-lite 重写系统说明 | 删复述，改链到 README |
 | 用「感觉好了」当验收 | 改成 Console/现象判据 |
 | Step 无 ADDED/MODIFIED/REMOVED | 补 Delta Spec 三段后再审 |
+| 三段都写「无」但 Mandatory 明显新增 | 判 `Delta幻觉`，补进对应段后再定版 |
 | 有 MODIFIED/REMOVED 却结案不改口径 | 先同步物理口径/A# 再 `completed` |

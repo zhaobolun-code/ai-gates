@@ -10,6 +10,8 @@
 
 ## 日常按触发加载
 
+安静了看哪层：子窗约 15 分钟零活动看 `model-routing.md` 子窗健康检查；同一步 60 分钟无新 diff 看 `loop-engineering.md` 超时硬停；按天没动静看 `long-task.md` 的 7 天。3 天不单设阈值。
+
 | 触发 | 点名 reference |
 | --- | --- |
 | 测试失败 / 热修 / 止损 / 黑板 / 有意义评审 / A# 复议 | `diagnosis-gates.md`（§0.2.1 有意义评审、§0.6 黑板、§0.7 触顶复议）；需要日志再加 `unity-editor-log.md` |

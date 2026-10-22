@@ -251,6 +251,22 @@ if ($ToCategory -eq "签收") {
     }
 }
 
+if ($ToCategory -eq "停写" -or $ToCategory -eq "失败") {
+    $stopIdxCn = Join-Path $dstAbs "已完成\_索引.md"
+    $stopIdxEn = Join-Path $dstAbs "已完成\_index.md"
+    $stopIdxPath = $null
+    if (Test-Path -LiteralPath $stopIdxCn) { $stopIdxPath = $stopIdxCn }
+    elseif (Test-Path -LiteralPath $stopIdxEn) { $stopIdxPath = $stopIdxEn }
+    if (-not $stopIdxPath) {
+        Write-Host "WARN: $ToCategory but missing 已完成/_索引.md (index must point at the stop reason)" -ForegroundColor Yellow
+    } else {
+        $stopIdxText = [IO.File]::ReadAllText($stopIdxPath, $utf8NoBom)
+        if ($stopIdxText -notmatch '触顶|停写|停因') {
+            Write-Host "WARN: $ToCategory but 已完成/_索引.md has no 触顶/停写/停因 (folder move != stop record)" -ForegroundColor Yellow
+        }
+    }
+}
+
 if ($ToCategory -ne "执行中") {
     Compress-UnityVerifyLogs -WindowRoot $dstAbs
 } else {

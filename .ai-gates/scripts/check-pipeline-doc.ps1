@@ -53,6 +53,16 @@ $validStatuses = @(
     "completed(已归档)"
 )
 
+function Test-TierToken {
+    param([string]$Text, [string]$Tier)
+    if ([string]::IsNullOrWhiteSpace($Text) -or [string]::IsNullOrWhiteSpace($Tier)) { return $false }
+    if ($Tier -eq '跳过') {
+        return [bool]($Text -match '(^|[\s、,，/])跳过($|[\s、,，/])')
+    }
+    $esc = [regex]::Escape($Tier)
+    return [bool]($Text -match "(?<![A-Za-z0-9.])$esc(?![A-Za-z0-9.])")
+}
+
 function Add-Issue($level, $message) {
     if ($level -eq "error") { $script:errors += $message }
     elseif ($level -eq "soft") { $script:softWarnings += $message }
@@ -216,10 +226,10 @@ if ($content -match '(?ms)^##\s+文档状态\s*$') {
 
     if ($block -match '(?m)^[\s\-]*\*\*方案审核档位\*\*[：:]\s*`?([^`\r\n]+?)`?\s*$') {
         $planReviewTier = $Matches[1].Trim()
-        $validTiers = @('L1', 'L1.5', 'L2', 'L3', '跳过')
+        $validTiers = @('L1.5', 'L1', 'L2', 'L3', '跳过')
         $tierOk = $false
         foreach ($t in $validTiers) {
-            if ($planReviewTier -like "*$t*") { $tierOk = $true; break }
+            if (Test-TierToken -Text $planReviewTier -Tier $t) { $tierOk = $true; break }
         }
         if (-not $tierOk) {
             Add-Issue "warning" "Unknown 方案审核档位=$planReviewTier (expected L1 / L1.5 / L2 / L3 / 跳过)"
@@ -260,6 +270,8 @@ else {
     }
 }
 
+if ($status -eq 'in-progress(进行中)') { $status = 'in-progress(实现中)' }
+
 if ($format) {
     if ($status -and ($validStatuses -notcontains $status)) {
         Add-Issue "warning" "Unknown 状态=$status (not in state-machine enum)"
@@ -277,8 +289,7 @@ if ($format) {
     )
     $activeDevStates = @(
         "implementation-ready(可实现)",
-        "in-progress(实现中)",
-        "in-progress(进行中)"
+        "in-progress(实现中)"
     )
 
     if ($canDev -eq "是") {
@@ -322,7 +333,7 @@ if ($format) {
         $pcPath = Join-Path $repoRoot ".cursor/project-context.md"
         $regModules = Get-RegressionModulesFromProjectContext -ProjectContextPath $pcPath
         if (Test-ContentHitsRegressionModule -Text $content -Modules $regModules) {
-            if ($planReviewTier -notlike '*L1.5*') {
+            if (-not (Test-TierToken -Text $planReviewTier -Tier 'L1.5')) {
                 Add-Issue "warning" "Mandatory Code Changes appears to hit regression-index module but 方案审核档位 is not L1.5"
             }
         }
@@ -554,6 +565,7 @@ if ($CheckUniqueEditable) {
     if ((-not $stopLossMaxed) -and (Test-Path -LiteralPath $stateJsonPath)) {
         try {
             $st = Get-Content -LiteralPath $stateJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            # 与 update-doc-state.ps1 一致：stopLossCounters 的每个键是 { count, max }。
             if ($st.stopLossCounters) {
                 foreach ($p in $st.stopLossCounters.PSObject.Properties) {
                     $cur = [int]$p.Value.count
@@ -565,7 +577,9 @@ if ($CheckUniqueEditable) {
                     }
                 }
             }
-        } catch { }
+        } catch {
+            Write-Warning ("stopLossCounters unreadable in {0}: {1}. Expected each entry to have count and max." -f $stateJsonPath, $_.Exception.Message)
+        }
     }
 
     $statusNorm = $null

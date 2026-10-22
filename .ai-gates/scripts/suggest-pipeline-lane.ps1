@@ -90,8 +90,8 @@ try {
             $cols = $ln -split '\|'
             if ($cols.Count -lt 13) { continue }
             $mod = $cols[2].Trim()
-            $scope = $cols[12].Trim()
-            if ($scope) { [void]$lessonHot.Add($scope) }
+            $lessonScope = $cols[12].Trim()
+            if ($lessonScope) { [void]$lessonHot.Add($lessonScope) }
             if ($mod) { [void]$lessonHot.Add($mod) }
         }
     }

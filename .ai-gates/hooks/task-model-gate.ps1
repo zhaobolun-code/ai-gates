@@ -52,21 +52,19 @@ $type = ''
 $blob = ''
 if ($inputObj.PSObject.Properties['model']) { $model = [string]$inputObj.model }
 if ($inputObj.PSObject.Properties['subagent_type']) { $type = [string]$inputObj.subagent_type }
-foreach ($name in @('description', 'prompt')) {
-    if ($inputObj.PSObject.Properties[$name]) { $blob += ' ' + [string]$inputObj.$name }
-}
+if ($inputObj.PSObject.Properties['description']) { $blob = [string]$inputObj.description }
 
 $inherit = [string]::IsNullOrWhiteSpace($model) -or ($model.Trim().ToLowerInvariant() -eq 'inherit')
 if (-not $inherit) { Write-Allow }
 
-$pipelineType = @('developer', 'code-reviewer', 'planner', 'plan-reviewer', 'module-readme')
+$pipelineType = @('developer', 'code-reviewer', 'planner', 'plan-reviewer', 'module-readme', 'log-evidence', 'read-evidence', 'run-evidence')
 $isPipeline = $pipelineType -contains $type.Trim().ToLowerInvariant()
 if (-not $isPipeline) {
-    $isPipeline = $blob -match '程序员|代码审核|代码审|方案审|策划|验收|\[developer\]|\[CR\]|\[planner\]|\[plan-reviewer\]|\[docs\]'
+    $isPipeline = $blob -match '程序员|代码审核|代码审|方案审|策划|验收|查日志|查正文|跑命令|\[developer\]|\[CR\]|\[planner\]|\[plan-reviewer\]|\[docs\]|\[log\]|\[read\]|\[run\]'
 }
 if (-not $isPipeline) { Write-Allow }
 
-$msg = 'Task model is missing or inherit, so the subagent copies the main window. Pass model= from .cursor/project-context.md section 模型路由. Programmer (Standard and above) uses cursor-grok-4.6-high. Planner, plan review, code review, and verify use grok-4.7-high. Do not omit model. Do not pass inherit.'
+$msg = 'Task model is missing or inherit, so the subagent copies the main window. Pass model= from .cursor/project-context.md section 模型路由. Do not omit model. Do not pass inherit.'
 $result = @{
     permission    = 'deny'
     user_message  = $msg

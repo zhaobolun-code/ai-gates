@@ -1,6 +1,6 @@
 ﻿# AI 开发流水线 Skill - 打包信息
 
-- 版本：v5.0.6
+- 版本：以 skills/VERSION 为准
 - 打包日期：2026-09-10
 - 来源：本包由 .ai-gates/package-release.ps1 从中央技能库生成，仅含随 Skill 分发的通用文件。
 

@@ -92,7 +92,7 @@
 ## 脚本用法
 
 ```powershell
-# 失败输出起草（不写主表；须「准」后才 -Apply）
+# 失败输出填空（cause 和 fix 带「原因待人写」，是失败原文套进固定句子。没改成真正原因就准，不算复盘完成；不写主表；须「准」后才 -Apply）
 powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/draft-lesson-pending.ps1 `
   -FailPath "{fail.txt}" -OutPath "{方案夹}/证据/_lesson-pending.md"
 

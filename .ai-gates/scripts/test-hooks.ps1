@@ -334,7 +334,7 @@ try {
 
     # A5：新鲜标记 + 业务 .cs → deny（2026-10-13 起：有自己的 [PM] = 主窗，不得改业务码）；
     #     非业务路径仍 allow（原 allow 语义保留在还成立的路径上）；
-    #     main-window-exec.json 许可（Express/Direct 车道 + 30 分钟内）→ allow（逃生路径钉死）。
+    #     main-window-exec.json 不再放行业务 .cs（Express/Direct 也派程序员）。
     # 备份/删除与断言整体用 try/finally 包裹：断言中途抛异常也保证备份回写，
     # 避免污染真实会话留下的许可文件（测试隔离原则）。
     $permitFile = Join-Path $logDir "main-window-exec.json"
@@ -353,7 +353,7 @@ try {
         $permitJson = @{ conversation_id = $convFresh; lane = "Direct"; at = [DateTime]::UtcNow.ToString("o") } | ConvertTo-Json -Compress
         [System.IO.File]::WriteAllText($permitFile, $permitJson, $utf8NoBom)
         $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $convFresh } | ConvertTo-Json -Compress)
-        Assert-Test "A5 pm-gate-check: valid main-window-exec.json permit -> allow" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+        Assert-Test "A5 pm-gate-check: main-window-exec.json no longer allows business .cs" ((Get-Permission $r.Stdout) -eq "deny" -and $r.ExitCode -eq 0 -and $r.Stdout -match "main_window_business_code") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
     } finally {
         if ($permitExisted) { [System.IO.File]::WriteAllText($permitFile, $permitBackup, $utf8Bom) }
         elseif (Test-Path -LiteralPath $permitFile) { Remove-Item -LiteralPath $permitFile -Force -ErrorAction SilentlyContinue }
@@ -651,6 +651,33 @@ try {
     $r = Invoke-HookScript -ScriptName "..\scripts\pipeline-health.ps1" -StdinJson $null -ExtraArgs @{ Days = 30 }
     Assert-Test "A10 pipeline-health: report generates (exit 0 or 2)" ($r.ExitCode -eq 0 -or $r.ExitCode -eq 2) "exit=$($r.ExitCode) stderr=$($r.Stderr)"
     Assert-Test "A10 pipeline-health: report contains 流水线体检" ($r.Stdout -match "流水线体检") "stdout=$($r.Stdout)"
+
+    # A11：凭证脱敏有词边界。令牌抹掉，task-model-gate 文件名保留。
+    . (Join-Path $hooksDir 'cursor-hooks-common.ps1')
+    $redacted = Redact-HookSecrets 'cmd github_pat_TESTTOKENONLY and task-model-gate.ps1'
+    Assert-Test "A11 redact: token becomes [redacted]" ($redacted -match '\[redacted\]' -and $redacted -notmatch 'github_pat_') "out=$redacted"
+    Assert-Test "A11 redact: task-model-gate filename stays" ($redacted -match 'task-model-gate\.ps1') "out=$redacted"
+
+    # A12：补丁正文里的 path 不是目标文件。Update File 才是。
+    $skillPatch = "*** Update File: .ai-gates/skills/references/foo.md`n-`"path`": `"Assets/Foo.cs`"`n"
+    $csPatch = "*** Update File: Assets/Foo.cs`n-`"path`": `"readme.md`"`n"
+    $hunkOnly = '{"old_string":"\"path\": \"Assets/Foo.cs\""}'
+    Assert-Test "A12 patch path: Update File wins over hunk path" ((Get-HookTargetPathFromRaw $skillPatch) -eq '.ai-gates/skills/references/foo.md') "got=$(Get-HookTargetPathFromRaw $skillPatch)"
+    Assert-Test "A12 patch path: business Update File stays" ((Get-HookTargetPathFromRaw $csPatch) -eq 'Assets/Foo.cs') "got=$(Get-HookTargetPathFromRaw $csPatch)"
+    Assert-Test "A12 patch path: hunk path is not the target" ((Get-HookTargetPathFromRaw $hunkOnly) -eq $null) "got=$(Get-HookTargetPathFromRaw $hunkOnly)"
+    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson $skillPatch
+    Assert-Test "A12 pm-gate-check: skill patch is not a business deny" ((Get-Permission $r.Stdout) -eq "allow") "stdout=$($r.Stdout)"
+
+    $convParse = "__test__conv-parse-$([Guid]::NewGuid().ToString('N'))"
+    $gateParse = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8 | ConvertFrom-Json
+    $gateParse | Add-Member -NotePropertyName $convParse -NotePropertyValue ([pscustomobject]@{ lastPmAtUtc = [DateTime]::UtcNow.ToString('o'); snippet = '[PM] parse-fail' }) -Force
+    $gateParse | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $gateFile -Encoding UTF8
+    $brokenMain = '{"conversation_id":"' + $convParse + '","tool_input":{"path":"Assets/Foo.cs","old_string":"x",}}'
+    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson $brokenMain
+    Assert-Test "A12 parse fail: own [PM] + business .cs still deny" ((Get-Permission $r.Stdout) -eq "deny" -and $r.Stdout -match "main_window_business_code") "stdout=$($r.Stdout)"
+    $brokenChild = '{"conversation_id":"' + $convNone + '","tool_input":{"path":"Assets/Foo.cs","old_string":"x",}}'
+    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson $brokenChild
+    Assert-Test "A12 parse fail: no own [PM] + business .cs allow" ((Get-Permission $r.Stdout) -eq "allow" -and $r.Stdout -match "parse_failed_fail_open") "stdout=$($r.Stdout)"
 
 }
 finally {

@@ -37,7 +37,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 3.05 缺冻结表 → major
 3.06 ≥2 Step 须串联/并联+路径集。假串联 major；路径相交标并联 → blocker。单步 `无（单步·不跑电路）` 不硬拦。**战役中刀**口径/选型/A# 未变 → 本岗应不派；误派 findings `campaign_skip` 并停。[circuit-windows.md](../references/circuit-windows.md)
 3.07 两套叫法 → major。[shared-language.md](../references/shared-language.md)
-3.5 无 A1 / 不可证伪 / 缺 Delta → blocker。[acceptance-and-delta.md](../references/acceptance-and-delta.md)
+3.5 无 A1 / 不可证伪 / 缺 Delta → blocker。三段都写「无」但 Mandatory 明显新增行为 → blocker，标签 Delta幻觉，不得定版；新增写进对应段后再审。有 MODIFIED/REMOVED，签收结案未写出要同步的口径句子，或口径未改仍标 `completed` → blocker，标签 `口径滞后`。[acceptance-and-delta.md](../references/acceptance-and-delta.md)
 3.51 默认抽检四类洞（失败句/字段钉死/条款与清单同句/机器绿≠人看见的现象）。命中 → major。碰撞仍点名才开 [collision-review.md](../references/collision-review.md)
 3.55 Analyze 对表缺任一 → major；缺 A# → blocker。[acceptance-and-delta.md](../references/acceptance-and-delta.md) §Analyze 对表
 3.56 关键断言缺置信标注 → major；猜测冒充确定 → blocker。[evidence-levels.md](../references/evidence-levels.md)

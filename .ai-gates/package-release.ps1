@@ -224,6 +224,16 @@ try {
     if (Test-Path -LiteralPath $marketplaceSrc) {
         Write-Host "Copying cursor-marketplace/ (copy to GitHub repo root for Cursor Marketplace)..."
         Copy-Item -Path $marketplaceSrc -Destination (Join-Path $stageRoot "cursor-marketplace") -Recurse -Force
+        $pluginJson = Join-Path $stageRoot "cursor-marketplace\.cursor-plugin\plugin.json"
+        if (Test-Path -LiteralPath $pluginJson) {
+            $verNum = $Version.TrimStart('vV')
+            $rawPlugin = [System.IO.File]::ReadAllText($pluginJson)
+            $rawPlugin = [regex]::Replace($rawPlugin, '("version"\s*:\s*")[^"]+(")', {
+                param($m)
+                $m.Groups[1].Value + $verNum + $m.Groups[2].Value
+            })
+            [System.IO.File]::WriteAllText($pluginJson, $rawPlugin)
+        }
     }
 
     # 2026-08-04：显式排除 tmp 文件夹（防御性）。中间产物暂存区在 .ai-gates/tmp/，

@@ -19,7 +19,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 | 车道 | 本岗 |
 | --- | --- |
 | Express | PM [express-slice.md](../templates/express-slice.md)；完成 [express-self-check.md](../express-self-check.md)；有夹则窗内自检。无 CR |
-| Direct | 对话内 A#；隔离 CR（必须子窗）；单会话收口 |
+| Direct | 对话内 A#；隔离 CR（必须子窗或新开 Chat，标注「隔离复核」）；同 Chat 只标非独立不算完成；单会话收口 |
 | Standard | plan-lite Step；完成后交 PM 提示 CR；同 Chat 标非独立 CR |
 | Full | 串行；交 `[CR]` |
 
@@ -27,7 +27,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 
 ## 模型路由 + 子窗
 
-优先子窗 + 便宜快速档，**必须** `model=`（Standard 及以上程序员 = 项目说明里的低级 slug）。省略或 `inherit` 会复制主窗，钩子拒绝。Express / Direct（PM 已写清 A#）**可主窗**，标「主窗执行（未开子窗）」；CR 仍必须隔离子窗。Standard/Full 禁主窗改业务码；降级标「主窗执行（未开子窗 · 非独立）」。AFK → [agent-brief.md](../references/agent-brief.md)。
+优先子窗 + 便宜快速档，**必须** `model=`（程序员 = 项目说明里的低级 slug）。省略或 `inherit` 会复制主窗，钩子拒绝。Express、Direct、Standard、Full 的业务改码都**必须子窗**。主窗不改业务 `.cs`/`.lua`。CR 仍必须隔离子窗。AFK → [agent-brief.md](../references/agent-brief.md)。
 
 ## Checklist（每次）
 
@@ -46,7 +46,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 3. 只改本 Step A#。[acceptance-and-delta.md](../references/acceptance-and-delta.md)。Auto 一次一 Step → [loop-engineering.md](../references/loop-engineering.md)
 3.05 只改本子窗路径集。[circuit-windows.md](../references/circuit-windows.md)
 4. YAGNI；未「准, 抽离」禁止整段搬家
-4.5 微循环：改一段就自检。业务 C# 交 CR 前真编译零错误。禁 grep 冒充编译。[unity-editor-log.md](../references/unity-editor-log.md) §A
+4.5 微循环：改一段就自检。单个 Step 里至少一半小改动块留自检痕迹。这种自检不计入 `repair_rounds`。业务 C# 交 CR 前真编译零错误，并写出可执行 Unity 步骤或 Console 关键词。Skill/纯文档交审走静态核对和可证伪假需求，不写成已跑 Unity。禁 grep 冒充编译。[unity-editor-log.md](../references/unity-editor-log.md) §A
 4.6 可机械验证项 → [test-first.md](../references/test-first.md)
 5. 与方案冲突 / 越 A# → 停
 5.5 三问：名实 / 数据源与回退 / 理解相反会破坏什么。不确定 → [knowledge-gap.md](../references/knowledge-gap.md)；置信标注 → [evidence-levels.md](../references/evidence-levels.md)；分歧启用 → [divergence-annotation.md](../references/divergence-annotation.md)

@@ -38,7 +38,7 @@ try {
     # 解析失败不影响放行，只是这一行日志信息不全
 }
 
-$line = "$timestamp | tool=$toolName | session=$sessionId | path=$filePath"
+$line = Redact-HookSecrets "$timestamp | tool=$toolName | session=$sessionId | path=$filePath"
 
 try {
     Add-Content -LiteralPath $logFile -Value $line -Encoding UTF8

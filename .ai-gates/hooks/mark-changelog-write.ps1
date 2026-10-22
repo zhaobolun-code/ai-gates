@@ -90,17 +90,7 @@ function Write-ChangelogMark {
 # 正则提取路径（parse 失败兜底；与 pm-gate-check.ps1 的 Get-PathFromRaw 同思路）
 function Get-PathFromRaw {
     param([string]$Raw)
-    foreach ($pat in @(
-        '"file_path"\s*:\s*"((?:\\.|[^"\\])*)"',
-        '"path"\s*:\s*"((?:\\.|[^"\\])*)"',
-        '"target_notebook"\s*:\s*"((?:\\.|[^"\\])*)"'
-    )) {
-        $m = [Regex]::Match($Raw, $pat)
-        if ($m.Success) {
-            return ($m.Groups[1].Value -replace '\\/', '/' -replace '\\\\', '\')
-        }
-    }
-    return $null
+    return Get-HookTargetPathFromRaw -Raw $Raw
 }
 
 # 正则提取会话 id（parse 失败兜底）

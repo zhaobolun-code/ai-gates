@@ -51,6 +51,40 @@ function Get-AiGatesHookChannel {
     return 'project'
 }
 
+function Redact-HookSecrets {
+    param([string]$Text)
+    if ([string]::IsNullOrEmpty($Text)) { return $Text }
+    $t = $Text
+    foreach ($pat in @('github_pat_[A-Za-z0-9_]+', 'ghp_[A-Za-z0-9_]+', 'crsr_[A-Za-z0-9]+', '\bsk-[A-Za-z0-9]+')) {
+        $t = [regex]::Replace($t, $pat, '[redacted]')
+    }
+    return [regex]::Replace($t, '(?i)(Authorization:\s*Bearer\s+)\S+', '${1}[redacted]')
+}
+
+function Get-HookTargetPathFromRaw {
+    param([string]$Raw)
+    if ([string]::IsNullOrEmpty($Raw)) { return $null }
+    $fileLine = [regex]::Match($Raw, '\*\*\*\s+(?:Update|Add|Delete)\s+File:\s*([^\r\n]+)')
+    if ($fileLine.Success) {
+        $p = $fileLine.Groups[1].Value.Trim().Trim('"').Trim()
+        if ($p) { return ($p -replace '\\/', '/' -replace '\\\\', '\') }
+    }
+    $head = $Raw
+    $cut = [regex]::Match($Raw, '"(?:old_string|new_string|contents|content|patch|diff)"\s*:')
+    if ($cut.Success -and $cut.Index -gt 0) { $head = $Raw.Substring(0, $cut.Index) }
+    foreach ($pat in @(
+        '"file_path"\s*:\s*"((?:\\.|[^"\\])*)"',
+        '"path"\s*:\s*"((?:\\.|[^"\\])*)"',
+        '"target_notebook"\s*:\s*"((?:\\.|[^"\\])*)"'
+    )) {
+        $m = [regex]::Match($head, $pat)
+        if ($m.Success) {
+            return ($m.Groups[1].Value -replace '\\/', '/' -replace '\\\\', '\')
+        }
+    }
+    return $null
+}
+
 function Write-AiGatesHookSkipAudit {
     param([string]$Reason)
     try {
@@ -62,7 +96,8 @@ function Write-AiGatesHookSkipAudit {
         $auditFile = Join-Path $logDir 'plugin-hook-skip.log'
         $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
         $channel = Get-AiGatesHookChannel
-        Add-Content -LiteralPath $auditFile -Value "$ts | channel=$channel skip=true reason=$Reason" -Encoding UTF8
+        $safeReason = Redact-HookSecrets $Reason
+        Add-Content -LiteralPath $auditFile -Value "$ts | channel=$channel skip=true reason=$safeReason" -Encoding UTF8
     } catch { }
 }
 

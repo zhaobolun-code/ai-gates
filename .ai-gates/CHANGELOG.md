@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.0.11（任务模型闸 + 短交接与 token 行 · patch；前版 5.0.10 定版信息保留）
+**当前 LTS**：v5.1.0（查日志、查正文、跑命令 · minor；前版 5.0.11 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,26 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-10-22：当前版本号收口到 `skills/VERSION`（5.1.0）。市场 `plugin.json` 的 version 与该文件相同，校验不一致即失败；打包时按该文件重写包内这份 version。仓库里的打包信息不再另写号码。历史评测和旧变更记录不改。Included：`cursor-marketplace/.cursor-plugin/plugin.json` + `scripts/validate-pipeline.ps1` + `package-release.ps1` + `PACKAGE-INFO.md`
+
+- 2026-10-22：新开 Chat 逐条走读 A–D，32/32，非逐条真演。上一行四条（C5、C7c、D6、D8）复读已过。只追加评测记录，不 bump VERSION。Included：`skills/references/skill-eval-checklist.md`
+
+- 2026-10-22：补上 A–D 走读没过的四条。失败封存必须写下失败原因和去向，主窗一行指针不为空。有 MODIFIED/REMOVED 时，签收未提示口径或口径未改仍标完成，方案审判 blocker，标签口径滞后。业务 C# 交审材料要带可执行 Unity 步骤或关键词；Skill/纯文档走静态核对和可证伪假需求。Direct 的代码审核必须子窗或新开 Chat 并标隔离复核，同 Chat 只标非独立不算完成。不 bump VERSION。Included：`skills/references/doc-windowing.md` + `skills/plan-reviewer/SKILL.md` + `skills/references/acceptance-and-delta.md` + `skills/developer/SKILL.md` + `skills/references/handoff-automation.md` + `skills/CORE.md` + `skills/code-reviewer/SKILL.md` + `skills/references/isolated-review.md`
+
+- 2026-10-21：钩子解析补丁时，先认 `*** Update/Add/Delete File:`，路径键只在补丁正文之前找。补丁正文里的 `"path"` 不再被当成要改的文件。同日再补：stdin 解析失败且路径是业务 `.cs` 时，只有该会话自己有新鲜 `[PM]` 才拒绝；证明不了是主窗则放行，程序员子窗不再被一起拦住。Included：`hooks/cursor-hooks-common.ps1` + `hooks/pm-gate-check.ps1` + `hooks/claude/pm-gate-check.ps1` + `hooks/codex/pm-gate-check.ps1` + `hooks/mark-changelog-write.ps1` + `scripts/test-hooks.ps1`。不 bump VERSION
+
+- 2026-10-21：§A–D 走读写入评测记录。第一次记分 31/32，当时 C7b 缺判定句；补句后复跑该条 Pass，表头改为 32/32。同日再补：程序员清单 4.5 写明单个 Step 至少一半小改动块留自检痕迹，这种自检不计入 `repair_rounds`。评测 D5 的连续修复次数改为 `repair_rounds`；痕迹不到一半，或把这种自检计入 `repair_rounds`，标签 `微循环无痕`。不 bump VERSION。Included：`skills/references/skill-eval-checklist.md` + `skills/developer/SKILL.md`
+
+- 2026-10-21：Delta 三段都写「无」、但 Mandatory 明显新增行为时，方案审判 blocker，标签 Delta幻觉，不得定版；新增写进对应段后再审。Included：`skills/references/acceptance-and-delta.md` + `skills/plan-reviewer/SKILL.md`。不 bump VERSION
+
+- 2026-10-21：用词和追溯。README 写明 Express 只问 1 问，Standard / Full 每个决策点等「准」。执行纪律文首改为入口已迁，复用四问和设计模式一问仍以该文为准。设计模式格子写明不沉淀只管入表。模型路由定义「高质量档」等于项目表的高级档、「同族」等于实现侧同一家族，slug 仍只读项目表。参考路由补上 15 分钟 / 60 分钟 / 7 天各看哪份。错题起草的 cause / fix 带「原因待人写」，没改这两句就准不算复盘完成。停写和失败的索引须指向未完成里的停因，文件名以索引为准。迁夹脚本在这两夹的索引仍像进行中时给出警告。不改止损复议，不 bump VERSION。Included：`README.md` + `skills/references/execution-discipline.md` + `skills/references/design-patterns.md` + `skills/references/model-routing.md` + `skills/references/reference-routing.md` + `skills/references/lessons-learned.md` + `skills/references/doc-windowing.md` + `scripts/draft-lesson-pending.ps1` + `scripts/migrate-pipeline-window.ps1`
+
+- 2026-10-21：钩子写审计日志前先抹掉凭证样式（`github_pat_`、`ghp_`、`crsr_`、`sk-`、`Authorization: Bearer` 后面的值），拦截提示里的命令同样处理。已有 `hooks-log` 里命中这些样式的行就地替换，不删日志。同日再补：Cursor 的 `audit-write` 写入前也走脱敏；`sk-` 改为词边界，避免打进 `task-`；`git-safety-check.log` 里被误伤的 `task-model-gate` 换回。Included：`hooks/cursor-hooks-common.ps1` + `hooks/claude/claude-hooks-common.ps1` + `hooks/codex/codex-hooks-common.ps1` + `hooks/pm-gate-check.ps1` + `hooks/git-safety-check.ps1` + `hooks/claude/git-safety-check.ps1` + `hooks/codex/git-safety-check.ps1` + `hooks/audit-write.ps1` + `scripts/test-hooks.ps1`。不 bump VERSION
+
+- 2026-10-21：CR 收口判断有没有业务 C# 时，路径规则写在 `handoff-automation.md` §C，不再指向签收窗里的「方案物理口径 #0」。宽严与那份原文相同：只看 Mandatory 列出的将改路径；`Runtime` / `Editor` 或 `Assets` 下的 `.cs` 算，`.cursor`、`.md`、`.ps1` 不算；`Tests` 落在 `Runtime` / `Editor` 树下仍算；不确定则人测。签收窗原文不改。Included：`skills/references/handoff-automation.md`。不 bump VERSION
+
+- 2026-10-20：主窗要看日志时调用查日志；要看代码或文档正文时调用查正文；要跑终端时调用跑命令。都派低级子窗，交回只留三行。查正文的子窗读代码只用 CodeGraph。跑命令的子窗只跑点名的那一条，交回退出码和一句结论。主窗仍可直接读当前 `未完成.md`、入口和模型路由。Express 与 Direct 的业务改码也必须派程序员子窗，主窗不再用 `main-window-exec.json` 放行 `.cs`/`.lua`。同日再补：该拒绝同步到 Claude/Codex；解析失败若抽出业务 `.cs`/`.lua` 改为拒绝；父 transcript 从尾部按块找 `[PM]`；`task-model-gate` 只看描述不扫整段提示词，拒绝文案不写死模型名；写门禁入口对 `pm-gate-check` 加 try-catch。同日再补脚本精度：`suggest-pipeline-lane` 读 lessons 时不再覆盖车道范围；`check-pipeline-doc` 把旧状态「进行中」收成「实现中」，方案审核档位按整词匹配，止损计数解析失败只打警告不阻断；`compute-evolution-candidates` 的晋升和作用域按表头列取；三份 `git-safety-check` 拦 `push` 的 `+` 引用和 `checkout -f`，`--force-with-lease` 不拒绝、只记审计；失败输出填进错题草稿时，cause 和 fix 写明要人改。Included：`skills/log-evidence/SKILL.md` + `skills/read-evidence/SKILL.md` + `skills/run-evidence/SKILL.md` + `skills/developer/SKILL.md` + `skills/references/agent-entry-route.md` + `skills/references/execution-discipline.md` + `skills/references/model-routing.md` + `skills/references/full-lane-decision-tree.md` + `skills/references/handoff-automation.md` + `skills/references/lane-glossary.md` + `skills/references/shared-language.md` + `skills/templates/AGENTS.md` + `skills/CORE.md` + `hooks/task-model-gate.ps1` + `hooks/pm-gate-check.ps1` + `hooks/claude/pm-gate-check.ps1` + `hooks/codex/pm-gate-check.ps1` + `hooks/pre-write-gate.ps1` + `hooks/claude/pre-write-gate.ps1` + `hooks/codex/pre-apply-patch-gate.ps1` + `scripts/test-hooks.ps1` + `scripts/suggest-pipeline-lane.ps1` + `scripts/check-pipeline-doc.ps1` + `scripts/compute-evolution-candidates.ps1` + `hooks/git-safety-check.ps1` + `hooks/claude/git-safety-check.ps1` + `hooks/codex/git-safety-check.ps1` + `scripts/draft-lesson-pending.ps1` + `skills/references/lessons-learned.md`。不 bump VERSION
 
 - 2026-10-16：bump `skills/VERSION` → **5.0.11**。收口 5.0.10 之后未发版条目：派子窗强制写 `model=`、主窗改业务代码须 `main-window-exec.json`（10-13）；`[PM]` 回复加一行上一轮实测 token、阶段结束换新对话走四格短交接（10-16）。同轮带上 5.0.10 尾包遗留的打包范围修复 `hooks/plugin/*.ps1`（自 5.0.6 起漏拷，本版起进包）。`plugin.json` version=`5.0.11`。
 

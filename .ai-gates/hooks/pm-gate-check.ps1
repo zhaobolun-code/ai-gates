@@ -58,7 +58,8 @@ function Write-Audit {
     param([string]$Line)
     try {
         $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-        Add-Content -LiteralPath $auditFile -Value "$ts | $Line" -Encoding UTF8
+        $safe = Redact-HookSecrets $Line
+        Add-Content -LiteralPath $auditFile -Value "$ts | $safe" -Encoding UTF8
     } catch {
     }
 }
@@ -109,18 +110,7 @@ function Test-CursorLevel1Path {
 
 function Get-PathFromRaw {
     param([string]$Raw)
-    foreach ($pat in @(
-        '"file_path"\s*:\s*"((?:\\.|[^"\\])*)"',
-        '"path"\s*:\s*"((?:\\.|[^"\\])*)"',
-        '"target_notebook"\s*:\s*"((?:\\.|[^"\\])*)"'
-    )) {
-        $m = [Regex]::Match($Raw, $pat)
-        if ($m.Success) {
-            $s = $m.Groups[1].Value -replace '\\/', '/' -replace '\\\\', '\'
-            return $s
-        }
-    }
-    return $null
+    return Get-HookTargetPathFromRaw -Raw $Raw
 }
 
 function Test-MainWindowMayEditBusiness {
@@ -129,18 +119,8 @@ function Test-MainWindowMayEditBusiness {
     $norm = ($FilePath -replace '\\', '/')
     if ($norm -notmatch '\.(cs|lua)$') { return $true }
     if ($norm -match '/\.ai-gates/' -or $norm -match '/\.cursor/') { return $true }
-    $permitPath = Join-Path $LogDir 'main-window-exec.json'
-    if (-not (Test-Path -LiteralPath $permitPath)) { return $false }
-    try {
-        $permit = Get-Content -LiteralPath $permitPath -Raw -Encoding UTF8 | ConvertFrom-Json -ErrorAction Stop
-        if ([string]$permit.conversation_id -ne $ConversationId) { return $false }
-        $lane = [string]$permit.lane
-        if ($lane -ne 'Express' -and $lane -ne 'Direct') { return $false }
-        $at = [DateTime]::Parse([string]$permit.at).ToUniversalTime()
-        return (([DateTime]::UtcNow - $at).TotalMinutes -le 30)
-    } catch {
-        return $false
-    }
+    # Express / Direct 也不再放行。main-window-exec.json 不再生效。
+    return $false
 }
 
 function Emit-Allow {
@@ -227,20 +207,44 @@ function Test-ParentTranscriptHasRecentPm {
             $info = New-Object System.IO.FileInfo $file
             $ageMin = ([DateTime]::UtcNow - $info.LastWriteTimeUtc).TotalMinutes
             if ($ageMin -gt $FreshnessMinutes) { continue }
-            $len = $info.Length
+            $len = [int64]$info.Length
             if ($len -le 0) { continue }
-            $start = [Math]::Max([int64]0, $len - 524288)
-            $fs = [System.IO.File]::Open($file, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
-            try {
-                $null = $fs.Seek($start, [System.IO.SeekOrigin]::Begin)
-                $toRead = [int]($len - $start)
-                $buf = New-Object byte[] $toRead
-                $read = $fs.Read($buf, 0, $toRead)
-            } finally {
-                $fs.Dispose()
+            # 从尾部按 512KB 一块往前找 [PM]。块内最新时间戳早于新鲜度窗口就停。经验上限 4MB。
+            $chunk = [int64]524288
+            $maxScan = [int64]4194304
+            $scanned = [int64]0
+            $end = $len
+            $found = $false
+            while ($end -gt 0 -and $scanned -lt $maxScan) {
+                $start = $end - $chunk
+                if ($start -lt 0) { $start = 0 }
+                $take = [int]($end - $start)
+                $fs = [System.IO.File]::Open($file, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+                try {
+                    $null = $fs.Seek($start, [System.IO.SeekOrigin]::Begin)
+                    $buf = New-Object byte[] $take
+                    $read = $fs.Read($buf, 0, $take)
+                } finally {
+                    $fs.Dispose()
+                }
+                if ($read -le 0) { break }
+                $text = [System.Text.Encoding]::UTF8.GetString($buf, 0, $read)
+                if ($text.Contains('[PM]')) { $found = $true; break }
+                $scanned += $take
+                $newest = $null
+                foreach ($m in [regex]::Matches($text, '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?')) {
+                    try {
+                        $t = [DateTime]::Parse($m.Value).ToUniversalTime()
+                        if (-not $newest -or $t -gt $newest) { $newest = $t }
+                    } catch { }
+                }
+                if ($newest -and (([DateTime]::UtcNow - $newest).TotalMinutes -gt $FreshnessMinutes)) { break }
+                if ($start -eq 0) { break }
+                $nextEnd = $start + 32
+                if ($nextEnd -ge $end) { break }
+                $end = $nextEnd
             }
-            $text = [System.Text.Encoding]::UTF8.GetString($buf, 0, $read)
-            if ($text.Contains('[PM]')) { return $true }
+            if ($found) { return $true }
         } catch {
             continue
         }
@@ -281,6 +285,37 @@ function Get-InheritedParentPmReason {
     return $null
 }
 
+function Get-ConversationIdFromRaw {
+    param([string]$Raw)
+    if ([string]::IsNullOrEmpty($Raw)) { return $null }
+    $head = $Raw
+    $cut = [regex]::Match($Raw, '"(?:old_string|new_string|contents|content|patch|diff)"\s*:')
+    if ($cut.Success -and $cut.Index -gt 0) { $head = $Raw.Substring(0, $cut.Index) }
+    foreach ($key in @('conversation_id', 'session_id')) {
+        $m = [regex]::Match($head, ('"' + $key + '"\s*:\s*"((?:\\.|[^"\\])*)"'))
+        if ($m.Success -and -not [string]::IsNullOrWhiteSpace($m.Groups[1].Value)) {
+            return $m.Groups[1].Value
+        }
+    }
+    return $null
+}
+
+function Test-OwnFreshPm {
+    param([string]$ConversationId)
+    if ([string]::IsNullOrWhiteSpace($ConversationId) -or $ConversationId -eq 'unknown') { return $false }
+    if (-not (Test-Path -LiteralPath $gateFile)) { return $false }
+    try {
+        $gateRaw = [System.IO.File]::ReadAllText($gateFile, [System.Text.Encoding]::UTF8)
+        $gate = $gateRaw | ConvertFrom-Json -ErrorAction Stop
+    } catch { return $false }
+    $entry = $gate.$ConversationId
+    if (-not $entry -or -not $entry.lastPmAtUtc) { return $false }
+    try {
+        $last = [DateTime]::Parse([string]$entry.lastPmAtUtc).ToUniversalTime()
+    } catch { return $false }
+    return (([DateTime]::UtcNow - $last).TotalMinutes -le $FreshnessMinutes)
+}
+
 # kill switch first (no stdin parse needed)
 if (Test-Path -LiteralPath $killSwitch) {
     Emit-Allow "kill_switch_active"
@@ -297,7 +332,14 @@ try {
         Emit-Allow "cursor_infra_path_exempt_parse_fallback"
         return
     }
-    # fail-open：解析失败不硬拦（与 MAINTAINER 一致；避免 mark 落盘故障连环死路）
+    $fallbackNorm = [string]$fallbackPath -replace '\\', '/'
+    $fallbackConv = Get-ConversationIdFromRaw -Raw $raw
+    $isBusiness = $fallbackNorm -match '\.(cs|lua)$' -and $fallbackNorm -notmatch '/\.(ai-gates|cursor|claude|codex)/'
+    if ($isBusiness -and (Test-OwnFreshPm -ConversationId $fallbackConv)) {
+        Emit-Deny -ConversationId $fallbackConv -Detail "main_window_business_code" -BaseMsg "PM gate deny detail=main_window_business_code : stdin parse failed, path is business .cs/.lua, and this conversation has its own [PM]. Dispatch a programmer subagent." -UserHint "Do not edit the file in this window."
+        return
+    }
+    # 抽不到路径仍放行，避免钩子故障把人卡死。
     Emit-Allow "parse_failed_fail_open"
     return
 }
@@ -309,6 +351,8 @@ if ($json.tool_input) {
     if ($json.tool_input.file_path) { $filePath = [string]$json.tool_input.file_path }
     elseif ($json.tool_input.path) { $filePath = [string]$json.tool_input.path }
     elseif ($json.tool_input.target_notebook) { $filePath = [string]$json.tool_input.target_notebook }
+    elseif ($json.tool_input.patch) { $filePath = Get-HookTargetPathFromRaw -Raw ([string]$json.tool_input.patch) }
+    elseif ($json.tool_input.diff) { $filePath = Get-HookTargetPathFromRaw -Raw ([string]$json.tool_input.diff) }
 }
 
 # --- .cursor/** 分级（2026-08-03 自我治理轻门禁） ---
@@ -413,7 +457,7 @@ try {
 
 $ageMinutes = ([DateTime]::UtcNow - $lastPmUtc).TotalMinutes
 if ($ageMinutes -le $FreshnessMinutes -and -not (Test-MainWindowMayEditBusiness -ConversationId $conversationId -FilePath $filePath -LogDir $logDir)) {
-    Emit-Deny -ConversationId $conversationId -Detail "main_window_business_code" -BaseMsg "PM gate deny detail=main_window_business_code : this conversation has its own [PM], so it is the main window. It must not edit business .cs/.lua. Dispatch a subagent with an explicit model= from project-context. Programmer uses cursor-grok-4.6-high. Express/Direct main-window edits need .ai-gates/hooks-log/main-window-exec.json with conversation_id, lane Express or Direct, and at (UTC) within 30 minutes." -UserHint "Do not edit the file in this window."
+    Emit-Deny -ConversationId $conversationId -Detail "main_window_business_code" -BaseMsg "PM gate deny detail=main_window_business_code : this conversation has its own [PM], so it is the main window. It must not edit business .cs/.lua. Dispatch a programmer subagent with an explicit model= from project-context. Programmer uses cursor-grok-4.6-high. Express and Direct also dispatch the programmer. main-window-exec.json does not allow this." -UserHint "Do not edit the file in this window."
     return
 }
 if ($ageMinutes -gt $FreshnessMinutes) {

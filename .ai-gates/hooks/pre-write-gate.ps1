@@ -21,8 +21,20 @@ $null = Read-HookStdin   # 预读一次，子脚本走全局缓存
 # audit-write 恒 allow：副作用（write-audit.log）照常发生，输出丢弃
 $null = & (Join-Path $PSScriptRoot 'audit-write.ps1')
 
-# pm-gate-check：命中 deny 短路输出；allow → 输出其 allow JSON
-$out = @(& (Join-Path $PSScriptRoot 'pm-gate-check.ps1'))
+# pm-gate-check：命中 deny 短路输出；allow → 输出其 allow JSON。抛错则记审计并放行。
+try {
+    $out = @(& (Join-Path $PSScriptRoot 'pm-gate-check.ps1'))
+} catch {
+    try {
+        $root = Get-AiGatesProjectRoot
+        $dir = Join-Path $root '.ai-gates\hooks-log'
+        if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+        $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+        Add-Content -LiteralPath (Join-Path $dir 'pm-gate-check.log') -Value "$ts | ALLOW pre_write_gate_pm_check_threw" -Encoding UTF8
+    } catch { }
+    Write-Output '{"permission":"allow"}'
+    exit 0
+}
 $deny = @($out | Where-Object { $_ -match '"permission"\s*:\s*"deny"' } | Select-Object -First 1)
 if ($deny) {
     Write-Output $deny

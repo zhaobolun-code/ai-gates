@@ -58,7 +58,7 @@ pm:
 
 **隔离审核**：L1.5 CR / L2 / L3 / 高风险对抗 CR → **优先**主 Agent 拉起 Subagent 隔离会话；高风险**优先异模型**（首选高质量档，失败回退同模型，不硬拦）；失败再提示手动新开 Chat；同 Chat 续审须标非独立。细则 → [isolated-review.md](references/isolated-review.md)。**不校验**用户是否接受隔离/是否换模型。
 
-**主窗仅 PM + 流水线岗子窗（优先 · 不硬拦）**：主窗**只**做 `[PM]`。方案审 / CR / 文档 **一律优先 Subagent**。Express 实现、以及 Direct 且 PM 已写清 A#：实现**可主窗**（须标「主窗执行（未开子窗）」）；CR 仍必须隔离子窗。Standard/Full 实现仍优先子窗。范围不清的 Direct 仍派策划子窗。**周报例外**：用户单独调用，不要求子窗。模型：策划/方案审=高质量；实现/文档=便宜快速；CR 相对实现优先高质量；**具体 slug 只读 project-context §模型路由**（没有该节则标「未按模型路由」，技能不另造默认表）。细则 → [model-routing.md](references/model-routing.md)。
+**主窗仅 PM + 流水线岗子窗（优先 · 不硬拦）**：主窗**只**做 `[PM]`。方案审 / CR / 文档 **一律优先 Subagent**。Express 与 Direct 的业务改码**必须子窗**（程序员，低级档）。CR 仍必须隔离子窗。主窗不改业务 `.cs`/`.lua`。范围不清的 Direct 仍派策划子窗。**周报例外**：用户单独调用，不要求子窗。模型：策划/方案审=高质量；实现/文档=便宜快速；CR 相对实现优先高质量；**具体 slug 只读 project-context §模型路由**（没有该节则标「未按模型路由」，技能不另造默认表）。细则 → [model-routing.md](references/model-routing.md)。
 
 Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr-dispatch-l1.5.md](./templates/cr-dispatch-l1.5.md)（Subagent 派发或手动粘贴）。
 **禁止**未完成内部结构化判定就仅凭白话判车道。
@@ -129,8 +129,8 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 | 车道 | 流程 | 文档 |
 | --- | --- | --- |
-| **Express** | 一句话切片 → **一轮确认** → 实现（**可主窗**）→ 一行自检 → Unity 测；无 CR；默认不落盘、不建窗；**一旦已建分类夹** → [doc-windowing.md](references/doc-windowing.md) §与 Express（最小两文件 + 终态须 migrate；不强制 `未完成.md`） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
-| **Direct** | **PM 写**对话内 A#/切片（不清才派策划）→ **一轮确认** → 实现（**可主窗**）→ 隔离 CR（**必须子窗**，高级档）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
+| **Express** | 一句话切片 → **一轮确认** → 实现（**必须子窗**）→ 一行自检 → Unity 测；无 CR；默认不落盘、不建窗；**一旦已建分类夹** → [doc-windowing.md](references/doc-windowing.md) §与 Express（最小两文件 + 终态须 migrate；不强制 `未完成.md`） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
+| **Direct** | **PM 写**对话内 A#/切片（不清才派策划）→ **一轮确认** → 实现（**必须子窗**）→ 隔离 CR（**必须子窗**，高级档）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
 | **Standard** | plan-lite → L1/L1.5/L2 → **一轮确认** → `[developer]` → `[CR]` → README。同窗同口径连续刀 → [circuit-windows.md](references/circuit-windows.md) **战役模式**（方案审不每刀重做；每刀仍 CR） | plan-lite；A# + delta-only |
 | **Full** | TL 显式启用；见 [references/](references/) | 执行文档；须含验收 A# |
 
@@ -156,7 +156,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 **反合理化（借口对照）**：无 `[PM]` 就写 / 日志关键词冒充 A# / 伪称隔离 CR → [anti-patterns.md](references/anti-patterns.md) §反合理化；评测 §K。
 
-**非门禁**：隔离审核是否成功 / 用户是否手动新开 Chat / 换模型 — 只要求诚实标注，不硬阻断。缺 PM 结构化判定或 **你下一步**（含 Express 简略四条）→ **已阻塞**。
+**非门禁**：Standard / Full 的隔离审核是否成功、用户是否手动新开 Chat、换模型 — 只要求诚实标注，不硬阻断。Direct 的 CR 须子窗或新开 Chat，标注「隔离复核」；同 Chat 只标非独立不算完成。缺 PM 结构化判定或 **你下一步**（含 Express 简略四条）→ **已阻塞**。
 
 **机器强制层（如实）**：分两层，禁止混名。**window_pm**（机器）：Cursor / Codex CLI / Claude Code 的 hooks 可 deny；放行只证明「本会话 120 分钟内打过 `[PM]` 点」，reason 字面为 `window_pm_not_this_turn`，**不是**本条已完成结构化判定。**this_turn_pm**（硬门禁 #7）：本条须有结构化 `[PM]`，机器做不到（preToolUse 拿不到正在生成的回复）。Codex **桌面**对 `apply_patch` 钩子可能不触发（信任已批准仍零打点，关键写后自查 `.ai-gates/hooks-log/`）。Trae 为软层（规则 + 技能传送门，**无**机器 hooks）。macOS / Linux 无 `pwsh` 时机器 hooks **未接线**，体检须报 `hooks_not_wired_no_pwsh`，不得写成已接线。`failClosed: false`：hook 脚本失败则放行。kill switch `.ai-gates/hooks-log/pm-gate-disabled` 可整条关掉。硬门禁 #7 仍须自觉。
 
@@ -174,6 +174,9 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 | 项目经理 / PM | 读本 CORE | `[PM]` |
 | 策划 / 方案审核 / 程序员 / 代码审核 | `planner` / `plan-reviewer` / `developer` / `code-reviewer` 下 `SKILL.md` | `[planner]` / `[plan-reviewer]` / `[developer]` / `[CR]` |
 | 文档 / 周报 | `module-readme` / `weekly-report` 下 `SKILL.md` | `[docs]` / `[weekly]` |
+| 查日志 | `log-evidence` 下 `SKILL.md`（主窗要看日志时派低级子窗，主窗不读原文） | `[log]` |
+| 查正文 | `read-evidence` 下 `SKILL.md`（主窗要看代码或长文档时派低级子窗） | `[read]` |
+| 跑命令 | `run-evidence` 下 `SKILL.md`（主窗要跑终端时派低级子窗） | `[run]` |
 
 切换岗位前 Read 对应 `SKILL.md`。Express 切片由 **`[PM]`** 输出，**策划不参与**。Direct A# 已写清同样不派策划。直叫岗位名须同条先 `[PM]`（硬门禁 #7）；无 slice/plan-lite 且未 ready 不得直接 `[developer]`。一轮确认「准」→ 同条 `[developer]`（[handoff-automation.md](references/handoff-automation.md) §0/§F）。
 

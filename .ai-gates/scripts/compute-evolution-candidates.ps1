@@ -6,7 +6,7 @@
 
 .DESCRIPTION
   - 表头用包含匹配定位列（真实表头第 3 列为「教训（一句话）」，用 -like 匹配，不硬编码列号）
-  - 行末字段语义：末段=「晋升」、次末段=「作用域」；字段数超表头（作用域内嵌 | 的真实行）时溢出段并入作用域，
+  - 晋升、作用域按表头下标取。晋升是表头最后一列且行比表头长时，多出来的段并入作用域，晋升仍取行末。
     不得因字段数超表头而误判/弃行
   - 日期前缀提取：「最近命中」单元格可能带后缀文本（如 2026-08-12（…二次命中）），按正则 ^\d{4}-\d{2}-\d{2} 提取；
     提取失败 → 该字段视为无命中并在 stderr 标注；行解析失败 → 跳过并 stderr 标注行号（fail-safe，不中断）；
@@ -68,6 +68,26 @@ function Get-ContentCells {
     return $cells
 }
 
+# 列数与表头一致时按下标取。晋升是最后一列且行更长时，多出来的段并进作用域。
+function Get-LessonTail {
+    param($Cells, [int]$HeaderCount, [int]$IdxPromoted, [int]$IdxScope)
+    $promoted = ''
+    $scope = ''
+    if ($IdxPromoted -lt 0) { return @{ promoted = $promoted; scope = $scope } }
+    if ($Cells.Count -gt $HeaderCount -and $IdxPromoted -eq ($HeaderCount - 1)) {
+        $promoted = [string]$Cells[$Cells.Count - 1]
+        $start = $IdxScope
+        if ($start -lt 0) { $start = $IdxPromoted - 1 }
+        if ($start -ge 0 -and $start -le ($Cells.Count - 2)) {
+            $scope = (@($Cells[$start..($Cells.Count - 2)]) -join '|')
+        }
+    } elseif ($IdxPromoted -lt $Cells.Count) {
+        $promoted = [string]$Cells[$IdxPromoted]
+        if ($IdxScope -ge 0 -and $IdxScope -lt $Cells.Count) { $scope = [string]$Cells[$IdxScope] }
+    }
+    return @{ promoted = $promoted; scope = $scope }
+}
+
 $lines = Get-Content -LiteralPath $LessonsPath -Encoding UTF8
 
 # 表头定位：包含匹配（教训 / 最近命中 / 晋升），不依赖列名逐字相等
@@ -122,13 +142,9 @@ for ($i = $headerIdx + 1; $i -lt $lines.Count; $i++) {
         # 字段数超表头：作用域内嵌 | 的真实行形态 → 溢出段并入作用域，按行末段取值
     }
 
-    # 行末字段语义：末段=晋升、次末段=作用域；溢出并入作用域
-    $promoted = $cells[$cells.Count - 1]
-    $scope = $cells[$cells.Count - 2]
-    if ($cells.Count -gt $headerCount) {
-        $scopeParts = @($cells[$idxScope..($cells.Count - 2)])
-        $scope = $scopeParts -join '|'
-    }
+    $tail = Get-LessonTail -Cells $cells -HeaderCount $headerCount -IdxPromoted $idxPromoted -IdxScope $idxScope
+    $promoted = $tail.promoted
+    $scope = $tail.scope
 
     $dateStr = $cells[$idxDate]
     $lastHitStr = $cells[$idxLastHit]
@@ -223,7 +239,7 @@ if (-not (Test-Path -LiteralPath $DesignPatternsPath)) {
             if ($cells.Count -lt 3) { continue }
             if (($cells -join '') -match '^[\s\-:]+$') { continue }
 
-            $promoted = $cells[$cells.Count - 1]
+            $promoted = (Get-LessonTail -Cells $cells -HeaderCount $headerCount -IdxPromoted $idxPromoted -IdxScope $idxScope).promoted
             $dateStr = $cells[$idxDate]
             $lastHitStr = $cells[$idxLastHit]
             $datePrefix = Get-DatePrefix -Cell $dateStr

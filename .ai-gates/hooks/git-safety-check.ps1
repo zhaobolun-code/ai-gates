@@ -8,6 +8,7 @@
 
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
+. (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
 
 try {
     $raw = [Console]::In.ReadToEnd()
@@ -24,16 +25,17 @@ if ([string]::IsNullOrWhiteSpace($cmd)) {
 }
 
 $dangerousPatterns = @(
-    @{ Pattern = 'git\s+push\b[^\n]*(--force\b|--force-with-lease\b|\s-f\b)'; Reason = '强制推送（--force / -f）可能覆盖远端历史，无法找回' },
+    @{ Pattern = 'git\s+push\b[^\n]*(--force(?!-with-lease)\b|\s-f\b|\s\+\S+)'; Reason = '强制推送（--force / -f / +引用）可能覆盖远端历史，无法找回' },
     @{ Pattern = 'git\s+reset\b[^\n]*--hard\b'; Reason = '硬重置（--hard）会丢弃未提交的工作区改动' },
     @{ Pattern = 'git\s+clean\b[^\n]*-[a-zA-Z]*[dfx]'; Reason = 'git clean 会永久删除未跟踪文件' },
-    @{ Pattern = 'git\s+checkout\b[^\n]*(--\s|\.$|\s\.\s)'; Reason = 'checkout 会丢弃指定文件的未提交改动（对应「方案推翻」流程，须已征得用户确认）' },
+    @{ Pattern = 'git\s+checkout\b[^\n]*(--force(?!-with-lease)\b|\s-f\b|--\s|\.$|\s\.\s)'; Reason = 'checkout -f / --force 或 checkout 路径会丢弃未提交改动（对应「方案推翻」流程，须已征得用户确认）' },
     @{ Pattern = 'git\s+branch\b[^\n]*-D\b'; Reason = '强制删除分支（-D）不检查是否已合并' }
 )
 
 foreach ($rule in $dangerousPatterns) {
     if ($cmd -match $rule.Pattern) {
-        $userMsg = "检测到高危 Git 命令：$cmd`n原因：$($rule.Reason)`n已被 hook 拦截（deny）。逃生：若你确认安全，请在终端手动执行该命令；或临时移除 hooks.json 中本 hook 条目后重试；或调整命令规避误判。"
+        $shown = Redact-HookSecrets $cmd
+        $userMsg = "检测到高危 Git 命令：$shown`n原因：$($rule.Reason)`n已被 hook 拦截（deny）。逃生：若你确认安全，请在终端手动执行该命令；或临时移除 hooks.json 中本 hook 条目后重试；或调整命令规避误判。"
         $agentMsg = "hook 拦到高危 Git 命令 ($($rule.Reason))，已 deny（Cursor 2.2+ ask 无效，改硬拦）；逃生：用户手动执行 / 移除本 hook / 调整命令。"
         $result = @{
             permission   = "deny"
@@ -45,5 +47,14 @@ foreach ($rule in $dangerousPatterns) {
     }
 }
 
+if ($cmd -match 'git\s+push\b[^\n]*--force-with-lease\b') {
+    try {
+        $logDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'hooks-log'
+        if (-not (Test-Path -LiteralPath $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
+        $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+        $shown = Redact-HookSecrets $cmd
+        Add-Content -LiteralPath (Join-Path $logDir 'git-safety-check.log') -Value "$ts | ALLOW force-with-lease cmd=$shown" -Encoding UTF8
+    } catch { }
+}
 Write-Output '{"permission":"allow"}'
 exit 0

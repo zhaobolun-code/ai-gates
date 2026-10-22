@@ -18,7 +18,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 | 车道 | 本岗 |
 | --- | --- |
 | Express | **不启用** — [express-self-check.md](../express-self-check.md) |
-| Direct | ✓ 必审；**必须子窗**；高级档；同 Chat 标「非独立 CR」 |
+| Direct | ✓ 必审；**必须子窗或新开 Chat**；高级档；标注「隔离复核」。同 Chat 只标非独立不算完成 |
 | Standard | ✓ **必须子窗**；L1.5 隔离 + 异模型优先。[isolated-review.md](../references/isolated-review.md) / [model-routing.md](../references/model-routing.md) |
 | Full | ✓ 必审；必须子窗。业务 C# 无 CRG 且无 CodeGraph = hard blocker。[codegraph-probe.md](../references/codegraph-probe.md)。Skill/Doc-only 无图谱 = soft risk，不挡收口 |
 

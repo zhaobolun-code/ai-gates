@@ -2,6 +2,7 @@
 # ASCII-only source (Windows PS 5 parser). Output is yaml.
 # Lesson 2026-08-12: do not require rg of this script's own filename.
 # Default does not pass the Apply switch to the commit script (A2).
+# cause and fix copy the fail line into a fixed sentence. A person rewrites them before 准.
 param(
     [string]$FailPath = "",
     [string]$FailText = "",
@@ -99,8 +100,8 @@ if ([string]::IsNullOrWhiteSpace($detail)) { $detail = "fail token " + $token }
 
 $lesson = "Fail output token " + $token + ": " + $detail
 if ($lesson.Length -lt 8) { $lesson = $lesson + " (drafted from fail line)" }
-$cause = "Assert failed at token " + $token + ": " + $detail
-$fix = "Fix the failing check " + $token + " then re-run; keep cause and fix non-empty"
+$cause = "原因待人写。Assert failed at token " + $token + ": " + $detail
+$fix = "原因待人写。Fix the failing check " + $token + " then re-run; keep cause and fix non-empty"
 if ($cause.Trim().Length -lt 4) { $cause = $cause + " cause" }
 if ($fix.Trim().Length -lt 4) { $fix = $fix + " fix" }
 

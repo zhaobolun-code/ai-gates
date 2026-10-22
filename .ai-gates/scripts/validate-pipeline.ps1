@@ -191,6 +191,17 @@ try {
         Write-Host "version consistency: FAILED (CHANGELOG current LTS)" -ForegroundColor Red
         $exitCode = 1
     }
+    $pluginJsonPath = Join-Path $repoRoot ".ai-gates/cursor-marketplace/.cursor-plugin/plugin.json"
+    if (-not (Test-Path -LiteralPath $pluginJsonPath)) {
+        Write-Host "version consistency: FAILED (plugin.json missing)" -ForegroundColor Red
+        $exitCode = 1
+    } else {
+        $pluginVersion = [string](Get-Content -LiteralPath $pluginJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json).version
+        if ($pluginVersion -ne $pipelineVersion) {
+            Write-Host "version consistency: FAILED (plugin.json $pluginVersion != skills/VERSION $pipelineVersion)" -ForegroundColor Red
+            $exitCode = 1
+        }
+    }
     foreach ($scriptName in @("validate-pipeline.ps1", "check-pipeline-doc.ps1")) {
         $scriptHead = (Get-Content -LiteralPath (Join-Path $scriptDir $scriptName) -TotalCount 20) -join "`n"
         if ($scriptHead -match 'v\d+\.\d+\.\d+') {

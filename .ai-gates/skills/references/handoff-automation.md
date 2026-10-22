@@ -52,7 +52,7 @@
 1. `implementation-ready`，`可交给程序员`=是
 2. `in-progress`
 3. Standard/Full：默认启用 Auto（§H；`auto_steps_done=0`），除非用户用了退出句；Express / Direct：**不**启用 Auto
-4. `[developer]` 立即改码（仅当前 Step / 登记窗）：Express / Direct 且 PM 已写清 A# → **可主窗**（须标「主窗执行（未开子窗）」）；Standard/Full **必须** Task 子窗。均按 [model-routing.md](./model-routing.md) 解析后的首选 slug **显式**传 `model=`（project-context §模型路由优先）。Direct CR 仍必须隔离子窗。
+4. `[developer]` 立即改码（仅当前 Step / 登记窗）：Express / Direct / Standard / Full 的业务改码都 **必须** Task 子窗。均按 [model-routing.md](./model-routing.md) 解析后的首选 slug **显式**传 `model=`（project-context §模型路由优先）。Direct CR 仍必须隔离子窗。
 
 **派策划 Task**：提示词禁点名典故 / 「很像某某模式」；扫 `design-patterns.md` 触发症状由策划完成。细则 [execution-discipline.md](./execution-discipline.md) §设计模式一问。
 
@@ -90,7 +90,11 @@
 3. README 一行或派 docs
 4. **Exit 分支（机械）**：
    - **热路径批量回归义务（叠加）**：若 `.cursor/project-context.md` 有 **§热路径批量回归**，且 Mandatory 触及表内路径 glob → 标 `step-completed` / `runtime-validated` **前**须表内场景 ID exit 0（JSON；跑前关 Unity Editor）；不跑/红不得标过；**禁**批量回归绿冒充业务 A#（≠有意义评审）。无该节则本条不触发。
-   - **命中 AI 验收**：Mandatory **无**业务 C#（路径规则见方案物理口径#0：仅看将改路径，文档提及 `.cs` 名不算）**且**「Unity 验证」trim 后大小写不敏感精确∈{`无`,`N/A`,`Skill/Doc-only`}，**且** verify 派发齐套已存在（lifecycle `mode=verify` + `templates/verify-dispatch.md` + 模型表「验收/verify」行）→ 主窗 PM **必须**落 `证据/_Step{NN}-验收派发.md` 并派高规格验收子窗（`mode=verify`，显式 `model=` 高质量档；剧本=本 Step Unity 验证+Regression；子窗禁改任何仓库交付物）。**禁止**只写 `await_human reason=unity_test` 干等。派发前可瞬态 `stop_reason=await_verify reason=ai_static`（子窗返回后消）。通过≡「测试通过」走 §E 同条抬升+Auto 续；不通过≡测失败（diagnosis/L0）。
+   - **命中 AI 验收**：Mandatory **无**业务 C#（路径规则就在本条下面）**且**「Unity 验证」trim 后大小写不敏感精确∈{`无`,`N/A`,`Skill/Doc-only`}，**且** verify 派发齐套已存在（lifecycle `mode=verify` + `templates/verify-dispatch.md` + 模型表「验收/verify」行）→ 主窗 PM **必须**落 `证据/_Step{NN}-验收派发.md` 并派高规格验收子窗（`mode=verify`，显式 `model=` 高质量档；剧本=本 Step Unity 验证+Regression；子窗禁改任何仓库交付物）。**禁止**只写 `await_human reason=unity_test` 干等。派发前可瞬态 `stop_reason=await_verify reason=ai_static`（子窗返回后消）。通过≡「测试通过」走 §E 同条抬升+Auto 续；不通过≡测失败（diagnosis/L0）。
+     - 只看 Mandatory **列出的将改路径**（不是正文或注释里随口提到的文件名）。
+     - **算业务 C#**：路径匹配 `**/*.{cs}`（大小写不敏感）且（路径含 `/Runtime/` 或 `/Editor/`，大小写不敏感）或（路径在 `Assets/**` 下以 `.cs` 结尾且非 `.cursor/**`）。
+     - **不算业务 C#**：仅文档字符串提及 `.cs` 名；或 Mandatory 只改 `.cursor/**` / `*.md` / `*.ps1`（及同类非业务交付物）。
+     - **从严**：Tests 若落在 Runtime/Editor 树下仍算业务 C#。不确定 → 默认 `unity_test`，不派 AI 验收。
    - **失败可证伪（Skill/Doc-only）**：Skill/Doc-only 已命中 AI 验收 → **必须派 verify**；只写 `await_human reason=unity_test` 干等=失败。禁止把 AI 静态验收扩到业务 C# 冒充 Play。业务 C# 机械项走 [test-first.md](./test-first.md) + 本条命令，禁止「等人看见 / 口头过」顶替机械项绿。
    - **未命中 / 不确定是否业务 C# / Unity 字段缺失·未知·非免测集合 / 齐套不存在** → `await_human reason=unity_test`（**你下一步**：请 Unity 测；此为验证，非方案确认轮）；**禁止**派 AI 验收抬升。
 
@@ -141,7 +145,7 @@ Standard/Full：确认包【推荐】「准」→ **默认本窗启用 Auto**（
 实现 + **隔离主 CR** 无 blocker → `auto_steps_done +1` → 按 §C Exit 分支写**唯一** reason：命中 AI 验收 → 派验收子窗（可瞬态 `await_verify reason=ai_static`，**禁止**只写 `unity_test` 干等）；未命中/不确定 → `< max_auto_steps` → `await_human reason=unity_test`；`≥` → `await_human reason=max_auto_steps`；文档均为 `step-completed`。**禁止**未验改下一 Step；**禁止多 Step 攒批再验**。
 
 **用户停点**：待验 / AI 验收 / `max_auto_steps` / diagnosis 硬停。Auto 下**禁止**在实现↔CR 之间或可自动跟的测挂推荐上再发确认包。
-**立即派 CR（准后无 blocker）**：一次「准」后无 blocker，实现子窗交回须**立即派 CR**；中间**禁止再发用户确认包**。禁止教「请先测再让我派 CR」。禁止只写口号、禁止第二套 Auto。权威只落本节（§0 可互指一句；禁止写进 §F）。
+**立即派 CR（准后无 blocker）**：一次「准」后无 blocker，实现子窗交回须**立即派 CR**；中间**禁止再发用户确认包**。禁止教「请先测再让我派 CR」。业务 C# 的交审材料里带上编译或 Editor.log 零错误，以及可执行 Unity 步骤或关键词。Skill/纯文档的交审材料写静态核对和可证伪假需求。禁止只写口号、禁止第二套 Auto。权威只落本节（§0 可互指一句；禁止写进 §F）。
 
 ### 口令
 

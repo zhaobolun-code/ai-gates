@@ -129,12 +129,23 @@ function Get-LogDir {
     return $logDir
 }
 
+function Redact-HookSecrets {
+    param([string]$Text)
+    if ([string]::IsNullOrEmpty($Text)) { return $Text }
+    $t = $Text
+    foreach ($pat in @('github_pat_[A-Za-z0-9_]+', 'ghp_[A-Za-z0-9_]+', 'crsr_[A-Za-z0-9]+', '\bsk-[A-Za-z0-9]+')) {
+        $t = [regex]::Replace($t, $pat, '[redacted]')
+    }
+    return [regex]::Replace($t, '(?i)(Authorization:\s*Bearer\s+)\S+', '${1}[redacted]')
+}
+
 function Write-HookAudit {
     param([string]$LogDir, [string]$FileName, [string]$Line)
     try {
         $file = Join-Path $LogDir $FileName
         $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-        Add-Content -LiteralPath $file -Value ("$ts | $Line") -Encoding UTF8
+        $safe = Redact-HookSecrets $Line
+        Add-Content -LiteralPath $file -Value ("$ts | $safe") -Encoding UTF8
     } catch {
         # 审计失败不阻塞 hook 主流程
     }

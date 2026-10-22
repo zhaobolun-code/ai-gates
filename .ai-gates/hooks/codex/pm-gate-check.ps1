@@ -3,7 +3,7 @@
 #
 # Cursor 原版 matcher 是 Write|StrReplace|EditNotebook，路径来自 tool_input.file_path；
 # Codex 文件写入工具为 apply_patch，路径从 tool_input.command（patch 文本）提取。
-# 语义与 Cursor 版一致（见 .cursor/hooks/pm-gate-check.ps1 头部与 MAINTAINER §Cursor Hooks）：
+# 业务门禁与 Cursor/Claude 同步；平台路径各写各的（见 MAINTAINER §Cursor Hooks）：
 #   业务路径（非 .cursor/**）且无新鲜 [PM] 标记 → permissionDecision=deny + reason 逃生提示。
 #   解析异常 → fail-open allow（避免 hook/落盘故障把人逼进死路）。
 # 2026-08-04 Codex 契约：显式 allow 不受支持（省略 permissionDecision 即 allow）；ask 不受支持；
@@ -11,7 +11,7 @@
 #
 # allow 旁路：
 #   1. kill switch：存在 .ai-gates/hooks-log/pm-gate-disabled 时整条检查临时关闭（仍写审计）。
-#   2. 该 session_id 在新鲜度窗口内有有效 [PM] 标记 → allow。
+#   2. 该 session_id 在新鲜度窗口内有有效 [PM] 标记 → allow，但不得改业务 .cs/.lua。
 #   3. 业务路径 inherited_parent_pm：本 session 无新鲜 [PM]，但唯一父 transcript 的 lastPmAtUtc
 #      在 120 分钟内 → allow。禁止任意会话有 PM 即放行；禁止 Level 1 走继承。
 #
@@ -136,20 +136,44 @@ function Test-ParentTranscriptHasRecentPm {
             $info = New-Object System.IO.FileInfo $file
             $ageMin = ([DateTime]::UtcNow - $info.LastWriteTimeUtc).TotalMinutes
             if ($ageMin -gt $FreshnessMinutes) { continue }
-            $len = $info.Length
+            $len = [int64]$info.Length
             if ($len -le 0) { continue }
-            $start = [Math]::Max([int64]0, $len - 524288)
-            $fs = [System.IO.File]::Open($file, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
-            try {
-                $null = $fs.Seek($start, [System.IO.SeekOrigin]::Begin)
-                $toRead = [int]($len - $start)
-                $buf = New-Object byte[] $toRead
-                $read = $fs.Read($buf, 0, $toRead)
-            } finally {
-                $fs.Dispose()
+            # 从尾部按 512KB 一块往前找 [PM]。块内最新时间戳早于新鲜度窗口就停。经验上限 4MB。
+            $chunk = [int64]524288
+            $maxScan = [int64]4194304
+            $scanned = [int64]0
+            $end = $len
+            $found = $false
+            while ($end -gt 0 -and $scanned -lt $maxScan) {
+                $start = $end - $chunk
+                if ($start -lt 0) { $start = 0 }
+                $take = [int]($end - $start)
+                $fs = [System.IO.File]::Open($file, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+                try {
+                    $null = $fs.Seek($start, [System.IO.SeekOrigin]::Begin)
+                    $buf = New-Object byte[] $take
+                    $read = $fs.Read($buf, 0, $take)
+                } finally {
+                    $fs.Dispose()
+                }
+                if ($read -le 0) { break }
+                $text = [System.Text.Encoding]::UTF8.GetString($buf, 0, $read)
+                if ($text.Contains('[PM]')) { $found = $true; break }
+                $scanned += $take
+                $newest = $null
+                foreach ($m in [regex]::Matches($text, '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?')) {
+                    try {
+                        $t = [DateTime]::Parse($m.Value).ToUniversalTime()
+                        if (-not $newest -or $t -gt $newest) { $newest = $t }
+                    } catch { }
+                }
+                if ($newest -and (([DateTime]::UtcNow - $newest).TotalMinutes -gt $FreshnessMinutes)) { break }
+                if ($start -eq 0) { break }
+                $nextEnd = $start + 32
+                if ($nextEnd -ge $end) { break }
+                $end = $nextEnd
             }
-            $text = [System.Text.Encoding]::UTF8.GetString($buf, 0, $read)
-            if ($text.Contains('[PM]')) { return $true }
+            if ($found) { return $true }
         } catch {
             continue
         }
@@ -192,9 +216,21 @@ function Try-InheritParentPm {
     return $false
 }
 
+function Test-IsMainWindowBusinessCode {
+    param([string[]]$Paths)
+    foreach ($p in @($Paths)) {
+        if ([string]::IsNullOrWhiteSpace($p) -or $p -eq '__no_path__') { continue }
+        $norm = ($p -replace '\\', '/')
+        if ($norm -notmatch '\.(cs|lua)$') { continue }
+        if ($norm -match '/\.(ai-gates|cursor|claude|codex)/') { continue }
+        return $true
+    }
+    return $false
+}
+
 # 业务门禁：无新鲜 [PM] → 返回 deny reason 字符串（主流程 emit+return）；通过返回 $true
 function Test-BusinessGate {
-    param([string]$SessionId)
+    param([string]$SessionId, [string[]]$Paths)
     if (-not (Test-Path -LiteralPath $gateFile)) {
         $hint = Get-MaybeChildDenyHint "逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 Stop hook 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=gate_file_missing" -f $SessionId)
@@ -240,6 +276,11 @@ function Test-BusinessGate {
         $hint = Get-MaybeChildDenyHint "逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 $FreshnessMinutes 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。"
         Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=stale_pm_marker_age={1}min" -f $SessionId, [Math]::Round($ageMinutes, 1))
         return (("PM gate deny detail=stale_pm_marker_age={0}min : no fresh [PM] marker detected. " -f [Math]::Round($ageMinutes, 1)) + $hint)
+    }
+    if (Test-IsMainWindowBusinessCode -Paths $Paths) {
+        $msg = "PM gate deny detail=main_window_business_code : this session has its own [PM], so it is the main window. It must not edit business .cs/.lua. Dispatch a programmer subagent. Express and Direct also dispatch the programmer."
+        Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=main_window_business_code" -f $SessionId)
+        return $msg
     }
     Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("ALLOW window_pm_not_this_turn_age={0}min" -f [Math]::Round($ageMinutes, 1))
     return $true
@@ -287,6 +328,22 @@ function Test-Level1Gate {
     return $true
 }
 
+function Test-OwnFreshPm {
+    param([string]$SessionId)
+    if ([string]::IsNullOrWhiteSpace($SessionId) -or $SessionId -eq 'unknown') { return $false }
+    if (-not (Test-Path -LiteralPath $gateFile)) { return $false }
+    try {
+        $gateRaw = [System.IO.File]::ReadAllText($gateFile, [System.Text.Encoding]::UTF8)
+        $gate = $gateRaw | ConvertFrom-Json -ErrorAction Stop
+    } catch { return $false }
+    $entry = $gate.$SessionId
+    if (-not $entry -or -not $entry.lastPmAtUtc) { return $false }
+    try {
+        $last = [DateTime]::Parse([string]$entry.lastPmAtUtc).ToUniversalTime()
+    } catch { return $false }
+    return (([DateTime]::UtcNow - $last).TotalMinutes -le $FreshnessMinutes)
+}
+
 # kill switch first (no stdin parse needed)
 if (Test-Path -LiteralPath $killSwitch) {
     Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line 'ALLOW kill_switch_active'
@@ -299,7 +356,15 @@ $json = $null
 try {
     $json = $raw | ConvertFrom-Json -ErrorAction Stop
 } catch {
-    # fail-open：解析失败不硬拦（与 MAINTAINER 一致；避免 mark 落盘故障连环死路）
+    $fallback = @()
+    try { $fallback = @(Get-TargetPaths -ToolInput $null -Raw $raw) } catch { $fallback = @() }
+    $fallbackSession = Get-SessionId -Json $null -Raw $raw
+    if ($fallbackSession -ne 'unknown' -and (Test-OwnFreshPm -SessionId $fallbackSession) -and (Test-IsMainWindowBusinessCode -Paths $fallback)) {
+        Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line ("DENY session={0} detail=parse_failed_business_code" -f $fallbackSession)
+        Write-Output (Emit-PreToolUseDeny -Reason "PM gate deny detail=main_window_business_code : stdin parse failed, path is business .cs/.lua, and this session has its own [PM]. Dispatch a programmer subagent.")
+        return
+    }
+    # 抽不到路径仍放行，避免钩子故障把人卡死。
     Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line 'ALLOW parse_failed_fail_open'
     Write-Output (Emit-PreToolUseAllow)
     return
@@ -325,7 +390,7 @@ foreach ($p in $paths) {
 
 # 两道门禁都须通过（业务查 [PM]、.cursor 设施查 CHANGELOG）；任一道 deny 即拦截
 if ($hasBusiness) {
-    $gateResult = Test-BusinessGate -SessionId $sessionId
+    $gateResult = Test-BusinessGate -SessionId $sessionId -Paths $paths
     if ($gateResult -ne $true) {
         Write-Output (Emit-PreToolUseDeny -Reason $gateResult)
         return
