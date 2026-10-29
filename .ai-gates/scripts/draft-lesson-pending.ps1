@@ -1,13 +1,16 @@
 ﻿# draft-lesson-pending.ps1 — fail output -> 证据/_lesson-pending.md yaml.
 # ASCII-only source (Windows PS 5 parser). Output is yaml.
 # Lesson 2026-08-12: do not require rg of this script's own filename.
-# Default does not pass the Apply switch to the commit script (A2).
+# Default does not call commit. Draft success means the file was written.
+# -SkipCommitCheck is a compat switch; default is already skip.
+# -CheckCommit runs commit dry-run without -Apply. Never pass -Apply on that call line.
 # cause and fix copy the fail line into a fixed sentence. A person rewrites them before 准.
 param(
     [string]$FailPath = "",
     [string]$FailText = "",
     [string]$OutPath = "",
-    [switch]$SkipCommitCheck
+    [switch]$SkipCommitCheck,
+    [switch]$CheckCommit
 )
 
 $ErrorActionPreference = "Stop"
@@ -124,8 +127,10 @@ $body = $fence + "yaml`n" + $yaml + "`n" + $fence + "`n"
 Write-Utf8Bom $OutPath $body
 Write-Host ("drafted " + $OutPath)
 Write-Host ("token=" + $token)
+Write-Host "cause/fix 仍是占位，改成真正原因和改法之后再跑 commit dry-run"
 
-if ($SkipCommitCheck) {
+# Default skip. -SkipCommitCheck is compat (also skip). -CheckCommit opts into dry-run.
+if ((-not $CheckCommit) -or $SkipCommitCheck) {
     exit 0
 }
 

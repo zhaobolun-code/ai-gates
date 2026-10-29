@@ -20,19 +20,26 @@ Assert-Decision 'dash C force push is denied' ([bool](Test-DangerousGitCommand -
 Assert-Decision 'dash C hard reset is denied' ([bool](Test-DangerousGitCommand -CommandText 'git -C ./some-repo reset --hard')) ''
 Assert-Decision 'git dir hard reset is denied' ([bool](Test-DangerousGitCommand -CommandText 'git --git-dir=repo/.git reset --hard')) ''
 Assert-Decision 'lease after dash C is not a deny' (-not (Test-DangerousGitCommand -CommandText 'git -C repo push --force-with-lease')) ''
-Assert-Decision 'unknown git option stays unparsed' (Test-GitCommandUnparsed -CommandText 'git --paginate status') ''
+Assert-Decision 'unknown git option stays unparsed' (Test-GitCommandUnparsed -CommandText 'git --no-such-opt status') ''
+Assert-Decision 'paginate status is parsed' (-not (Test-GitCommandUnparsed -CommandText 'git --paginate status')) ''
 Assert-Decision 'known global option is parsed' (-not (Test-GitCommandUnparsed -CommandText 'git -C repo status')) ''
 Assert-Decision 'quoted dash C hard reset is denied' ([bool](Test-DangerousGitCommand -CommandText 'git -C "my repo" reset --hard')) ''
 Assert-Decision 'second command after semicolon is denied' ([bool](Test-DangerousGitCommand -CommandText 'git status; git -C repo reset --hard')) ''
 Assert-Decision 'newline separated force push is denied' ([bool](Test-DangerousGitCommand -CommandText "git status`ngit -C repo push --force")) ''
 Assert-Decision 'env prefix hard reset is denied' ([bool](Test-DangerousGitCommand -CommandText 'GIT_DIR=repo git reset --hard')) ''
 Assert-Decision 'bash wrapper force push is denied' ([bool](Test-DangerousGitCommand -CommandText 'bash -lc "git push --force"')) ''
-Assert-Decision 'paginate before dash C is not denied' (-not (Test-DangerousGitCommand -CommandText 'git --paginate -C repo push --force')) ''
-Assert-Decision 'paginate before dash C stays unparsed' (Test-GitCommandUnparsed -CommandText 'git --paginate -C repo push --force') ''
+Assert-Decision 'paginate before dash C is denied' ([bool](Test-DangerousGitCommand -CommandText 'git --paginate -C repo push --force')) ''
+Assert-Decision 'paginate before dash C is parsed' (-not (Test-GitCommandUnparsed -CommandText 'git --paginate -C repo push --force')) ''
+Assert-Decision 'unknown option with force push is denied' ([bool](Test-DangerousGitCommand -CommandText 'git --no-such-opt push --force')) ''
+Assert-Decision 'unknown option status is not denied' (-not (Test-DangerousGitCommand -CommandText 'git --no-such-opt status')) ''
+Assert-Decision 'config then force push is denied' ([bool](Test-DangerousGitCommand -CommandText 'git -c user.email=a@b.com push --force')) ''
+Assert-Decision 'log patch is not denied' (-not (Test-DangerousGitCommand -CommandText 'git log -p')) ''
 . (Join-Path $PSScriptRoot 'official-version.ps1')
 Assert-Decision 'plain version is official' (Test-OfficialVersion -Version '5.1.0') ''
 Assert-Decision 'v prefix is official' (Test-OfficialVersion -Version 'v5.1.0') ''
 Assert-Decision 'garbage suffix is not official' (-not (Test-OfficialVersion -Version '5.1.0garbage')) ''
+Assert-Decision 'v tag matches pack version' (Test-TagMatchesPackVersion -Tag 'v5.2.0' -PackVersion '5.2.0') ''
+Assert-Decision 'different tag does not match pack' (-not (Test-TagMatchesPackVersion -Tag 'v5.2.0' -PackVersion '5.1.0')) ''
 
 $paths = @(Get-ExplicitWritePaths -CommandText 'Set-Content -Path Assets/Foo.cs -Value 1')
 Assert-Decision 'set-content path extracted' ($paths -contains 'Assets/Foo.cs') ($paths -join ',')
@@ -127,7 +134,23 @@ $codeDispatch = Get-WriteGateVerdict -HostName cursor -Paths @('证据/_Step02-�
 Assert-Decision 'main window cannot write code dispatch' ((-not $codeDispatch.Allow) -and $codeDispatch.Detail -eq 'dispatch_main_window') $codeDispatch.Detail
 $childDispatch = Get-WriteGateVerdict -HostName cursor -Paths @($planDispatch) -GateState Ok -OwnPm Missing -ParentHasFreshPm $true
 Assert-Decision 'planner child can write plan dispatch' ($childDispatch.Allow) $childDispatch.Detail
-Assert-Decision 'official changelog is the only level0 log' ((Test-OfficialChangelogPath -FilePath '.ai-gates/CHANGELOG.md') -and (Get-WritePathClass -FilePath 'D:/repo/.ai-gates/CHANGELOG.md' -IncludeClaude $false -RootReadmeIsFacility $false) -eq 'level0') ''
+$rootLog = (($script:AiGatesDecisionRoot -replace '\\', '/').TrimEnd('/')) + '/.ai-gates/CHANGELOG.md'
+Assert-Decision 'official changelog is this repo root' ((Test-OfficialChangelogPath -FilePath '.ai-gates/CHANGELOG.md') -and (Test-OfficialChangelogPath -FilePath $rootLog) -and ((Get-WritePathClass -FilePath $rootLog -IncludeClaude $false -RootReadmeIsFacility $false) -eq 'level0')) $rootLog
+Assert-Decision 'other root changelog does not unlock' (-not (Test-OfficialChangelogPath -FilePath 'D:/repo/.ai-gates/CHANGELOG.md')) ''
+Assert-Decision 'nested changelog does not unlock' (-not (Test-OfficialChangelogPath -FilePath 'subproject/.ai-gates/CHANGELOG.md')) ''
+$copyOnto = @(Get-ExplicitWritePaths -CommandText 'Copy-Item -Path forged.json -Destination .ai-gates/hooks-log/knife-state.json')
+$copyBlocks = @(Get-ShellWriteBlocks -Paths $copyOnto -HasFreshPm $true -HasFreshChangelog $true)
+Assert-Decision 'copy onto knife state blocks' ($copyBlocks.Count -eq 1 -and $copyBlocks[0].Reason -eq 'gate_auth_state') ($copyOnto -join ',')
+$moved = @(Get-ExplicitWritePaths -CommandText 'Move-Item .ai-gates/hooks-log/pm-gate.json .ai-gates/tmp/pm-gate.json')
+Assert-Decision 'move source is extracted' ($moved -contains '.ai-gates/hooks-log/pm-gate.json') ($moved -join ',')
+$removed = @(Get-ExplicitWritePaths -CommandText 'Remove-Item -LiteralPath .ai-gates\hooks-log\changelog-writes.json -Force')
+$removeBlocks = @(Get-ShellWriteBlocks -Paths $removed -HasFreshPm $true -HasFreshChangelog $true)
+Assert-Decision 'remove auth state blocks' ($removeBlocks.Count -eq 1 -and $removeBlocks[0].Reason -eq 'gate_auth_state') ($removed -join ',')
+$appendLog = Get-ExplicitWritePaths -CommandText 'Add-Content -Path .ai-gates/hooks-log/git-safety-check.log -Value x'
+$appendBlocks = Get-ShellWriteBlocks -Paths $appendLog -HasFreshPm $false -HasFreshChangelog $false
+Assert-Decision 'hook log append still allowed' ($appendBlocks.Count -eq 0) "count=$($appendBlocks.Count)"
+Assert-Decision 'auth script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates\hooks\mark-pm-gate.ps1') ''
+Assert-Decision 'renamed script name is not denied' (-not (Test-AuthScriptInvoke -CommandText 'powershell -File .\copied-gate.ps1')) ''
 Assert-Decision 'skills changelog does not unlock' ((-not (Test-OfficialChangelogPath -FilePath '.ai-gates/skills/CHANGELOG.md')) -and (Get-WritePathClass -FilePath 'D:/repo/.ai-gates/skills/CHANGELOG.md' -IncludeClaude $false -RootReadmeIsFacility $false) -eq 'level1') ''
 Assert-Decision 'hooks changelog does not unlock' ((-not (Test-OfficialChangelogPath -FilePath '.ai-gates/hooks/CHANGELOG.md')) -and (Get-WritePathClass -FilePath 'D:/repo/.ai-gates/hooks/CHANGELOG.md' -IncludeClaude $false -RootReadmeIsFacility $false) -eq 'level1') ''
 Assert-Decision 'scripts changelog does not unlock' ((-not (Test-OfficialChangelogPath -FilePath '.ai-gates/scripts/CHANGELOG.md')) -and (Get-WritePathClass -FilePath 'D:/repo/.ai-gates/scripts/CHANGELOG.md' -IncludeClaude $false -RootReadmeIsFacility $false) -eq 'level1') ''

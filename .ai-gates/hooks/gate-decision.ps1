@@ -3,13 +3,21 @@
 # 本文件不读 stdin，不写 permission / permissionDecision。
 # 宿主差异留在入口：允许时的字段名、会话键、Claude 是否把 .claude 当设施。
 
+# 本文件固定在 <仓库根>/.ai-gates/hooks/。点源时用本文件路径，不用调用者目录。
+if (-not $script:AiGatesDecisionRoot) {
+    $decisionFile = $PSCommandPath
+    if ([string]::IsNullOrWhiteSpace($decisionFile)) { $decisionFile = $MyInvocation.MyCommand.Path }
+    $decisionDir = Split-Path -Parent $decisionFile
+    $script:AiGatesDecisionRoot = [System.IO.Path]::GetFullPath((Join-Path $decisionDir '..\..'))
+}
+
 function Get-DangerousGitRules {
     return @(
-        @{ Pattern = 'git\s+push\b[^\n]*(--force(?!-with-lease)\b|\s-f\b|\s\+\S+)'; Reason = '强制推送（--force / -f / +引用）可能覆盖远端历史，无法找回' },
-        @{ Pattern = 'git\s+reset\b[^\n]*--hard\b'; Reason = '硬重置（--hard）会丢弃未提交的工作区改动' },
-        @{ Pattern = 'git\s+clean\b[^\n]*-[a-zA-Z]*[dfx]'; Reason = 'git clean 会永久删除未跟踪文件' },
-        @{ Pattern = 'git\s+checkout\b[^\n]*(--force(?!-with-lease)\b|\s-f\b|--\s|\.$|\s\.\s)'; Reason = 'checkout -f / --force 或 checkout 路径会丢弃未提交改动（对应「方案推翻」流程，须已征得用户确认）' },
-        @{ Pattern = 'git\s+branch\b[^\n]*-D\b'; Reason = '强制删除分支（-D）不检查是否已合并' }
+        @{ Pattern = 'git\s+push\b[^\n]*(--force(?!-with-lease)\b|\s-f\b|\s\+\S+)'; Loose = '(?i)\bgit\b[^\n]*\bpush\b[^\n]*(--force(?!-with-lease)\b|\s-f\b|\s\+\S+)'; Reason = '强制推送（--force / -f / +引用）可能覆盖远端历史，无法找回' },
+        @{ Pattern = 'git\s+reset\b[^\n]*--hard\b'; Loose = '(?i)\bgit\b[^\n]*\breset\b[^\n]*--hard\b'; Reason = '硬重置（--hard）会丢弃未提交的工作区改动' },
+        @{ Pattern = 'git\s+clean\b[^\n]*-[a-zA-Z]*[dfx]'; Loose = '(?i)\bgit\b[^\n]*\bclean\b[^\n]*-[a-zA-Z]*[dfx]'; Reason = 'git clean 会永久删除未跟踪文件' },
+        @{ Pattern = 'git\s+checkout\b[^\n]*(--force(?!-with-lease)\b|\s-f\b|--\s|\.$|\s\.\s)'; Loose = '(?i)\bgit\b[^\n]*\bcheckout\b[^\n]*(--force(?!-with-lease)\b|\s-f\b)'; Reason = 'checkout -f / --force 或 checkout 路径会丢弃未提交改动（对应「方案推翻」流程，须已征得用户确认）' },
+        @{ Pattern = 'git\s+branch\b[^\n]*-D\b'; Loose = '(?i)\bgit\b[^\n]*\bbranch\b[^\n]*-D\b'; Reason = '强制删除分支（-D）不检查是否已合并' }
     )
 }
 
@@ -17,7 +25,9 @@ function Get-NormalizedGitCommand {
     param([string]$CommandText)
     if ([string]::IsNullOrWhiteSpace($CommandText)) { return '' }
     $text = $CommandText -replace '(?i)\bgit\.exe\b', 'git'
-    $opt = '(?:-C\s+(?:"[^"]*"|''[^'']*''|\S+)|--git-dir(?:=|\s+)(?:"[^"]*"|''[^'']*''|\S+)|--work-tree(?:=|\s+)(?:"[^"]*"|''[^'']*''|\S+))'
+    $withArg = '(?:-C|-c|--git-dir|--work-tree)(?:=|\s+)(?:"[^"]*"|''[^'']*''|\S+)'
+    $noArg = '(?:--paginate|--no-pager|-p)\b'
+    $opt = "(?:$withArg|$noArg)"
     $guard = 0
     while ($guard -lt 30 -and $text -match ('(?i)(\bgit\s+)' + $opt + '\s+')) {
         $text = [regex]::Replace($text, ('(?i)(\bgit\s+)' + $opt + '\s+'), '$1', 1)
@@ -38,6 +48,11 @@ function Test-DangerousGitCommand {
     $norm = Get-NormalizedGitCommand -CommandText $CommandText
     foreach ($rule in (Get-DangerousGitRules)) {
         if ($norm -match $rule.Pattern) { return [string]$rule.Reason }
+    }
+    if (Test-GitCommandUnparsed -CommandText $CommandText) {
+        foreach ($rule in (Get-DangerousGitRules)) {
+            if ($rule.Loose -and ($norm -match $rule.Loose)) { return [string]$rule.Reason }
+        }
     }
     return $null
 }
@@ -93,7 +108,69 @@ function Get-ExplicitWritePaths {
         $paths.Add($target) | Out-Null
     }
 
+    foreach ($p in (Get-ItemCmdletWritePaths -CommandText $CommandText)) {
+        $paths.Add($p) | Out-Null
+    }
+
     return @($paths)
+}
+
+function Test-LooksLikePathToken {
+    param([string]$Token)
+    if ([string]::IsNullOrWhiteSpace($Token)) { return $false }
+    if ($Token.StartsWith('-')) { return $false }
+    return ($Token -match '[\\/]' -or $Token -match '\.')
+}
+
+function Get-ItemCmdletWritePaths {
+    param([string]$CommandText)
+    $found = New-Object System.Collections.Generic.List[string]
+    if ([string]::IsNullOrWhiteSpace($CommandText)) { return @($found) }
+    $segPat = '(?i)\b(?:Copy-Item|Move-Item|Remove-Item)\b[^|\r\n;&]*'
+    foreach ($m in [Regex]::Matches($CommandText, $segPat)) {
+        $seg = $m.Value
+        $kind = 'copy'
+        if ($seg -match '(?i)^Move-Item\b') { $kind = 'move' }
+        elseif ($seg -match '(?i)^Remove-Item\b') { $kind = 'remove' }
+        $tokens = New-Object System.Collections.Generic.List[string]
+        foreach ($tm in [Regex]::Matches($seg, '"([^"]*)"|''([^'']*)''|(\S+)')) {
+            if ($tm.Groups[1].Success) { $tokens.Add($tm.Groups[1].Value) | Out-Null }
+            elseif ($tm.Groups[2].Success) { $tokens.Add($tm.Groups[2].Value) | Out-Null }
+            else { $tokens.Add($tm.Groups[3].Value) | Out-Null }
+        }
+        $sources = New-Object System.Collections.Generic.List[string]
+        $dests = New-Object System.Collections.Generic.List[string]
+        for ($i = 1; $i -lt $tokens.Count; $i++) {
+            $t = [string]$tokens[$i]
+            if ($t -match '^(?i)-(Path|LiteralPath|Destination)$') {
+                $i++
+                if ($i -ge $tokens.Count) { break }
+                $val = [string]$tokens[$i]
+                if ($t -match '(?i)Destination') { $dests.Add($val) | Out-Null }
+                elseif (Test-LooksLikePathToken $val) { $sources.Add($val) | Out-Null }
+                continue
+            }
+            if ($t.StartsWith('-')) { continue }
+            if (Test-LooksLikePathToken $t) { $sources.Add($t) | Out-Null }
+        }
+        if ($kind -eq 'remove') {
+            foreach ($s in $sources) { $found.Add($s) | Out-Null }
+        } elseif ($kind -eq 'move') {
+            foreach ($s in $sources) { $found.Add($s) | Out-Null }
+            foreach ($d in $dests) { $found.Add($d) | Out-Null }
+        } elseif ($dests.Count -gt 0) {
+            foreach ($d in $dests) { $found.Add($d) | Out-Null }
+        } elseif ($sources.Count -gt 0) {
+            $found.Add([string]$sources[$sources.Count - 1]) | Out-Null
+        }
+    }
+    return @($found)
+}
+
+function Test-AuthScriptInvoke {
+    param([string]$CommandText)
+    if ([string]::IsNullOrWhiteSpace($CommandText)) { return $false }
+    return [bool]($CommandText -match '(?i)(?:^|[\s''"\\/])(?:mark-pm-gate|mark-changelog-write|set-knife-state|mark-human-tested)\.ps1\b')
 }
 
 function Test-GateAuthStatePath {
@@ -316,7 +393,12 @@ function Test-OfficialChangelogPath {
     param([string]$FilePath)
     if ([string]::IsNullOrWhiteSpace($FilePath)) { return $false }
     $norm = ($FilePath -replace '\\', '/').TrimEnd('/')
-    return [bool]($norm -match '(?i)(?:^|/)\.ai-gates/CHANGELOG\.md$')
+    $rel = $norm -replace '^\./', ''
+    if ($rel -match '(?i)^\.ai-gates/CHANGELOG\.md$') { return $true }
+    $root = [string]$script:AiGatesDecisionRoot
+    if ([string]::IsNullOrWhiteSpace($root)) { return $false }
+    $official = (($root -replace '\\', '/').TrimEnd('/')) + '/.ai-gates/CHANGELOG.md'
+    return [string]::Equals($norm, $official, [System.StringComparison]::OrdinalIgnoreCase)
 }
 
 function Test-ReviewDispatchPath {
@@ -360,6 +442,8 @@ function Get-GateRelativePath {
 function Get-WritePathClass {
     param([string]$FilePath, [bool]$IncludeClaude, [bool]$RootReadmeIsFacility, [bool]$RootDocsAreLevel1 = $false)
     if (Test-CrStampPath -FilePath $FilePath) { return 'stamp' }
+    # 正式 CHANGELOG 先判：仓库放在 temp/logs 之类的目录下时，生成路径规则会把它吞掉。
+    if (Test-OfficialChangelogPath -FilePath $FilePath) { return 'level0' }
     if (Test-GeneratedWritePath -FilePath $FilePath) { return 'generated' }
     $rel = Get-GateRelativePath -FilePath $FilePath -IncludeClaude $IncludeClaude
     $norm = [string]$FilePath -replace '\\', '/'

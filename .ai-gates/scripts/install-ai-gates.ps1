@@ -150,11 +150,17 @@ if ($CheckUpdate) {
     exit 0
 }
 
-# 安装模式：解析源（URL 先取最新 tag 再浅克隆；git stderr 在 Stop 下会误判为终止错误，故临时降级）
-if ($isLocalRepo) {
+# 显式 -Tag 优先。没传才用远端或本地仓库的最新 tag。本地仓库不传 -Tag 时拷工作区，不把 describe 记成已检出的 tag。
+$checkoutTag = $latestTag
+if (-not [string]::IsNullOrWhiteSpace($Tag)) { $checkoutTag = $Tag.Trim() }
+$cloneSource = $isUrl -or ($isLocalRepo -and -not [string]::IsNullOrWhiteSpace($Tag))
+
+# 安装模式：URL 或「本地仓库 + -Tag」按 checkoutTag 浅克隆；git stderr 在 Stop 下会误判为终止错误，故临时降级
+if ($isLocalRepo -and [string]::IsNullOrWhiteSpace($Tag)) {
     $workRepo = $Source
-} elseif ($isUrl) {
-    $cloneDir = Join-Path $UserCachePath ("src-" + $(if ($latestTag) { $latestTag } else { 'working' }))
+} elseif ($cloneSource) {
+    $cacheName = if ($checkoutTag) { $checkoutTag } else { 'working' }
+    $cloneDir = Join-Path $UserCachePath ("src-" + $cacheName)
     if (Test-Path -LiteralPath $cloneDir) { Remove-Item -LiteralPath $cloneDir -Recurse -Force }
     New-Item -ItemType Directory -Force -Path (Split-Path $cloneDir -Parent) | Out-Null
     $hasGit = $null -ne (Get-Command git -ErrorAction SilentlyContinue)
@@ -162,21 +168,23 @@ if ($isLocalRepo) {
         $prevEp = $ErrorActionPreference
         $ErrorActionPreference = 'Continue'
         try {
-            if ($latestTag) { $gout = & git clone --depth 1 --branch $latestTag $Source $cloneDir 2>&1 | Out-String }
+            if ($checkoutTag) { $gout = & git clone --depth 1 --branch $checkoutTag $Source $cloneDir 2>&1 | Out-String }
             else { $gout = & git clone --depth 1 $Source $cloneDir 2>&1 | Out-String }
         } finally {
             $ErrorActionPreference = $prevEp
         }
         if ($LASTEXITCODE -ne 0) {
+            if (-not $isUrl) { throw "cannot checkout tag '$checkoutTag' from $Source" }
             Write-Host ("WARN git clone failed, fallback to zip: {0}" -f $gout.Trim())
             $hasGit = $false
         }
     }
     if (-not $hasGit) {
-        # 无 git / clone 失败 → 下载 tag zip 解压（保证「一条命令」在无 git 机器可用）
-        if (-not $latestTag) { throw "cannot resolve latest tag without git for: $Source" }
-        $zipUrl = "$Source/archive/refs/tags/$latestTag.zip"
-        $zipFile = Join-Path $UserCachePath ("ai-gates-$latestTag.zip")
+        # 无 git / clone 失败 → 下载同一个 tag 的 zip。不再改去最新 tag。
+        if (-not $isUrl) { throw "cannot checkout tag '$checkoutTag' from $Source" }
+        if (-not $checkoutTag) { throw "cannot resolve latest tag without git for: $Source" }
+        $zipUrl = "$Source/archive/refs/tags/$checkoutTag.zip"
+        $zipFile = Join-Path $UserCachePath ("ai-gates-$checkoutTag.zip")
         New-Item -ItemType Directory -Force -Path (Split-Path $zipFile -Parent) | Out-Null
         Write-Host "downloading $zipUrl ..."
         Invoke-WebRequest -Uri $zipUrl -OutFile $zipFile -UseBasicParsing
@@ -199,8 +207,11 @@ if ($isLocalRepo) {
     throw "source not found / not a git repo / not an extracted pack: $Source"
 }
 
-if (-not $Tag) { $Tag = $latestTag }
-if (-not $Tag) { $Tag = 'working-tree' }
+if ([string]::IsNullOrWhiteSpace($Tag)) {
+    if ($isLocalRepo) { $Tag = 'working-tree' }
+    elseif ($checkoutTag) { $Tag = $checkoutTag }
+    else { $Tag = 'working-tree' }
+}
 
 # 安全校验：源必须是合法 ai-gates 包（.ai-gates/ + skills/VERSION 语义化版本），否则拒绝替换
 $srcLib = Join-Path $workRepo '.ai-gates'
@@ -209,6 +220,9 @@ $srcVersionFile = Join-Path $srcLib 'skills\VERSION'
 if (-not (Test-Path -LiteralPath $srcVersionFile)) { throw "source pack missing skills/VERSION: $srcVersionFile" }
 $srcVerRaw = (Get-Content -LiteralPath $srcVersionFile -Raw -Encoding UTF8).Trim()
 if ($null -eq (Get-Semver -Version $srcVerRaw)) { throw "source pack VERSION not semver: '$srcVerRaw'" }
+if ($Tag -ne 'working-tree' -and -not (Test-TagMatchesPackVersion -Tag $Tag -PackVersion $srcVerRaw)) {
+    throw "tag '$Tag' does not match skills/VERSION '$srcVerRaw'; install stopped before replacing the target"
+}
 
 $targetLib = Join-Path $TargetRoot '.ai-gates'
 New-Item -ItemType Directory -Force -Path $targetLib | Out-Null

@@ -18,3 +18,11 @@ function Get-OfficialSemver {
         Raw   = $v
     }
 }
+
+function Test-TagMatchesPackVersion {
+    param([string]$Tag, [string]$PackVersion)
+    $tagVer = Get-OfficialSemver -Version $Tag
+    $packVer = Get-OfficialSemver -Version $PackVersion
+    if ($null -eq $tagVer -or $null -eq $packVer) { return $false }
+    return ($tagVer.Major -eq $packVer.Major -and $tagVer.Minor -eq $packVer.Minor -and $tagVer.Patch -eq $packVer.Patch)
+}

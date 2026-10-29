@@ -127,7 +127,10 @@ try {
     Write-Host "`n--- workflow / version consistency ---" -ForegroundColor Cyan
     $readmeRaw = Read-Utf8Text (Join-Path $repoRoot ".ai-gates/USER-GUIDE.md")
     $evalRaw = Read-Utf8Text (Join-Path $skillsRoot "references/skill-eval-checklist.md")
-    $maintainerRaw = Read-Utf8Text (Join-Path $skillsRoot "MAINTAINER.md")
+    # MAINTAINER.md 不进安装包；空串让下面这条维护者文档检查自然跳过。
+    $maintainerRaw = ""
+    $maintainerDocPath = Join-Path $skillsRoot "MAINTAINER.md"
+    if (Test-Path -LiteralPath $maintainerDocPath) { $maintainerRaw = Read-Utf8Text $maintainerDocPath }
     $workflowOk = $true
     if ($readmeRaw -notmatch 'plan-lite\s*→\s*L1/L1\.5/L2 方案审核\s*→\s*确认' -or
         $readmeRaw -match 'plan-lite\s*→\s*确认\s*→\s*L1/L1\.5/L2') {
@@ -174,7 +177,12 @@ try {
         @{ Name = "Trae rule"; Path = (Join-Path $repoRoot ".trae/rules/ai-dev-pipeline.md"); Pattern = '(?m)^description: .*v(?<v>\d+\.\d+\.\d+)' }
     )
     $entryModes = @()
+    $checkedEntryCount = 0
+    # 这两项只在源码仓存在：MAINTAINER.md 不进包；Trae 规则 .md 也不进包（包内只有 .mdc）。
+    $optionalEntries = @("MAINTAINER", "Trae rule")
     foreach ($spec in $entrySpecs) {
+        if (-not (Test-Path -LiteralPath $spec.Path) -and ($optionalEntries -contains $spec.Name)) { continue }
+        $checkedEntryCount++
         $result = Get-CurrentEntryMode -Path $spec.Path -VersionPattern $spec.Pattern
         $entryModes += $result.Mode
         if ($result.Mode -eq "invalid" -or ($result.Mode -eq "hardcoded" -and $result.Version -ne $pipelineVersion)) {
@@ -183,7 +191,7 @@ try {
         }
     }
     $pointerCount = @($entryModes | Where-Object { $_ -eq "pointer" }).Count
-    if ($pointerCount -gt 0 -and $pointerCount -lt $entrySpecs.Count) {
+    if ($pointerCount -gt 0 -and $pointerCount -lt $checkedEntryCount) {
         Write-Host "version consistency: FAILED (mixed hardcoded/pointer current entries)" -ForegroundColor Red
         $exitCode = 1
     }
@@ -211,12 +219,16 @@ try {
         }
     }
     $packagePath = Join-Path $repoRoot ".ai-gates/package-release.ps1"
-    $packageRaw = Read-Utf8Text $packagePath
-    if ($packageRaw -notmatch 'Join-Path \$skillsDir "VERSION"' -or
-        $packageRaw -match 'Get-Content -LiteralPath \(Join-Path \$skillsDir "CORE\.md"\).*TotalCount 1' -or
-        $packageRaw -match 'v\d+\.\d+\.\d+') {
-        Write-Host "version consistency: FAILED (package-release VERSION source)" -ForegroundColor Red
-        $exitCode = 1
+    # package-release.ps1 是维护者文件，不进安装包；缺它就跳过这几条静态检查。
+    $packageRaw = ""
+    if (Test-Path -LiteralPath $packagePath) {
+        $packageRaw = Read-Utf8Text $packagePath
+        if ($packageRaw -notmatch 'Join-Path \$skillsDir "VERSION"' -or
+            $packageRaw -match 'Get-Content -LiteralPath \(Join-Path \$skillsDir "CORE\.md"\).*TotalCount 1' -or
+            $packageRaw -match 'v\d+\.\d+\.\d+') {
+            Write-Host "version consistency: FAILED (package-release VERSION source)" -ForegroundColor Red
+            $exitCode = 1
+        }
     }
     $syntheticPattern = '(?m)^Current: v(?<v>\d+\.\d+\.\d+)'
     $syntheticPointer = Get-EntryModeFromText -Raw "Current: VERSION" -VersionPattern $syntheticPattern

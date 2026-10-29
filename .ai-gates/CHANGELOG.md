@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.2.0（门禁收口与安装同步 · minor；前版 5.1.0 定版信息保留）
+**当前 LTS**：v5.2.1（护栏收口与发布闸修正 · patch；前版 5.2.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,14 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-10-29：bump `skills/VERSION` → **5.2.1**。收口 5.2.0 之后未发版条目：Git 全局选项先剥再判危险（强制推送 / 硬重置 / `clean` 删文件 / `checkout -f` / `branch -D` 仍拒）；`Copy-Item` / `Move-Item` / `Remove-Item` 碰三份授权文件就拒绝；Shell 拒绝直跑四份打点脚本；`beforeSubmitPrompt` 只注入本会话上一轮 token；发布闸拒绝 cause/fix 占位句，典故待审与队列表头收紧。`plugin.json` version=`5.2.1`。打包改为递归拷贝 `scripts/fixtures/**`（含新增 `publish-reject/` 用例），11 个脚本恢复 UTF-8 BOM。安装包里没有 `hooks-log/`：`test-hooks.ps1` 在 `pm-gate.json` 不存在时先放空壳，跑完按 `__test__` 前缀清掉；`assert-publish-reject-p1p2.ps1` 找不到维护者本地的 `Doc/` 历史夹具、或包内词条表为空时跳过旧用例与 improve 夹具并说明，不再计失败。正式变更日志的判定提前到生成路径之前，仓库落在 `temp` 之类目录下也能认回 Level 0。安装包里没有维护者文件：`validate-pipeline` 缺 `MAINTAINER.md` / `package-release.ps1` / Trae 规则 `.md` 时跳过对应检查，`check-rule-invariants` 只在源码仓要求根 `AGENTS.md`，`test-hooks` 与 `check-hooks-policy` 缺 MAINTAINER 时跳过相应断言，缺 `package-release.ps1` 时跳过 A3 三条；A9 会清掉只剩模拟会话的空壳门禁文件，A12 前补回，干净安装也能跑完自检。新包 `releases/ai_dev_v5.2.1.7z`，不覆盖 5.2.0 包。`validate-pipeline -Strict` 全绿（test-hooks 101/0）。
+
+- 2026-10-29：beforeSubmitPrompt 按本会话注入上一轮 token 行，不注入 latest。不 bump VERSION。Included：`hooks/inject-turn-tokens.ps1` + `hooks.json` + `scripts/test-hooks.ps1`
+
+- 2026-10-29：发布闸拒绝 cause/fix 占位句（原因待人写 / 原因待确认 / Fix the failing check / keep cause and fix non-empty）；commit 在过闸和写主表前用同一组片段再判，占位即 throw，dry-run 也拒。起草默认不再调 commit，成功只表示文件已写出；保留 `-SkipCommitCheck`，加 `-CheckCommit` 才跑不带 `-Apply` 的 dry-run。典故待审收紧 status/action/destination 与必填字段；create 的 anchor 须是路径:符号且文件存在（仓库根相对，再试 `.ai-gates/` 前缀）；improve / optimize_description 的 name 须是词条表单元格。队列表头缺 origin+notes 或 state/origin/notes/title 任一列为 -1 则拒；空队列合法。错题 `-Apply` 按 `| date | module | lesson | source | doc |` 前缀幂等，已有则只把 pending 改成 committed。不 bump VERSION。Included：`scripts/test-publish-reject.ps1` + `scripts/commit-lesson-pending.ps1` + `scripts/draft-lesson-pending.ps1` + `scripts/assert-publish-reject-p1p2.ps1` + `scripts/fixtures/publish-reject/`
+
+- 2026-10-29：护栏收口，不 bump VERSION。已知 Git 全局选项（`--paginate`、`--no-pager`、`-p`、`-c`、`-C`、`--git-dir`、`--work-tree`）先剥掉再判危险；认不出的选项仍记「未解析」，但同一条里已经能看出的强制推送、硬重置、`clean` 删文件、`checkout -f`、`branch -D` 仍拒绝。正式变更日志只认当前仓库根下的 `.ai-gates/CHANGELOG.md`。`Copy-Item`、`Move-Item`、`Remove-Item` 碰到三份授权文件就拒绝。Shell 拒绝直接运行四份打点脚本；脚本改名后再跑，或别的程序自己写文件，不在这道门里。`set-knife-state` 和 `mark-human-tested` 只写本仓库的 `knife-state.json`。安装时显式 `-Tag` 检出的就是这一版，并且必须等于来源包的 `skills/VERSION`，不等就停、不覆盖。`validate-pipeline -Strict` 仍只是脚本回归。Included：`hooks/gate-decision.ps1` + `hooks/bash-write-gate.ps1` + `hooks/claude/bash-write-gate.ps1` + `hooks/codex/bash-write-gate.ps1` + `scripts/official-version.ps1` + `scripts/install-ai-gates.ps1` + `scripts/set-knife-state.ps1` + `scripts/mark-human-tested.ps1` + `scripts/test-gate-decision.ps1` + `scripts/test-hooks.ps1` + `README.md`
 
 - 2026-10-29：bump `skills/VERSION` → **5.2.0**。收口 5.1.0 之后未发版条目：变更日志只认 `.ai-gates/CHANGELOG.md`，EditMode 绿灯看 `passed`，升级覆盖入口并删掉库里的废弃文件，安装地址改到 `.ai-gates/scripts/`，危险 Git 先去掉 `-C` / `--git-dir` / `--work-tree`，正式版本必须整串 `x.y.z`，`hooks-log` 三份授权文件不能伪造，Git 放行先写日志。`plugin.json` version=`5.2.0`。新包 `releases/ai_dev_v5.2.0.7z`，不覆盖 5.1.0 包。入口锚点改认常驻卡。包内补 `scripts/fixtures/`（`check-volume.ps1` / `test-gate-decision.ps1` 的只读数据，首包漏拷会让安装后的 validate 在 volume 段崩）；打包范围自检从 `hooks/` 扩到 `scripts/` 子目录。钩子回归在测父窗继承时先挪开本机待测刀状态，测完放回。
 

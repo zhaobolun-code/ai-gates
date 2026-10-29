@@ -6,7 +6,10 @@ param(
 )
 $ErrorActionPreference = "Stop"
 . (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\hooks\gate-decision.ps1")
-if ([string]::IsNullOrWhiteSpace($StatePath) -or [string]::IsNullOrWhiteSpace($EvidencePath)) { exit 1 }
+# StatePath 不采用。现象句包含只防止记错现象，不证明操作者是人。
+if ([string]::IsNullOrWhiteSpace($EvidencePath)) { exit 1 }
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+$StatePath = Join-Path $root ".ai-gates\hooks-log\knife-state.json"
 if (-not (Test-Path -LiteralPath $StatePath) -or -not (Test-Path -LiteralPath $EvidencePath)) { exit 1 }
 $stateRaw = [System.IO.File]::ReadAllText($StatePath, [System.Text.Encoding]::UTF8)
 $evidence = [System.IO.File]::ReadAllText($EvidencePath, [System.Text.Encoding]::UTF8)

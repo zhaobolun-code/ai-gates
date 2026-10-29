@@ -15,6 +15,13 @@
         "timeout": 15
       }
     ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/inject-turn-tokens.ps1",
+        "failClosed": false,
+        "timeout": 10
+      }
+    ],
     "beforeShellExecution": [
       {
         "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/pre-shell-gate.ps1",

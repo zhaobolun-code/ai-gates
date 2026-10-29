@@ -58,13 +58,6 @@ $checks = @(
         )
     },
     @{
-        Rel     = "AGENTS.md"
-        Needles = @(
-            "每轮 ``[PM]`` 先做结构化判定",
-            "项目经理"
-        )
-    },
-    @{
         Rel     = ".cursor/rules/ai-dev-pipeline.mdc"
         Needles = @(
             "硬门禁 #7",
@@ -79,6 +72,16 @@ foreach ($c in $checks) {
     foreach ($hit in (Test-FileNeedles -Rel $c.Rel -Needles $c.Needles)) {
         $issues.Add($hit) | Out-Null
     }
+}
+
+# AGENTS.md 不进安装包：源码仓必须有；装到项目里由用户按模板自建，缺了不算红。
+$agents = Join-Path $RepoRoot "AGENTS.md"
+if (Test-Path -LiteralPath $agents) {
+    foreach ($hit in (Test-FileNeedles -Rel "AGENTS.md" -Needles @("每轮 ``[PM]`` 先做结构化判定", "项目经理"))) {
+        $issues.Add($hit) | Out-Null
+    }
+} elseif (Test-Path -LiteralPath (Join-Path $RepoRoot ".ai-gates/package-release.ps1")) {
+    $issues.Add("missing: AGENTS.md") | Out-Null
 }
 
 $trae = Join-Path $RepoRoot ".trae/rules/ai-dev-pipeline.md"

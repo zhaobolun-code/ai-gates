@@ -12,7 +12,8 @@
 #                CHANGELOG.md at pack root IS shipped for public trust
 #     scripts/   *.ps1 / *.sh except Chemical-specific (e.g. ci-pressure-manager-gate.ps1)
 #                + point-named scripts/fog-map.template.html (if present; not all non-scripts)
-#                + scripts/fixtures/*.json (read-only data for check-volume.ps1 / test-gate-decision.ps1)
+#                + scripts/fixtures/** (read-only data, recursive; e.g. check-volume / test-gate-decision /
+#                  publish-reject fixtures)
 #     rules/ai-dev-pipeline.mdc
 #     hooks.json + hooks/*.ps1 + hooks/codex/*.ps1 + hooks/claude/*.ps1 + hooks/plugin/*.ps1  (Cursor + Codex + Claude + Cursor-marketplace hooks)
 #     codex/hooks.json + codex/config.toml  (Codex wiring, git-tracked central copy)
@@ -145,16 +146,19 @@ try {
     if (Test-Path -LiteralPath $fixturesDir) {
         $stageFixtures = Join-Path $stageScripts "fixtures"
         New-Item -ItemType Directory -Force -Path $stageFixtures | Out-Null
-        Get-ChildItem -Path $fixturesDir -File -ErrorAction SilentlyContinue |
-            Copy-Item -Destination $stageFixtures -Force
+        # 递归：fixtures 下允许按用例分目录（如 publish-reject/），只拷第一层会静默漏文件。
+        Copy-Item -Path (Join-Path $fixturesDir "*") -Destination $stageFixtures -Recurse -Force
     }
 
-    # 打包范围自检（scripts）：所有子目录下的数据文件都必须出现在暂存区。
+    # 打包范围自检（scripts）：所有子目录（含子目录里的子目录）下的数据文件都必须出现在暂存区。
     $missingScripts = @()
     foreach ($scriptSubDir in (Get-ChildItem -Path $scriptsDir -Directory -ErrorAction SilentlyContinue)) {
-        Get-ChildItem -Path $scriptSubDir.FullName -File -ErrorAction SilentlyContinue | ForEach-Object {
-            if (-not (Test-Path -LiteralPath (Join-Path (Join-Path $stageScripts $scriptSubDir.Name) $_.Name))) {
-                $missingScripts += "$($scriptSubDir.Name)/$($_.Name)"
+        $subBase = $scriptSubDir.FullName
+        Get-ChildItem -Path $subBase -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
+            $rel = $_.FullName.Substring($subBase.Length).TrimStart([char[]]@('\', '/')) -replace '\\', '/'
+            $rel = "$($scriptSubDir.Name)/$rel"
+            if (-not (Test-Path -LiteralPath (Join-Path $stageScripts $rel))) {
+                $missingScripts += $rel
             }
         }
     }

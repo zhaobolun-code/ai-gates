@@ -114,7 +114,10 @@ function Get-HooksPolicyReport {
     }
 
     if (-not (Test-Path -LiteralPath $maintainerPath)) {
-        $issues.Add("MAINTAINER.md missing") | Out-Null
+        # MAINTAINER.md 不进安装包；只有源码仓（有 package-release.ps1）才要求它存在。
+        if (Test-Path -LiteralPath (Join-Path $RepoRoot ".ai-gates/package-release.ps1")) {
+            $issues.Add("MAINTAINER.md missing") | Out-Null
+        }
     } else {
         $maintainerRaw = [System.IO.File]::ReadAllText($maintainerPath, [System.Text.Encoding]::UTF8)
         if ($maintainerRaw -notmatch 'permission:\s*deny') {

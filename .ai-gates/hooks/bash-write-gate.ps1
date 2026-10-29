@@ -60,6 +60,17 @@ if (Test-Path -LiteralPath $killSwitch) {
     return
 }
 
+if (Test-AuthScriptInvoke -CommandText $cmd) {
+    Write-BashAudit "DENY auth_script_invoke session=$sessionId"
+    $result = @{
+        permission    = "deny"
+        user_message  = "Shell 不能直接运行打点脚本。这道门只认命令行里的脚本名；改名再跑，或用别的程序写状态文件，不在这道门里。"
+        agent_message = "bash-write-gate deny auth_script_invoke"
+    }
+    Write-Output ($result | ConvertTo-Json -Compress)
+    return
+}
+
 $paths = @(Get-ExplicitWritePaths -CommandText $cmd)
 if ($paths.Count -eq 0) {
     Write-BashAudit "ALLOW no_write_detected session=$sessionId"

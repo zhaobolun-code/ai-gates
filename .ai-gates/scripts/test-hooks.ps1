@@ -106,6 +106,14 @@ $gateBackup = $null
 if (Test-Path -LiteralPath $gateFile) {
     $gateBackup = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8
 }
+# 安装包不带 hooks-log/：干净仓库里 pm-gate.json 可能还不存在。先给一个空壳，
+# 末尾按 __test__ 前缀清理；原先没有 backup 且清理后为空时会删掉文件。
+if (-not (Test-Path -LiteralPath $logDir)) {
+    New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+}
+if (-not (Test-Path -LiteralPath $gateFile)) {
+    [System.IO.File]::WriteAllText($gateFile, '{}', $utf8NoBom)
+}
 $changelogWritesBackup = $null
 if (Test-Path -LiteralPath $changelogWritesFile) {
     $changelogWritesBackup = [System.IO.File]::ReadAllText($changelogWritesFile, [System.Text.Encoding]::UTF8)
@@ -324,6 +332,7 @@ try {
 
     $gateNow = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8 | ConvertFrom-Json
     Assert-Test "A4 mark-pm-gate: gate file contains fresh conversation entry (text)" ($null -ne $gateNow.$convFresh.lastPmAtUtc) "gate keys=$($gateNow.PSObject.Properties.Name -join ',')"
+    Assert-Test "A4 forged stdin still stamps; shell name deny is a separate gate" ($null -ne $gateNow.$convFresh.lastPmAtUtc) "fresh=$($gateNow.$convFresh.lastPmAtUtc)"
 
     $markLogTail = ""
     if (Test-Path -LiteralPath $markLog) {
@@ -485,16 +494,22 @@ try {
     # A1.6 集成：postToolUse 含 post-write-gate 且 failClosed:false；MAINTAINER hooks 表 8 行（含压缩前点亮）
     $markEntry = @($allHookEntries | Where-Object { $_.Command -match 'post-write-gate\.ps1' -and $_.Event -eq 'postToolUse' -and -not $_.FailClosed })
     Assert-Test "A1.6 hooks.json: postToolUse post-write-gate failClosed=false" ($markEntry.Count -ge 1) "entries=$($allHookEntries | ConvertTo-Json -Compress)"
-    $maintainerRaw = [System.IO.File]::ReadAllText((Join-Path $repoRoot ".cursor\skills\MAINTAINER.md"), [System.Text.Encoding]::UTF8)
-    # 只统计 §Cursor Hooks 小节内表格行——其他小节的表（流程稳定性规则等）也含 .ps1 文件名
-    $maintainerLines = $maintainerRaw -split "`n"
-    $hooksSecStart = -1; $hooksSecEnd = $maintainerLines.Count
-    for ($i = 0; $i -lt $maintainerLines.Count; $i++) {
-        if ($hooksSecStart -lt 0 -and $maintainerLines[$i] -match '^## Cursor Hooks') { $hooksSecStart = $i }
-        elseif ($hooksSecStart -ge 0 -and $maintainerLines[$i] -match '^## ') { $hooksSecEnd = $i; break }
+    $maintainerPath = Join-Path $repoRoot ".cursor\skills\MAINTAINER.md"
+    if (-not (Test-Path -LiteralPath $maintainerPath)) {
+        # MAINTAINER.md 不进安装包；装到项目里没有这份维护者手册，跳过这一条。
+        Write-Host "SKIP A1.6 MAINTAINER hooks table (maintainer file not installed)"
+    } else {
+        $maintainerRaw = [System.IO.File]::ReadAllText($maintainerPath, [System.Text.Encoding]::UTF8)
+        # 只统计 §Cursor Hooks 小节内表格行——其他小节的表（流程稳定性规则等）也含 .ps1 文件名
+        $maintainerLines = $maintainerRaw -split "`n"
+        $hooksSecStart = -1; $hooksSecEnd = $maintainerLines.Count
+        for ($i = 0; $i -lt $maintainerLines.Count; $i++) {
+            if ($hooksSecStart -lt 0 -and $maintainerLines[$i] -match '^## Cursor Hooks') { $hooksSecStart = $i }
+            elseif ($hooksSecStart -ge 0 -and $maintainerLines[$i] -match '^## ') { $hooksSecEnd = $i; break }
+        }
+        $hookTableRows = @($maintainerLines[$hooksSecStart..($hooksSecEnd - 1)] | Where-Object { $_ -match '^\|' -and $_ -match '\.ps1' })
+        Assert-Test "A1.6 MAINTAINER: hooks table has 9 rows incl. pre-write-gate" ($hooksSecStart -ge 0 -and $hookTableRows.Count -eq 9 -and $maintainerRaw -match 'pre-write-gate' -and $maintainerRaw -match 'task-model-gate') "rows=$($hookTableRows.Count)"
     }
-    $hookTableRows = @($maintainerLines[$hooksSecStart..($hooksSecEnd - 1)] | Where-Object { $_ -match '^\|' -and $_ -match '\.ps1' })
-    Assert-Test "A1.6 MAINTAINER: hooks table has 9 rows incl. pre-write-gate" ($hooksSecStart -ge 0 -and $hookTableRows.Count -eq 9 -and $maintainerRaw -match 'pre-write-gate' -and $maintainerRaw -match 'task-model-gate') "rows=$($hookTableRows.Count)"
 
     # A7：sessionStart 漂移检测 — 当前仓应无漂移；stdout 为 {} 或无可解析 additional_context
     $driftFile = Join-Path $logDir "hooks-policy-drift.json"
@@ -559,35 +574,40 @@ try {
     # 用 -Version v9.9.9 隔离产物，避免覆盖 .cursor/ 下既有 ai_dev_v3.x.7z；
     # stub validate 经 -ValidateScriptPath 注入（exit 1 / exit 0 两种）。
     $relScript = Join-Path $repoRoot ".ai-gates\package-release.ps1"
-    $relTestVersion = "v9.9.9"
-    $relTestOut = Join-Path $repoRoot ".ai-gates\releases\ai_dev_$relTestVersion.7z"
-    $relBefore = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot ".cursor") -Filter "ai_dev_*.7z" -File |
-        ForEach-Object { "$($_.Name)|$($_.Length)|$($_.LastWriteTimeUtc.Ticks)" })
-    $stubFail = Join-Path ([System.IO.Path]::GetTempPath()) "test-hooks-validate-fail-$([Guid]::NewGuid().ToString('N')).ps1"
-    $stubOk = Join-Path ([System.IO.Path]::GetTempPath()) "test-hooks-validate-ok-$([Guid]::NewGuid().ToString('N')).ps1"
-    Set-Content -LiteralPath $stubFail -Value "exit 1" -Encoding UTF8
-    Set-Content -LiteralPath $stubOk -Value "exit 0" -Encoding UTF8
-    try {
-        # A3.1：stub validate exit 1 + 无 -SkipValidate → exit 非 0、输出含拒绝句、不产出新 7z
-        $r = Invoke-HookScript -ScriptName $relScript -StdinJson $null -ExtraArgs @{ Version = $relTestVersion; ValidateScriptPath = $stubFail }
-        $combined = $r.Stdout + "`n" + $r.Stderr
-        $relAfter1 = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot ".cursor") -Filter "ai_dev_*.7z" -File |
+    if (-not (Test-Path -LiteralPath $relScript)) {
+        # package-release.ps1 是维护者文件，不进安装包；装到项目里没有它，跳过 A3。
+        Write-Host "SKIP A3 package-release (maintainer file not installed)"
+    } else {
+        $relTestVersion = "v9.9.9"
+        $relTestOut = Join-Path $repoRoot ".ai-gates\releases\ai_dev_$relTestVersion.7z"
+        $relBefore = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot ".cursor") -Filter "ai_dev_*.7z" -File |
             ForEach-Object { "$($_.Name)|$($_.Length)|$($_.LastWriteTimeUtc.Ticks)" })
-        Assert-Test "A3.1 package-release: stub validate exit1 -> exit!=0 + reject msg + no new 7z" ($r.ExitCode -ne 0 -and $combined -match '已拒绝打包' -and $combined -match 'SkipValidate' -and (Compare-Object $relBefore $relAfter1).Count -eq 0) "exit=$($r.ExitCode) out=$($combined)"
+        $stubFail = Join-Path ([System.IO.Path]::GetTempPath()) "test-hooks-validate-fail-$([Guid]::NewGuid().ToString('N')).ps1"
+        $stubOk = Join-Path ([System.IO.Path]::GetTempPath()) "test-hooks-validate-ok-$([Guid]::NewGuid().ToString('N')).ps1"
+        Set-Content -LiteralPath $stubFail -Value "exit 1" -Encoding UTF8
+        Set-Content -LiteralPath $stubOk -Value "exit 0" -Encoding UTF8
+        try {
+            # A3.1：stub validate exit 1 + 无 -SkipValidate → exit 非 0、输出含拒绝句、不产出新 7z
+            $r = Invoke-HookScript -ScriptName $relScript -StdinJson $null -ExtraArgs @{ Version = $relTestVersion; ValidateScriptPath = $stubFail }
+            $combined = $r.Stdout + "`n" + $r.Stderr
+            $relAfter1 = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot ".cursor") -Filter "ai_dev_*.7z" -File |
+                ForEach-Object { "$($_.Name)|$($_.Length)|$($_.LastWriteTimeUtc.Ticks)" })
+            Assert-Test "A3.1 package-release: stub validate exit1 -> exit!=0 + reject msg + no new 7z" ($r.ExitCode -ne 0 -and $combined -match '已拒绝打包' -and $combined -match 'SkipValidate' -and (Compare-Object $relBefore $relAfter1).Count -eq 0) "exit=$($r.ExitCode) out=$($combined)"
 
-        # A3.2：stub validate exit 0 → 越过 validate 门（绿门通过消息；不因 validate 阶段失败）
-        $r = Invoke-HookScript -ScriptName $relScript -StdinJson $null -ExtraArgs @{ Version = $relTestVersion; ValidateScriptPath = $stubOk }
-        $combined2 = $r.Stdout + "`n" + $r.Stderr
-        Assert-Test "A3.2 package-release: stub validate exit0 -> passes validate gate" ($combined2 -match 'validate-pipeline -Strict: OK' -and $combined2 -notmatch '已拒绝打包') "exit=$($r.ExitCode) out=$($combined2)"
+            # A3.2：stub validate exit 0 → 越过 validate 门（绿门通过消息；不因 validate 阶段失败）
+            $r = Invoke-HookScript -ScriptName $relScript -StdinJson $null -ExtraArgs @{ Version = $relTestVersion; ValidateScriptPath = $stubOk }
+            $combined2 = $r.Stdout + "`n" + $r.Stderr
+            Assert-Test "A3.2 package-release: stub validate exit0 -> passes validate gate" ($combined2 -match 'validate-pipeline -Strict: OK' -and $combined2 -notmatch '已拒绝打包') "exit=$($r.ExitCode) out=$($combined2)"
 
-        # A3.3：-SkipValidate + stub validate exit 1 → 跳过 validate 门（进入后续流程，不因 validate 拦截）
-        $r = Invoke-HookScript -ScriptName $relScript -StdinJson $null -ExtraArgs @{ Version = $relTestVersion; ValidateScriptPath = $stubFail; SkipValidate = $true }
-        $combined3 = $r.Stdout + "`n" + $r.Stderr
-        Assert-Test "A3.3 package-release: -SkipValidate + stub exit1 -> skips validate gate" ($combined3 -match 'WARNING: -SkipValidate' -and $combined3 -notmatch '已拒绝打包') "exit=$($r.ExitCode) out=$($combined3)"
-    } finally {
-        Remove-Item -LiteralPath $stubFail, $stubOk -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath $relTestOut -Force -ErrorAction SilentlyContinue
-        Remove-Item -LiteralPath (Join-Path $repoRoot ".ai-gates\_release_staging") -Recurse -Force -ErrorAction SilentlyContinue
+            # A3.3：-SkipValidate + stub validate exit 1 → 跳过 validate 门（进入后续流程，不因 validate 拦截）
+            $r = Invoke-HookScript -ScriptName $relScript -StdinJson $null -ExtraArgs @{ Version = $relTestVersion; ValidateScriptPath = $stubFail; SkipValidate = $true }
+            $combined3 = $r.Stdout + "`n" + $r.Stderr
+            Assert-Test "A3.3 package-release: -SkipValidate + stub exit1 -> skips validate gate" ($combined3 -match 'WARNING: -SkipValidate' -and $combined3 -notmatch '已拒绝打包') "exit=$($r.ExitCode) out=$($combined3)"
+        } finally {
+            Remove-Item -LiteralPath $stubFail, $stubOk -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $relTestOut -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath (Join-Path $repoRoot ".ai-gates\_release_staging") -Recurse -Force -ErrorAction SilentlyContinue
+        }
     }
 
     # --- A8：check-unity-compile.ps1 写后质量门（postToolUse） ---
@@ -648,6 +668,43 @@ try {
         }
     }
 
+    # --- inject-turn-tokens.ps1：beforeSubmitPrompt 按本会话注入，不读 latest ---
+    $injectLine = "token：上一轮 输入 11 / 输出 22 / 缓存读 33 / 缓存写 44"
+    $injectOtherLine = "token：上一轮 输入 91 / 输出 92 / 缓存读 93 / 缓存写 94"
+    $injectLatestLine = "token：上一轮 输入 81 / 输出 82 / 缓存读 83 / 缓存写 84"
+    $injectId = "__test__inject-hit-$([Guid]::NewGuid().ToString('N'))"
+    $injectOtherId = "__test__inject-other-$([Guid]::NewGuid().ToString('N'))"
+    $injectMissingId = "__test__inject-miss-$([Guid]::NewGuid().ToString('N'))"
+    $injectTmp = Join-Path ([System.IO.Path]::GetTempPath()) "test-inject-turn-tokens-$([Guid]::NewGuid().ToString('N')).json"
+    try {
+        $injectMap = [ordered]@{
+            $injectId      = [ordered]@{ line = $injectLine }
+            $injectOtherId = [ordered]@{ line = $injectOtherLine }
+            latest         = [ordered]@{ line = $injectLatestLine; conversationId = $injectOtherId }
+        }
+        [System.IO.File]::WriteAllText($injectTmp, ($injectMap | ConvertTo-Json -Depth 6), $utf8Bom)
+
+        $r = Invoke-HookScript -ScriptName "inject-turn-tokens.ps1" -StdinJson (@{ conversation_id = $injectId } | ConvertTo-Json -Compress) -ExtraArgs @{ TokenFile = $injectTmp }
+        Assert-Test "A1 inject-turn-tokens: matching conversation_id injects stored line" ($r.ExitCode -eq 0 -and $r.Stdout -match [Regex]::Escape($injectLine) -and $r.Stdout -match "不要估算本轮") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+
+        $r = Invoke-HookScript -ScriptName "inject-turn-tokens.ps1" -StdinJson (@{ conversation_id = $injectMissingId } | ConvertTo-Json -Compress) -ExtraArgs @{ TokenFile = $injectTmp }
+        Assert-Test "A2 inject-turn-tokens: missing conversation_id does not inject this or other sessions" ($r.ExitCode -eq 0 -and $r.Stdout -notmatch "输入 11" -and $r.Stdout -notmatch "输入 91" -and $r.Stdout -notmatch "输入 81" -and $r.Stdout -notmatch "输出 92" -and $r.Stdout -notmatch "输出 82") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+
+        $latestOnly = Join-Path ([System.IO.Path]::GetTempPath()) "test-inject-turn-tokens-latest-$([Guid]::NewGuid().ToString('N')).json"
+        try {
+            $latestMap = [ordered]@{
+                latest = [ordered]@{ line = $injectLatestLine; conversationId = $injectOtherId }
+            }
+            [System.IO.File]::WriteAllText($latestOnly, ($latestMap | ConvertTo-Json -Depth 6), $utf8Bom)
+            $r = Invoke-HookScript -ScriptName "inject-turn-tokens.ps1" -StdinJson (@{ conversationId = $injectId } | ConvertTo-Json -Compress) -ExtraArgs @{ TokenFile = $latestOnly }
+            Assert-Test "A3 inject-turn-tokens: latest-only file does not inject latest numbers" ($r.ExitCode -eq 0 -and $r.Stdout -notmatch "输入 81" -and $r.Stdout -notmatch "输出 82" -and $r.Stdout -notmatch "缓存读 83" -and $r.Stdout -notmatch "缓存写 84") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+        } finally {
+            Remove-Item -LiteralPath $latestOnly -Force -ErrorAction SilentlyContinue
+        }
+    } finally {
+        Remove-Item -LiteralPath $injectTmp -Force -ErrorAction SilentlyContinue
+    }
+
     # A3：无 pwsh 不得报已接线——真实 Unix 无 pwsh 跑不了本 .ps1，用注入接缝测字面量
     $prevRuntime = $env:AI_GATES_HOOKS_RUNTIME
     try {
@@ -699,6 +756,11 @@ try {
     Assert-Test "A12 pm-gate-check: skill patch is not a business deny" ((Get-Permission $r.Stdout) -eq "allow") "stdout=$($r.Stdout)"
 
     $convParse = "__test__conv-parse-$([Guid]::NewGuid().ToString('N'))"
+    # A9 的 simulate-cursor-session 会清掉只剩 __sim__ 条目的门禁文件；安装包里没有真实会话，
+    # 这里重新给一个空壳，收尾仍按「无 backup 且只剩测试条目则删」还原。
+    if (-not (Test-Path -LiteralPath $gateFile)) {
+        [System.IO.File]::WriteAllText($gateFile, '{}', $utf8NoBom)
+    }
     $gateParse = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8 | ConvertFrom-Json
     $gateParse | Add-Member -NotePropertyName $convParse -NotePropertyValue ([pscustomobject]@{ lastPmAtUtc = [DateTime]::UtcNow.ToString('o'); snippet = '[PM] parse-fail' }) -Force
     $gateParse | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $gateFile -Encoding UTF8

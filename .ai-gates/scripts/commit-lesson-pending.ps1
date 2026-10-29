@@ -71,6 +71,21 @@ function Get-YamlMap([string]$yaml) {
     return $map
 }
 
+function Test-PlaceholderCauseFix([string]$cause, [string]$fix) {
+    # keep in sync with test-publish-reject.ps1 Test-PlaceholderCauseFix
+    $needles = @(
+        "原因待人写",
+        "原因待确认",
+        "Fix the failing check",
+        "keep cause and fix non-empty"
+    )
+    foreach ($n in $needles) {
+        if ($cause.IndexOf($n) -ge 0 -or $fix.IndexOf($n) -ge 0) {
+            throw "placeholder cause/fix refused: $n"
+        }
+    }
+}
+
 $repo = Get-RepoRoot
 if (-not $LessonsPath) {
     $LessonsPath = Join-Path $repo ".ai-gates\lessons-learned.md"
@@ -114,6 +129,8 @@ if ([string]::IsNullOrWhiteSpace($cause) -or [string]::IsNullOrWhiteSpace($fix))
 if ($cause.Trim().Length -lt 4 -or $fix.Trim().Length -lt 4) {
     throw "cause/fix too short"
 }
+# keep in sync with test-publish-reject.ps1; before publish gate
+Test-PlaceholderCauseFix $cause $fix
 
 $rejectScript = Join-Path $PSScriptRoot "test-publish-reject.ps1"
 if (-not (Test-Path -LiteralPath $rejectScript)) {
@@ -155,7 +172,20 @@ if (-not $Apply) {
     exit 0
 }
 
+# keep in sync with test-publish-reject.ps1; before writing main table
+Test-PlaceholderCauseFix $cause $fix
+
 $lessonsText = Read-Utf8 $LessonsPath
+$dupPrefix = "| $date | $module | $lesson | $source | $doc |"
+if ($lessonsText.IndexOf($dupPrefix) -ge 0) {
+    $existMark = [string]([char]0x5DF2) + [string]([char]0x5B58) + [string]([char]0x5728)
+    Write-Host $existMark
+    [Console]::Out.WriteLine($existMark)
+    $pendingNew = [regex]::Replace($pendingText, '(?m)^(\s*status\s*:\s*)pending\b', '${1}committed', 1)
+    Write-Utf8Bom $PendingPath $pendingNew
+    Write-Host "OK: row already in lessons table; pending marked committed."
+    exit 0
+}
 if ($lessonsText -notmatch '(?m)^\|\s*---\s*\|') {
     throw "lessons table header separator not found"
 }

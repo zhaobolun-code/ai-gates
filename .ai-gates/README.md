@@ -80,4 +80,4 @@ ai-gates 的取法是**流程由它选，停点由你说**。下面几条决定�
 
 ## 平台
 
-支持 Cursor / Codex / Trae / Claude Code。机器门禁**不是**「所有客户端都会 deny 写入」：Cursor、Codex CLI、Claude Code 可拦；Codex 桌面的 `apply_patch` 可能不触发；Trae 没有机器 hooks。脚本是 PowerShell：Windows 用本机 powershell；macOS / Linux 需要 PowerShell 7（`pwsh`）。注册命令仍是 `powershell`。只有 `pwsh`、没有 `powershell` 时钩子不会启动，体检报 `hooks_command_is_powershell`，不算已接线。两个都没有则报 `hooks_not_wired_no_pwsh`，只剩规则自觉。机器放行只证明「这会话 120 分钟内说过 `[PM]`」，不证明这一条已经做完结构化判定。平台差异和「被拦了怎么办」详见 [USER-GUIDE](./USER-GUIDE.md)。
+支持 Cursor / Codex / Trae / Claude Code。机器门禁**不是**「所有客户端都会 deny 写入」：Cursor、Codex CLI、Claude Code 可拦；Codex 桌面的 `apply_patch` 可能不触发；Trae 没有机器 hooks。脚本是 PowerShell：Windows 用本机 powershell；macOS / Linux 需要 PowerShell 7（`pwsh`）。注册命令仍是 `powershell`。只有 `pwsh`、没有 `powershell` 时钩子不会启动，体检报 `hooks_command_is_powershell`，不算已接线。两个都没有则报 `hooks_not_wired_no_pwsh`，只剩规则自觉。机器放行只证明「这会话 120 分钟内说过 `[PM]`」，不证明这一条已经做完结构化判定。这是开发护栏：解析失败、认不出的命令、状态文件读坏，仍按原策略放行。`validate-pipeline -Strict` 只证明脚本回归，不证明 Cursor、Claude、Codex 已经在宿主里调用了钩子。Shell 会拒绝直接运行打点脚本；把脚本改名再跑，或用别的程序写状态文件，不在这道门里。平台差异和「被拦了怎么办」详见 [USER-GUIDE](./USER-GUIDE.md)。

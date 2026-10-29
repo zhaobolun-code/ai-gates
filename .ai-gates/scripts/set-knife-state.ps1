@@ -8,11 +8,9 @@
 )
 $ErrorActionPreference = "Stop"
 . (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\hooks\gate-decision.ps1")
-if ([string]::IsNullOrWhiteSpace($StatePath)) {
-    $root = git rev-parse --show-toplevel 2>$null
-    if (-not $root) { $root = (Resolve-Path (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\..")).Path }
-    $StatePath = Join-Path $root ".ai-gates\hooks-log\knife-state.json"
-}
+# StatePath 不采用。只写本仓库固定的 knife-state.json。
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+$StatePath = Join-Path $root ".ai-gates\hooks-log\knife-state.json"
 $dir = Split-Path -Parent $StatePath
 if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
 $existing = ""

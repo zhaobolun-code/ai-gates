@@ -60,6 +60,12 @@ if (Test-KillSwitch) {
     return
 }
 
+if (Test-AuthScriptInvoke -CommandText $cmd) {
+    Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("DENY auth_script_invoke session={0}" -f $sessionId)
+    Write-Output (Emit-PreToolUseDeny -Reason "Bash write gate deny: auth_script_invoke. The shell gate only matches the script name. A renamed copy or another program writing the state file is outside this gate.")
+    return
+}
+
 $paths = @(Get-ExplicitWritePaths -CommandText $cmd)
 if ($paths.Count -eq 0) {
     Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("ALLOW no_write_detected session={0}" -f $sessionId)

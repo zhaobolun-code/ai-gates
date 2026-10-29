@@ -61,6 +61,33 @@ function Test-MechanismNotes([string]$notes) {
     return $false
 }
 
+function Get-RepoRoot {
+    $p = $PSScriptRoot
+    if (-not $p) { $p = Split-Path -Parent $MyInvocation.MyCommand.Path }
+    for ($i = 0; $i -lt 12; $i++) {
+        $ver = Join-Path $p ".ai-gates\skills\VERSION"
+        if (Test-Path -LiteralPath $ver) { return $p }
+        $p = Split-Path -Parent $p
+        if (-not $p) { break }
+    }
+    throw "cannot resolve repo root from " + $PSScriptRoot
+}
+
+function Test-PlaceholderCauseFix([string]$cause, [string]$fix) {
+    # keep in sync with commit-lesson-pending.ps1 Test-PlaceholderCauseFix
+    $needles = @(
+        "原因待人写",
+        "原因待确认",
+        "Fix the failing check",
+        "keep cause and fix non-empty"
+    )
+    foreach ($n in $needles) {
+        if ($cause.IndexOf($n) -ge 0 -or $fix.IndexOf($n) -ge 0) {
+            Fail-Reject ("无证据 cause/fix placeholder " + $n)
+        }
+    }
+}
+
 function Test-LessonMap($map) {
     $lesson = ""
     if ($map.ContainsKey("lesson")) { $lesson = [string]$map["lesson"] }
@@ -77,6 +104,45 @@ function Test-LessonMap($map) {
     if ($cause.Trim().Length -lt 4 -or $fix.Trim().Length -lt 4) {
         Fail-Reject "无证据 cause/fix too short"
     }
+    Test-PlaceholderCauseFix $cause $fix
+}
+
+function Test-HasContent([string]$s) {
+    return -not [string]::IsNullOrWhiteSpace($s)
+}
+
+function Test-NameAsTableCell([string]$name, [string]$filePath) {
+    if (-not (Test-Path -LiteralPath $filePath)) { return $false }
+    $want = $name.Trim()
+    if ($want -eq "") { return $false }
+    $text = Read-Utf8 $filePath
+    foreach ($line in ($text -split "`r?`n")) {
+        if ($line -notmatch '^\|') { continue }
+        $cells = @(Get-Cells $line)
+        if ($cells.Count -eq 0) { continue }
+        if ($cells[0] -match '^-+$') { continue }
+        foreach ($c in $cells) {
+            if ($c -eq $want) { return $true }
+        }
+    }
+    return $false
+}
+
+function Test-CreateAnchorPath([string]$anchor) {
+    $a = $anchor.Trim()
+    $colon = $a.LastIndexOf([char]':')
+    if ($colon -le 0 -or $colon -ge ($a.Length - 1)) {
+        Fail-Reject "无证据 create anchor not path:symbol"
+    }
+    $rel = $a.Substring(0, $colon).Trim() -replace '/', '\'
+    if ([string]::IsNullOrWhiteSpace($rel)) {
+        Fail-Reject "无证据 create anchor not path:symbol"
+    }
+    $repo = Get-RepoRoot
+    $p1 = Join-Path $repo $rel
+    $p2 = Join-Path $repo (Join-Path ".ai-gates" $rel)
+    if ((Test-Path -LiteralPath $p1) -or (Test-Path -LiteralPath $p2)) { return }
+    Fail-Reject "无证据 create anchor path missing"
 }
 
 function Test-PatternMap($map) {
@@ -85,15 +151,55 @@ function Test-PatternMap($map) {
     if (Test-EmptyTalk $name) {
         Fail-Reject "空话 name/title"
     }
+    $status = ""
+    if ($map.ContainsKey("status")) { $status = ([string]$map["status"]).Trim().ToLowerInvariant() }
+    $allowedStatus = @("pending", "committed", "rejected", "revise")
+    if ($allowedStatus -notcontains $status) {
+        Fail-Reject "无证据 bad status"
+    }
     $action = ""
     if ($map.ContainsKey("action")) { $action = ([string]$map["action"]).Trim().ToLowerInvariant() }
     if ([string]::IsNullOrWhiteSpace($action)) {
         Fail-Reject "无证据 missing action"
     }
+    $allowedAction = @("improve", "optimize_description", "create")
+    if ($allowedAction -notcontains $action) {
+        Fail-Reject "无证据 bad action"
+    }
+    $destination = ""
+    if ($map.ContainsKey("destination")) { $destination = ([string]$map["destination"]).Trim().ToLowerInvariant() }
+    $allowedDest = @("design-patterns", "maxim", "maxim-generic", "allusion")
+    if ($allowedDest -notcontains $destination) {
+        Fail-Reject "无证据 bad destination"
+    }
+    $symptom = ""
+    if ($map.ContainsKey("symptom")) { $symptom = [string]$map["symptom"] }
+    $pack = ""
+    if ($map.ContainsKey("pack")) { $pack = [string]$map["pack"] }
+    $verifyStatus = ""
+    if ($map.ContainsKey("verify_status")) { $verifyStatus = [string]$map["verify_status"] }
+    $forbid = ""
+    if ($map.ContainsKey("forbid")) { $forbid = [string]$map["forbid"] }
+    if (-not (Test-HasContent $symptom)) { Fail-Reject "无证据 missing symptom" }
+    if (-not (Test-HasContent $pack)) { Fail-Reject "无证据 missing pack" }
+    if (-not (Test-HasContent $verifyStatus)) { Fail-Reject "无证据 missing verify_status" }
+    if (-not (Test-HasContent $forbid)) { Fail-Reject "无证据 missing forbid" }
     $anchor = ""
     if ($map.ContainsKey("anchor")) { $anchor = [string]$map["anchor"] }
     if ($action -eq "create" -and [string]::IsNullOrWhiteSpace($anchor)) {
         Fail-Reject "无证据 create missing anchor"
+    }
+    if ($action -eq "create") {
+        Test-CreateAnchorPath $anchor
+    }
+    if ($action -eq "improve" -or $action -eq "optimize_description") {
+        $repo = Get-RepoRoot
+        $t1 = Join-Path $repo ".ai-gates\skills\references\design-patterns.md"
+        $t2 = Join-Path $repo ".ai-gates\design-patterns.project.md"
+        $hit = (Test-NameAsTableCell $name $t1) -or (Test-NameAsTableCell $name $t2)
+        if (-not $hit) {
+            Fail-Reject "无证据 name not a table cell"
+        }
     }
 }
 
@@ -121,7 +227,7 @@ function Test-Queue([string]$text, [string]$wantId) {
         $cells = @(Get-Cells $line)
         if ($cells.Count -eq 0) { continue }
         $joined = ($cells -join " ").ToLowerInvariant()
-        if (-not $headerSeen -and ($joined -match 'origin') -and ($joined -match 'notes')) {
+        if (($joined -match 'origin') -and ($joined -match 'notes')) {
             for ($i = 0; $i -lt $cells.Count; $i++) {
                 $h = $cells[$i].ToLowerInvariant()
                 if ($h -eq "state") { $idxState = $i }
@@ -130,6 +236,23 @@ function Test-Queue([string]$text, [string]$wantId) {
                 if ($h -eq "id") { $idxId = $i }
                 if ($h -eq "title") { $idxTitle = $i }
             }
+            $headerSeen = $true
+            break
+        }
+    }
+    if (-not $headerSeen) {
+        Fail-Reject "无证据 queue missing origin/notes header"
+    }
+    if ($idxState -lt 0 -or $idxOrigin -lt 0 -or $idxNotes -lt 0 -or $idxTitle -lt 0) {
+        Fail-Reject "无证据 queue header missing state/origin/notes/title"
+    }
+    $headerSeen = $false
+    foreach ($line in $lines) {
+        if ($line -notmatch '^\|') { continue }
+        $cells = @(Get-Cells $line)
+        if ($cells.Count -eq 0) { continue }
+        $joined = ($cells -join " ").ToLowerInvariant()
+        if (-not $headerSeen -and ($joined -match 'origin') -and ($joined -match 'notes')) {
             $headerSeen = $true
             continue
         }
