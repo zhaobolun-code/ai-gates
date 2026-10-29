@@ -8,7 +8,7 @@
 
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet('git-safety-check', 'pre-write-gate', 'post-write-gate', 'mark-pm-gate')]
+    [ValidateSet('git-safety-check', 'pre-shell-gate', 'pre-write-gate', 'post-write-gate', 'mark-pm-gate')]
     [string]$Target
 )
 

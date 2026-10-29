@@ -58,7 +58,7 @@ pm:
 
 **隔离审核**：L1.5 CR / L2 / L3 / 高风险对抗 CR → **优先**主 Agent 拉起 Subagent 隔离会话；高风险**优先异模型**（首选高质量档，失败回退同模型，不硬拦）；失败再提示手动新开 Chat；同 Chat 续审须标非独立。细则 → [isolated-review.md](references/isolated-review.md)。**不校验**用户是否接受隔离/是否换模型。
 
-**主窗仅 PM + 流水线岗子窗（优先 · 不硬拦）**：主窗**只**做 `[PM]`。方案审 / CR / 文档 **一律优先 Subagent**。Express 与 Direct 的业务改码**必须子窗**（程序员，低级档）。CR 仍必须隔离子窗。主窗不改业务 `.cs`/`.lua`。范围不清的 Direct 仍派策划子窗。**周报例外**：用户单独调用，不要求子窗。模型：策划/方案审=高质量；实现/文档=便宜快速；CR 相对实现优先高质量；**具体 slug 只读 project-context §模型路由**（没有该节则标「未按模型路由」，技能不另造默认表）。细则 → [model-routing.md](references/model-routing.md)。
+**主窗仅 PM + 流水线岗子窗**：主窗**只**做 `[PM]`。方案审 / CR / 文档 **一律优先 Subagent**。Express 与 Direct 的业务改码**必须子窗**（程序员，低级档）。CR 仍必须隔离子窗。主窗不改业务 `.cs`/`.lua`。范围不清的 Direct 仍派策划子窗。**周报例外**：用户单独调用，不要求子窗。模型：策划/方案审=高质量；实现/文档=便宜快速；CR 相对实现优先高质量；**具体 slug 只读 project-context §模型路由**（没有该节则标「未按模型路由」，技能不另造默认表）。细则 → [model-routing.md](references/model-routing.md)。
 
 Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr-dispatch-l1.5.md](./templates/cr-dispatch-l1.5.md)（Subagent 派发或手动粘贴）。
 **禁止**未完成内部结构化判定就仅凭白话判车道。

@@ -16,22 +16,15 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 
 ## 车道
 
-| 车道 | 本岗 |
-| --- | --- |
-| Express | PM [express-slice.md](../templates/express-slice.md)；完成 [express-self-check.md](../express-self-check.md)；有夹则窗内自检。无 CR |
-| Direct | 对话内 A#；隔离 CR（必须子窗或新开 Chat，标注「隔离复核」）；同 Chat 只标非独立不算完成；单会话收口 |
-| Standard | plan-lite Step；完成后交 PM 提示 CR；同 Chat 标非独立 CR |
-| Full | 串行；交 `[CR]` |
-
-升道链命中 → 停扩，交 PM。禁止本岗写死升道目标。
+各档步骤见当前车道卡。升道之后停手，交回 PM。本岗不写死升到哪一档。
 
 ## 模型路由 + 子窗
 
-优先子窗 + 便宜快速档，**必须** `model=`（程序员 = 项目说明里的低级 slug）。省略或 `inherit` 会复制主窗，钩子拒绝。Express、Direct、Standard、Full 的业务改码都**必须子窗**。主窗不改业务 `.cs`/`.lua`。CR 仍必须隔离子窗。AFK → [agent-brief.md](../references/agent-brief.md)。
+优先子窗 + 便宜快速档，**必须** `model=`（程序员 = 项目说明里的低级 slug）。省略或 `inherit` 会复制主窗，钩子拒绝。Express、Direct、Standard、Full 的业务改码都**必须子窗**。主窗不改业务 `.cs`/`.lua`。CR 仍必须隔离子窗。主窗提示里的岗位卡和合同正文忽略，自己读本页和白名单。交回主窗只留三行。代码审核派发由本岗刷新，主窗不改。AFK → [agent-brief.md](../references/agent-brief.md)。
 
 ## Checklist（每次）
 
-1. 有「准」或恢复口令才改。Express 须切片。Standard/Full：非战役须已过方案审；**战役**口径/选型/A# 未变则免本刀方案审 → [circuit-windows.md](../references/circuit-windows.md)。零确认改码禁止。
+1. 有「准」或恢复口令才改。切片、自检、代码审、待测状态见当前车道卡。**战役**口径/选型/A# 未变则免本刀方案审 → [circuit-windows.md](../references/circuit-windows.md)。零确认改码禁止。
 1.5 只读白名单：`未完成.md` + `物理口径.md` + `Mandatory-Step*.md` + Mandatory 源码。禁 Read `已完成/历史全文*` / `证据/**` 全文。终态须 migrate。迁窗/完成即迁移 → [doc-windowing.md](../references/doc-windowing.md)
 1.55 完成即迁移：非战役本 Step 收口即迁；战役可批到签收。Direct/Express 无夹跳过。
 1.57 仅开窗/改邻接/签收 → Read [fog-map-structure.md](../references/fog-map-structure.md)。中刀只实现 / Express 机械 / 闲聊 → 不读。
@@ -50,22 +43,20 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 4.6 可机械验证项 → [test-first.md](../references/test-first.md)
 5. 与方案冲突 / 越 A# → 停
 5.5 三问：名实 / 数据源与回退 / 理解相反会破坏什么。不确定 → [knowledge-gap.md](../references/knowledge-gap.md)；置信标注 → [evidence-levels.md](../references/evidence-levels.md)；分歧启用 → [divergence-annotation.md](../references/divergence-annotation.md)
-6. Express → express-self-check。Standard/Full 刷新 `证据/_Step{NN}-代码审核派发.md` → [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md)。README → [readme-dispatch.md](../references/readme-dispatch.md)
+6. Standard/Full 刷新 `证据/_Step{NN}-代码审核派发.md` → [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md)。README → [readme-dispatch.md](../references/readme-dispatch.md)
 6.05 禁止本岗 Task 派代码审核
 6.06 自称 locally-validated / DONE 须同条命令+退出码；否则 `DONE_WITH_CONCERNS`。[evidence-levels.md](../references/evidence-levels.md)
-7. Unity 未跑写 `not run`。测挂交 PM [diagnosis-gates.md](../references/diagnosis-gates.md) §0。黑板 → `证据/_repair-blackboard.md`
+7. 测挂交 PM [diagnosis-gates.md](../references/diagnosis-gates.md) §0。黑板 → `证据/_repair-blackboard.md`。未跑不写通过，见当前车道卡。
 7.5 Editor.log §A 自修；测挂先 §B 关键词，不标 runtime-validated
 8. 交接短表。错题/模式/收集仓/外仓：条件命中才 Read [lessons-learned.md](../references/lessons-learned.md) / [pattern-harvest.md](../references/pattern-harvest.md) / [collect-queue.md](../references/collect-queue.md) / [external-compare.md](../references/external-compare.md)
-9. >3 文件 / 跨模块 → 停报 PM
 10. CR blocker 先修
 11. 咨询不改文件
 
 ## 回复须含
 
-Express：不加四态，交 express-self-check。
 Direct / Standard/Full：最后一条 **≤15 行**，**第一行必须是** `DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`。有可跑命令却无退出码 → 不得 `DONE`。交回主窗不贴 diff、不贴编译日志，只留改了哪些文件、结论、还没证明什么。Direct 禁止落盘报告。Standard/Full 细节进 `证据/_Step{NN}-implement-report.md`。无四态第一行 PM 不得派 CR。
 修轮：`repair_rounds` 0→1 resume；1→2 新开+高一档。禁止同档连派两次。[handoff-template.md](../references/handoff-template.md)
 
 ## 禁止
 
-一次多 Step / 无切片就改 / 跳过 CR 或 Express 自检 / 无运行证据声称通过
+一次多 Step / 无运行证据声称通过。切片、自检、代码审见当前车道卡。

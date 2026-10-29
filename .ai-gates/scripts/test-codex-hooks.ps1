@@ -41,9 +41,9 @@ function Invoke-Hook {
     )
     $ps = Join-Path $hooksCodexDir $Script
     if ($EditorLogPath) {
-        $out = $Payload | & powershell -NoProfile -ExecutionPolicy Bypass -File $ps -LogDir $LogDir -EditorLogPath $EditorLogPath 2>$null
+        $out = $Payload | & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $ps -LogDir $LogDir -EditorLogPath $EditorLogPath 2>$null
     } else {
-        $out = $Payload | & powershell -NoProfile -ExecutionPolicy Bypass -File $ps -LogDir $LogDir 2>$null
+        $out = $Payload | & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $ps -LogDir $LogDir 2>$null
     }
     return [string]::Join("`n", @($out))
 }
@@ -93,6 +93,14 @@ Write-Case 'A2 git status -> allow(no permissionDecision)' ($out -notmatch 'perm
 $out = Invoke-Hook -Script 'git-safety-check.ps1' -Payload 'not-json{{{' -LogDir $ld
 Write-Case 'A3 parse fail -> allow' ($out -notmatch 'permissionDecision') $out
 
+$p = Get-SessionPayload -SessionId $sid -ToolName 'Bash' -Command 'Set-Content -Path Assets/Foo.cs -Value 1'
+$out = Invoke-Hook -Script 'bash-write-gate.ps1' -Payload $p -LogDir $ld
+Write-Case 'A4 shell write business no pm -> deny' ($out -match '"permissionDecision":"deny"' -and $out -match 'business_no_fresh_pm') $out
+
+$p = Get-SessionPayload -SessionId $sid -ToolName 'Bash' -Command 'git status'
+$out = Invoke-Hook -Script 'bash-write-gate.ps1' -Payload $p -LogDir $ld
+Write-Case 'A5 shell no explicit write -> allow(no permissionDecision)' ($out -notmatch 'permissionDecision') $out
+
 # ---------- B: audit-write ----------
 $ld = Join-Path $tmpRoot 'B'
 New-Item -ItemType Directory -Path $ld -Force | Out-Null
@@ -111,7 +119,7 @@ Write-Case 'C1 business no marker -> deny' ($out -match '"permissionDecision":"d
 $now = [DateTime]::UtcNow.ToString('o')
 [System.IO.File]::WriteAllText((Join-Path $ld 'pm-gate.json'), (@{ $sid = @{ lastPmAtUtc = $now; snippet = 'PM 判定' } } | ConvertTo-Json -Depth 6), (New-Object System.Text.UTF8Encoding($true)))
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
-Write-Case 'C2 business fresh marker -> allow' ($out -notmatch 'permissionDecision') $out
+Write-Case 'C2 business fresh marker on main window -> deny' ($out -match '"permissionDecision":"deny"' -and $out -match 'main_window_business_code') $out
 
 $stale = [DateTime]::UtcNow.AddHours(-3).ToString('o')
 [System.IO.File]::WriteAllText((Join-Path $ld 'pm-gate.json'), (@{ $sid = @{ lastPmAtUtc = $stale } } | ConvertTo-Json -Depth 6), (New-Object System.Text.UTF8Encoding($true)))
@@ -175,11 +183,11 @@ Write-Case 'C10 mixed fresh changelog no pm -> deny (business gate)' ($out -matc
 [System.IO.File]::WriteAllText((Join-Path $ldM 'pm-gate.json'), (@{ $sid = @{ lastPmAtUtc = $now } } | ConvertTo-Json -Depth 6), (New-Object System.Text.UTF8Encoding($true)))
 Remove-Item -LiteralPath (Join-Path $ldM 'changelog-writes.json') -Force
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ldM
-Write-Case 'C11 mixed fresh pm no changelog -> deny (level1 gate)' ($out -match '"permissionDecision":"deny"' -and $out -match 'Level-1') $out
+Write-Case 'C11 mixed fresh pm no changelog -> deny (main window business)' ($out -match '"permissionDecision":"deny"' -and $out -match 'main_window_business_code') $out
 
 [System.IO.File]::WriteAllText((Join-Path $ldM 'changelog-writes.json'), (@{ $sid = @{ lastChangelogWriteAtUtc = $now } } | ConvertTo-Json -Depth 6), (New-Object System.Text.UTF8Encoding($true)))
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ldM
-Write-Case 'C12 mixed both fresh -> allow' ($out -notmatch 'permissionDecision') $out
+Write-Case 'C12 mixed both fresh on main window -> deny' ($out -match '"permissionDecision":"deny"' -and $out -match 'main_window_business_code') $out
 
 # ---------- D: mark-pm-gate ----------
 $ld = Join-Path $tmpRoot 'D'

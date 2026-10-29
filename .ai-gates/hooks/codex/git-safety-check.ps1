@@ -16,6 +16,7 @@ param(
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 . (Join-Path $PSScriptRoot 'codex-hooks-common.ps1')
+. (Join-Path $PSScriptRoot '..\gate-decision.ps1')
 
 if (-not $LogDir) { $LogDir = Get-LogDir -ScriptRoot $PSScriptRoot }
 
@@ -27,35 +28,31 @@ try {
         $cmd = [string](Get-Property $json.tool_input 'command')
     }
 } catch {
-    # 解析异常 fail-open：不影响原命令执行
+    Write-HookAudit -LogDir $LogDir -FileName 'git-safety-check.log' -Line "ALLOW 解析失败"
     Write-Output (Emit-PreToolUseAllow)
     return
 }
 
 if ([string]::IsNullOrWhiteSpace($cmd)) {
+    Write-HookAudit -LogDir $LogDir -FileName 'git-safety-check.log' -Line "ALLOW 空命令"
     Write-Output (Emit-PreToolUseAllow)
     return
 }
 
-$dangerousPatterns = @(
-    @{ Pattern = 'git\s+push\b[^\n]*(--force(?!-with-lease)\b|\s-f\b|\s\+\S+)'; Reason = '强制推送（--force / -f / +引用）可能覆盖远端历史，无法找回' },
-    @{ Pattern = 'git\s+reset\b[^\n]*--hard\b'; Reason = '硬重置（--hard）会丢弃未提交的工作区改动' },
-    @{ Pattern = 'git\s+clean\b[^\n]*-[a-zA-Z]*[dfx]'; Reason = 'git clean 会永久删除未跟踪文件' },
-    @{ Pattern = 'git\s+checkout\b[^\n]*(--force(?!-with-lease)\b|\s-f\b|--\s|\.$|\s\.\s)'; Reason = 'checkout -f / --force 或 checkout 路径会丢弃未提交改动（对应「方案推翻」流程，须已征得用户确认）' },
-    @{ Pattern = 'git\s+branch\b[^\n]*-D\b'; Reason = '强制删除分支（-D）不检查是否已合并' }
-)
-
-foreach ($rule in $dangerousPatterns) {
-    if ($cmd -match $rule.Pattern) {
-        Write-HookAudit -LogDir $LogDir -FileName 'git-safety-check.log' -Line ("DENY cmd={0} reason={1}" -f $cmd, $rule.Reason)
-        $shown = Redact-HookSecrets $cmd
-        $reason = "检测到高危 Git 命令：$shown。原因：$($rule.Reason)。已被 Codex PreToolUse hook 拦截（deny）。逃生：若你确认安全，请在终端手动执行该命令；或临时移除 .codex/hooks.json 中本 hook 条目后重试；或调整命令规避误判。"
-        Write-Output (Emit-PreToolUseDeny -Reason $reason)
-        return
-    }
+$gitReason = Test-DangerousGitCommand -CommandText $cmd
+if ($gitReason) {
+    Write-HookAudit -LogDir $LogDir -FileName 'git-safety-check.log' -Line ("DENY cmd={0} reason={1}" -f $cmd, $gitReason)
+    $shown = Redact-HookSecrets $cmd
+    $reason = "检测到高危 Git 命令：$shown。原因：$gitReason。已被 Codex PreToolUse hook 拦截（deny）。逃生：若你确认安全，请在终端手动执行该命令；或临时移除 .codex/hooks.json 中本 hook 条目后重试；或调整命令规避误判。"
+    Write-Output (Emit-PreToolUseDeny -Reason $reason)
+    return
 }
 
-if ($cmd -match 'git\s+push\b[^\n]*--force-with-lease\b') {
+if (Test-GitCommandUnparsed -CommandText $cmd) {
+    Write-HookAudit -LogDir $LogDir -FileName 'git-safety-check.log' -Line ("ALLOW 未解析 cmd={0}" -f $cmd)
+}
+
+if (Test-GitForceWithLease -CommandText $cmd) {
     Write-HookAudit -LogDir $LogDir -FileName 'git-safety-check.log' -Line ("ALLOW force-with-lease cmd={0}" -f $cmd)
 }
 Write-HookAudit -LogDir $LogDir -FileName 'git-safety-check.log' -Line ("ALLOW cmd={0}" -f $cmd)

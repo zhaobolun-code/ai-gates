@@ -138,6 +138,17 @@ try {
     $r = Invoke-HookScript -ScriptName "git-safety-check.ps1" -StdinJson '{"command":"git reset --hard HEAD~1"}'
     Assert-Test "git-safety-check: reset --hard -> deny" ((Get-Permission $r.Stdout) -eq "deny") "stdout=$($r.Stdout)"
 
+    $bwDir = Join-Path ([System.IO.Path]::GetTempPath()) ("aigates-bwrite-" + [Guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $bwDir -Force | Out-Null
+    $r = Invoke-HookScript -ScriptName "bash-write-gate.ps1" -StdinJson '{"command":"Set-Content -Path Assets/Foo.cs -Value 1","conversation_id":"t-none"}' -ExtraArgs @{ LogDir = $bwDir }
+    Assert-Test "bash-write-gate: business write without pm -> deny" ((Get-Permission $r.Stdout) -eq "deny") "stdout=$($r.Stdout)"
+    $r = Invoke-HookScript -ScriptName "bash-write-gate.ps1" -StdinJson '{"command":"git status","conversation_id":"t-none"}' -ExtraArgs @{ LogDir = $bwDir }
+    Assert-Test "bash-write-gate: no explicit write -> allow" ((Get-Permission $r.Stdout) -eq "allow") "stdout=$($r.Stdout)"
+    $r = Invoke-HookScript -ScriptName "bash-write-gate.ps1" -StdinJson '{"command":"Set-Content -Path .ai-gates/tmp/x.txt -Value 1","conversation_id":"t-none"}' -ExtraArgs @{ LogDir = $bwDir }
+    Assert-Test "bash-write-gate: generated path -> allow" ((Get-Permission $r.Stdout) -eq "allow") "stdout=$($r.Stdout)"
+    $r = Invoke-HookScript -ScriptName "pre-shell-gate.ps1" -StdinJson '{"command":"git push origin main --force"}' -ExtraArgs @{ LogDir = $bwDir }
+    Assert-Test "pre-shell-gate: force push -> deny" ((Get-Permission $r.Stdout) -eq "deny") "stdout=$($r.Stdout)"
+
     # --- verify-runtime-evidence.ps1：构造临时 Editor.log fixture ---
     $tmpLog = Join-Path ([System.IO.Path]::GetTempPath()) "test-hooks-editor-$([Guid]::NewGuid().ToString('N')).log"
     @(
@@ -254,7 +265,14 @@ try {
     Assert-Test "A5 pm-gate-check: no-parent deny still tells this session to emit [PM]" ($r.Stdout -match "先在本会话回复中发出") "stdout=$($r.Stdout)"
 
     # A5c/A5d/A5e：唯一父 transcript（写到真实 ~/.cursor/projects 测试夹，finally 删）
+    # 待测刀状态会挡住一切业务 .cs。这段只测父窗继承，先挪开本机 knife-state.json，结束再放回。
+    $knifeFile = Join-Path $logDir "knife-state.json"
+    $knifeExisted = Test-Path -LiteralPath $knifeFile
+    $knifeBackup = $null
+    if ($knifeExisted) { $knifeBackup = [System.IO.File]::ReadAllText($knifeFile, [System.Text.Encoding]::UTF8) }
     $script:projTest = Join-Path $env:USERPROFILE ".cursor\projects\__pmgate_inherit_test__"
+    try {
+    if ($knifeExisted) { Remove-Item -LiteralPath $knifeFile -Force }
     $parentId = "__test__parent-$([Guid]::NewGuid().ToString('N'))"
     $childWithPm = "__test__child-pm-$([Guid]::NewGuid().ToString('N'))"
     $childNoPm = "__test__child-nopm-$([Guid]::NewGuid().ToString('N'))"
@@ -289,8 +307,15 @@ try {
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $childTx } | ConvertTo-Json -Compress)
     Assert-Test "A5e pm-gate-check: parent transcript has [PM] -> allow inherit" ((Get-Permission $r.Stdout) -eq "allow" -and $r.ExitCode -eq 0) "exit=$($r.ExitCode) stdout=$($r.Stdout)"
 
-    if (Test-Path -LiteralPath $script:projTest) {
-        Remove-Item -LiteralPath $script:projTest -Recurse -Force -ErrorAction SilentlyContinue
+    } finally {
+        if ($knifeExisted) {
+            [System.IO.File]::WriteAllText($knifeFile, $knifeBackup, (New-Object System.Text.UTF8Encoding $false))
+        } elseif (Test-Path -LiteralPath $knifeFile) {
+            Remove-Item -LiteralPath $knifeFile -Force -ErrorAction SilentlyContinue
+        }
+        if (Test-Path -LiteralPath $script:projTest) {
+            Remove-Item -LiteralPath $script:projTest -Recurse -Force -ErrorAction SilentlyContinue
+        }
     }
 
     # A4：text 字段命中 [PM] → 新鲜 pm-gate.json + mark-pm-gate.log 含 wrote=
@@ -388,11 +413,16 @@ try {
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".ai-gates\CHANGELOG.md" }; conversation_id = $convL1None } | ConvertTo-Json -Compress)
     Assert-Test "A1.3 pm-gate-check: CHANGELOG.md itself Level0 exempt -> allow" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".ai-gates\hooks-log\pm-gate.json" }; conversation_id = $convL1None } | ConvertTo-Json -Compress)
-    Assert-Test "A1.3 pm-gate-check: hooks-log runtime Level0 exempt -> allow" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    Assert-Test "A1.3 pm-gate-check: pm-gate.json is not a forgeable level0 file" ((Get-Permission $r.Stdout) -eq "deny" -and $r.Stdout -match "gate_auth_state") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".ai-gates\hooks-log\git-safety-check.log" }; conversation_id = $convL1None } | ConvertTo-Json -Compress)
+    Assert-Test "A1.3 pm-gate-check: hooks-log text log still allow" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".cursor\project-context.md" }; conversation_id = $convL1None } | ConvertTo-Json -Compress)
     Assert-Test "A1.3 pm-gate-check: project-context.md Level0 exempt -> allow" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
 
     # A1.4：业务路径回归（原 A5 语义保留）——无标记 deny / 有新鲜标记但无许可 → deny（主窗禁改业务码）
+    # 前面的 mark-pm-gate 会重写整份 pm-gate.json。这里再打一次，保证本条断言看到的是新鲜标记。
+    $r = Invoke-HookScript -ScriptName "mark-pm-gate.ps1" -StdinJson (@{ text = "[PM] A1.4 新鲜标记"; conversation_id = $convFresh } | ConvertTo-Json -Compress)
+    Assert-Test "A1.4 mark-pm-gate: restamp fresh conversation -> exit 0" ($r.ExitCode -eq 0) "exit=$($r.ExitCode)"
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets\Foo.cs" }; conversation_id = $convNone } | ConvertTo-Json -Compress)
     Assert-Test "A1.4 pm-gate-check: business path no marker -> deny (Cursor 2.2+ ask bug)" ((Get-Permission $r.Stdout) -eq "deny") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets\Foo.cs" }; conversation_id = $convFresh } | ConvertTo-Json -Compress)

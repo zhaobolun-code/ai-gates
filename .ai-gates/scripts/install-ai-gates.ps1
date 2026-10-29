@@ -13,7 +13,7 @@
   - 安全校验：替换前确认源含 .ai-gates/ 且 skills/VERSION 为合法语义化版本，否则拒绝
   - 复制范围 = 库内容（skills/hooks/scripts/rules/codex、根文档、hooks.json、link-platform.*、
     LICENSE、VERSION 等），不含运行时目录（hooks-log/tmp/verify/releases/regression-heat 等项目自留）
-  - 幂等：可反复运行；已存在同名根文档跳过（不覆盖项目专属文件）
+  - 幂等：可反复运行；根上的官方入口会覆盖，内容不同时先备份到 tmp
 
 .EXAMPLE
   # 安装/更新到当前项目（默认官方源，取最新 tag）
@@ -40,12 +40,10 @@ $ErrorActionPreference = "Stop"
 if (-not $TargetRoot) { $TargetRoot = (Get-Location).Path }
 if (-not $UserCachePath) { $UserCachePath = Join-Path $HOME '.ai-gates-cache' }
 
+. (Join-Path $PSScriptRoot 'official-version.ps1')
 function Get-Semver {
     param([string]$Version)
-    $v = ([string]$Version).Trim() -replace '^[vV]', ''
-    $m = [regex]::Match($v, '^(\d+)\.(\d+)\.(\d+)')
-    if (-not $m.Success) { return $null }
-    return [pscustomobject]@{ Major = [int]$m.Groups[1].Value; Minor = [int]$m.Groups[2].Value; Patch = [int]$m.Groups[3].Value; Raw = $v }
+    return Get-OfficialSemver -Version $Version
 }
 
 function Compare-Semver {
@@ -215,18 +213,49 @@ if ($null -eq (Get-Semver -Version $srcVerRaw)) { throw "source pack VERSION not
 $targetLib = Join-Path $TargetRoot '.ai-gates'
 New-Item -ItemType Directory -Force -Path $targetLib | Out-Null
 
+function Test-SameFileBytes {
+    param([string]$Left, [string]$Right)
+    if (-not (Test-Path -LiteralPath $Left) -or -not (Test-Path -LiteralPath $Right)) { return $false }
+    return (Get-FileHash -LiteralPath $Left -Algorithm SHA256).Hash -eq (Get-FileHash -LiteralPath $Right -Algorithm SHA256).Hash
+}
+
+function Backup-ChangedOfficialFile {
+    param([string]$SourceFile, [string]$DestFile, [string]$BackupRoot)
+    if (-not (Test-Path -LiteralPath $DestFile)) { return }
+    if (Test-SameFileBytes -Left $SourceFile -Right $DestFile) { return }
+    New-Item -ItemType Directory -Force -Path $BackupRoot | Out-Null
+    Copy-Item -LiteralPath $DestFile -Destination (Join-Path $BackupRoot (Split-Path -Leaf $DestFile)) -Force
+}
+
+function Remove-LibraryOrphans {
+    param([string]$SourceDir, [string]$DestDir)
+    if (-not (Test-Path -LiteralPath $DestDir)) { return }
+    $srcRoot = (Resolve-Path -LiteralPath $SourceDir).Path.TrimEnd('\')
+    $dstRoot = (Resolve-Path -LiteralPath $DestDir).Path.TrimEnd('\')
+    Get-ChildItem -LiteralPath $DestDir -Recurse -File -Force | ForEach-Object {
+        $rel = $_.FullName.Substring($dstRoot.Length).TrimStart('\')
+        $srcFile = Join-Path $srcRoot $rel
+        if (-not (Test-Path -LiteralPath $srcFile)) {
+            Remove-Item -LiteralPath $_.FullName -Force
+        }
+    }
+}
+
 # 库内容目录（运行时目录 hooks-log/tmp/verify/releases 不复制，项目自留）
 foreach ($d in @('skills', 'hooks', 'scripts', 'rules', 'codex')) {
     $src = Join-Path $srcLib $d
     if (Test-Path -LiteralPath $src) {
         Copy-Item -LiteralPath $src -Destination $targetLib -Recurse -Force
+        Remove-LibraryOrphans -SourceDir $src -DestDir (Join-Path $targetLib $d)
     }
 }
+$backupRoot = Join-Path $targetLib ("tmp\upgrade-backup-" + (Get-Date -Format 'yyyyMMddHHmmss'))
 foreach ($f in @('hooks.json', 'link-platform.ps1', 'link-platform.sh', 'README.md', 'USER-GUIDE.md', 'METHODOLOGY.md', 'LICENSE', 'CHANGELOG.md')) {
     $src = Join-Path $srcLib $f
     if (Test-Path -LiteralPath $src) {
         $dst = Join-Path $targetLib $f
-        if (-not (Test-Path -LiteralPath $dst)) { Copy-Item -LiteralPath $src -Destination $dst -Force }
+        Backup-ChangedOfficialFile -SourceFile $src -DestFile $dst -BackupRoot $backupRoot
+        Copy-Item -LiteralPath $src -Destination $dst -Force
     }
 }
 
@@ -235,7 +264,7 @@ if (-not $NoLink) {
     if (Test-Path -LiteralPath $linkScript) {
         Push-Location $TargetRoot
         try {
-            & powershell -NoProfile -ExecutionPolicy Bypass -File $linkScript 2>&1 | Out-String | Write-Host
+            & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $linkScript 2>&1 | Out-String | Write-Host
         } finally {
             Pop-Location
         }

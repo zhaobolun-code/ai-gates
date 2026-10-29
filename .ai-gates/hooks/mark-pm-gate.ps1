@@ -15,7 +15,8 @@
 # 载荷里的 input_tokens / output_tokens / cache_read_tokens / cache_write_tokens
 # （解析失败时取原文里最后一次出现，避开回复正文里的同名数字）写入
 # hooks-log/pm-turn-tokens.json，并在 stdout 输出 additional_context，供下一轮
-# [PM] 原样抄「上一轮」那一行。本钩子发生在回复结束之后，写不出本轮账单。
+# [PM] 原样抄「上一轮」那一行。过线时必须换行，下一行写换窗通知，每次都写。
+# 本钩子发生在回复结束之后，写不出本轮账单。
 #
 # 已知局限（如实记录，不夸大）：afterAgentResponse 只在"这条助手消息完全生成完毕后"
 # 触发，所以本 hook 写下的标记，只能证明"之前某一轮完整回复里出现过 [PM]"，不能证明
@@ -37,6 +38,7 @@
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 
 . (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
+. (Join-Path $PSScriptRoot 'gate-decision.ps1')
 $utf8Bom = New-Object System.Text.UTF8Encoding($true)
 $repoRoot = Get-AiGatesProjectRoot
 $logDir = Join-Path $repoRoot ".ai-gates\hooks-log"
@@ -212,7 +214,6 @@ try {
     $tokenCacheRead = Get-LastJsonInt -Raw ([string]$raw) -Name "cache_read_tokens"
     $tokenCacheWrite = Get-LastJsonInt -Raw ([string]$raw) -Name "cache_write_tokens"
     if ($null -ne $tokenInput -and $null -ne $tokenOutput) {
-        $tokenLine = "token：上一轮 输入 $tokenInput / 输出 $tokenOutput / 缓存读 $(Format-TokenCell $tokenCacheRead) / 缓存写 $(Format-TokenCell $tokenCacheWrite)"
         $tokenFile = Join-Path $logDir "pm-turn-tokens.json"
         $tokenMap = [ordered]@{}
         if (Test-Path -LiteralPath $tokenFile) {
@@ -223,14 +224,23 @@ try {
                 # 旧文件损坏就当空表重建
             }
         }
+        $storedFirst = $null
+        if ($tokenMap.Contains($conversationId) -and $null -ne $tokenMap[$conversationId].firstInput) {
+            $storedFirst = $tokenMap[$conversationId].firstInput
+        }
+        $firstInput = Get-ConversationFirstInput -StoredFirstInput $storedFirst -CurrentInput $tokenInput
+        $showNotice = Test-ShowHandoverNotice -InputTokens $tokenInput -CacheReadTokens $tokenCacheRead -FirstInput $storedFirst
+        $tokenLine = Get-TurnTokenLine -InputTokens $tokenInput -OutputTokens $tokenOutput -CacheReadTokens $tokenCacheRead -CacheWriteTokens $tokenCacheWrite -ShowNotice $showNotice
         $tokenEntry = [ordered]@{
-            conversationId = $conversationId
-            input          = $tokenInput
-            output         = $tokenOutput
-            cacheRead      = $tokenCacheRead
-            cacheWrite     = $tokenCacheWrite
-            atUtc          = [DateTime]::UtcNow.ToString("o")
-            line           = $tokenLine
+            conversationId         = $conversationId
+            input                  = $tokenInput
+            output                 = $tokenOutput
+            cacheRead              = $tokenCacheRead
+            cacheWrite             = $tokenCacheWrite
+            atUtc                  = [DateTime]::UtcNow.ToString("o")
+            line                   = $tokenLine
+            firstInput             = $firstInput
+            contextHeavyPrompted   = [bool]$showNotice
         }
         $tokenMap[$conversationId] = $tokenEntry
         $tokenMap["latest"] = $tokenEntry
@@ -266,7 +276,7 @@ try {
 
 # afterAgentResponse 无 permission 字段语义。有实测数字时把一句交给下一轮，供 [PM] 原样抄。
 if (-not [string]::IsNullOrWhiteSpace($tokenLine)) {
-    $hint = "上一轮回复的实测 token 已记下。若本轮回复含 [PM]，在 YAML 结束后原样另起一行，不要估算本轮，不要改数字：$tokenLine"
+    $hint = Get-TurnTokenHint -TokenLine $tokenLine
     Write-Output ((@{ additional_context = $hint } | ConvertTo-Json -Compress))
 }
 exit 0

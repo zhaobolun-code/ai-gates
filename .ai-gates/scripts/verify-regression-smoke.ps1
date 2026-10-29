@@ -116,7 +116,7 @@ foreach ($e in $entries) {
         Write-Host "[smoke] auto-run golden $($matchScene.id) for: $($e.scenario)" -ForegroundColor Cyan
         $goldOut = Join-Path $OutputDir ("golden-" + $matchScene.id)
         New-Item -ItemType Directory -Force -Path $goldOut | Out-Null
-        & powershell -NoProfile -ExecutionPolicy Bypass -File $goldenRunner -SceneId $matchScene.id -UnityExe $UnityExe -OutputDir $goldOut 2>&1 | Out-String | Write-Host
+        & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $goldenRunner -SceneId $matchScene.id -UnityExe $UnityExe -OutputDir $goldOut 2>&1 | Out-String | Write-Host
         $ok = ($LASTEXITCODE -eq 0)
         if (-not $ok) { $failCount++ }
         $rows.Add(("| {0} | {1} | auto (G{2}) | {3} |" -f $e.module, $e.scenario, $matchScene.id, $(if ($ok) { '通过' } else { '失败' }))) | Out-Null

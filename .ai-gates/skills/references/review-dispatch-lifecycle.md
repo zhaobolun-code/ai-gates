@@ -7,8 +7,8 @@
 
 | mode | 工件路径 | 生成/维护 |
 | --- | --- | --- |
-| `plan` | `证据/_方案审核派发.md` | PM / planner |
-| `code` | `证据/_Step{NN}-代码审核派发.md` | PM / developer |
+| `plan` | `证据/_方案审核派发.md` | planner。主窗不改 |
+| `code` | `证据/_Step{NN}-代码审核派发.md` | developer。主窗不改 |
 | `adversarial` | `证据/_Step{NN}-对抗CR派发.md`（可选） | PM / code-reviewer |
 | `verify` | `证据/_Step{NN}-验收派发.md` | PM（CR 无 blocker 后） |
 
@@ -22,7 +22,7 @@ L3 第 1/2 轮用字段 `round`（1|2），**仍属 `mode=plan`**，不算独立
 
 - `证据/**` 默认禁读（见 doc-windowing）。
 - **唯一例外**：派发时**明确点名的一个** `_...派发.md`；禁止扫描 `证据/`、读其它日志、把整个证据夹加入白名单。
-- Reviewer：**先读**点名工件 → **再只读**工件内白名单。Checker **禁止修改**工件；修订由 Maker/PM 在主会话完成。
+- Reviewer：**先读**点名工件 → **再只读**工件内白名单。Checker **禁止修改**工件。方案派发只由策划子窗改，代码派发只由程序员子窗改。主窗不改这两份。
 
 ## 3. 机械版本（公共算法）
 
@@ -70,7 +70,7 @@ L3 第 1/2 轮用字段 `round`（1|2），**仍属 `mode=plan`**，不算独立
 
 ## 5. L3 第1→第2 转场
 
-1. 第1轮无 blocker → PM/planner 重算 `review_input_revision`；不一致则清零重生第1轮。
+1. 第1轮无 blocker → 策划子窗重算 `review_input_revision`；不一致则清零重生第1轮。主窗不改派发文件。
 2. 一致 → 记 1/2，递增 `dispatch_revision`，同工件切 `round=2`，保留相同 target/review_input revision。
 3. **转场纪律（强制）**：第1轮通过后、第2轮开始前，**只允许**改 `未完成.md` 的排除三节（给下一个 AI / 文档状态 / 实施审查摘要）。若改了非排除节正文 / 物理口径 / 白名单文件 → **必须**重算 revision 并**清零重生第1轮**，禁止带着旧 `review_input_revision` 硬派第2轮（否则必 stale_dispatch）。
 3. 第2轮从固定骨架生成，**不含**第1轮结论；Checker 无写权。
@@ -80,8 +80,8 @@ L3 第 1/2 轮用字段 `round`（1|2），**仍属 `mode=plan`**，不算独立
 
 | 动作 | 责任岗 |
 | --- | --- |
-| 生成/优化方案工件、验 revision、切第2轮 | PM / planner |
-| 生成/刷新代码 CR 工件（含修复后） | PM / developer |
+| 生成/优化方案工件、验 revision、切第2轮 | planner。主窗不改 |
+| 生成/刷新代码 CR 工件（含修复后） | developer。主窗不改 |
 | 可选对抗工件 | PM / code-reviewer |
 | 生成/刷新验收派发工件（`mode=verify`） | PM |
 | 只读点名工件 + findings / 验收结论 | plan-reviewer / code-reviewer / 验收子窗（Checker **无写权**） |

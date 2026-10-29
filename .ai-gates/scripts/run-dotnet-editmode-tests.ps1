@@ -1,15 +1,27 @@
 ﻿# run-dotnet-editmode-tests.ps1
 # TDD Step 1（M3）：外部 dotnet NUnit 测试跑批（替代原 run-unity-editmode-tests.ps1）。
 # 语义：dotnet restore + dotnet test（trx 落到 .ai-gates/verify/），解析 <ResultSummary>：
-#   outcome=Passed|Completed && failed=0 && total>=70 → exit 0（绿灯）
+#   outcome=Passed|Completed && failed=0 && total>=70 && passed>=70 → exit 0（绿灯）
 #   其余（含 no-match 空跑 total=0 / 真实失败 / trx 缺失 / restore 失败）→ exit 1/2（红灯）
 # 注意：dotnet test 自身对「过滤器无匹配」返回 0（VSTest 视为通过），故以 trx 为准、
 # 并强制 total>=70 守卫，防假绿。
 # 可选 -Filter <VSTest 表达式>：仅用于反假绿验证（A7），默认不带过滤器跑全量。
+# 绿灯：outcome 为 Passed 或 Completed，failed=0，total>=70，并且 passed>=70。
+# 全部跳过或未执行时 passed 不够，不能靠 total 凑成通过。
 
 param(
     [string]$Filter = ''
 )
+
+function Test-EditModeGreen {
+    param($Outcome, [int]$Total, [int]$Passed, [int]$Failed, [int]$Skipped = 0, [int]$NotExecuted = 0)
+    if ($Failed -gt 0) { return 2 }
+    if ($Outcome -ne 'Passed' -and $Outcome -ne 'Completed') { return 1 }
+    if ($Total -lt 70 -or $Passed -lt 70) { return 2 }
+    return 0
+}
+
+if ($MyInvocation.InvocationName -ne '.') {
 
 $ErrorActionPreference = 'Stop'
 $scriptDir = $PSScriptRoot
@@ -62,8 +74,12 @@ $skipped = [int]$counters.skipped
 
 Write-Host ("EditMode tests: outcome={0} total={1} passed={2} failed={3} skipped={4} (trx: {5})" -f $outcome, $total, $passed, $failed, $skipped, $trxPath)
 
-# VSTest trx 实录：干净运行 outcome="Completed"（Passed 仅在部分适配器出现），以 failed=0 为准
-if (($outcome -eq 'Passed' -or $outcome -eq 'Completed') -and $failed -eq 0 -and $total -ge 70) {
+# VSTest trx 实录：干净运行 outcome="Completed"（Passed 仅在部分适配器出现）。
+# 通过数必须单独达标。跳过和未执行不算进通过。
+$notExecuted = 0
+if ($counters.notExecuted) { $notExecuted = [int]$counters.notExecuted }
+$verdict = Test-EditModeGreen -Outcome $outcome -Total $total -Passed $passed -Failed $failed -Skipped $skipped -NotExecuted $notExecuted
+if ($verdict -eq 0) {
     exit 0
 }
 if ($failed -gt 0) {
@@ -74,5 +90,10 @@ if ($total -lt 70) {
     Write-Error "用例总数不足 (total=$total < 70)，疑似空跑/假绿"
     exit 2
 }
+if ($passed -lt 70) {
+    Write-Error "实际通过不足 (passed=$passed < 70, skipped=$skipped, notExecuted=$notExecuted)，未跑的用例不算通过"
+    exit 2
+}
 Write-Error "trx outcome 非 Passed/Completed (outcome=$outcome)"
 exit 1
+}

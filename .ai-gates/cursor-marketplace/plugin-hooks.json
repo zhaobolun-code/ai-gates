@@ -10,7 +10,7 @@
     ],
     "beforeShellExecution": [
       {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CURSOR_PLUGIN_ROOT}/.ai-gates/hooks/plugin/invoke.ps1\" -Target git-safety-check",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CURSOR_PLUGIN_ROOT}/.ai-gates/hooks/plugin/invoke.ps1\" -Target pre-shell-gate",
         "failClosed": false,
         "timeout": 10
       }

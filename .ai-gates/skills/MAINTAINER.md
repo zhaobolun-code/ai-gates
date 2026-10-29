@@ -46,7 +46,7 @@ v3.1.3 观察期已于 **2026-07-16** 由 TL「bump / 转正」关闭；**v3.1.4
 | **人工验收** | Unity 测试、新开 Chat / 换模型审查 — **设计为人工选择**，Agent 只提示，不自动化、不校验、不阻断 Standard 闭环 |
 | **PM 门禁** | 硬门禁 #7 + 各岗 SKILL §PM 门禁 — 无本轮 PM 结构化判定不得改交付物（仍依赖 Agent 执行） |
 | **恢复口令** | 主口令 **`按 CORE 重来`**（同义：`流水线重来`、`没按流程来`） |
-| **已知限制** | 合规依赖 Agent 自觉执行硬门禁；PM 脚本 / Git **可选**；冷启动无 project-context 时保守 Standard；L1 须子窗（同会话即可，标注「非独立复核」；多 Step 时 PM **提示**可选新开 Chat，不校验） |
+| **已知限制** | 机器做不到的硬门禁仍靠自觉（本条判定、Trae、Codex 桌面）；PM 脚本 / Git **可选**；冷启动无 project-context 时默认 Direct（与 CORE 冷启动一致）；Direct 的代码审核须子窗或新开 Chat，同 Chat 只标非独立不算完成；Standard / Full 的隔离成败不硬阻断 |
 | **发布前抽测** | Express 单文件小改；Standard+回归模块；**绕过 PM 直叫岗位**（应硬停引导）；Full 强制须见完整流程白话 |
 | **archive/** | **若存在**该目录，须含 [archive/README.md](./archive/README.md)「勿读」哨兵；当前仓库无 `archive/`，此项不适用；Agent 日常不 Read |
 

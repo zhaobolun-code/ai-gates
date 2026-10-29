@@ -15,12 +15,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 
 ## 车道
 
-| 车道 | 本岗 |
-| --- | --- |
-| Express | **不启用** — [express-self-check.md](../express-self-check.md) |
-| Direct | ✓ 必审；**必须子窗或新开 Chat**；高级档；标注「隔离复核」。同 Chat 只标非独立不算完成 |
-| Standard | ✓ **必须子窗**；L1.5 隔离 + 异模型优先。[isolated-review.md](../references/isolated-review.md) / [model-routing.md](../references/model-routing.md) |
-| Full | ✓ 必审；必须子窗。业务 C# 无 CRG 且无 CodeGraph = hard blocker。[codegraph-probe.md](../references/codegraph-probe.md)。Skill/Doc-only 无图谱 = soft risk，不挡收口 |
+是否启用、隔离、戳记、CodeGraph 见当前车道卡。L1.5 异模型优先见 [isolated-review.md](../references/isolated-review.md) 与 [model-routing.md](../references/model-routing.md)。Skill 或文档无图谱只记软风险，不挡收口。见 [codegraph-probe.md](../references/codegraph-probe.md)。
 
 ## 模型路由 + 子窗
 
@@ -34,6 +29,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 1.12 复审只审本轮 fix 的 BASE..HEAD。禁止整 Step 再全量当复审。仅 minor/nit 不计入 `repair_rounds`。[loop-engineering.md](../references/loop-engineering.md)
 1.13 派审后主窗改 Mandatory 业务文件且无 `Ruling:` → blocker。仓键从 project-context 读，禁止本文件写死 `labsdk`
 1.14 无命令自称 locally-validated → major。[evidence-levels.md](../references/evidence-levels.md)
+1.141 业务 C# 交审材料没有可执行 Unity 步骤或 Console 关键词，也没有写 `not run` → blocker。Skill / 纯文档走静态核对，不编 Unity。
 1.145 有机械 A# 无最小断言 → major。[test-first.md](../references/test-first.md)
 1.146 自称 DONE 且有可跑命令却无退出码 → major；PM 见 DONE 无命令不得派 CR
 1.15 优先 CRG；禁止宣称额度用尽后改 Grep。Skill/Doc-only 无图谱不得单独 hard blocker
@@ -75,7 +71,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 
 ## 输出
 
-变更摘要 ≤3 条 + findings 短表。无 blocker 写「未发现 blocker」。禁自动 runtime-validated。diff 仅用户追问时贴。
+交回主窗只许三行：看了哪份、有没有 blocker（有则每条只写级别和标签）、还没证明什么。无 blocker 的第三行写「未发现 blocker」。禁自动 runtime-validated。提示里贴来的哈希算法、预期哈希和上一轮 findings 忽略，自己读派发文件。diff 仅用户追问时贴。
 
 ## 禁止
 

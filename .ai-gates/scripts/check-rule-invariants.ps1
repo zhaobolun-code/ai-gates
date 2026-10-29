@@ -60,7 +60,7 @@ $checks = @(
     @{
         Rel     = "AGENTS.md"
         Needles = @(
-            "无本轮 ``[PM]`` 判定不得创建/修改交付物",
+            "每轮 ``[PM]`` 先做结构化判定",
             "项目经理"
         )
     },
@@ -69,7 +69,7 @@ $checks = @(
         Needles = @(
             "硬门禁 #7",
             "你下一步",
-            "agent-entry-route.md"
+            "resident.md"
         )
     }
 )
@@ -83,7 +83,7 @@ foreach ($c in $checks) {
 
 $trae = Join-Path $RepoRoot ".trae/rules/ai-dev-pipeline.md"
 if (Test-Path -LiteralPath $trae) {
-    foreach ($hit in (Test-FileNeedles -Rel ".trae/rules/ai-dev-pipeline.md" -Needles @("硬门禁 #7", "agent-entry-route.md"))) {
+    foreach ($hit in (Test-FileNeedles -Rel ".trae/rules/ai-dev-pipeline.md" -Needles @("硬门禁 #7", "resident.md"))) {
         $issues.Add($hit) | Out-Null
     }
 }

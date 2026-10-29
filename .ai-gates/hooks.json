@@ -17,7 +17,7 @@
     ],
     "beforeShellExecution": [
       {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/git-safety-check.ps1",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/pre-shell-gate.ps1",
         "failClosed": false,
         "timeout": 10
       }

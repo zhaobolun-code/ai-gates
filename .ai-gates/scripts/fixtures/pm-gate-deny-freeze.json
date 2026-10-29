@@ -1,0 +1,40 @@
+{
+  "cursor": [
+    "changelog_writes_missing_level1",
+    "gate_file_missing",
+    "gate_file_unreadable",
+    "main_window_business_code",
+    "no_changelog_write_for_conversation_level1",
+    "no_pm_marker_for_conversation",
+    "parent_pm_not_marked",
+    "stale_changelog_write_age",
+    "stale_pm_marker_age",
+    "timestamp_unparseable"
+  ],
+  "claude": [
+    "changelog_writes_missing_level1",
+    "gate_file_missing",
+    "gate_file_unreadable",
+    "main_window_business_code",
+    "no_changelog_write_for_session_level1",
+    "no_pm_marker_for_session",
+    "parent_pm_not_marked",
+    "parse_failed_business_code",
+    "stale_changelog_write_age",
+    "stale_pm_marker_age",
+    "timestamp_unparseable"
+  ],
+  "codex": [
+    "changelog_writes_missing_level1",
+    "gate_file_missing",
+    "gate_file_unreadable",
+    "main_window_business_code",
+    "no_changelog_write_for_session_level1",
+    "no_pm_marker_for_session",
+    "parent_pm_not_marked",
+    "parse_failed_business_code",
+    "stale_changelog_write_age",
+    "stale_pm_marker_age",
+    "timestamp_unparseable"
+  ]
+}

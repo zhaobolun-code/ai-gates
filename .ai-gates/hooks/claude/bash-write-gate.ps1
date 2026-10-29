@@ -22,6 +22,7 @@ param(
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 . (Join-Path $PSScriptRoot 'claude-hooks-common.ps1')
+. (Join-Path $PSScriptRoot '..\gate-decision.ps1')
 
 if (-not $LogDir) { $LogDir = Get-LogDir -ScriptRoot $PSScriptRoot }
 $gateFile = Join-Path $LogDir 'pm-gate.json'
@@ -31,105 +32,6 @@ $FreshnessMinutes = 120
 
 function Test-KillSwitch {
     return (Test-Path -LiteralPath $killSwitch)
-}
-
-function Test-InfraPath {
-    param([string]$FilePath)
-    if (-not $FilePath) { return $false }
-    return ($FilePath -match '[\\/]\.(cursor|ai-gates|codex|claude)[\\/]' -or $FilePath -match '^\.(cursor|ai-gates|codex|claude)[\\/]')
-}
-
-function Test-GeneratedPath {
-    param([string]$FilePath)
-    if (-not $FilePath) { return $false }
-    $norm = $FilePath -replace '\\', '/'
-    if ($norm -match '(?i)(?:^|/)(bin|obj|library|temp|logs|node_modules)(?:/|$)') { return $true }
-    if ($norm -match '(?i)\.ai-gates/(tmp|hooks-log|verify|releases)(?:/|$)') { return $true }
-    if ($norm -match '(?:^|/)\.git(?:/|$)') { return $true }
-    return $false
-}
-
-# 从 Bash 命令文本提取显式写文件的目标路径（尽力而为；提取不到返回空数组，主流程 fail-open）。
-function Get-BashWritePaths {
-    param([string]$CommandText)
-    $paths = New-Object System.Collections.Generic.List[string]
-    if ([string]::IsNullOrWhiteSpace($CommandText)) { return @($paths) }
-
-    # 1) PowerShell 写 cmdlet：-Path / -LiteralPath / 相邻引号或裸 token
-    $cmdletPat = '(?i)\b(?:Set-Content|Add-Content|Out-File|Clear-Content)\b[^\r\n]*'
-    foreach ($m in [Regex]::Matches($CommandText, $cmdletPat)) {
-        $seg = $m.Value
-        # 带引号路径优先（支持含空格路径）；否则取 -Path 后的裸 token（不含引号/空格）
-        $flagQuoted = '(?i)(?:-Path|-LiteralPath|-FilePath)\s+["'']([^"'']+)["'']'
-        $fm = [Regex]::Match($seg, $flagQuoted)
-        if (-not $fm.Success) {
-            $flagBare = '(?i)(?:-Path|-LiteralPath|-FilePath)\s+([^\s"'']+)'
-            $fm = [Regex]::Match($seg, $flagBare)
-        }
-        if ($fm.Success) {
-            $paths.Add($fm.Groups[1].Value.Trim()) | Out-Null
-            continue
-        }
-        $quotePat = '["'']((?:\\.|[^"''])*)["'']'
-        $qm = [Regex]::Match($seg, $quotePat)
-        if ($qm.Success) {
-            $paths.Add($qm.Groups[1].Value.Trim()) | Out-Null
-            continue
-        }
-        # 裸 token（非 - 开头、非纯命令动词），取第一个
-        $barePat = '(?i)\b(?:Set-Content|Add-Content|Out-File|Clear-Content)\s+((?:[^\s"''|;&<>])+)'
-        $bm = [Regex]::Match($seg, $barePat)
-        if ($bm.Success -and -not $bm.Groups[1].Value.StartsWith('-')) {
-            $paths.Add($bm.Groups[1].Value.Trim()) | Out-Null
-        }
-    }
-
-    # 2) [IO.File]::WriteAllText/Lines/Bytes
-    $ioPat = '\[IO\.File\]::WriteAll\w*\(["'']([^"'']+)["'']'
-    foreach ($m in [Regex]::Matches($CommandText, $ioPat)) {
-        $paths.Add($m.Groups[1].Value.Trim()) | Out-Null
-    }
-
-    # 3) 重定向 > 或 >>（排除 2>&1 / 1>&2 / *>&1 等句柄重定向）
-    $redirPat = '(?<!\d|\*)(?:>>|>)\s*["'']?([^\s"'';|&<>]+)["'']?'
-    foreach ($m in [Regex]::Matches($CommandText, $redirPat)) {
-        $target = $m.Groups[1].Value.Trim()
-        if ($target -match '^&') { continue }
-        if ($target -eq 'NUL' -or $target -eq '$null') { continue }
-        $paths.Add($target) | Out-Null
-    }
-
-    return @($paths)
-}
-
-function Test-BusinessFresh {
-    param([string]$SessionId)
-    if (-not (Test-Path -LiteralPath $gateFile)) { return $false }
-    try {
-        $gateRaw = Get-Content -LiteralPath $gateFile -Raw -Encoding UTF8
-        $gate = $gateRaw | ConvertFrom-Json -ErrorAction Stop
-    } catch { return $true }  # 读取异常 fail-open（同 pm-gate-check）
-    $entry = $gate.$SessionId
-    if (-not $entry -or -not $entry.lastPmAtUtc) { return $false }
-    try {
-        $lastUtc = [DateTime]::Parse($entry.lastPmAtUtc).ToUniversalTime()
-    } catch { return $true }
-    return (([DateTime]::UtcNow - $lastUtc).TotalMinutes -le $FreshnessMinutes)
-}
-
-function Test-ChangelogFresh {
-    param([string]$SessionId)
-    if (-not (Test-Path -LiteralPath $changelogFile)) { return $false }
-    try {
-        $raw = [System.IO.File]::ReadAllText($changelogFile, [System.Text.Encoding]::UTF8)
-        $changelog = $raw | ConvertFrom-Json -ErrorAction Stop
-    } catch { return $true }  # 读取异常 fail-open
-    $entry = $changelog.$SessionId
-    if (-not $entry -or -not $entry.lastChangelogWriteAtUtc) { return $false }
-    try {
-        $lastUtc = [DateTime]::Parse($entry.lastChangelogWriteAtUtc).ToUniversalTime()
-    } catch { return $true }
-    return (([DateTime]::UtcNow - $lastUtc).TotalMinutes -le $FreshnessMinutes)
 }
 
 $raw = Read-HookStdin
@@ -158,29 +60,18 @@ if (Test-KillSwitch) {
     return
 }
 
-$paths = @(Get-BashWritePaths -CommandText $cmd)
+$paths = @(Get-ExplicitWritePaths -CommandText $cmd)
 if ($paths.Count -eq 0) {
     Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("ALLOW no_write_detected session={0}" -f $sessionId)
     Write-Output (Emit-PreToolUseAllow)
     return
 }
 
-$blocked = New-Object System.Collections.Generic.List[string]
-$blockedReasons = New-Object System.Collections.Generic.List[string]
-foreach ($p in $paths) {
-    if (Test-GeneratedPath -FilePath $p) { continue }
-    if (Test-InfraPath -FilePath $p) {
-        if (-not (Test-ChangelogFresh -SessionId $sessionId)) {
-            $blocked.Add($p) | Out-Null
-            $blockedReasons.Add("infra_no_recent_changelog") | Out-Null
-        }
-    } else {
-        if (-not (Test-BusinessFresh -SessionId $sessionId)) {
-            $blocked.Add($p) | Out-Null
-            $blockedReasons.Add("business_no_fresh_pm") | Out-Null
-        }
-    }
-}
+$hasPm = Test-SessionStampFresh -FilePath $gateFile -SessionId $sessionId -StampName 'lastPmAtUtc' -FreshnessMinutes $FreshnessMinutes
+$hasLog = Test-SessionStampFresh -FilePath $changelogFile -SessionId $sessionId -StampName 'lastChangelogWriteAtUtc' -FreshnessMinutes $FreshnessMinutes
+$blocks = Get-ShellWriteBlocks -Paths $paths -HasFreshPm $hasPm -HasFreshChangelog $hasLog -IncludeClaude
+$blocked = @($blocks | ForEach-Object { $_.Path })
+$blockedReasons = @($blocks | ForEach-Object { $_.Reason })
 
 if ($blocked.Count -gt 0) {
     $hint = "逃生：先在本会话回复中发出 [PM] 标记（设施路径则先写 CHANGELOG），待 Stop hook 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或改用 Write/Edit 走常规写门禁。"

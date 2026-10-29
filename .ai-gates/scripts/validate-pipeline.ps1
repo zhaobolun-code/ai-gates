@@ -18,6 +18,7 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [Console]::OutputEncoding = $utf8NoBom
 $OutputEncoding = $utf8NoBom
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $scriptDir 'official-version.ps1')
 $repoRoot = git rev-parse --show-toplevel 2>$null
 if (-not $repoRoot) {
     $repoRoot = (Resolve-Path (Join-Path $scriptDir "../..")).Path
@@ -35,7 +36,7 @@ try {
         exit 1
     }
     $pipelineVersion = (Get-Content -LiteralPath $versionPath -Raw).Trim()
-    if ($pipelineVersion -notmatch '^\d+\.\d+\.\d+$') {
+    if (-not (Test-OfficialVersion -Version $pipelineVersion)) {
         Write-Host "invalid VERSION: $pipelineVersion" -ForegroundColor Red
         exit 1
     }
@@ -232,6 +233,41 @@ try {
     }
     if ($exitCode -eq 0) { Write-Host "version consistency: OK ($pipelineVersion)" -ForegroundColor Green }
 
+    # 打包范围（hooks）：package-release.ps1 必须为 hooks/ 下实际存在的每个子目录留拷贝块。
+    # 2026-10-16 发现 hooks/plugin 自 5.0.6 起漏拷；静态覆盖检查让同类漂移在打包前就红。
+    $hooksSourceDir = Join-Path $repoRoot ".ai-gates\hooks"
+    if ((Test-Path -LiteralPath $hooksSourceDir) -and (Test-Path -LiteralPath $packagePath)) {
+        $hookSubDirs = @(Get-ChildItem -LiteralPath $hooksSourceDir -Directory)
+        $uncoveredHookDirs = @()
+        foreach ($hookSubDir in $hookSubDirs) {
+            $copyBlockPattern = 'Join-Path\s+\$hooksDir\s+"' + [regex]::Escape($hookSubDir.Name) + '"'
+            if ($packageRaw -notmatch $copyBlockPattern) { $uncoveredHookDirs += $hookSubDir.Name }
+        }
+        if ($uncoveredHookDirs.Count -gt 0) {
+            Write-Host ("packaging scope: FAILED (package-release.ps1 未覆盖 hooks/{0})" -f ($uncoveredHookDirs -join "、hooks/")) -ForegroundColor Red
+            $exitCode = 1
+        } else {
+            Write-Host ("packaging scope (hooks): OK ({0} 个子目录)" -f $hookSubDirs.Count) -ForegroundColor Green
+        }
+    }
+
+    # 打包范围（scripts）：5.2.0 首包漏了 scripts/fixtures，安装后 check-volume 直接崩。
+    $scriptsSourceDir = Join-Path $repoRoot ".ai-gates\scripts"
+    if ((Test-Path -LiteralPath $scriptsSourceDir) -and (Test-Path -LiteralPath $packagePath)) {
+        $scriptSubDirs = @(Get-ChildItem -LiteralPath $scriptsSourceDir -Directory)
+        $uncoveredScriptDirs = @()
+        foreach ($scriptSubDir in $scriptSubDirs) {
+            $copyBlockPattern = 'Join-Path\s+\$scriptsDir\s+"' + [regex]::Escape($scriptSubDir.Name) + '"'
+            if ($packageRaw -notmatch $copyBlockPattern) { $uncoveredScriptDirs += $scriptSubDir.Name }
+        }
+        if ($uncoveredScriptDirs.Count -gt 0) {
+            Write-Host ("packaging scope: FAILED (package-release.ps1 未覆盖 scripts/{0})" -f ($uncoveredScriptDirs -join "、scripts/")) -ForegroundColor Red
+            $exitCode = 1
+        } else {
+            Write-Host ("packaging scope (scripts): OK ({0} 个子目录)" -f $scriptSubDirs.Count) -ForegroundColor Green
+        }
+    }
+
     Write-Host "`n--- templates ---" -ForegroundColor Cyan
     $requiredTemplates = @(
         "express-slice.md",
@@ -276,14 +312,14 @@ try {
             Write-Host "rule invariants: FAILED (check-rule-invariants.ps1 missing)" -ForegroundColor Red
             $exitCode = 1
         } else {
-            & powershell -NoProfile -ExecutionPolicy Bypass -File $invariantsPath -RepoRoot $repoRoot
+            & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $invariantsPath -RepoRoot $repoRoot
             if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
         }
 
         Write-Host "`n--- hooks 行为回归 (支柱 C) ---" -ForegroundColor Cyan
         $testHooksPath = Join-Path $scriptDir "test-hooks.ps1"
         if (Test-Path -LiteralPath $testHooksPath) {
-            & powershell -NoProfile -ExecutionPolicy Bypass -File $testHooksPath
+            & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $testHooksPath
             if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
         } else {
             Write-Host "test-hooks.ps1 missing" -ForegroundColor Red
@@ -347,7 +383,7 @@ try {
         Write-Host "`n--- regression index ---" -ForegroundColor Cyan
         $syncArgs = @("-ExecutionPolicy", "Bypass", "-File", (Join-Path $scriptDir "sync-regression-index.ps1"))
         if ($Strict) { $syncArgs += "-Strict" }
-        & powershell @syncArgs
+        & (Get-Process -Id $PID).Path @syncArgs
         if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
     }
 
@@ -356,7 +392,7 @@ try {
         $docArgs = @("-ExecutionPolicy", "Bypass", "-File", (Join-Path $scriptDir "check-pipeline-doc.ps1"), "-DocPath", $DocPath)
         if ($CheckGit) { $docArgs += "-CheckGit" }
         if ($Strict) { $docArgs += "-Strict" }
-        & powershell @docArgs
+        & (Get-Process -Id $PID).Path @docArgs
         if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
     } elseif (-not $SkipRegression) {
         Write-Host "`nTip: pass -DocPath to validate an execution doc." -ForegroundColor DarkGray
@@ -394,10 +430,17 @@ try {
     $boundaryScript = Join-Path $scriptDir 'check-boundaries.ps1'
     if (Test-Path -LiteralPath $boundaryScript) {
         if ($Strict) {
-            & powershell -NoProfile -ExecutionPolicy Bypass -File $boundaryScript -Strict 2>&1 | ForEach-Object { Write-Host $_ }
+            & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $boundaryScript -Strict 2>&1 | ForEach-Object { Write-Host $_ }
         } else {
-            & powershell -NoProfile -ExecutionPolicy Bypass -File $boundaryScript 2>&1 | ForEach-Object { Write-Host $_ }
+            & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $boundaryScript 2>&1 | ForEach-Object { Write-Host $_ }
         }
+        if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
+    }
+
+    $volumeScript = Join-Path $scriptDir 'check-volume.ps1'
+    if (Test-Path -LiteralPath $volumeScript) {
+        Write-Host "`n--- volume ---" -ForegroundColor Cyan
+        & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $volumeScript
         if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
     }
 

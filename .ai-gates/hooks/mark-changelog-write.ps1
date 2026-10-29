@@ -25,6 +25,7 @@
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 . (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
+. (Join-Path $PSScriptRoot 'gate-decision.ps1')
 
 $utf8Bom = New-Object System.Text.UTF8Encoding($true)
 $repoRoot = Get-AiGatesProjectRoot
@@ -120,8 +121,8 @@ try {
         elseif ($json.tool_input.target_notebook) { $targetPath = [string]$json.tool_input.target_notebook }
     }
 
-    # CHANGELOG 判定：大小写不敏感，路径可含 .cursor/skills/ 前缀
-    if ($targetPath -and $targetPath -match '(?i)changelog\.md$') {
+    # 只有 .ai-gates/CHANGELOG.md 打点。子目录里的同名文件不算。
+    if (Test-OfficialChangelogPath -FilePath $targetPath) {
         $isChangelog = $true
         Write-ChangelogMark -ConvId $conversationId
         $wrote = "changelog-writes.json"
@@ -137,7 +138,7 @@ try {
         $fallbackPath = Get-PathFromRaw -Raw $rawStr
         if ($fallbackPath) { $targetPath = $fallbackPath }
 
-        if ($targetPath -and $targetPath -match '(?i)changelog\.md$') {
+        if (Test-OfficialChangelogPath -FilePath $targetPath) {
             $isChangelog = $true
             Write-ChangelogMark -ConvId $conversationId
             $wrote = "changelog-writes.json"

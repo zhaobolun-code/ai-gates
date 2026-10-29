@@ -15,16 +15,11 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 
 ## 车道
 
-| 车道 | 本岗 |
-| --- | --- |
-| Express | **禁止** plan-lite — 切片由 `[PM]` 按 [express-slice.md](../templates/express-slice.md) |
-| Direct | **仅当 PM 未写清** A#/范围/口径才派；已写清则**不派**。切片不落盘；跨会话升 Standard |
-| Standard | 复制 [plan-lite.md](../templates/plan-lite.md) |
-| Full | [execution-doc-template.md](../references/execution-doc-template.md) |
+是否启用、落不落盘见当前车道卡。跨会话升 Standard。Standard 复制 [plan-lite.md](../templates/plan-lite.md)。Full 用 [execution-doc-template.md](../references/execution-doc-template.md)。
 
 ## 模型路由 + 子窗
 
-**必须子窗** + 高质量档，**必须** `model=`。禁止主窗落盘完整方案；降级标「主窗执行（未开子窗 · 非独立）」。
+**必须子窗** + 高质量档，**必须** `model=`。禁止主窗落盘完整方案；降级标「主窗执行（未开子窗 · 非独立）」。主窗提示里的哈希算法、预期哈希、岗位卡和 blocker 长文忽略，自己读本页、派发文件和 [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md)。交回主窗只留三行。
 
 ## Checklist
 
@@ -45,7 +40,7 @@ description: 将需求整理为 AI 可执行方案。用户说「策划」「写
 4.12 ≥2 Step 须电路一问；战役标战役。[circuit-windows.md](../references/circuit-windows.md)。单步字面 `无（单步·不跑电路）`
 4.13–4.15 收集仓/回传：条件命中 → [collect-queue.md](../references/collect-queue.md) / [pattern-harvest.md](../references/pattern-harvest.md) §Skill 自进化。「准」不开 PR
 4.16 外仓对照默认不启用；用户点名才跑。[external-compare.md](../references/external-compare.md)
-4.5 交方案审前刷新 `证据/_方案审核派发.md` → [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md)
+4.5 交方案审前由本岗刷新 `证据/_方案审核派发.md` → [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md)。主窗不改这份。
 5. 文档状态 `draft` → `review-pending` → 「准」后 ready 并同条改码
 6. 禁止「考虑」「待定」
 7. 未读代码/README 不得写 Mandatory

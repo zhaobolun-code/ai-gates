@@ -88,7 +88,7 @@ try {
     if (-not (Test-Path -LiteralPath $targetCore)) {
         if ($installScript -and $sourceArg) {
             Write-SeedAudit -Root $projectRoot -Line ("install source={0}" -f $sourceArg)
-            $null = & powershell -NoProfile -ExecutionPolicy Bypass -File $installScript -Source $sourceArg -TargetRoot $projectRoot 2>&1
+            $null = & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $installScript -Source $sourceArg -TargetRoot $projectRoot 2>&1
         } else {
             Write-SeedAudit -Root $projectRoot -Line 'skip no_install_script'
         }

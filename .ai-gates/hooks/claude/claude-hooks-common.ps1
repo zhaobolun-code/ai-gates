@@ -147,7 +147,7 @@ function Write-HookAudit {
         $safe = Redact-HookSecrets $Line
         Add-Content -LiteralPath $file -Value ("$ts | $safe") -Encoding UTF8
     } catch {
-        # 审计失败不阻塞 hook 主流程
+        try { [Console]::Error.WriteLine("hook audit failed: $FileName $Line") } catch { }
     }
 }
 

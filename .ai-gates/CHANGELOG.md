@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.1.0（查日志、查正文、跑命令 · minor；前版 5.0.11 定版信息保留）
+**当前 LTS**：v5.2.0（门禁收口与安装同步 · minor；前版 5.1.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,60 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-10-29：bump `skills/VERSION` → **5.2.0**。收口 5.1.0 之后未发版条目：变更日志只认 `.ai-gates/CHANGELOG.md`，EditMode 绿灯看 `passed`，升级覆盖入口并删掉库里的废弃文件，安装地址改到 `.ai-gates/scripts/`，危险 Git 先去掉 `-C` / `--git-dir` / `--work-tree`，正式版本必须整串 `x.y.z`，`hooks-log` 三份授权文件不能伪造，Git 放行先写日志。`plugin.json` version=`5.2.0`。新包 `releases/ai_dev_v5.2.0.7z`，不覆盖 5.1.0 包。入口锚点改认常驻卡。包内补 `scripts/fixtures/`（`check-volume.ps1` / `test-gate-decision.ps1` 的只读数据，首包漏拷会让安装后的 validate 在 volume 段崩）；打包范围自检从 `hooks/` 扩到 `scripts/` 子目录。钩子回归在测父窗继承时先挪开本机待测刀状态，测完放回。
+
+- 2026-10-28：Git 放行留下记录。认不出的全局参数、解析失败、空命令都先写 `git-safety-check.log` 再放行。日志写失败时改写到错误输出，不再吞掉。补了换行、分号、引号路径、环境变量前缀和 `bash -lc` 的判定测试。未知参数仍放行。`hooks.json` 仍是 `powershell`。不把这些改动打进已有的 `5.1.0` 包，不 bump VERSION。Included：`hooks/git-safety-check.ps1` + `hooks/claude/git-safety-check.ps1` + `hooks/codex/git-safety-check.ps1` + `hooks/claude/claude-hooks-common.ps1` + `hooks/codex/codex-hooks-common.ps1` + `scripts/test-gate-decision.ps1`
+
+- 2026-10-28：`hooks-log/pm-gate.json`、`changelog-writes.json`、`knife-state.json` 不能由写工具或显式终端写入。这三份只由钩子和官方脚本自己写。其余 `hooks-log` 日志仍可写。未知 Git 参数和解析失败仍放行。`hooks.json` 的命令仍是 `powershell`；非 Windows 上若没有这个命令，体检报 `hooks_command_is_powershell`，不算已接线。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `scripts/check-hooks-policy.ps1` + `scripts/test-gate-decision.ps1`
+
+- 2026-10-28：危险 Git 命令先去掉 `-C`、`--git-dir`、`--work-tree` 再判断。`git -C repo push --force` 和 `git -C repo reset --hard` 会拒绝。认不出的全局参数仍放行，并在日志写「未解析」。正式版本必须整串是 `x.y.z`，安装器和流水线校验共用这一条。脚本里再调用 PowerShell 时用当前这次的程序。`hooks.json` 仍写 `powershell`。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/git-safety-check.ps1` + `hooks/claude/git-safety-check.ps1` + `hooks/codex/git-safety-check.ps1` + `scripts/official-version.ps1` + `scripts/install-ai-gates.ps1` + `scripts/validate-pipeline.ps1` + `scripts/test-gate-decision.ps1` + `scripts/test-claude-hooks.ps1` + `scripts/test-codex-hooks.ps1` + `scripts/migrate-pipeline-window.ps1` + `scripts/pm-init.ps1` + `scripts/ensure-plugin-seed.ps1` + `scripts/verify-regression-smoke.ps1` + `scripts/pre-commit-pipeline-advisory.ps1` + `package-release.ps1`
+
+- 2026-10-28：收紧四处安装与门禁。只有 `.ai-gates/CHANGELOG.md` 能打点并算 Level 0，子目录同名文件不能开锁。EditMode 绿灯要求 `passed >= 70` 且 `failed = 0`，全部跳过不再算通过。升级覆盖 `hooks.json` 和根文档，并删掉库目录里新版本已移除的文件；入口有差异时先备份到 `tmp/`。README 一键安装指向 `.ai-gates/scripts/install-ai-gates.ps1`。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/mark-changelog-write.ps1` + `hooks/claude/mark-changelog-write.ps1` + `hooks/codex/mark-changelog-write.ps1` + `scripts/install-ai-gates.ps1` + `scripts/run-dotnet-editmode-tests.ps1` + `scripts/test-gate-decision.ps1` + `scripts/test-editmode-verdict.ps1` + `README.md`
+
+- 2026-10-27：主窗只做判定和派发。同一方案夹且口径、选型、A# 未变时不派方案审，仍派隔离代码审。文件不相交的 Step 在同一回复里并联派。禁止续问同一个子窗，再查就新派。不新建岗，不写调度脚本，不 bump VERSION。Included：`skills/references/resident.md` + `skills/references/circuit-windows.md` + `skills/read-evidence/SKILL.md`
+
+- 2026-10-27：主窗不再改方案审核派发和代码审核派发。刷新哈希和 `dispatch_revision` 由策划或程序员子窗写。主窗自己有新鲜 `[PM]` 时写这两类文件会被拒绝。验收派发仍可由主窗写。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `skills/references/resident.md` + `skills/references/review-dispatch-lifecycle.md` + `skills/planner/SKILL.md` + `skills/developer/SKILL.md` + `scripts/test-gate-decision.ps1`
+
+- 2026-10-27：派发不再贴正文。主窗只写岗位、轮次、派发文件路径，不贴哈希算法、预期哈希、blocker 原文和岗位卡。方案审和代码审交回主窗只留三行。策划和程序员忽略提示里贴来的长文，自己读派发文件和岗位卡。不 bump VERSION。Included：`skills/references/resident.md` + `skills/references/agent-entry-route.md` + `skills/plan-reviewer/SKILL.md` + `skills/planner/SKILL.md` + `skills/code-reviewer/SKILL.md` + `skills/developer/SKILL.md`
+
+- 2026-10-27：查正文、跑命令、查日志写入每轮必读。用到才打开那一份，不把三份全文装进每轮。主窗不自己读代码和长文档、不自己搜索、不自己跑终端、不自己看日志。派发只给路径和问题。岗位卡由子窗自己读。车道卡路径写在常驻卡上。不 bump VERSION。Included：`skills/references/resident.md` + `skills/references/agent-entry-route.md` + `skills/templates/AGENTS.md`
+
+- 2026-10-26：token 行里满 5 位的数字改成以万计数。406259 写成 40.6万，保留一位小数，整万不写小数。不足 5 位仍写原数。过线判断仍用原始整数。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `skills/references/resident.md` + `skills/references/agent-entry-route.md` + `scripts/test-gate-decision.ps1`
+
+- 2026-10-26：旧上下文占比过高时，token 下一行写「已满足换窗条件, 请执行换窗逻辑减少token消耗」。必须换行，禁止用空格接在 token 行尾。数字只抄本对话自己的注入，没有注入就写「上一轮未记到」，禁止抄别的对话。换窗行要等本对话首次记账后再增加至少 20 万输入，并且缓存读仍达到输入的 80%。不输出八段交接。不拒绝工具。Claude、Codex、Trae 没有这句。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/mark-pm-gate.ps1` + `skills/references/resident.md` + `skills/references/session-handover.md` + `skills/references/hook-gates.md` + `skills/references/agent-entry-route.md` + `scripts/test-gate-decision.ps1`
+
+- 2026-10-26：中文 README 与方法论对齐现行规则。每刀先扫错题大纲，典故不靠方案夹。拒绝收在一份判定里，三端入口只写各自的 JSON，Trae 没有机器钩子。机器放行只证明 120 分钟内打过 `[PM]`，不证明本条已判定。不 bump VERSION。Included：`README.md` + `METHODOLOGY.md`
+
+- 2026-10-26：岗位页不再重复车道卡上的步骤。策划、方案审、程序员、代码审的车道段改成指向当前卡，页内只留卡上没有的规则。体积闸上限降到新的行数。错题大纲仍是车道卡第 1 步。不删旧参考。不 bump VERSION。Included：`skills/planner/SKILL.md` + `skills/plan-reviewer/SKILL.md` + `skills/developer/SKILL.md` + `skills/code-reviewer/SKILL.md` + `scripts/fixtures/skill-line-caps.json`
+
+- 2026-10-26：Codex 每轮必读的后半截改成指针。硬门禁和冷启动指向常驻卡与当前车道卡。卫生指向 `execution-discipline.md` 的工作区卫生。钩子事件指向 `hook-gates.md`。`apply_patch` 不覆盖 Bash 写入、桌面端未证实，这两句留在入口。四张岗位页里已经写在车道卡上的步骤从表里拿掉，页内清单不删。体积闸按 UTF-8 计行，上限等于编辑器里的换行数。旧参考不动。错题大纲仍是车道卡第 1 步。不 bump VERSION。Included：`skills/templates/AGENTS.md` + `skills/planner/SKILL.md` + `skills/plan-reviewer/SKILL.md` + `skills/developer/SKILL.md` + `skills/code-reviewer/SKILL.md` + `scripts/check-volume.ps1` + `scripts/fixtures/skill-line-caps.json`
+
+- 2026-10-26：说明文件不再收成同一个相对名。`.cursor/README.md` 在三端都是 Level 2。`.ai-gates` 根上的 README、SKILLS、USER-GUIDE、METHODOLOGY 在 Claude 和 Codex 仍是 Level 1。Cursor 上这四份仍放行。根目录说明默认仍不算设施。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `scripts/test-gate-decision.ps1`
+
+- 2026-10-23：三份写门入口只读入、只写宿主 JSON。拒绝和放行都在 `gate-decision.ps1`。上次入口换过去失败，是因为 PowerShell 的 `$PID` 被当成了父会话，而且 `.cursor/README.md` 被当成要先写变更日志。这两处按原来的拒绝文案对齐。Cursor 入口仍写出拒绝、解析失败放行和窗口原因，策略扫描才算对齐。根目录说明默认仍不算设施。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/pm-gate-check.ps1` + `hooks/claude/pm-gate-check.ps1` + `hooks/codex/pm-gate-check.ps1` + `scripts/test-gate-decision.ps1`
+
+- 2026-10-23：写门判定增加 `Get-WriteGateVerdict`。冻结夹具改为拒绝码在真源或该端入口里必须还在。三份入口仍走原来的分支，因为直接改走新函数会改掉逃生提示和 `.cursor/README.md` 的放行。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `scripts/test-gate-decision.ps1`
+
+- 2026-10-23：待测状态有了写入方。同一窗、同一 A#、同一句现象再热修，次数加一。人测记录对不上现象句就不翻待测。默认必读收成常驻卡和当前车道卡。主窗写 `hooks-log/cr-stamp.json` 拒绝，写在 hooks-log 放行之前。Express 不要求这枚戳记。不改岗位页行数。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/pm-gate-check.ps1` + `hooks/claude/pm-gate-check.ps1` + `hooks/codex/pm-gate-check.ps1` + `scripts/set-knife-state.ps1` + `scripts/test-gate-decision.ps1` + `skills/references/lane-express.md` + `skills/references/lane-direct.md` + `skills/references/lane-standard.md` + `skills/references/lane-full.md` + `skills/references/agent-entry-route.md` + `skills/templates/AGENTS.md`
+
+- 2026-10-23：体积闸。岗位页超过登记行数，或 `references` 里有文件没出现在路由表，检查失败。不删旧文件。当时没进路由的参考补上点名行。不 bump VERSION。Included：`scripts/check-volume.ps1` + `scripts/fixtures/skill-line-caps.json` + `scripts/validate-pipeline.ps1` + `skills/references/reference-routing.md`
+
+- 2026-10-23：待测和第三次热修只加进判定真源。上一刀仍待测时写业务 `.cs` / `.lua` 拒绝。同一窗、同一 A#、同一句现象热修到第 3 次拒绝，字段对不上或已升车道则放行。人测记录对上现象句才允许把待测翻掉。解析失败仍放行。不改 `failClosed`。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/pm-gate-check.ps1` + `hooks/claude/pm-gate-check.ps1` + `hooks/codex/pm-gate-check.ps1` + `scripts/mark-human-tested.ps1` + `scripts/test-gate-decision.ps1` + `scripts/fixtures/pm-gate-deny-freeze.json` + `skills/references/hook-gates.md`
+
+- 2026-10-23：第一屏和四张车道卡一次收口。常驻一句加四个固定词、四件做不到、四行选车道。判定后只读当前那一张卡。不动钩子。不 bump VERSION。Included：`skills/references/resident.md` + `skills/references/lane-express.md` + `skills/references/lane-direct.md` + `skills/references/lane-standard.md` + `skills/references/lane-full.md` + `skills/references/agent-entry-route.md` + `skills/references/reference-routing.md` + `README.md` + `rules/ai-dev-pipeline.mdc` + `skills/templates/AGENTS.md`
+
+- 2026-10-23：冻结三端写门现在会拒绝的 detail。夹具按 Cursor / Claude / Codex 分开列码，少一个码测试失败。不改拒绝行为。现跑 Cursor 95、Claude 35、Codex 30，全绿。不 bump VERSION。Included：`scripts/fixtures/pm-gate-deny-freeze.json` + `scripts/test-gate-decision.ps1`
+
+- 2026-10-23：判定收成一份。`hooks/gate-decision.ps1` 只管危险 Git、显式写路径、设施或生成目录、时间戳是否新鲜。Cursor、Claude、Codex 的入口只负责读入和写出该端要的 JSON。Cursor 的 Shell 改文件走同一判定，`beforeShellExecution` 改为 `pre-shell-gate.ps1`（先 Git，再写文件）。Codex 允许仍省略 `permissionDecision`。不改 `failClosed`。短表补 Shell 写门，并写明 Trae、Codex 桌面、Read 未接线。冷启动与 CORE 对齐为默认 Direct。主窗标题去掉「不硬拦」；Direct 的隔离审查仍须子窗，同 Chat 只标非独立不算完成。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/bash-write-gate.ps1` + `hooks/pre-shell-gate.ps1` + `hooks/git-safety-check.ps1` + `hooks/claude/git-safety-check.ps1` + `hooks/codex/git-safety-check.ps1` + `hooks/claude/bash-write-gate.ps1` + `hooks/codex/bash-write-gate.ps1` + `hooks.json` + `skills/references/hook-gates.md` + `skills/CORE.md` + `skills/MAINTAINER.md` + `skills/references/agent-entry-route.md` + `scripts/test-gate-decision.ps1` + `scripts/test-hooks.ps1` + `scripts/test-claude-hooks.ps1` + `scripts/test-codex-hooks.ps1`
+
+- 2026-10-22：三刀。错题大纲命中时「你下一步」点名日期或关键词，没命中写「已扫，无命中」。业务 C# 交审缺可执行 Unity 步骤或关键词、又没写 `not run`，代码审判 blocker。体检在近 N 天 write-audit 没有 apply_patch 时写「Codex 桌面拦截未证实」，不因此改退出码。命令门的拒绝不算写入钩子。不 bump VERSION。Included：`skills/references/agent-entry-route.md` + `skills/code-reviewer/SKILL.md` + `scripts/pipeline-health.ps1`
+
+- 2026-10-22：现有机器钩子收成一张短表。每道写明拒绝还是只提示、防的模型失误、登记日。零日志不拆，没量过不等于没事。不搬外仓的触发统计。不 bump VERSION。Included：`skills/references/hook-gates.md` + `skills/references/reference-routing.md`
+
+- 2026-10-22：日常确认先读再问。文件、接口、仓库里已经写明的数值和口径先读进确认包，三问、一次确认包和续链合并包只问必须由用户拍板的事。入口岗清单写上同一句。不 bump VERSION。Included：`skills/references/demand-clarification.md` + `skills/references/agent-entry-route.md`
+
+- 2026-10-22：打包范围加两道自检，堵 `hooks/plugin` 自 5.0.6 起漏拷那类问题。`validate-pipeline.ps1` 逐个比对 `hooks/` 下实际存在的子目录与 `package-release.ps1` 里的 `Join-Path $hooksDir "<名>"` 拷贝块，缺一个即失败；`package-release.ps1` 暂存后按源目录清点顶层 `*.ps1/*.sh` 与各子目录 `*.ps1`，暂存区少文件直接退出 1。Included：`scripts/validate-pipeline.ps1` + `package-release.ps1`。不 bump VERSION
 
 - 2026-10-22：当前版本号收口到 `skills/VERSION`（5.1.0）。市场 `plugin.json` 的 version 与该文件相同，校验不一致即失败；打包时按该文件重写包内这份 version。仓库里的打包信息不再另写号码。历史评测和旧变更记录不改。Included：`cursor-marketplace/.cursor-plugin/plugin.json` + `scripts/validate-pipeline.ps1` + `package-release.ps1` + `PACKAGE-INFO.md`
 
@@ -211,7 +265,6 @@
 - 2026-08-17：evolution-05-gh-collect GitHub 收集仓（可选 gh 出口，用户「归档」签收）：collect-queue §gh 加厚默认仓 `zhaobolun-code/ai-gates-collect`、上传通道 PR、「准」不开 PR；本机可探测、未探测成功禁止自称已通。收集仓 PR #1 已合并（两条错题）。禁止包级自称已下发。不 bump VERSION
 
 - 2026-08-17：接入口径正面改写（README / USER-GUIDE / METHODOLOGY）：开工=「项目经理 初始化」；碰撞/逆链写点名才启用、不纳入车道；评价段去掉「不成立」。不 bump VERSION
-
 
 - 2026-08-17：evolution-04-local-loop 本地自进化环（第一段可跑，用户「归档」签收）：手续页加厚去上下文化→shareable→抽象→「准」才入通用格；planner/developer/plan-reviewer 接线；本机队列 1 条 shareable 演练。不 bump VERSION。gh 未接线不可实施上传/下发。
 

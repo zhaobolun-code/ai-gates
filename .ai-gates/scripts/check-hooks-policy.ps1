@@ -16,10 +16,11 @@ function Get-HooksRuntimeStatus {
     # Interpreter availability ≠ this client has machine hooks (Trae = soft layer).
     # Override for tests / Unix doctor from a machine that can run ps1:
     #   $env:AI_GATES_HOOKS_RUNTIME = 'hooks_not_wired_no_pwsh'
+    param([bool]$CommandStartsWithPowershell = $true)
     $forced = [string]$env:AI_GATES_HOOKS_RUNTIME
     if (-not [string]::IsNullOrWhiteSpace($forced)) {
         $code = $forced.Trim()
-        $ok = ($code -ne 'hooks_not_wired_no_pwsh')
+        $ok = ($code -ne 'hooks_not_wired_no_pwsh' -and $code -ne 'hooks_command_is_powershell')
         return [ordered]@{ Interpreter = $ok; Wired = $ok; Code = $code }
     }
     $onWindows = $false
@@ -29,8 +30,12 @@ function Get-HooksRuntimeStatus {
     if ($onWindows) {
         return [ordered]@{ Interpreter = $true; Wired = $true; Code = 'windows_powershell' }
     }
-    $pwsh = Get-Command pwsh -ErrorAction SilentlyContinue
-    if ($pwsh) {
+    $hasPowershell = [bool](Get-Command powershell -ErrorAction SilentlyContinue)
+    $hasPwsh = [bool](Get-Command pwsh -ErrorAction SilentlyContinue)
+    if ($CommandStartsWithPowershell -and -not $hasPowershell) {
+        return [ordered]@{ Interpreter = $hasPwsh; Wired = $false; Code = 'hooks_command_is_powershell' }
+    }
+    if ($hasPwsh -or $hasPowershell) {
         return [ordered]@{ Interpreter = $true; Wired = $true; Code = 'unix_pwsh' }
     }
     return [ordered]@{ Interpreter = $false; Wired = $false; Code = 'hooks_not_wired_no_pwsh' }
@@ -46,6 +51,7 @@ function Get-HooksPolicyReport {
     )
 
     $issues = New-Object System.Collections.Generic.List[string]
+    $commandIsPowershell = $false
     $hooksJsonPath = Join-Path $RepoRoot ".cursor/hooks.json"
     $pmGateCheckPath = Join-Path $RepoRoot ".cursor/hooks/pm-gate-check.ps1"
     $driftHookPath = Join-Path $RepoRoot ".cursor/hooks/check-hooks-drift.ps1"
@@ -61,6 +67,7 @@ function Get-HooksPolicyReport {
             foreach ($ev in $hooksCfg.hooks.PSObject.Properties) {
                 foreach ($entry in @($ev.Value)) {
                     $cmd = [string]$entry.command
+                    if ($cmd -match '(?i)^\s*powershell(\.exe)?\b') { $commandIsPowershell = $true }
                     if ([bool]$entry.failClosed) {
                         $issues.Add(("failClosed=true not allowed ({0}: {1})" -f $ev.Name, $cmd)) | Out-Null
                     }
@@ -138,9 +145,13 @@ function Get-HooksPolicyReport {
         }
     }
 
-    $runtime = Get-HooksRuntimeStatus
+    $runtime = Get-HooksRuntimeStatus -CommandStartsWithPowershell $commandIsPowershell
     if (-not $runtime.Wired) {
-        $issues.Add("hooks_not_wired_no_pwsh: macOS/Linux machine hooks need PowerShell 7+ (pwsh); do not report hooks wired") | Out-Null
+        if ($runtime.Code -eq 'hooks_command_is_powershell') {
+            $issues.Add("hooks_command_is_powershell: hook command is powershell but that executable is absent; pwsh alone does not start these hooks") | Out-Null
+        } else {
+            $issues.Add("hooks_not_wired_no_pwsh: macOS/Linux machine hooks need PowerShell 7+ (pwsh); do not report hooks wired") | Out-Null
+        }
     }
 
     return [ordered]@{

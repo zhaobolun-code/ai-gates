@@ -245,7 +245,7 @@ function Invoke-GateAUniqueEditable {
             $rel = $srcFull.Substring($rootFull.Length).TrimStart('\', '/').Replace('\', '/')
         }
         Write-Host ("pre-commit-pipeline-advisory: Gate A CheckUniqueEditable {0}" -f $rel)
-        $out = & powershell -NoProfile -ExecutionPolicy Bypass -File $CheckScript -DocPath $src -CheckUniqueEditable 2>&1 | Out-String
+        $out = & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $CheckScript -DocPath $src -CheckUniqueEditable 2>&1 | Out-String
         Write-Host $out
         if ($out -match 'editable=yes') { $yes++ }
         elseif ($out -match 'editable=no') { $no++ }
@@ -292,7 +292,7 @@ try {
             Write-Host "pre-commit-pipeline-advisory: regression index files in changed set, running sync check"
             $syncArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $syncScript)
             if ($Strict) { $syncArgs += "-Strict" }
-            & powershell @syncArgs
+            & (Get-Process -Id $PID).Path @syncArgs
             if ($LASTEXITCODE -ne 0) { $fail = $true }
         }
     }
@@ -318,7 +318,7 @@ try {
             Write-Host ("pre-commit-pipeline-advisory: checking {0}" -f $rel)
             $args = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $checkScript, "-DocPath", $full, "-CheckGit")
             if ($Strict) { $args += "-Strict" }
-            & powershell @args
+            & (Get-Process -Id $PID).Path @args
             if ($LASTEXITCODE -ne 0) { $fail = $true }
         }
 
@@ -333,7 +333,7 @@ try {
         if ($Strict) { $fail = $true }
     } else {
         Write-Host "pre-commit-pipeline-advisory: Gate B - detect-empty -FailOnCandidates"
-        & powershell -NoProfile -ExecutionPolicy Bypass -File $detectScript -FailOnCandidates
+        & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $detectScript -FailOnCandidates
         if ($LASTEXITCODE -ne 0) {
             Write-Host ("pre-commit-pipeline-advisory: Gate B candidates present (exit={0})" -f $LASTEXITCODE) -ForegroundColor $(if ($Strict) { 'Red' } else { 'Yellow' })
             if ($Strict) { $fail = $true }
@@ -352,7 +352,7 @@ try {
         })
         if ($maybePm.Count -gt 0) {
             Write-Host "pre-commit-pipeline-advisory: possible PressureManager touch in changed set; advisory only (hard gate = CI / explicit local)"
-            & powershell -NoProfile -ExecutionPolicy Bypass -File $pmGate -Advisory | Out-Host
+            & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $pmGate -Advisory | Out-Host
         }
     }
 

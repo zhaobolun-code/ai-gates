@@ -53,6 +53,11 @@
 | 只能人做的步骤（凭证 / 授权 / 后台） | `human-wizard.md` |
 | 外部事实 / API / 文档调研（开子窗） | `research-task.md` |
 | 用户点名「外仓对照」；加载 ≠ 启用；PM 提示 ≠ 启用；禁止每窗必搜 GitHub | `external-compare.md` |
+| 改 `hooks/*.ps1` 或 `hooks.json`，或点名门禁短表。零日志不拆；本表不自动升降门禁 | `hook-gates.md` |
+| 车道已判为 Express。只装这一张，不装另外三张 | `lane-express.md` |
+| 车道已判为 Direct。只装这一张，不装另外三张 | `lane-direct.md` |
+| 车道已判为 Standard。只装这一张，不装另外三张 | `lane-standard.md` |
+| 车道已判为 Full。只装这一张，不装另外三张 | `lane-full.md` |
 | AFK 子代理委托书 / 耐久契约 | `agent-brief.md` |
 | 需求评估 / 被拒需求去重 | `out-of-scope.md` |
 | 设计模块形状 / 找 seam / 接口方案对比（与 `architecture-health-check`「体检找候选」互补；并行接口设计见 `design-it-twice.md`，共用本行） | `codebase-design.md` |
@@ -76,6 +81,30 @@
 | 7 天卡住 / 质量趋势停点 | `long-task.md` |
 | 压缩重派 / 跨会话续作账本 | `loop-engineering.md` |
 | 覆盖度 / 读过测过失败过 / 禁止自报覆盖率 | `coverage-map.md` |
+| 每轮先读常驻，再只读当前车道卡 | `resident.md` |
+| 点名反模式全表 | `anti-patterns.md` |
+| 代码审要结构图、不是认知全图 | `codegraph-probe.md` |
+| 执行文档默认路径 | `doc-path-defaults.md` |
+| 证据等级 / 置信标注 | `evidence-levels.md` |
+| 点名样例夹 | `examples.md` |
+| 执行文档模板 | `execution-doc-template.md` |
+| Full 强制条决策树 | `full-lane-decision-tree.md` |
+| 交接模板 | `handoff-template.md` |
+| 钩子只提示、不升成拒绝 | `hooks-advisory.md` |
+| 车道用词 | `lane-glossary.md` |
+| 方案审档位 | `plan-review-tiers.md` |
+| 项目经理 初始化 / 检查健康 | `pm-init.md` |
+| 项目经理工具 | `pm-tooling.md` |
+| 项目专属配置不进技能包 | `project-local-config.md` |
+| 派文档岗 | `readme-dispatch.md` |
+| 点名本路由表 | `reference-routing.md` |
+| 回退前必须人点头 | `rollback.md` |
+| 换窗交接 | `session-handover.md` |
+| 文档状态机 | `state-machine.md` |
+| 止损和热度对照 | `stop-loss-heat-compare.md` |
+| 技术负责人接入 | `tl-onboarding.md` |
+| 对人说话 | `user-visible-states.md` |
+| 点名执行文档黄金样例 | `执行文档黄金样例.md` |
 
 ## 按岗加载
 
@@ -86,7 +115,7 @@
 
 ## 维护者专用
 
-`MAINTAINER.md`、`skill-eval-checklist.md`、脚本说明、模板与反模式全表仅在维护/发布/评测任务按需读取；日常业务实现不加载。
+`MAINTAINER.md`、`hook-gates.md`、`skill-eval-checklist.md`、脚本说明、模板与反模式全表仅在维护/发布/评测任务按需读取；日常业务实现不加载。
 
 ## 禁止
 

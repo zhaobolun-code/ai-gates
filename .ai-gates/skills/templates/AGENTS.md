@@ -14,10 +14,11 @@
 
 ## 必读顺序
 
-1. `.ai-gates/skills/references/agent-entry-route.md`（日常入口）
-2. `.ai-gates/skills/CORE.md`（权威规则；争议 / recovery / 按 CORE 重来 时读全文）
-3. `.cursor/project-context.md`（改代码前必读；含 Codex 模型映射）
-4. 当前岗位 `.ai-gates/skills/<岗位>/SKILL.md`（按 checklist 执行）
+1. `.ai-gates/skills/references/resident.md`
+2. 当前这一张车道卡（`skills/references/` 下的 `lane-express.md` / `lane-direct.md` / `lane-standard.md` / `lane-full.md`）
+3. 用到才打开那一份，不把三份全文装进每轮：`read-evidence`、`run-evidence`、`log-evidence`。主窗不自己读、不自己搜、不自己跑、不自己看日志。
+
+派子窗前再读 `.cursor/project-context.md` 的模型路由那一节。回归索引和物理口径派查正文去读。不把整份项目说明装进每轮。派发只写岗位、轮次、派发文件路径。不贴哈希算法、预期哈希、blocker 原文、岗位卡。子窗交回只留三行。岗位卡由子窗自己读。
 
 ## 岗位路由（切岗前 Read 对应 SKILL.md）
 
@@ -29,53 +30,22 @@
 | 代码审核 / 审代码 | `.ai-gates/skills/code-reviewer/SKILL.md` |
 | 文档 / 更新 README | `.ai-gates/skills/module-readme/SKILL.md` |
 | 周报 | `.ai-gates/skills/weekly-report/SKILL.md` |
+| 查日志（主窗要看日志时派子窗，不自己读原文） | `.ai-gates/skills/log-evidence/SKILL.md` |
+| 查正文（主窗要看代码或文档时派子窗） | `.ai-gates/skills/read-evidence/SKILL.md` |
+| 跑命令（主窗要跑终端时派子窗） | `.ai-gates/skills/run-evidence/SKILL.md` |
 
-## 硬门禁（摘要；细则见 CORE）
+## 硬门禁
 
-- **无本轮 `[PM]` 判定不得创建/修改交付物**（代码 / 执行文档 / README）；直接叫岗位也必须同条先 `[PM]`。纯问答/只读咨询 → 主窗直接答，不建窗、不生成文档。
-- 改代码前必须读 `.cursor/project-context.md`；只实现当前 Step / 切片范围，验收以 A# 为准；Unity 未测不标「已通过」。
-- Express 先有一句话切片；Direct 无方案审但须隔离 CR；Standard 先过方案审；CR 有 blocker 不收口、不写最终 README。
-- 主窗只当 PM：方案审 / CR / 文档优先子代理（Subagent）。Express 与 Direct 的业务改码也必须派程序员；CR 仍必须隔离子窗。派发必须显式传 `model=`（Codex 模型映射见 project-context §模型路由；Codex 桌面 0.146 实测：任务须随 spawn 初始消息，`fork_turns=all` 继承父模型、以送达优先并标注，详见 model-routing §Codex 桌面派发实测）；周报例外，当前窗直接做。
+见常驻卡和当前这一张车道卡。车道卡第 1 步仍是扫错题大纲。
 
 ## 冷启动
 
-无 `.cursor/project-context.md` 时：纯问答/只读咨询直接答；要改代码 → 提示 `项目经理 初始化`（生成/确认 project-context 后再动），未初始化前默认 Direct（≤3 文件、无 API/存档/跨模块；Express 仅 1 文件机械）；>3 文件或 API/存档/跨模块 → Standard。若 `.ai-gates/skills/CORE.md` 读不到，先跑 `link-platform.ps1`（见头部说明）。
+没有项目说明时，按常驻卡的选车道顺序。要改代码先说「项目经理 初始化」。
 
-## 工作区卫生（Codex 产生文件的归属）
+## 工作区卫生
 
-- 一次性中间产物（调试/探针脚本、临时输出、revision/hash 计算等）→ **`.ai-gates/tmp/`**（不入库；环节收尾整目录清空，与 Cursor/Trae 同规则）。
-- hook 机器层运行时证据（pm-gate.json / changelog-writes.json / *.log）→ `.ai-gates/hooks-log/`（证据，勿清理）。
-- `.ai-gates/` 是真实目录（库内容 + 运行时中间文件）：临时产物放 `.ai-gates/tmp/`、运行时证据
-  放 `.ai-gates/hooks-log/`、验证产物放 `.ai-gates/verify/`、项目状态（lessons-* / pipeline-* /
-  regression-index.yaml）放 `.ai-gates/` 根；全部不入 git（`.ai-gates/` 整体不跟踪）。
-- Codex 应用级会话暂存（如 `~/.codex/visualizations/...`）留在 app 自有目录即可；若内容需项目内可见/复用，改放 `.ai-gates/tmp/`。
-- 细则：`.ai-gates/skills/CORE.md` §工作区卫生 / `.ai-gates/skills/references/execution-discipline.md` §工作区卫生。
-- 说明：`.cursor/` 是历史遗留的运行层目录名（gitignored：只保留项目专属 `project-context.md` /
-  `mcp.json` / `hooks.json` 与传送门 `skills|hooks|scripts|rules`），**不表示要求安装 Cursor**；
-  Codex-only 只需 `.ai-gates/`（库 + 运行时）+ `.codex` 传送门 + 本文件。
+一次性中间产物只放 `.ai-gates/tmp/`。细则见 `execution-discipline.md` 的工作区卫生。
 
-## Codex hooks 接线（机器强制层 · 2026-08-04 实测接线）
+## Codex 钩子
 
-Codex 侧机械层由 `.codex/hooks.json` + `.codex/config.toml`（传送门 → `.ai-gates/codex/`，
-本地中央副本，不入 git）直接指向 `.ai-gates/hooks/codex/*.ps1`（真实路径，不依赖 `.cursor/` 传送门）。
-已实测（codex-cli 0.146.0-alpha.9.2）：PreToolUse/PostToolUse 对 `Bash` 与 `apply_patch`
-都触发；deny 真正拦截并回显原因；`additionalContext` 注入可达模型。
-
-| 事件 | matcher | 脚本 | 语义 |
-| --- | --- | --- | --- |
-| SessionStart | — | check-hooks-drift.ps1 | Codex 接线漂移 → additionalContext 提示 |
-| PreToolUse | ^Bash$ | pre-bash-gate.ps1（git-safety-check + bash-write-gate） | 高危 Git（push --force / reset --hard / clean -f / checkout -- / branch -D）→ deny 拦截 |
-| PreToolUse | ^apply_patch$ | pre-apply-patch-gate.ps1（audit-write + pm-gate-check） | 写审计；无新鲜 `[PM]` → deny（120 分钟窗口，按 session_id） |
-| PostToolUse | ^apply_patch$ | post-apply-patch-gate.ps1（mark-changelog-write + check-unity-compile） | Unity 编译错误提示；CHANGELOG 写打点 |
-| Stop | — | mark-pm-gate.ps1 | 回复含 `[PM]` → 写 pm-gate.json（Cursor 版 afterAgentResponse 的等价映射） |
-
-用法要点：
-- hooks 需要信任：桌面端首个会话会提示信任项目 hooks，批准后才生效；CLI 一次性验证用
-  `codex exec --enable hooks --dangerously-bypass-hook-trust`（0.146 中 `codex_hooks`
-  是已废弃别名，正名是 `hooks`）。
-- 逃生：`.ai-gates/hooks-log/pm-gate-disabled`（kill switch，临时全放行）/ 手动编辑 /
-  先发 `[PM]` 待 Stop 打点 / 改 `.cursor` 或 `.ai-gates` 设施先写 CHANGELOG。
-- 局限（如实）：门禁覆盖 `apply_patch`（Codex 标准文件写入工具）；经 Bash 的写入
-  （如 `Set-Content`）不在此钩子覆盖内（与 Cursor 版只覆盖 Write 工具同类）。**2026-08-05 实测**：
-  Codex 桌面应用会话对 `apply_patch` 钩子可能不触发（信任已批准仍零打点）；CLI 侧（0.147.0-alpha.1.2）
-  全链路可用。桌面端关键写操作后自查 `.ai-gates/hooks-log/`，或按需用 CLI 真演补机械证据。
+`apply_patch` 这道门不覆盖 Bash 里的写入。显式写文件另有 shell 门。桌面端拦截未证实。事件和各端是否真拦，见 `.ai-gates/skills/references/hook-gates.md`。

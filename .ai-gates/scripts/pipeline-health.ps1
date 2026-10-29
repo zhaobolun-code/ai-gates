@@ -25,6 +25,8 @@
 #       仅 30 天内历史（近 12 小时为 0）→ INFO（根因 2026-08-04 11:55 junction 已修，非活退化）
 #   D4  近 N 天打点 = 0 且 deny = 0 → CRIT：hook 链路全静默（hooks.json 未接线或 Cursor 侧失效）
 #   D5  kill switch 存在 → INFO：门禁被人工禁用（豁免期内不判退化）
+#   D6  近 N 天 write-audit 无 tool=apply_patch
+#       → INFO：Codex 桌面写入拦截未证实。bash-write-gate 不算写入钩子。不改退出码，不写成健康
 #
 # Usage:
 #   powershell -ExecutionPolicy Bypass -File .cursor/scripts/pipeline-health.ps1
@@ -138,6 +140,7 @@ $parseFailMarkCw = Count-LogLines -Path (Join-Path $logDir "mark-changelog-write
 $parseFailMarkPm12 = Count-LogLines -Path (Join-Path $logDir "mark-pm-gate.log") -Pattern "PARSE_FAIL" -SinceUtc $since12h
 $parseFailMarkCw12 = Count-LogLines -Path (Join-Path $logDir "mark-changelog-write.log") -Pattern "PARSE_FAIL" -SinceUtc $since12h
 $unityHit = Count-LogLines -Path (Join-Path $logDir "unity-compile-check.log") -Pattern "HIT"
+$codexWrite = Count-LogLines -Path (Join-Path $logDir "write-audit.log") -Pattern "tool=apply_patch"
 $killSwitch = Test-Path -LiteralPath (Join-Path $logDir "pm-gate-disabled")
 
 # 退化信号判定
@@ -173,6 +176,9 @@ if ($pmGate.Recent -eq 0 -and $cw.Recent -eq 0 -and $denyCount -eq 0 -and -not $
 if ($signals.Count -eq 0) {
     $signals += "OK 近 $Days 天无退化信号：打点正常、门禁有触发、链路稳定"
 }
+if ($codexWrite -eq 0) {
+    $signals += "INFO D6 近 $Days 天 Codex 桌面拦截未证实：write-audit 无 apply_patch。不因此改退出码"
+}
 
 $latestPmStr = if ($pmGate.LatestUtc) { $pmGate.LatestUtc.ToString("yyyy-MM-dd HH:mm:ss'Z'") } else { "无" }
 $latestCwStr = if ($cw.LatestUtc) { $cw.LatestUtc.ToString("yyyy-MM-dd HH:mm:ss'Z'") } else { "无" }
@@ -187,6 +193,7 @@ $report = [ordered]@{
     parseFail = $parseFailTotal
     parseFail12h = $parseFail12h
     unityCompileHit = $unityHit
+    codexWriteDots = $codexWrite
     killSwitchActive = $killSwitch
     signals = $signals
     level = $level
@@ -207,6 +214,7 @@ if ($JsonOutput) {
     $md += ""
     $md += "## 门禁与质量门"
     $md += "- 门禁 deny：$denyCount 次 · PARSE_FAIL（近 $Days 天/近 12 小时）：$parseFailTotal/$parseFail12h 次 · Unity 编译命中：$unityHit 次"
+    $md += "- Codex 写入打点（apply_patch + bash-write-gate）：$codexWrite 次"
     $md += "- kill switch：$killSwitch"
     $md += ""
     $md += "## 退化信号"

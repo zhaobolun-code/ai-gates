@@ -12,6 +12,7 @@
 #                CHANGELOG.md at pack root IS shipped for public trust
 #     scripts/   *.ps1 / *.sh except Chemical-specific (e.g. ci-pressure-manager-gate.ps1)
 #                + point-named scripts/fog-map.template.html (if present; not all non-scripts)
+#                + scripts/fixtures/*.json (read-only data for check-volume.ps1 / test-gate-decision.ps1)
 #     rules/ai-dev-pipeline.mdc
 #     hooks.json + hooks/*.ps1 + hooks/codex/*.ps1 + hooks/claude/*.ps1 + hooks/plugin/*.ps1  (Cursor + Codex + Claude + Cursor-marketplace hooks)
 #     codex/hooks.json + codex/config.toml  (Codex wiring, git-tracked central copy)
@@ -52,7 +53,7 @@ if (-not (Test-Path (Join-Path $skillsDir "CORE.md"))) {
 # 2026-08-04 软连接改造：validate-pipeline 等会经 .cursor/ 传送门读取，先确保传送门就位
 if (-not (Test-Path (Join-Path $repoRoot ".cursor/skills/CORE.md"))) {
     Write-Host "Portals missing — running link-platform.ps1 first..." -ForegroundColor Yellow
-    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repoRoot ".ai-gates/link-platform.ps1")
+    & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repoRoot ".ai-gates/link-platform.ps1")
     if ($LASTEXITCODE -ne 0) {
         Write-Error "link-platform.ps1 failed; refusing to package."
         exit 1
@@ -92,7 +93,7 @@ if ($SkipValidate) {
     Write-Host "WARNING: -SkipValidate 已指定——跳过 validate-pipeline -Strict（维护者签字级逃生；打包前请自行确认全绿）。" -ForegroundColor Yellow
 } else {
     Write-Host "Running validate-pipeline -Strict before packaging..." -ForegroundColor Cyan
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $ValidateScriptPath -Strict
+    & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $ValidateScriptPath -Strict
     $validateExit = $LASTEXITCODE
     if ($validateExit -ne 0) {
         # ErrorActionPreference=Stop 下 Write-Error 会终止脚本，退出码 1——正好是拒绝语义
@@ -138,6 +139,30 @@ try {
     if (Test-Path -LiteralPath $fogMapTemplate) {
         Copy-Item -LiteralPath $fogMapTemplate -Destination (Join-Path $stageScripts "fog-map.template.html") -Force
     }
+    # scripts/fixtures/：check-volume.ps1 / test-gate-decision.ps1 的只读数据。
+    # 2026-10-29 首包漏拷 → 安装后 validate 的 volume 段 ReadAllText 崩。
+    $fixturesDir = Join-Path $scriptsDir "fixtures"
+    if (Test-Path -LiteralPath $fixturesDir) {
+        $stageFixtures = Join-Path $stageScripts "fixtures"
+        New-Item -ItemType Directory -Force -Path $stageFixtures | Out-Null
+        Get-ChildItem -Path $fixturesDir -File -ErrorAction SilentlyContinue |
+            Copy-Item -Destination $stageFixtures -Force
+    }
+
+    # 打包范围自检（scripts）：所有子目录下的数据文件都必须出现在暂存区。
+    $missingScripts = @()
+    foreach ($scriptSubDir in (Get-ChildItem -Path $scriptsDir -Directory -ErrorAction SilentlyContinue)) {
+        Get-ChildItem -Path $scriptSubDir.FullName -File -ErrorAction SilentlyContinue | ForEach-Object {
+            if (-not (Test-Path -LiteralPath (Join-Path (Join-Path $stageScripts $scriptSubDir.Name) $_.Name))) {
+                $missingScripts += "$($scriptSubDir.Name)/$($_.Name)"
+            }
+        }
+    }
+    if ($missingScripts.Count -gt 0) {
+        Write-Error ("打包范围自检失败：scripts 暂存区缺少 {0}" -f ($missingScripts -join ", "))
+        exit 1
+    }
+    Write-Host ("Scripts staging self-check: OK ({0} files)" -f @(Get-ChildItem -Path $stageScripts -Recurse -File).Count)
 
     Write-Host "Copying rules/ai-dev-pipeline.mdc..."
     $mdcPath = Join-Path $rulesDir "ai-dev-pipeline.mdc"
@@ -180,6 +205,25 @@ try {
             Get-ChildItem -Path (Join-Path $pluginHooksDir "*") -Include *.ps1 -File -ErrorAction SilentlyContinue |
                 Copy-Item -Destination $stagePluginHooks -Force
         }
+
+        # 打包范围自检：暂存区必须与源目录同构（顶层 *.ps1/*.sh + 各子目录 *.ps1）。
+        # 2026-10-16 的 hooks/plugin 漏拷靠人工发现；这里让同类漂移在打包当场失败。
+        $missingStaged = @()
+        Get-ChildItem -Path (Join-Path $hooksDir "*") -Include *.ps1, *.sh -File -ErrorAction SilentlyContinue | ForEach-Object {
+            if (-not (Test-Path -LiteralPath (Join-Path $stageHooks $_.Name))) { $missingStaged += $_.Name }
+        }
+        foreach ($hookSubDir in (Get-ChildItem -Path $hooksDir -Directory -ErrorAction SilentlyContinue)) {
+            Get-ChildItem -Path (Join-Path $hookSubDir.FullName "*") -Include *.ps1 -File -ErrorAction SilentlyContinue | ForEach-Object {
+                if (-not (Test-Path -LiteralPath (Join-Path (Join-Path $stageHooks $hookSubDir.Name) $_.Name))) {
+                    $missingStaged += "$($hookSubDir.Name)/$($_.Name)"
+                }
+            }
+        }
+        if ($missingStaged.Count -gt 0) {
+            Write-Error ("打包范围自检失败：暂存区缺少 {0}" -f ($missingStaged -join ", "))
+            exit 1
+        }
+        Write-Host ("Hooks staging self-check: OK ({0} files)" -f @(Get-ChildItem -Path $stageHooks -Recurse -File).Count)
     }
 
     Write-Host "Copying codex wiring (hooks.json + config.toml)..."

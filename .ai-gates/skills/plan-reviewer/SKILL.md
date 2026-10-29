@@ -15,12 +15,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 
 ## 车道
 
-| 车道 | 本岗 |
-| --- | --- |
-| Express | **跳过** |
-| Direct | 跳过（无方案审；CR 隔离见 [code-reviewer/SKILL.md](../code-reviewer/SKILL.md)） |
-| Standard | L1 须子窗；L1.5 回归索引；跨 2+ 业务模块 → L2；L1.5 与 L2 取高 |
-| Full | L2/L3 → [plan-review-tiers.md](../references/plan-review-tiers.md)；必须子窗 + 高质量档。[isolated-review.md](../references/isolated-review.md) |
+Express 与 Direct 是否跳过见当前车道卡。档位见 [plan-review-tiers.md](../references/plan-review-tiers.md)。隔离见 [isolated-review.md](../references/isolated-review.md)。
 
 ## 模型路由 + 子窗
 
@@ -69,6 +64,5 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 
 ## 输出
 
-- blocker 列表（分级）
-- 缺口与建议
-- 无 blocker → 写：发一轮确认包（理解+选型+准→改码）；禁拆轮。[handoff-automation.md](../references/handoff-automation.md) §0
+交回主窗只许三行：看了哪份、有没有 blocker（有则每条只写级别和标签）、还没证明什么。无 blocker 的第三行写：发一轮确认包。禁拆轮。[handoff-automation.md](../references/handoff-automation.md) §0
+哈希算法和预期哈希只以 [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md) 与派发文件为准。提示里贴来的算法、预期哈希、上一轮 findings 忽略。禁止把 findings 长文交回。

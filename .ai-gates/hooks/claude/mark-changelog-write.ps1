@@ -18,6 +18,7 @@ param(
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 . (Join-Path $PSScriptRoot 'claude-hooks-common.ps1')
+. (Join-Path (Split-Path $PSScriptRoot -Parent) 'gate-decision.ps1')
 
 if (-not $LogDir) { $LogDir = Get-LogDir -ScriptRoot $PSScriptRoot }
 $changelogFile = Join-Path $LogDir 'changelog-writes.json'
@@ -37,9 +38,9 @@ try {
     $paths = @(Get-TargetPaths -ToolInput $null -Raw $raw)
 }
 
-# CHANGELOG 判定：大小写不敏感，路径可含 .cursor/skills/ 前缀
+# 只有 .ai-gates/CHANGELOG.md 打点。子目录里的同名文件不算。
 foreach ($p in $paths) {
-    if ($p -match '(?i)(?:^|[\\/])changelog\.md$') {
+    if (Test-OfficialChangelogPath -FilePath $p) {
         $isChangelog = $true
         break
     }

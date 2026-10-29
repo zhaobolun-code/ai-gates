@@ -279,7 +279,7 @@ $docRoots = @(Get-DocRoots -RepoRoot $repoRoot)
 foreach ($root in $docRoots) {
     $rootRel = Get-RepoRelative -AbsPath $root -RepoRoot $repoRoot
     Write-Host "Running repair-doc-crosslinks -Path $rootRel -Apply ..."
-    & powershell -NoProfile -File $repairScript -Path $root -Apply
+    & (Get-Process -Id $PID).Path -NoProfile -File $repairScript -Path $root -Apply
     if ($LASTEXITCODE -ne 0) {
         Write-Error "repair-doc-crosslinks failed for Path=$rootRel exit=$LASTEXITCODE"
         exit $LASTEXITCODE

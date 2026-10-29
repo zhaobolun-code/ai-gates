@@ -110,7 +110,7 @@ if ($ctxState -eq "missing") {
         Write-Error "Missing $initScript"
         exit 1
     }
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $initScript
+    & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $initScript
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 } else {
     Write-Host "Skip context create (already exists)." -ForegroundColor DarkGray
