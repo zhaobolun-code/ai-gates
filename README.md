@@ -37,7 +37,7 @@ List a plan and wait for my confirm before touching files. On failure or network
 - One Windows command: `powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/.ai-gates/scripts/install-ai-gates.ps1 | iex"`
 - Download the archive from [Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest) and extract it into the project root. The archive contains `.ai-gates/`.
 
-The official Cursor Marketplace listing is not up yet. Do not install from the Marketplace yet. macOS and Linux have no full one-step installer. The `.sh` script only creates portals.
+macOS and Linux have no full one-step installer. The `.sh` script only creates portals.
 
 ## After install
 

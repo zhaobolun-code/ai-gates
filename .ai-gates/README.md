@@ -35,7 +35,7 @@ ai-gates 是装在项目里的一道护栏。你用平时的话提需求。恰�
 - Windows 上一条命令：`powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/zhaobolun-code/ai-gates/main/.ai-gates/scripts/install-ai-gates.ps1 | iex"`
 - 从 [Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest) 下压缩包，解压到项目根（包里就是 `.ai-gates/`）。
 
-官方 Cursor 市场还没上架，先别从市场装。Mac 和 Linux 没有整套一键安装。`.sh` 只用来建传送门。
+Mac 和 Linux 没有整套一键安装。`.sh` 只用来建传送门。
 
 ## 装完怎么用
 

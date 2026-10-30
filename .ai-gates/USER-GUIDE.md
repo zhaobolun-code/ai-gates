@@ -31,7 +31,7 @@
 
 安装只把文件放进项目、建好传送门（各软件的入口文件）、写下安装信息。初始化才填项目说明和模型。
 
-贴给 Agent 的那段、Windows 一条命令、以及从 [Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest) 手动解压，都写在 [README.md](./README.md)。官方 Cursor 市场还没上架，先别从市场装。
+贴给 Agent 的那段、Windows 一条命令、以及从 [Releases](https://github.com/zhaobolun-code/ai-gates/releases/latest) 手动解压，都写在 [README.md](./README.md)。
 
 Windows 一条命令：
 

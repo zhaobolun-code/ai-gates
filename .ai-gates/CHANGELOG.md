@@ -11,9 +11,11 @@
 
 ## 最近迭代（最新在上）
 
-- 2026-10-30：使用指南去掉「30 秒 / 零手动」，安装地址改到 `.ai-gates/scripts/`，四档与常驻卡对齐，市场改为还没上架。方法论开头和四车道说法与首页对齐，试验记录和数字不改。不 bump VERSION。Included：`USER-GUIDE.md` + `METHODOLOGY.md`
+- 2026-10-30：Express 卡写明：命中止损，升到 Standard，不升 Full。止损 0→1、热度、将到 2/3 不单独升道。不 bump VERSION。Included：`skills/references/lane-express.md`
 
-- 2026-10-30：中文首页按改写稿定版。先写痛点，安装和初始化拆开，四档按常驻卡，平台限制留在首页。不 bump VERSION。Included：`README.md`
+- 2026-10-30：使用指南去掉「30 秒 / 零手动」，安装地址改到 `.ai-gates/scripts/`，四档与常驻卡对齐。Cursor 市场安装说明先删，审核完成再写回。方法论开头和四车道说法与首页对齐，试验记录和数字不改。不 bump VERSION。Included：`USER-GUIDE.md` + `METHODOLOGY.md`
+
+- 2026-10-30：中文首页按改写稿定版。先写痛点，安装和初始化拆开，四档按常驻卡，平台限制留在首页。Cursor 市场句子先删，审核完成再写回。不 bump VERSION。Included：`README.md`
 
 - 2026-10-30：给人看的正文增加一份书写习惯，并补上简体中文才常见的腔：时代背景起头、句尾升华、「对…进行…」、欧化长定语，以及故意装口语。技术说明和周报保持书面。不对抗检测器，不改周报骨架，不改模块 README 的必含节。还没接到每轮必读。不 bump VERSION。Included：`skills/references/human-voice.md`
 
