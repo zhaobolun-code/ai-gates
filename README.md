@@ -1,6 +1,6 @@
 # ai-gates
 
-Chinese edition: [README in the skill pack](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md)
+中文版：[技能包里的说明](https://github.com/zhaobolun-code/ai-gates/blob/main/.ai-gates/README.md)
 
 AI often says the work is done. Can the old config still be read? Did anyone actually run a test? Ask, and the answer is sometimes vague. There are also hallucinations: functions, files, or interfaces that do not exist in this project, described as if they were already wired up.
 

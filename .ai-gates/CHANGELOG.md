@@ -11,7 +11,13 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-10-30：使用指南去掉「30 秒 / 零手动」，安装地址改到 `.ai-gates/scripts/`，四档与常驻卡对齐，市场改为还没上架。方法论开头和四车道说法与首页对齐，试验记录和数字不改。不 bump VERSION。Included：`USER-GUIDE.md` + `METHODOLOGY.md`
+
 - 2026-10-30：中文首页按改写稿定版。先写痛点，安装和初始化拆开，四档按常驻卡，平台限制留在首页。不 bump VERSION。Included：`README.md`
+
+- 2026-10-30：给人看的正文增加一份书写习惯，并补上简体中文才常见的腔：时代背景起头、句尾升华、「对…进行…」、欧化长定语，以及故意装口语。技术说明和周报保持书面。不对抗检测器，不改周报骨架，不改模块 README 的必含节。还没接到每轮必读。不 bump VERSION。Included：`skills/references/human-voice.md`
+
+- 2026-10-29：来源为逆链或思考碰撞的待准错题，以及来源为分歧标注的知识缺口，必须带洞种签名、触发条件和下次怎么提前发现；缺任一行拒收，不算有效沉淀。日常错题 origin 为空不加这三行仍能准。三行不进主表新列。不 bump VERSION。Included：`skills/templates/lesson-pending.md` + `skills/references/lessons-learned.md` + `skills/references/collision-review.md` + `skills/references/reverse-chain.md` + `skills/references/divergence-annotation.md` + `skills/references/knowledge-gap.md` + `scripts/commit-lesson-pending.ps1` + `scripts/test-publish-reject.ps1` + `scripts/assert-publish-reject-p1p2.ps1` + `scripts/fixtures/publish-reject/fx-lesson-reverse-no-signature.md` + `scripts/fixtures/publish-reject/fx-lesson-origin-empty.md`
 
 - 2026-10-29：bump `skills/VERSION` → **5.2.1**。收口 5.2.0 之后未发版条目：Git 全局选项先剥再判危险（强制推送 / 硬重置 / `clean` 删文件 / `checkout -f` / `branch -D` 仍拒）；`Copy-Item` / `Move-Item` / `Remove-Item` 碰三份授权文件就拒绝；Shell 拒绝直跑四份打点脚本；`beforeSubmitPrompt` 只注入本会话上一轮 token；发布闸拒绝 cause/fix 占位句，典故待审与队列表头收紧。`plugin.json` version=`5.2.1`。打包改为递归拷贝 `scripts/fixtures/**`（含新增 `publish-reject/` 用例），11 个脚本恢复 UTF-8 BOM。安装包里没有 `hooks-log/`：`test-hooks.ps1` 在 `pm-gate.json` 不存在时先放空壳，跑完按 `__test__` 前缀清掉；`assert-publish-reject-p1p2.ps1` 找不到维护者本地的 `Doc/` 历史夹具、或包内词条表为空时跳过旧用例与 improve 夹具并说明，不再计失败。正式变更日志的判定提前到生成路径之前，仓库落在 `temp` 之类目录下也能认回 Level 0。安装包里没有维护者文件：`validate-pipeline` 缺 `MAINTAINER.md` / `package-release.ps1` / Trae 规则 `.md` 时跳过对应检查，`check-rule-invariants` 只在源码仓要求根 `AGENTS.md`，`test-hooks` 与 `check-hooks-policy` 缺 MAINTAINER 时跳过相应断言，缺 `package-release.ps1` 时跳过 A3 三条；A9 会清掉只剩模拟会话的空壳门禁文件，A12 前补回，干净安装也能跑完自检。新包 `releases/ai_dev_v5.2.1.7z`，不覆盖 5.2.0 包。`validate-pipeline -Strict` 全绿（test-hooks 101/0）。
 
