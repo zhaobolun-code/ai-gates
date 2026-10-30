@@ -128,6 +128,7 @@ Cursor/Trae 传送门），**不表示要求安装 Cursor**；Codex-only 团队�
 | 反模式全文 | [anti-patterns.md](./references/anti-patterns.md) |
 | 执行纪律（不漂移、不臆测） | [execution-discipline.md](./references/execution-discipline.md) |
 | 团队五态映射 | [user-visible-states.md](./references/user-visible-states.md) |
+| 书写习惯（给人看的正文） | [human-voice.md](./references/human-voice.md)（model-invoked：写首页 / 使用说明 / 给人看的正文 → 见 [reference-routing.md](./references/reference-routing.md)；周报只删腔、不改骨架；不对抗检测器） |
 | 复盘与恢复度量 | [retrospective-metrics.md](./references/retrospective-metrics.md)（含效果轻量版 outcome） |
 | 效果轻量日志 | [pipeline-outcome-log.md](./templates/pipeline-outcome-log.md) + `append-pipeline-outcome.ps1` / `summarize-pipeline-outcome.ps1` |
 | 共享语言 / 活词汇表 | [shared-language.md](./references/shared-language.md) |

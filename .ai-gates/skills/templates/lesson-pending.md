@@ -19,6 +19,10 @@ scope: 作用域路径前缀
 l0_section: false    # true 时「准」后把未完成.md 中 L0 标为已晋升L1
 outline_bucket: ""   # 可选：补进大纲的桶名，如 压力 / 门闸与传质
 evidence: ""         # 可选：证据指针；无则 cause/fix 视为证据
+origin: ""            # 空 | 逆链 | 思考碰撞。分歧标注不走这个文件
+hole_signature: ""   # 洞种/锚类型。斜杠不是竖线，避免撞破主表
+hole_trigger: ""     # 触发条件，须能回指本条锚
+hole_next: ""        # 下次怎么提前发现，须可执行
 ```
 
 ## 给用户

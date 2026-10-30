@@ -86,6 +86,50 @@ function Test-PlaceholderCauseFix([string]$cause, [string]$fix) {
     }
 }
 
+function Test-HoleLines($map) {
+    # keep in sync with test-publish-reject.ps1 Test-HoleLines
+    $origin = ""
+    if ($map.ContainsKey("origin")) {
+        $origin = ([string]$map["origin"]).Trim().Trim([char]34).Trim([char]39).Trim()
+    }
+    if ([string]::IsNullOrWhiteSpace($origin)) { return }
+    if (@("逆链", "思考碰撞") -notcontains $origin) { return }
+
+    $sig = ""
+    $trig = ""
+    $nxt = ""
+    if ($map.ContainsKey("hole_signature")) { $sig = ([string]$map["hole_signature"]).Trim().Trim([char]34).Trim([char]39).Trim() }
+    if ($map.ContainsKey("hole_trigger")) { $trig = ([string]$map["hole_trigger"]).Trim().Trim([char]34).Trim([char]39).Trim() }
+    if ($map.ContainsKey("hole_next")) { $nxt = ([string]$map["hole_next"]).Trim().Trim([char]34).Trim([char]39).Trim() }
+
+    if ([string]::IsNullOrWhiteSpace($sig) -or [string]::IsNullOrWhiteSpace($trig) -or [string]::IsNullOrWhiteSpace($nxt)) {
+        throw "origin=$origin requires hole_signature/hole_trigger/hole_next"
+    }
+
+    if ($sig -notmatch '^([^/|]{2,16})/(A#|Mandatory|机器现象|失败标准|冻结表|不选的)$') {
+        throw "hole_signature must match 洞种/锚类型"
+    }
+    $kind = $Matches[1]
+    foreach ($w in @("类似", "大概", "可能", "应该")) {
+        if ($kind.IndexOf($w) -ge 0) {
+            throw "hole_signature forbidden word: $w"
+        }
+    }
+    $holeFields = @{ hole_trigger = $trig; hole_next = $nxt }
+    foreach ($fname in @("hole_trigger", "hole_next")) {
+        $val = [string]$holeFields[$fname]
+        $compact = [regex]::Replace($val, '\s', '')
+        if ($compact.Length -lt 4) {
+            throw "$fname too short"
+        }
+        foreach ($p in @("后续处理", "待确认", "下次注意", "后续再看")) {
+            if ($val.IndexOf($p) -ge 0) {
+                throw "$fname placeholder: $p"
+            }
+        }
+    }
+}
+
 $repo = Get-RepoRoot
 if (-not $LessonsPath) {
     $LessonsPath = Join-Path $repo ".ai-gates\lessons-learned.md"
@@ -131,6 +175,7 @@ if ($cause.Trim().Length -lt 4 -or $fix.Trim().Length -lt 4) {
 }
 # keep in sync with test-publish-reject.ps1; before publish gate
 Test-PlaceholderCauseFix $cause $fix
+Test-HoleLines $map
 
 $rejectScript = Join-Path $PSScriptRoot "test-publish-reject.ps1"
 if (-not (Test-Path -LiteralPath $rejectScript)) {

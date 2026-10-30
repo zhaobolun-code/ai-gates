@@ -26,7 +26,7 @@
 
 ## 分歧来源
 
-经 [divergence-annotation.md](./divergence-annotation.md) 入队的条目，须在问题句或上下文位置标注 `来源：分歧标注` + `DA-{nn}`；仍须满足三要素；缺 DA 对照 → 拒收。对照须由派发方写，条目不得由 A/B 自写对照冒充。收敛/升级规则不变（确认包清队、同族跨窗 ≥2 → 机制 A）。
+经 [divergence-annotation.md](./divergence-annotation.md) 入队的条目，须在问题句或上下文位置标注 `来源：分歧标注` + `DA-{nn}`；仍须满足三要素；缺 DA 对照 → 拒收。对照须由派发方写，条目不得由 A/B 自写对照冒充。来源分歧标注的条目除现有三要素外，再必填 hole_signature / hole_trigger / hole_next；缺则拒收。普通「我不知道」不加这三行（见 [lessons-learned.md](./lessons-learned.md) pending 洞种三行）。收敛/升级规则不变（确认包清队、同族跨窗 ≥2 → 机制 A）。
 
 ## 碰撞来源
 

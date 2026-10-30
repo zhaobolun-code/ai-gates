@@ -7,4 +7,4 @@
 5. 一行自检。不派独立代码审，也不写 `hooks-log/cr-stamp.json`。
 6. 这一刀含业务 `.cs` / `.lua` 且还要人测：运行 `scripts/set-knife-state.ps1`，写下待测、窗名、A#、现象句、热修次数、当前车道。
 
-有行为变化、第二个业务文件、API、存档或跨模块，立刻改判，不再用这张卡。切片和自检的格式见 `express-slice`、`express-self-check`。
+有行为变化、第二个业务文件、API、存档或跨模块，立刻改判，不再用这张卡。命中止损，升到 Standard，不升 Full。止损 0→1、热度、将到 2/3 不单独升道。切片和自检的格式见 `express-slice`、`express-self-check`。

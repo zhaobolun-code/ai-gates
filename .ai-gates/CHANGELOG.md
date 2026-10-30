@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.2.1（护栏收口与发布闸修正 · patch；前版 5.2.0 定版信息保留）
+**当前 LTS**：v5.2.2（洞种门禁与书写习惯 · patch；前版 5.2.1 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -11,9 +11,11 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-10-30：bump `skills/VERSION` → **5.2.2**。收口 5.2.1 之后未发版条目：来源为逆链 / 思考碰撞的待准错题，以及来源为分歧标注的知识缺口，必须带洞种签名 / 触发条件 / 下次怎么提前发现，缺任一行拒收；给人看的正文新增书写习惯参考并登记读取路由；Express 命中止损升 Standard；首页、使用指南、方法论按改写稿定版；使用指南补回方案先审后确认的流程句。`plugin.json` version=`5.2.2`。新包 `releases/ai_dev_v5.2.2.7z`，不覆盖 5.2.1 包。`validate-pipeline -Strict` 全绿（test-hooks 101/0）。
+
 - 2026-10-30：Express 卡写明：命中止损，升到 Standard，不升 Full。止损 0→1、热度、将到 2/3 不单独升道。不 bump VERSION。Included：`skills/references/lane-express.md`
 
-- 2026-10-30：使用指南去掉「30 秒 / 零手动」，安装地址改到 `.ai-gates/scripts/`，四档与常驻卡对齐。Cursor 市场安装说明先删，审核完成再写回。方法论开头和四车道说法与首页对齐，试验记录和数字不改。不 bump VERSION。Included：`USER-GUIDE.md` + `METHODOLOGY.md`
+- 2026-10-30：使用指南去掉「30 秒 / 零手动」，安装地址改到 `.ai-gates/scripts/`，四档与常驻卡对齐。方法论开头和四车道说法与首页对齐，试验记录和数字不改。不 bump VERSION。Included：`USER-GUIDE.md` + `METHODOLOGY.md`
 
 - 2026-10-30：中文首页按改写稿定版。先写痛点，安装和初始化拆开，四档按常驻卡，平台限制留在首页。Cursor 市场句子先删，审核完成再写回。不 bump VERSION。Included：`README.md`
 

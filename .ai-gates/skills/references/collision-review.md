@@ -138,7 +138,7 @@
 - **跨轮重现**：同一异议在 ≥2 个不同配对中被独立提出（不论当时是否采纳）；
 - **杀伤半径**：绑了具体 A# / Mandatory，并断言该条会失败。
 
-收尾可**人工**对照 anti-patterns 标「候选新类」；禁止新做关键词比对脚本。实质「我不知道」→ [knowledge-gap.md](./knowledge-gap.md) 三要素，不与 pending 混表。
+收尾可**人工**对照 anti-patterns 标「候选新类」；禁止新做关键词比对脚本。实质「我不知道」→ [knowledge-gap.md](./knowledge-gap.md) 三要素，不与 pending 混表。来源思考碰撞的 pending 必须带洞种三行，缺则拒收（见 [lessons-learned.md](./lessons-learned.md) pending 洞种三行）。
 
 用户「准」→ `commit-lesson-pending.ps1 -Apply`：pending → **错题本主表**。**禁止**自动迁入反模式库 / 改 Skill；**禁止** 7 天超时进主表或自动「已拒绝」（沉默 = 留在 pending，不进主表，见 [lessons-learned.md](./lessons-learned.md)）。
 

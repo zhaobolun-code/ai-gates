@@ -104,6 +104,7 @@
 | 止损和热度对照 | `stop-loss-heat-compare.md` |
 | 技术负责人接入 | `tl-onboarding.md` |
 | 对人说话 | `user-visible-states.md` |
+| 写首页 / 使用说明 / 给人看的正文；周报只删腔、不改骨架 | `human-voice.md` |
 | 点名执行文档黄金样例 | `执行文档黄金样例.md` |
 
 ## 按岗加载

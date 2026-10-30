@@ -190,6 +190,29 @@ if ($before -ne $after) {
     Write-Host ("OK p1 valid dry-run lessons rows " + $after)
 }
 
+# hole: reverse missing signature must reject; empty origin still passes
+$pHoleNoSig = Join-Path $fx "fx-lesson-reverse-no-signature.md"
+Expect-Exit "hole reverse no signature gate" (Invoke-Ps1 $reject @("-PendingPath", $pHoleNoSig)) 2
+$beforeHole = Count-LessonRows $tmpLessons
+Expect-NonZero "hole reverse no signature commit dry-run" (Invoke-Ps1 $commit @("-PendingPath", $pHoleNoSig, "-LessonsPath", $tmpLessons))
+$afterHoleReject = Count-LessonRows $tmpLessons
+if ($beforeHole -ne $afterHoleReject) {
+    Write-Host ("FAIL hole reverse no signature lessons grew " + $beforeHole + " -> " + $afterHoleReject)
+    $failed++
+} else {
+    Write-Host ("OK hole reverse no signature lessons rows " + $afterHoleReject)
+}
+$pHoleEmpty = Join-Path $fx "fx-lesson-origin-empty.md"
+Expect-Exit "hole origin empty gate" (Invoke-Ps1 $reject @("-PendingPath", $pHoleEmpty)) 0
+Expect-Zero "hole origin empty commit dry-run" (Invoke-Ps1 $commit @("-PendingPath", $pHoleEmpty, "-LessonsPath", $tmpLessons))
+$afterHoleEmpty = Count-LessonRows $tmpLessons
+if ($beforeHole -ne $afterHoleEmpty) {
+    Write-Host ("FAIL hole origin empty dry-run lessons grew " + $beforeHole + " -> " + $afterHoleEmpty)
+    $failed++
+} else {
+    Write-Host ("OK hole origin empty dry-run lessons rows " + $afterHoleEmpty)
+}
+
 # 5 action delete missing fields
 $p2del = Join-Path $fx "fx-pattern-action-delete.md"
 Expect-Exit "p2 action delete gate" (Invoke-Ps1 $reject @("-PendingPath", $p2del)) 2
