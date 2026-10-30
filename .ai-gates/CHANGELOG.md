@@ -11,6 +11,8 @@
 
 ## 最近迭代（最新在上）
 
+- 2026-10-30：中文首页按改写稿定版。先写痛点，安装和初始化拆开，四档按常驻卡，平台限制留在首页。不 bump VERSION。Included：`README.md`
+
 - 2026-10-29：bump `skills/VERSION` → **5.2.1**。收口 5.2.0 之后未发版条目：Git 全局选项先剥再判危险（强制推送 / 硬重置 / `clean` 删文件 / `checkout -f` / `branch -D` 仍拒）；`Copy-Item` / `Move-Item` / `Remove-Item` 碰三份授权文件就拒绝；Shell 拒绝直跑四份打点脚本；`beforeSubmitPrompt` 只注入本会话上一轮 token；发布闸拒绝 cause/fix 占位句，典故待审与队列表头收紧。`plugin.json` version=`5.2.1`。打包改为递归拷贝 `scripts/fixtures/**`（含新增 `publish-reject/` 用例），11 个脚本恢复 UTF-8 BOM。安装包里没有 `hooks-log/`：`test-hooks.ps1` 在 `pm-gate.json` 不存在时先放空壳，跑完按 `__test__` 前缀清掉；`assert-publish-reject-p1p2.ps1` 找不到维护者本地的 `Doc/` 历史夹具、或包内词条表为空时跳过旧用例与 improve 夹具并说明，不再计失败。正式变更日志的判定提前到生成路径之前，仓库落在 `temp` 之类目录下也能认回 Level 0。安装包里没有维护者文件：`validate-pipeline` 缺 `MAINTAINER.md` / `package-release.ps1` / Trae 规则 `.md` 时跳过对应检查，`check-rule-invariants` 只在源码仓要求根 `AGENTS.md`，`test-hooks` 与 `check-hooks-policy` 缺 MAINTAINER 时跳过相应断言，缺 `package-release.ps1` 时跳过 A3 三条；A9 会清掉只剩模拟会话的空壳门禁文件，A12 前补回，干净安装也能跑完自检。新包 `releases/ai_dev_v5.2.1.7z`，不覆盖 5.2.0 包。`validate-pipeline -Strict` 全绿（test-hooks 101/0）。
 
 - 2026-10-29：beforeSubmitPrompt 按本会话注入上一轮 token 行，不注入 latest。不 bump VERSION。Included：`hooks/inject-turn-tokens.ps1` + `hooks.json` + `scripts/test-hooks.ps1`
