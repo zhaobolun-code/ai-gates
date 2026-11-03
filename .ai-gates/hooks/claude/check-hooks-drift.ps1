@@ -23,6 +23,10 @@ param(
 . (Join-Path $PSScriptRoot 'claude-hooks-common.ps1')
 
 if (-not $LogDir) { $LogDir = Get-LogDir -ScriptRoot $PSScriptRoot }
+try {
+    . (Join-Path (Split-Path $PSScriptRoot -Parent) 'clear-stale-tmp.ps1')
+    Clear-StaleAiGatesTmp -TmpRoot (Join-Path (Split-Path (Split-Path $LogDir -Parent) -Parent) '.ai-gates\tmp')
+} catch { }
 $driftFile = Join-Path $LogDir 'claude-hooks-drift.json'
 
 $cursorRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent

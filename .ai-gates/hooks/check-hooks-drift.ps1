@@ -11,6 +11,10 @@
 [Console]::InputEncoding = New-Object System.Text.UTF8Encoding $false
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 . (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
+try {
+    . (Join-Path $PSScriptRoot 'clear-stale-tmp.ps1')
+    Clear-StaleAiGatesTmp -TmpRoot (Join-Path (Get-AiGatesProjectRoot) '.ai-gates\tmp')
+} catch { }
 
 function Write-Audit {
     param([string]$Line)

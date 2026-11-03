@@ -67,3 +67,15 @@ Agent 应优先 `-Apply` 做安全创建；`-InstallCodeGraph` **仅在用户明
 - 未初始化时改代码仍走 CORE §无 project-context 冷启动（保守 Standard）。
 - `项目经理 初始化` / `PM init`（及口令等价组合）是**主动接入**口令，完成后 `project_context: loaded`，车道判定可按项目表执行。
 - 已初始化仓库再跑 → 幂等探测 + 补缺，不得 `-Force` 覆盖已有 project-context（除非用户明确要求覆盖）。
+
+## 检查健康（doctor）
+
+用户说「项目经理 检查健康」或 `PM doctor` 时，必须跑：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/install-ai-gates.ps1 -CheckUpdate
+```
+
+stdout 含字面 `UPDATE AVAILABLE` 时，用户可见正文必须有「有新版本，需要更新。」`UP TO DATE`、`NOT INSTALLED`、`CHECK FAILED` 不说这句。
+
+检查健康不得跑不带 `-CheckUpdate` 的 `install-ai-gates.ps1`，不得下载或覆盖 skills/hooks/scripts，即使用户确认也不装。

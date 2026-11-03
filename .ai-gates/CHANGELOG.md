@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.3.0（kill switch 与安装安全 · minor；前版 5.2.2 定版信息保留）
+**当前 LTS**：v5.3.1（检查健康与 tmp 卫生 · patch；前版 5.3.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,14 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-11-03：bump `skills/VERSION` → **5.3.1**。收口 5.3.0 之后未发版条目：检查健康须跑 `install-ai-gates.ps1 -CheckUpdate`，stdout 含 `UPDATE AVAILABLE` 时用户可见正文写「有新版本，需要更新。」，不得安装或覆盖；主动搜索排除 `.ai-gates/tmp/`，已经点名的路径仍可读；会话开始时删掉 `.ai-gates/tmp/` 里超过 1 天的文件和空目录，目录本身留下。`plugin.json` version=`5.3.1`。新包 `releases/ai_dev_v5.3.1.7z`，不覆盖 5.3.0 包。`validate-pipeline -Strict` 全绿（test-hooks 108/0）。
+
+- 2026-11-03：检查健康须跑 `install-ai-gates.ps1 -CheckUpdate`。stdout 有字面 `UPDATE AVAILABLE` 时，用户可见正文写「有新版本，需要更新。」不得安装或覆盖 skills/hooks/scripts。不 bump VERSION。Included：`skills/references/pm-init.md` + `USER-GUIDE.md` + `README.md`
+
+- 2026-11-03：主动搜索排除 `.ai-gates/tmp/`。已经点名的路径仍可读。不 bump VERSION。Included：`skills/references/resident.md` + `skills/references/execution-discipline.md` + `skills/read-evidence/SKILL.md`
+
+- 2026-11-03：会话开始时删掉 `.ai-gates/tmp/` 里超过 1 天的文件，空目录一并去掉，目录本身留下。不 bump VERSION。Included：`hooks/clear-stale-tmp.ps1` + `hooks/check-hooks-drift.ps1` + `hooks/claude/check-hooks-drift.ps1` + `hooks/codex/check-hooks-drift.ps1`
 
 - 2026-11-03：bump `skills/VERSION` → **5.3.0**。收口 5.2.2 之后未发版条目：kill switch 不再认空文件，须在本机终端跑 `scripts/enable-kill-switch.ps1` 并输入短语，空文件与 Agent 写入都不算；传送门解析绝对目标，对不上报 STALE、不自动删；真实 `.codex` 与中央库不同先备份再换链接；安装覆盖前备份哈希不同与将删文件并写前后清单，`skills/VERSION` 不一致即失败。`hooks-log/*.log` 超 8MB 只留末尾 2MB，按整行切，不碰 json。human-voice 改为每轮写给人看的话之前读，不占参考文件份额；进度说法仍以 `user-visible-states.md` 为准。迷雾读卡能回答窗指纹过期、边依据、四类缺口，合同只写结构面，query 不调用 generate。`plugin.json` version=`5.3.0`。新包 `releases/ai_dev_v5.3.0.7z`，不覆盖 5.2.2 包。`validate-pipeline -Strict` 全绿（test-hooks 108/0）。
 

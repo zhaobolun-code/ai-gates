@@ -23,7 +23,7 @@ description: 主窗要查看代码或文档正文时使用。派低级子窗去�
 
 ## 子窗
 
-代码只用 CodeGraph（`codegraph_explore`）。不要整文件 `Read`，不要全库 `Grep`。文档只打开主窗点名的那一份。不改文件。不发 `[PM]`。不跑终端。
+代码只用 CodeGraph（`codegraph_explore`）。不要整文件 `Read`，不要全库 `Grep`。主动搜索排除 `.ai-gates/tmp/`。已经点名的路径仍可读。文档只打开主窗点名的那一份。不改文件。不发 `[PM]`。不跑终端。
 
 交回只许这三行：
 

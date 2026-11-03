@@ -182,6 +182,7 @@
 
 - **一次性中间产物**（revision/hash 计算、压力测试、批量迁移/修复脚本、排查用临时输出）只放
   **`.ai-gates/tmp/`**（不入库；目录缺失先建）。环节收尾**整目录清空**，不留"以后可能有用"的暂存。
+  主动搜索（Grep、Glob、全库搜索）排除这个目录。已经点名的路径仍可读。不要用 `.cursorignore` 或 `.cursorindexingignore` 挡住它。
 - **不得**散落在 `.cursor/` 根（项目状态/产物目录被垃圾淹没）、`hooks-log/`（运行时证据与垃圾
   混淆，发布闸证据不可信）或 `.ai-gates/`（git 跟踪的中央库，任何多余文件都离打包/入库一步）。
 - `.ai-gates/hooks-log/` 只保留 hook 运行时证据（pm-gate.json / changelog-writes.json / *.log / 真演记录）。
