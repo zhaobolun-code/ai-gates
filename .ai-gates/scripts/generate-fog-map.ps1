@@ -5,7 +5,7 @@
 # No -OutFile: default .ai-gates/verify/fog-map.html (create dir if missing).
 # JSON: roots[] is the scan set. Keep "root" = roots[0] so 4.x readers that
 # still read DATA.root / lean.json.root do not treat a missing key as 0.
-# Do not edit fog-map-structure.md in this step (Step1).
+# Lean JSON nodes include dir/fp/fpFiles/gaps and neighbor grade+cite.
 param(
     [string]$DocRoot,
     [string]$OutFile,
@@ -163,6 +163,188 @@ function Get-RelNames([string]$relBlock, [string[]]$stateKeys) {
     return $names
 }
 
+function Get-Sha256Hex([byte[]]$Bytes) {
+    if ($null -eq $Bytes) { $Bytes = [byte[]]@() }
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $hash = $sha.ComputeHash($Bytes)
+        return ([BitConverter]::ToString($hash)).Replace("-", "").ToLowerInvariant()
+    } finally {
+        $sha.Dispose()
+    }
+}
+
+function Get-FileSha256Hex([string]$LiteralPath) {
+    if (-not (Test-Path -LiteralPath $LiteralPath)) {
+        Write-Error ("fingerprint file missing: " + $LiteralPath)
+    }
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $fs = $null
+    try {
+        $fs = [IO.File]::Open($LiteralPath, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
+        $hash = $sha.ComputeHash($fs)
+        return ([BitConverter]::ToString($hash)).Replace("-", "").ToLowerInvariant()
+    } catch {
+        Write-Error ("fingerprint unreadable: " + $LiteralPath)
+    } finally {
+        if ($null -ne $fs) { $fs.Dispose() }
+        $sha.Dispose()
+    }
+}
+
+function Get-RepoRelPath([string]$fullPath) {
+    $full = [IO.Path]::GetFullPath($fullPath)
+    $root = [IO.Path]::GetFullPath($repoRoot)
+    $fullN = $full.TrimEnd("\", "/")
+    $rootN = $root.TrimEnd("\", "/")
+    if ($fullN.Length -ge $rootN.Length -and $fullN.Substring(0, $rootN.Length).Equals($rootN, [StringComparison]::OrdinalIgnoreCase)) {
+        $rel = $fullN.Substring($rootN.Length).TrimStart("\", "/")
+        return ($rel -replace "\\", "/")
+    }
+    return ($fullN -replace "\\", "/")
+}
+
+function Convert-ToObjArray($items) {
+    $acc = New-Object System.Collections.ArrayList
+    if ($null -ne $items) {
+        foreach ($it in $items) { [void]$acc.Add($it) }
+    }
+    if ($acc.Count -eq 0) { return @() }
+    return @($acc.ToArray())
+}
+
+function Get-PayloadHex($items) {
+    $paths = New-Object System.Collections.Generic.List[string]
+    foreach ($it in (Convert-ToObjArray $items)) {
+        if ($null -eq $it) { continue }
+        $p = [string]$it.path
+        if (-not [string]::IsNullOrEmpty($p)) { [void]$paths.Add($p) }
+    }
+    $arr = Convert-ToObjArray $paths
+    if ($arr.Count -gt 1) { [Array]::Sort($arr, [StringComparer]::Ordinal) }
+    $map = @{}
+    foreach ($it in (Convert-ToObjArray $items)) {
+        if ($null -eq $it) { continue }
+        $map[[string]$it.path] = [string]$it.sha256
+    }
+    $sb = New-Object System.Text.StringBuilder
+    foreach ($p in $arr) {
+        $h = [string]$map[$p]
+        [void]$sb.Append($p)
+        [void]$sb.Append("=")
+        [void]$sb.Append($h)
+        [void]$sb.Append("`n")
+    }
+    return (Get-Sha256Hex $utf8.GetBytes($sb.ToString()))
+}
+
+function Clip-Quote([string]$s) {
+    if ($null -eq $s) { return "" }
+    $t = $s.Trim()
+    if ($t.Length -gt 80) { return $t.Substring(0, 80) }
+    return $t
+}
+
+function Resolve-RelId([string]$stripped, $idSetRef, $idsLenDescRef) {
+    if ([string]::IsNullOrEmpty($stripped)) { return $stripped }
+    if ($idSetRef.Contains($stripped)) { return $stripped }
+    $suffixHits = @($idsLenDescRef | Where-Object { $_.EndsWith("-" + $stripped) -or $_ -eq $stripped })
+    if ($suffixHits.Count -eq 1) { return $suffixHits[0] }
+    foreach ($id in $idsLenDescRef) {
+        if ($stripped.StartsWith($id)) { return $id }
+        if ($id.StartsWith($stripped) -and ($id.Length - $stripped.Length) -le 8) { return $id }
+    }
+    return $stripped
+}
+
+function Get-RelTableRows([string]$relBlock) {
+    $rows = New-Object System.Collections.Generic.List[object]
+    if ([string]::IsNullOrEmpty($relBlock)) { return $rows }
+    foreach ($line in ($relBlock -split "`n")) {
+        if ($line -notmatch "^\s*\|") { continue }
+        $parts = @($line -split "\|")
+        if ($parts.Count -lt 3) { continue }
+        $nameCell = $parts[1].Trim().Trim([char]0x60).Trim()
+        if ($nameCell.Length -eq 0) { continue }
+        if ($nameCell -match (U @(0x7A97, 0x8DEF, 0x5F84))) { continue }
+        if ($nameCell -match "^:?-+:?$") { continue }
+        $others = New-Object System.Collections.Generic.List[string]
+        for ($k = 2; $k -lt $parts.Count; $k++) {
+            $cell = $parts[$k].Trim()
+            if ($cell.Length -gt 0) { [void]$others.Add($cell) }
+        }
+        [void]$rows.Add(@{ line = $line; nameCell = $nameCell; others = (Convert-ToObjArray $others) })
+    }
+    return $rows
+}
+
+function Test-RelTableHit($w, [string]$targetId, $idSetRef, $idsLenDescRef, $stateKeysRef) {
+    foreach ($rn in $w.relNames) {
+        if ([string]$rn -eq $targetId) { return $true }
+    }
+    $rows = Get-RelTableRows $w.relBlock
+    foreach ($row in $rows) {
+        foreach ($cell in (Convert-ToObjArray $row.others)) {
+            if (Test-IdInText $cell $targetId $idsLenDescRef) { return $true }
+        }
+    }
+    return $false
+}
+
+function Get-ConfirmedCite($w, [string]$targetId, $idSetRef, $idsLenDescRef, $stateKeysRef) {
+    $rows = Get-RelTableRows $w.relBlock
+    $enumComma = [string][char]0x3001
+    $file = [string]$w.unfinishedRel
+    $relHead = "## " + (U @(0x7A97, 0x53E3, 0x5173, 0x7CFB, 0x6458, 0x8981))
+    foreach ($d in (Convert-ToObjArray $w.docFiles)) {
+        if ($null -ne $d -and ([string]$d.text).IndexOf($relHead) -ge 0) { $file = [string]$d.rel; break }
+    }
+    foreach ($row in $rows) {
+        $chunks = @($row.nameCell -split ("\s+/\s+|" + [regex]::Escape($enumComma)))
+        foreach ($chunk in $chunks) {
+            $raw = $chunk.Trim().Trim([char]0x60).Trim()
+            if ($raw.Length -lt 2) { continue }
+            if ($raw.StartsWith([string][char]0xFF08) -or $raw.StartsWith("(")) { continue }
+            $one = Strip-RelJunk $raw $stateKeysRef
+            if ($one.Length -lt 2) { continue }
+            $resolved = Resolve-RelId $one $idSetRef $idsLenDescRef
+            if ($resolved -eq $targetId) {
+                return @{ file = $file; quote = (Clip-Quote $row.line); raw = $raw; resolved = $targetId }
+            }
+        }
+    }
+    foreach ($row in $rows) {
+        foreach ($cell in (Convert-ToObjArray $row.others)) {
+            if (Test-IdInText $cell $targetId $idsLenDescRef) {
+                return @{ file = $file; quote = (Clip-Quote $row.line); raw = $targetId; resolved = $targetId }
+            }
+        }
+    }
+    return $null
+}
+
+function Get-FirstLineCite($files, [string]$targetId, $idsLenDescRef) {
+    foreach ($f in (Convert-ToObjArray $files)) {
+        if ($null -eq $f) { continue }
+        foreach ($line in ([string]$f.text -split "`n")) {
+            if (Test-IdInText $line $targetId $idsLenDescRef) {
+                return @{ file = [string]$f.rel; quote = (Clip-Quote $line); raw = $targetId; resolved = $targetId }
+            }
+        }
+    }
+    return $null
+}
+
+function Pick-CiteSide($a, $b, [bool]$aHas, [bool]$bHas) {
+    if ($aHas -and $bHas) {
+        if ([StringComparer]::Ordinal.Compare([string]$a.id, [string]$b.id) -lt 0) { return $a }
+        return $b
+    }
+    if ($aHas) { return $a }
+    if ($bHas) { return $b }
+    return $null
+}
+
 $stateKeys = @($stateMap.Keys)
 $scanRoots = New-Object System.Collections.Generic.List[string]
 $explicitDocRoot = -not [string]::IsNullOrWhiteSpace($DocRoot)
@@ -256,18 +438,51 @@ foreach ($st in $stateKeys) {
             }
         }
         $discoverUnix = [int64]($bestT.ToUniversalTime() - $epoch).TotalSeconds
+        $dirRel = Get-RepoRelPath $folder.FullName
+        $unfinishedRel = Get-RepoRelPath $unfinished
+        $docFiles = New-Object System.Collections.Generic.List[object]
+        $fpFiles = New-Object System.Collections.Generic.List[object]
+        [void]$fpFiles.Add(@{ path = $unfinishedRel; sha256 = (Get-FileSha256Hex $unfinished) })
+        [void]$docFiles.Add(@{ rel = $unfinishedRel; text = $body; full = $unfinished })
+        $physPath = Join-Path $folder.FullName $filePhys
+        if (Test-Path -LiteralPath $physPath) {
+            $physRel = Get-RepoRelPath $physPath
+            [void]$fpFiles.Add(@{ path = $physRel; sha256 = (Get-FileSha256Hex $physPath) })
+            [void]$docFiles.Add(@{ rel = $physRel; text = $phys; full = $physPath })
+        }
+        foreach ($mf in $mandFiles) {
+            $mRel = Get-RepoRelPath $mf.FullName
+            [void]$fpFiles.Add(@{ path = $mRel; sha256 = (Get-FileSha256Hex $mf.FullName) })
+            [void]$docFiles.Add(@{ rel = $mRel; text = (Read-Utf8 $mf.FullName); full = $mf.FullName })
+        }
+        $fpHex = Get-PayloadHex $fpFiles
+        $evFiles = New-Object System.Collections.Generic.List[object]
+        if (Test-Path -LiteralPath $evDir) {
+            $evFilesOnDisk = @(Get-ChildItem -LiteralPath $evDir -File -ErrorAction SilentlyContinue |
+                Where-Object { $okExt -contains $_.Extension.ToLowerInvariant() })
+            foreach ($ef in $evFilesOnDisk) {
+                $evRel = $dirRel.TrimEnd("/") + "/" + $dirEv + "/" + $ef.Name
+                [void]$evFiles.Add(@{ rel = $evRel; text = (Read-Utf8 $ef.FullName); full = $ef.FullName })
+            }
+        }
         $windows.Add([pscustomobject]@{
-            id         = $id
-            stateLabel = $st
-            cls        = $stateMap[$st]
-            relBlock   = $relBlock
-            relNames   = $relNameList
-            combo      = $combo
-            cs         = @(Get-CsTokens $combo)
-            sealed     = [bool]$sealed
-            evCount    = $evCount
-            pins       = $pins
-            t          = $discoverUnix
+            id            = $id
+            stateLabel    = $st
+            cls           = $stateMap[$st]
+            relBlock      = $relBlock
+            relNames      = $relNameList
+            combo         = $combo
+            cs            = @(Get-CsTokens $combo)
+            sealed        = [bool]$sealed
+            evCount       = $evCount
+            pins          = $pins
+            t             = $discoverUnix
+            dirRel        = $dirRel
+            unfinishedRel = $unfinishedRel
+            fp            = $fpHex
+            fpFiles       = $fpFiles
+            docFiles      = $docFiles
+            evFiles       = $evFiles
         }) | Out-Null
     }
 }
@@ -339,21 +554,23 @@ for ($i = 0; $i -lt $windows.Count; $i++) {
         $parts = New-Object System.Collections.Generic.List[string]
         $score = 0
         $broken = $false
-        $inRelA = ($a.relNames -contains $b.id) -or (Test-IdInText $a.relBlock $b.id $idsLenDesc)
-        $inRelB = ($b.relNames -contains $a.id) -or (Test-IdInText $b.relBlock $a.id $idsLenDesc)
+        $inRelA = Test-RelTableHit $a $b.id $idSet $idsLenDesc $stateKeys
+        $inRelB = Test-RelTableHit $b $a.id $idSet $idsLenDesc $stateKeys
         if ($inRelA -or $inRelB) { $score += 5; [void]$parts.Add("rel +5") }
         $inBodyA = (-not $inRelA) -and (Test-IdInText $a.combo $b.id $idsLenDesc)
         $inBodyB = (-not $inRelB) -and (Test-IdInText $b.combo $a.id $idsLenDesc)
         if ($inBodyA -or $inBodyB) { $score += 3; [void]$parts.Add("body +3") }
         $share = @($a.cs | Where-Object { $b.cs -contains $_ })
         if ($share.Count -gt 0) { $score += 3; [void]$parts.Add("cs +3") }
-        $evHit = $false
-        foreach ($p in $a.pins) {
-            if ($p.name.StartsWith($dirEv) -and (Test-IdInText $p.text $b.id $idsLenDesc)) { $evHit = $true }
+        $evA = $false
+        $evB = $false
+        foreach ($p in (Convert-ToObjArray $a.evFiles)) {
+            if ($null -ne $p -and (Test-IdInText $p.text $b.id $idsLenDesc)) { $evA = $true }
         }
-        foreach ($p in $b.pins) {
-            if ($p.name.StartsWith($dirEv) -and (Test-IdInText $p.text $a.id $idsLenDesc)) { $evHit = $true }
+        foreach ($p in (Convert-ToObjArray $b.evFiles)) {
+            if ($null -ne $p -and (Test-IdInText $p.text $a.id $idsLenDesc)) { $evB = $true }
         }
+        $evHit = $evA -or $evB
         if ($evHit) { $score += 2; [void]$parts.Add("evidence +2") }
         if ($a.sealed -or $b.sealed) {
             if ($inRelA -or $inRelB -or $inBodyA -or $inBodyB) {
@@ -366,10 +583,55 @@ for ($i = 0; $i -lt $windows.Count; $i++) {
             a      = $a.id
             b      = $b.id
             score  = [int]$score
-            parts  = @($parts)
+            parts  = (Convert-ToObjArray $parts)
             broken = [bool]$broken
         }
-        if ($score -ge 3) { $edges.Add($obj) }
+        if ($score -ge 3) {
+            $grade = "inferred"
+            if ($inRelA -or $inRelB) { $grade = "confirmed" }
+            elseif ($evHit) { $grade = "supported" }
+            $citeHit = $null
+            if ($grade -eq "confirmed") {
+                $side = Pick-CiteSide $a $b $inRelA $inRelB
+                $target = $(if ([string]$side.id -eq [string]$a.id) { $b.id } else { $a.id })
+                $citeHit = Get-ConfirmedCite $side $target $idSet $idsLenDesc $stateKeys
+            } elseif ($grade -eq "supported") {
+                $side = Pick-CiteSide $a $b $evA $evB
+                $target = $(if ([string]$side.id -eq [string]$a.id) { $b.id } else { $a.id })
+                $citeHit = Get-FirstLineCite $side.evFiles $target $idsLenDesc
+            } else {
+                $side = Pick-CiteSide $a $b $inBodyA $inBodyB
+                if ($null -ne $side) {
+                    $target = $(if ([string]$side.id -eq [string]$a.id) { $b.id } else { $a.id })
+                    $citeHit = Get-FirstLineCite $side.docFiles $target $idsLenDesc
+                }
+                if ($null -eq $citeHit -and $share.Count -gt 0) {
+                    $side2 = Pick-CiteSide $a $b $true $true
+                    $otherId = $(if ([string]$side2.id -eq [string]$a.id) { $b.id } else { $a.id })
+                    $citeHit = @{
+                        file     = [string]$side2.unfinishedRel
+                        quote    = (Clip-Quote ([string]$share[0]))
+                        raw      = [string]$otherId
+                        resolved = [string]$otherId
+                    }
+                }
+            }
+            $citeObj = $null
+            if ($null -ne $citeHit) {
+                $citeFull = Join-Path $repoRoot (([string]$citeHit.file).Replace("/", "\"))
+                $citeSha = Get-FileSha256Hex $citeFull
+                $citeObj = @{
+                    file     = [string]$citeHit.file
+                    quote    = [string]$citeHit.quote
+                    sha256   = [string]$citeSha
+                    raw      = [string]$citeHit.raw
+                    resolved = [string]$citeHit.resolved
+                }
+            }
+            $obj["grade"] = $grade
+            $obj["cite"] = $citeObj
+            $edges.Add($obj)
+        }
         elseif ($score -ge 1) { $near.Add($obj) }
     }
 }
@@ -383,7 +645,7 @@ foreach ($w in $windows) {
 function Get-Recommend([string]$id) {
     $w = $byId[$id]
     if ($w.cls -ne "doing") { return $null }
-    $cands = @($edges | Where-Object { $_.a -eq $id -or $_.b -eq $id })
+    $cands = @($edges | Where-Object { ($_.a -eq $id -or $_.b -eq $id) -and ([string]$_.grade -eq "confirmed") -and (-not $_.broken) })
     foreach ($e in ($cands | Sort-Object { -$_.score })) {
         $other = if ($e.a -eq $id) { $e.b } else { $e.a }
         $ow = $byId[$other]
@@ -599,7 +861,11 @@ function Convert-LeanNodeJson($item) {
     $recJ = if ($null -eq $item.rec) { "null" } else { ConvertTo-Json -InputObject $item.rec -Compress -Depth 5 }
     $nbJ = ConvertTo-JsArrayJson $item.neighbors
     $evJ = [int]$item.evCount
-    return ("{0}`"id`":{1},`"state`":{2},`"stateLabel`":{3},`"island`":{4},`"rec`":{5},`"neighbors`":{6},`"evCount`":{7}{8}" -f "{", $idJ, $stJ, $lbJ, $isJ, $recJ, $nbJ, $evJ, "}")
+    $dirJ = ConvertTo-Json -InputObject ([string]$item.dir) -Compress
+    $fpJ = ConvertTo-Json -InputObject ([string]$item.fp) -Compress
+    $fpFilesJ = ConvertTo-JsArrayJson $item.fpFiles
+    $gapsJ = ConvertTo-JsArrayJson $item.gaps
+    return ("{0}`"id`":{1},`"state`":{2},`"stateLabel`":{3},`"island`":{4},`"rec`":{5},`"neighbors`":{6},`"evCount`":{7},`"dir`":{8},`"fp`":{9},`"fpFiles`":{10},`"gaps`":{11}{12}" -f "{", $idJ, $stJ, $lbJ, $isJ, $recJ, $nbJ, $evJ, $dirJ, $fpJ, $fpFilesJ, $gapsJ, "}")
 }
 
 function ConvertTo-LeanNodeArrayJson($items) {
@@ -628,15 +894,42 @@ foreach ($n in $nodes) {
         if ($null -eq $other) { continue }
         $sig = "rel"
         if ($null -ne $e.parts -and @($e.parts).Count -gt 0) { $sig = [string](@($e.parts)[0]) }
-        [void]$nbList.Add(@{
+        $nbItem = @{
             id     = [string]$other
             score  = [int]$e.score
             signal = $sig
             broken = [bool]$e.broken
-        })
+            grade  = [string]$e.grade
+        }
+        if ($null -ne $e.cite) { $nbItem["cite"] = $e.cite }
+        [void]$nbList.Add($nbItem)
     }
     $recOut = $null
     if ($n.rec) { $recOut = @{ id = [string]$n.rec.id; why = [string]$n.rec.why } }
+    $wsrc = $byId[$n.id]
+    $gaps = New-Object System.Collections.ArrayList
+    if ($null -ne $wsrc) {
+        foreach ($name in (Convert-ToObjArray $wsrc.relNames)) {
+            if (-not $idSet.Contains($name)) {
+                [void]$gaps.Add(@{ kind = "undocumented"; id = [string]$name })
+            }
+        }
+        if ([int]$wsrc.evCount -eq 0) {
+            [void]$gaps.Add(@{ kind = "thin-evidence" })
+        }
+        foreach ($ne in $near) {
+            if ([string]$ne.a -eq [string]$n.id -or [string]$ne.b -eq [string]$n.id) {
+                $oid = $(if ([string]$ne.a -eq [string]$n.id) { $ne.b } else { $ne.a })
+                [void]$gaps.Add(@{ kind = "pending"; id = [string]$oid })
+            }
+        }
+    }
+    $fpOut = New-Object System.Collections.ArrayList
+    if ($null -ne $wsrc) {
+        foreach ($it in (Convert-ToObjArray $wsrc.fpFiles)) {
+            [void]$fpOut.Add(@{ path = [string]$it.path; sha256 = [string]$it.sha256 })
+        }
+    }
     [void]$leanNodes.Add(@{
         id         = [string]$n.id
         state      = [string]$n.state
@@ -645,6 +938,10 @@ foreach ($n in $nodes) {
         rec        = $recOut
         neighbors  = $nbList.ToArray()
         evCount    = [int]$n.evCount
+        dir        = $(if ($null -ne $wsrc) { [string]$wsrc.dirRel } else { "" })
+        fp         = $(if ($null -ne $wsrc) { [string]$wsrc.fp } else { "" })
+        fpFiles    = $fpOut.ToArray()
+        gaps       = $gaps.ToArray()
     })
 }
 
@@ -678,6 +975,7 @@ foreach ($pn in @($parsedLean.nodes)) {
     if (-not (Test-HasJsonKey $pn "state")) { Write-Error "lean json node missing key: state" }
     if (-not (Test-HasJsonKey $pn "rec")) { Write-Error ("lean json node missing key: rec id={0}" -f $pn.id) }
     if (Test-HasJsonKey $pn "pins") { Write-Error ("lean json node has forbidden pins id={0}" -f $pn.id) }
+    if (-not (Test-HasJsonKey $pn "dir")) { Write-Error ("lean json node missing key: dir id={0}" -f $pn.id) }
     if (Test-HasJsonKey $pn "neighbors") { $hasAnyNeighbors = $true }
 }
 if (-not $hasEdgesKey -and -not $hasAnyNeighbors) {

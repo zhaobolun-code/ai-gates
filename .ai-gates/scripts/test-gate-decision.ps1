@@ -151,6 +151,36 @@ $appendBlocks = Get-ShellWriteBlocks -Paths $appendLog -HasFreshPm $false -HasFr
 Assert-Decision 'hook log append still allowed' ($appendBlocks.Count -eq 0) "count=$($appendBlocks.Count)"
 Assert-Decision 'auth script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates\hooks\mark-pm-gate.ps1') ''
 Assert-Decision 'renamed script name is not denied' (-not (Test-AuthScriptInvoke -CommandText 'powershell -File .\copied-gate.ps1')) ''
+Assert-Decision 'enable kill switch script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates\scripts\enable-kill-switch.ps1') ''
+Assert-Decision 'disable kill switch script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates/scripts/disable-kill-switch.ps1') ''
+Assert-Decision 'empty path is not an active kill switch' (-not (Test-KillSwitchActive -FilePath '')) ''
+Assert-Decision 'kill switch path matched' (Test-KillSwitchPath -FilePath '.ai-gates/hooks-log/pm-gate-disabled') ''
+Assert-Decision 'kill switch path backslash matched' (Test-KillSwitchPath -FilePath '.ai-gates\hooks-log\pm-gate-disabled') ''
+$ksTmp = Join-Path ([System.IO.Path]::GetTempPath()) ('ks-active-' + [Guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $ksTmp -Force | Out-Null
+$ksFile = Join-Path $ksTmp 'pm-gate-disabled'
+try {
+    New-Item -ItemType File -Path $ksFile -Force | Out-Null
+    Assert-Decision 'empty kill switch file is not active' (-not (Test-KillSwitchActive -FilePath $ksFile)) ''
+    $ksOk = @{
+        schema = 1
+        source = 'interactive-console'
+        phrase = 'ENABLE KILL SWITCH'
+        host = 'ConsoleHost'
+        confirmedAtUtc = [DateTime]::UtcNow.ToString('o')
+    } | ConvertTo-Json -Compress
+    [System.IO.File]::WriteAllText($ksFile, $ksOk, (New-Object System.Text.UTF8Encoding($true)))
+    Assert-Decision 'valid kill switch json is active' (Test-KillSwitchActive -FilePath $ksFile) ''
+} finally {
+    Remove-Item -LiteralPath $ksTmp -Recurse -Force -ErrorAction SilentlyContinue
+}
+$ksShell = @(Get-ShellWriteBlocks -Paths @('.ai-gates/hooks-log/pm-gate-disabled') -HasFreshPm $true -HasFreshChangelog $true)
+Assert-Decision 'shell cannot write kill switch even under hooks-log' ($ksShell.Count -eq 1 -and $ksShell[0].Reason -eq 'kill_switch_human_only') "count=$($ksShell.Count) reason=$($ksShell[0].Reason)"
+$ksEditor = Get-WriteGateVerdict -HostName cursor -Paths @('.ai-gates/hooks-log/pm-gate-disabled') -GateState Ok -OwnPm Missing
+Assert-Decision 'editor cannot write kill switch' ((-not $ksEditor.Allow) -and $ksEditor.Detail -eq 'kill_switch_human_only') $ksEditor.Detail
+$ksSetContent = @(Get-ExplicitWritePaths -CommandText 'Set-Content -Path .ai-gates/hooks-log/pm-gate-disabled -Value x')
+$ksSetBlocks = @(Get-ShellWriteBlocks -Paths $ksSetContent -HasFreshPm $true -HasFreshChangelog $true)
+Assert-Decision 'set-content kill switch path is blocked' ($ksSetBlocks.Count -eq 1 -and $ksSetBlocks[0].Reason -eq 'kill_switch_human_only') ($ksSetContent -join ',')
 Assert-Decision 'skills changelog does not unlock' ((-not (Test-OfficialChangelogPath -FilePath '.ai-gates/skills/CHANGELOG.md')) -and (Get-WritePathClass -FilePath 'D:/repo/.ai-gates/skills/CHANGELOG.md' -IncludeClaude $false -RootReadmeIsFacility $false) -eq 'level1') ''
 Assert-Decision 'hooks changelog does not unlock' ((-not (Test-OfficialChangelogPath -FilePath '.ai-gates/hooks/CHANGELOG.md')) -and (Get-WritePathClass -FilePath 'D:/repo/.ai-gates/hooks/CHANGELOG.md' -IncludeClaude $false -RootReadmeIsFacility $false) -eq 'level1') ''
 Assert-Decision 'scripts changelog does not unlock' ((-not (Test-OfficialChangelogPath -FilePath '.ai-gates/scripts/CHANGELOG.md')) -and (Get-WritePathClass -FilePath 'D:/repo/.ai-gates/scripts/CHANGELOG.md' -IncludeClaude $false -RootReadmeIsFacility $false) -eq 'level1') ''

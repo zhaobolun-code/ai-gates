@@ -10,7 +10,7 @@
 #   - 生成/运行时目录白名单放行（bin/obj/Library/Temp/Logs/node_modules/.git、
 #     .ai-gates/{tmp,hooks-log,verify,releases}）
 # 解析不确定 / 提取不到路径 / 非显式写入命令 → fail-open allow（与 git-safety-check 同惯例）。
-# 逃生：kill switch（.ai-gates/hooks-log/pm-gate-disabled）/ 手动编辑 / 改用 Write/Edit。
+# 逃生：kill switch 须在本机终端运行 enable-kill-switch.ps1（空文件和 Agent 写入不算）/ 手动编辑 / 改用 Write/Edit。
 #
 # 注意：本钩子只拦"显式写文件"命令，不拦构建/测试（dotnet build、Unity batchmode 等
 # 通过自身引擎写生成文件）；生成目录白名单兜底放行，误判靠 fail-open + 逃生通道兜底。
@@ -31,7 +31,7 @@ $killSwitch = Join-Path $LogDir 'pm-gate-disabled'
 $FreshnessMinutes = 120
 
 function Test-KillSwitch {
-    return (Test-Path -LiteralPath $killSwitch)
+    return (Test-KillSwitchActive -FilePath $killSwitch)
 }
 
 $raw = Read-HookStdin
@@ -80,7 +80,7 @@ $blocked = @($blocks | ForEach-Object { $_.Path })
 $blockedReasons = @($blocks | ForEach-Object { $_.Reason })
 
 if ($blocked.Count -gt 0) {
-    $hint = "逃生：先在本会话回复中发出 [PM] 标记（设施路径则先写 CHANGELOG），待 Stop hook 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或改用 Write/Edit 走常规写门禁。"
+    $hint = "逃生：先在本会话回复中发出 [PM] 标记（设施路径则先写 CHANGELOG），待 Stop hook 打点后重试；或$(Get-KillSwitchEscapeHint) 或改用 Write/Edit 走常规写门禁。"
     Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("DENY session={0} paths={1} reasons={2}" -f $sessionId, ($blocked -join ','), ($blockedReasons -join ','))
     Write-Output (Emit-PreToolUseDeny -Reason ("Bash write gate deny: explicit file write to {0} without {1}. {2}" -f ($blocked -join ', '), ($blockedReasons -join ', '), $hint))
     return

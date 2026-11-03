@@ -3,7 +3,7 @@
 常驻只读 [resident.md](./resident.md)。判定之后只读当前车道那一张卡，不把四张一起装进来。
 
 > **默认入口**。日常勿通读 CORE 全文；争议 / recovery / `按 CORE 重来` 再查 [CORE.md](../CORE.md)。  
-> 第二跳：按 [reference-routing.md](./reference-routing.md) 点名 ≤2 份 reference（禁整目录灌入）。
+> 第二跳：按 [reference-routing.md](./reference-routing.md) 点名 ≤2 份 reference（禁整目录灌入）。给人看的话另读 [human-voice.md](./human-voice.md)，不占这两份名额。
 
 ## 对人说话（每轮 · 团队用户）
 
@@ -14,8 +14,9 @@
 3. 每轮一句：现在到哪 / 刚做成什么 / 还剩什么。
 4. 用人话。黑话默认不说；可留口令与典故词，典故词不展开压缩包。
 5. 同一症状连败三轮仍坏 → 先点名哪条假设错了，再给选项。触发才加载 [diagnosis-gates.md](./diagnosis-gates.md) §0.2.3。
+6. 口气按 [human-voice.md](./human-voice.md)。命令、路径、表头、周报骨架不改。
 
-细则 → [user-visible-states.md](./user-visible-states.md) §对人说话。
+细则 → [user-visible-states.md](./user-visible-states.md) §对人说话。书写习惯 → [human-voice.md](./human-voice.md)。
 
 ## 压缩之后
 

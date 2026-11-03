@@ -79,7 +79,7 @@ function Emit-CursorVerdict {
     Emit-Deny -ConversationId $ConversationId -Detail $Verdict.Detail -UserMessage ([string]$Verdict.Message)
 }
 
-if (Test-Path -LiteralPath $killSwitch) {
+if (Test-KillSwitchActive -FilePath $killSwitch) {
     Emit-CursorVerdict -Verdict (New-GateVerdict -Allow $true -Detail 'kill_switch_active') -ConversationId ''
     return
 }

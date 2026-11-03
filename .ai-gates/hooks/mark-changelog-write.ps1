@@ -5,6 +5,8 @@
 # .ai-gates/hooks-log/changelog-writes.json（按 conversation_id 记 lastChangelogWriteAtUtc），
 # 供 pm-gate-check.ps1（preToolUse）的 Level 1 轻门禁读取：会话内最近 N 分钟写过
 # CHANGELOG → 写 .cursor/skills|hooks|scripts|rules|hooks.json 设施 allow；无 → deny。
+# Level 1 放行只证明本会话 120 分钟内写过正式 .ai-gates/CHANGELOG.md，
+# 不证明条目描述了即将修改的文件或内容。打点不绑到文件范围或变更摘要。
 #
 # 为什么用 postToolUse：preToolUse 多个 hook 并行执行时序不可保证（audit-write 落盘
 # 可能晚于 pm-gate-check 读取），打点必须放"写后事件"（postToolUse），证明"已写"
@@ -36,8 +38,89 @@ if (-not (Test-Path $logDir)) {
 $changelogFile = Join-Path $logDir "changelog-writes.json"
 $auditFile = Join-Path $logDir "mark-changelog-write.log"
 
+# mark-changelog-write.log 超过 8MB 时，只从末尾读 2MB 写回（不把整文件装进内存）。
+# 截断失败必须吞掉，不得阻断后续 Add-Content / exit 0。
+function Limit-MarkChangelogAuditLog {
+    param([string]$Path)
+    $maxBytes = 8 * 1024 * 1024
+    $keepBytes = 2 * 1024 * 1024
+    $tempPath = $null
+    $bakPath = $null
+    $fs = $null
+    $outFs = $null
+    try {
+        if ([string]::IsNullOrWhiteSpace($Path)) { return }
+        if (-not (Test-Path -LiteralPath $Path)) { return }
+
+        $fs = [System.IO.File]::Open($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+        $len = $fs.Length
+        if ($len -le $maxBytes) { return }
+
+        $readLen = [int64]$keepBytes
+        if ($readLen -gt $len) { $readLen = $len }
+        [void]$fs.Seek(-$readLen, [System.IO.SeekOrigin]::End)
+        $buf = New-Object byte[] $readLen
+        $got = 0
+        while ($got -lt $readLen) {
+            $n = $fs.Read($buf, $got, [int]($readLen - $got))
+            if ($n -le 0) { break }
+            $got += $n
+        }
+        $fs.Dispose()
+        $fs = $null
+        if ($got -le 0) { return }
+
+        $start = 0
+        $nl = -1
+        for ($i = 0; $i -lt $got; $i++) {
+            if ($buf[$i] -eq 10) { $nl = $i; break }
+        }
+        if ($nl -ge 0) { $start = $nl + 1 }
+        $end = $got
+        if ($nl -ge 0 -and $end -gt $start -and $buf[$end - 1] -ne 10) {
+            $lastNl = -1
+            for ($j = $end - 1; $j -ge $start; $j--) {
+                if ($buf[$j] -eq 10) { $lastNl = $j; break }
+            }
+            if ($lastNl -ge $start) { $end = $lastNl + 1 }
+        }
+
+        $dir = Split-Path $Path -Parent
+        $leaf = Split-Path $Path -Leaf
+        $tempPath = Join-Path $dir ($leaf + '.tmp.' + [Guid]::NewGuid().ToString('N'))
+        $bakPath = Join-Path $dir ($leaf + '.bak.' + [Guid]::NewGuid().ToString('N'))
+        $outFs = [System.IO.File]::Open($tempPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+        $writeLen = $end - $start
+        if ($writeLen -lt 0) { $writeLen = 0 }
+        if ($writeLen -eq 0 -and $nl -lt 0) {
+            $start = 0
+            $writeLen = $got
+        }
+        if ($writeLen -gt 0) { $outFs.Write($buf, $start, [int]$writeLen) }
+        $outFs.Dispose()
+        $outFs = $null
+
+        [System.IO.File]::Replace($tempPath, $Path, $bakPath)
+        $tempPath = $null
+        Remove-Item -LiteralPath $bakPath -Force -ErrorAction SilentlyContinue
+        $bakPath = $null
+    } catch {
+        # 截断失败不阻断调用方追加
+    } finally {
+        if ($null -ne $fs) { try { $fs.Dispose() } catch { } }
+        if ($null -ne $outFs) { try { $outFs.Dispose() } catch { } }
+        if ($tempPath -and (Test-Path -LiteralPath $tempPath)) {
+            Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
+        }
+        if ($bakPath -and (Test-Path -LiteralPath $bakPath)) {
+            Remove-Item -LiteralPath $bakPath -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
 function Write-Audit {
     param([string]$Line)
+    try { Limit-MarkChangelogAuditLog -Path $auditFile } catch { }
     try {
         $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         Add-Content -LiteralPath $auditFile -Value "$ts | $Line" -Encoding UTF8

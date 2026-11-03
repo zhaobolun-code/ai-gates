@@ -16,7 +16,7 @@
 #   mark-pm-gate.log / mark-changelog-write.log  打点审计（含 PARSE_FAIL 插桩）
 #   unity-compile-check.log       写后质量门命中审计（含 HIT）
 #   hooks-policy-drift.log        漂移检测审计
-#   pm-gate-disabled              kill switch（存在 = 门禁被人工禁用）
+#   pm-gate-disabled              kill switch（须 interactive-console 确认 JSON 才算关门禁；空文件/伪造不算）
 #
 # 退化信号（WARN/CRIT）：
 #   D1  打点文件缺失（pm-gate.json / changelog-writes.json）→ CRIT：对应门禁退化为 fail-open/初始态
@@ -24,7 +24,8 @@
 #   D3  近 12 小时 PARSE_FAIL > 0 → WARN：打点链路不稳（大 payload 解析失败，fallback 兜底中）；
 #       仅 30 天内历史（近 12 小时为 0）→ INFO（根因 2026-08-04 11:55 junction 已修，非活退化）
 #   D4  近 N 天打点 = 0 且 deny = 0 → CRIT：hook 链路全静默（hooks.json 未接线或 Cursor 侧失效）
-#   D5  kill switch 存在 → INFO：门禁被人工禁用（豁免期内不判退化）
+#   D5  kill switch 已确认 → INFO：门禁被人工禁用（豁免期内不判退化）
+#       文件在但确认无效 → 报未确认，不报已关门禁
 #   D6  近 N 天 write-audit 无 tool=apply_patch
 #       → INFO：Codex 桌面写入拦截未证实。bash-write-gate 不算写入钩子。不改退出码，不写成健康
 #
@@ -46,6 +47,7 @@ $ErrorActionPreference = "Stop"
 $utf8Bom = New-Object System.Text.UTF8Encoding($true)
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $scriptDir '..\hooks\gate-decision.ps1')
 $repoRoot = git rev-parse --show-toplevel 2>$null
 if (-not $repoRoot) { $repoRoot = (Resolve-Path (Join-Path $scriptDir "..\..")).Path }
 $logDir = Join-Path $repoRoot ".ai-gates\hooks-log"
@@ -141,7 +143,9 @@ $parseFailMarkPm12 = Count-LogLines -Path (Join-Path $logDir "mark-pm-gate.log")
 $parseFailMarkCw12 = Count-LogLines -Path (Join-Path $logDir "mark-changelog-write.log") -Pattern "PARSE_FAIL" -SinceUtc $since12h
 $unityHit = Count-LogLines -Path (Join-Path $logDir "unity-compile-check.log") -Pattern "HIT"
 $codexWrite = Count-LogLines -Path (Join-Path $logDir "write-audit.log") -Pattern "tool=apply_patch"
-$killSwitch = Test-Path -LiteralPath (Join-Path $logDir "pm-gate-disabled")
+$killSwitchPath = Join-Path $logDir "pm-gate-disabled"
+$killSwitchExists = Test-Path -LiteralPath $killSwitchPath
+$killSwitch = Test-KillSwitchActive -FilePath $killSwitchPath
 
 # 退化信号判定
 $signals = @()
@@ -162,8 +166,11 @@ if ($parseFail12h -gt 0) {
     if ($lastPm -and (-not $lastPf -or $lastPm -gt $lastPf)) { $lastPf = $lastPm }
     $signals += "INFO D3 历史 PARSE_FAIL（近 $Days 天 x$parseFailTotal，最近 $lastPf；近 12 小时 0 例，已收敛，非活退化）"
 }
+if ($killSwitchExists -and -not $killSwitch) {
+    $signals += "INFO D5 kill switch 文件存在但确认无效：未确认，门禁未关"
+}
 if ($killSwitch) {
-    $signals += "INFO D5 kill switch 存在：门禁被人工禁用（豁免期内不判退化）"
+    $signals += "INFO D5 kill switch 已确认：门禁被人工禁用（豁免期内不判退化）"
 }
 if (-not $killSwitch -and ($pmGate.Recent -gt 0 -or $cw.Recent -gt 0)) {
     if ($denyCount -eq 0) {

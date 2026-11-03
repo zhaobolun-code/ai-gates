@@ -170,7 +170,7 @@ function Get-ItemCmdletWritePaths {
 function Test-AuthScriptInvoke {
     param([string]$CommandText)
     if ([string]::IsNullOrWhiteSpace($CommandText)) { return $false }
-    return [bool]($CommandText -match '(?i)(?:^|[\s''"\\/])(?:mark-pm-gate|mark-changelog-write|set-knife-state|mark-human-tested)\.ps1\b')
+    return [bool]($CommandText -match '(?i)(?:^|[\s''"\\/])(?:mark-pm-gate|mark-changelog-write|set-knife-state|mark-human-tested|enable-kill-switch|disable-kill-switch)\.ps1\b')
 }
 
 function Test-GateAuthStatePath {
@@ -178,6 +178,42 @@ function Test-GateAuthStatePath {
     if ([string]::IsNullOrWhiteSpace($FilePath)) { return $false }
     $norm = $FilePath -replace '\\', '/'
     return [bool]($norm -match '(?i)(?:^|/)hooks-log/(pm-gate|changelog-writes|knife-state)\.json$')
+}
+
+function Test-KillSwitchPath {
+    param([string]$FilePath)
+    if ([string]::IsNullOrWhiteSpace($FilePath)) { return $false }
+    $norm = $FilePath -replace '\\', '/'
+    return [bool]($norm -match '(?i)(?:^|/)hooks-log/pm-gate-disabled$')
+}
+
+function Test-KillSwitchActive {
+    param([string]$FilePath)
+    if ([string]::IsNullOrWhiteSpace($FilePath)) { return $false }
+    if (-not (Test-Path -LiteralPath $FilePath)) { return $false }
+    try {
+        $raw = [System.IO.File]::ReadAllText($FilePath, [System.Text.Encoding]::UTF8)
+        if ([string]::IsNullOrWhiteSpace($raw)) { return $false }
+        $obj = $raw | ConvertFrom-Json -ErrorAction Stop
+    } catch { return $false }
+    if ($null -eq $obj) { return $false }
+    try {
+        if ([int64]$obj.schema -ne 1) { return $false }
+    } catch { return $false }
+    if ([string]$obj.source -cne 'interactive-console') { return $false }
+    if ([string]$obj.phrase -cne 'ENABLE KILL SWITCH') { return $false }
+    if ([string]$obj.host -cne 'ConsoleHost') { return $false }
+    $confirmed = [string]$obj.confirmedAtUtc
+    if ([string]::IsNullOrWhiteSpace($confirmed)) { return $false }
+    try {
+        $at = [DateTime]::Parse($confirmed).ToUniversalTime()
+    } catch { return $false }
+    if ($at -gt [DateTime]::UtcNow.AddMinutes(5)) { return $false }
+    return $true
+}
+
+function Get-KillSwitchEscapeHint {
+    return '请在本机终端（不要经过 Agent）运行 .ai-gates/scripts/enable-kill-switch.ps1，并按提示输入 ENABLE KILL SWITCH。空文件和 Agent 写入不算。'
 }
 
 function Test-GeneratedWritePath {
@@ -231,6 +267,10 @@ function Get-ShellWriteBlocks {
         if ([string]::IsNullOrWhiteSpace($p)) { continue }
         if (Test-GateAuthStatePath -FilePath $p) {
             $blocks.Add([pscustomobject]@{ Path = $p; Reason = 'gate_auth_state' }) | Out-Null
+            continue
+        }
+        if (Test-KillSwitchPath -FilePath $p) {
+            $blocks.Add([pscustomobject]@{ Path = $p; Reason = 'kill_switch_human_only' }) | Out-Null
             continue
         }
         if (Test-GeneratedWritePath -FilePath $p) { continue }
@@ -473,26 +513,30 @@ function Get-WritePathClass {
 
 function Get-WriteDenyHint {
     param([string]$Detail)
+    $ks = Get-KillSwitchEscapeHint
+    if ($Detail -eq 'kill_switch_human_only') {
+        return $ks
+    }
     if ($Detail -eq 'parent_pm_not_marked') {
-        return '子窗不要发 [PM]，也不要把 [PM] 写进 resume 提示词。主窗须在自己的回复里发出 [PM]，等打点写入 pm-gate.json 后再派或续写。或主窗代写并标明未开子窗。或放置 hooks-log/pm-gate-disabled / 手动编辑。'
+        return ('子窗不要发 [PM]，也不要把 [PM] 写进 resume 提示词。主窗须在自己的回复里发出 [PM]，等打点写入 pm-gate.json 后再派或续写。或主窗代写并标明未开子窗。或' + $ks + ' 或手动编辑。')
     }
     $childTail = ' 若本窗是子窗：不要发 [PM]，也不要把 [PM] 写进 resume，等主窗回复打点或主窗代写。'
     if ($Detail -like 'stale_changelog_write_age*' -or $Detail -like 'no_changelog_write_*' -or $Detail -eq 'changelog_writes_missing_level1') {
-        return '逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。顺序见 MAINTAINER 文首「改 skill 五步」。'
+        return ('逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或' + $ks + ' 或手动编辑目标文件。顺序见 MAINTAINER 文首「改 skill 五步」。')
     }
     if ($Detail -like 'stale_pm_marker_age*') {
-        return ('逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 120 分钟），待打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。' + $childTail)
+        return ('逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 120 分钟），待打点后重试；或' + $ks + ' 或手动编辑目标文件。' + $childTail)
     }
     if ($Detail -eq 'timestamp_unparseable') {
-        return ('逃生：先在本会话回复中重新发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。' + $childTail)
+        return ('逃生：先在本会话回复中重新发出 [PM] 标记，待打点后重试；或' + $ks + ' 或手动编辑目标文件。' + $childTail)
     }
     if ($Detail -eq 'gate_file_unreadable') {
-        return ('逃生：先在本会话回复中发出 [PM] 标记，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。' + $childTail)
+        return ('逃生：先在本会话回复中发出 [PM] 标记，待打点后重试；或' + $ks + ' 或手动编辑目标文件。' + $childTail)
     }
     if ($Detail -eq 'main_window_business_code' -or $Detail -eq 'parse_failed_business_code' -or $Detail -eq 'cr_stamp_main_window' -or $Detail -eq 'dispatch_main_window' -or $Detail -eq 'gate_auth_state' -or $Detail -eq 'awaiting_human_test' -or $Detail -eq 'third_hotfix') {
         return 'Do not edit the file in this window.'
     }
-    return ('逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或手动编辑目标文件。' + $childTail)
+    return ('逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或' + $ks + ' 或手动编辑目标文件。' + $childTail)
 }
 
 function Complete-GateDeny {
@@ -549,6 +593,12 @@ function Get-WriteGateVerdict {
     if ($authState.Count -gt 0) {
         $base = 'PM gate deny detail=gate_auth_state : pm-gate.json, changelog-writes.json, and knife-state.json are written by the hooks and the official scripts. Do not write them from the editor or an explicit shell redirect.'
         return New-GateVerdict -Allow $false -Detail 'gate_auth_state' -Message (Complete-GateDeny -Detail 'gate_auth_state' -Base $base)
+    }
+
+    $killWrites = @($pathsIn | Where-Object { Test-KillSwitchPath -FilePath $_ })
+    if ($killWrites.Count -gt 0) {
+        $base = 'PM gate deny detail=kill_switch_human_only : pm-gate-disabled can only be written by the interactive console script.'
+        return New-GateVerdict -Allow $false -Detail 'kill_switch_human_only' -Message (Complete-GateDeny -Detail 'kill_switch_human_only' -Base $base)
     }
 
     $dispatch = @($pathsIn | Where-Object { Test-ReviewDispatchPath -FilePath $_ })

@@ -141,9 +141,9 @@ macOS / Linux 没有对应的一整套一键命令。`link-platform.sh` 只用�
 
 | 现象 | 原因 | 做法 |
 | --- | --- | --- |
-| 写入被拒绝，提示 `no window_pm` / `no fresh [PM]` | 本会话 120 分钟内没有 `[PM]` 打点。机器层叫 window_pm，不是「这一条已经判定完」 | 主窗回一句带 `[PM]` 的话，等打点后重试。子窗不要发 `[PM]`，等主窗打点或主窗代写。或放 `.ai-gates/hooks-log/pm-gate-disabled` 临时放行 |
+| 写入被拒绝，提示 `no window_pm` / `no fresh [PM]` | 本会话 120 分钟内没有 `[PM]` 打点。机器层叫 window_pm，不是「这一条已经判定完」 | 主窗回一句带 `[PM]` 的话，等打点后重试。子窗不要发 `[PM]`，等主窗打点或主窗代写。或在本机终端（不要经过 Agent）运行 `.ai-gates/scripts/enable-kill-switch.ps1`，按提示输入 ENABLE KILL SWITCH。空文件和 Agent 写入不算 |
 | 窗口内放过了，流程仍说缺判定 | 机器放行不等于这一条已经做完判定 | 本条回复仍须带结构化 `[PM]` 和「你下一步」。不要把 120 分钟窗口当成已经判过 |
-| 写入被拒绝，提示 `Level-1` / `CHANGELOG` | 改设施前没写变更日志 | 先写 `.ai-gates/CHANGELOG.md` 再重试。顺序见 [MAINTAINER.md](skills/MAINTAINER.md) 文首 |
+| 写入被拒绝，提示 `Level-1` / `CHANGELOG` | 改设施前没写变更日志。Level 1 放行只证明本会话 120 分钟内写过正式 CHANGELOG.md，不证明条目描述了即将修改的文件或内容 | 先写 `.ai-gates/CHANGELOG.md` 再重试。顺序见 [MAINTAINER.md](skills/MAINTAINER.md) 文首 |
 | 终端写文件被拒绝，提示 `Bash write gate` | 这次写入没经过开工标记 | 改走编辑器里的改文件方式；或先发 `[PM]`，打点后再试 |
 | `git push --force` / `reset --hard` 被拒绝 | 高危 git 被拦住 | 确认安全后在终端自己执行，或临时拿掉对应的拦截条目 |
 | 写完没有任何拦截痕迹 | Codex 桌面的 `apply_patch` 可能不触发。Cursor 桌面一般会触发 | 看 `.ai-gates/hooks-log/`，或换命令行会话再试 |

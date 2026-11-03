@@ -41,6 +41,7 @@ if (-not $TargetRoot) { $TargetRoot = (Get-Location).Path }
 if (-not $UserCachePath) { $UserCachePath = Join-Path $HOME '.ai-gates-cache' }
 
 . (Join-Path $PSScriptRoot 'official-version.ps1')
+. (Join-Path $PSScriptRoot 'install-tree.ps1')
 function Get-Semver {
     param([string]$Version)
     return Get-OfficialSemver -Version $Version
@@ -241,29 +242,19 @@ function Backup-ChangedOfficialFile {
     Copy-Item -LiteralPath $DestFile -Destination (Join-Path $BackupRoot (Split-Path -Leaf $DestFile)) -Force
 }
 
-function Remove-LibraryOrphans {
-    param([string]$SourceDir, [string]$DestDir)
-    if (-not (Test-Path -LiteralPath $DestDir)) { return }
-    $srcRoot = (Resolve-Path -LiteralPath $SourceDir).Path.TrimEnd('\')
-    $dstRoot = (Resolve-Path -LiteralPath $DestDir).Path.TrimEnd('\')
-    Get-ChildItem -LiteralPath $DestDir -Recurse -File -Force | ForEach-Object {
-        $rel = $_.FullName.Substring($dstRoot.Length).TrimStart('\')
-        $srcFile = Join-Path $srcRoot $rel
-        if (-not (Test-Path -LiteralPath $srcFile)) {
-            Remove-Item -LiteralPath $_.FullName -Force
-        }
-    }
-}
-
 # 库内容目录（运行时目录 hooks-log/tmp/verify/releases 不复制，项目自留）
-foreach ($d in @('skills', 'hooks', 'scripts', 'rules', 'codex')) {
+$libraryDirs = @('skills', 'hooks', 'scripts', 'rules', 'codex')
+$backupRoot = Join-Path $targetLib ("tmp\upgrade-backup-" + (Get-Date -Format 'yyyyMMddHHmmss'))
+Write-LibraryManifest -LibRoot $targetLib -Dirs $libraryDirs -OutFile (Join-Path $backupRoot 'manifest-before.txt')
+foreach ($d in $libraryDirs) {
     $src = Join-Path $srcLib $d
     if (Test-Path -LiteralPath $src) {
-        Copy-Item -LiteralPath $src -Destination $targetLib -Recurse -Force
-        Remove-LibraryOrphans -SourceDir $src -DestDir (Join-Path $targetLib $d)
+        Install-LibraryTree -SourceDir $src -DestDir (Join-Path $targetLib $d) -BackupRoot $backupRoot -RelativePrefix $d
     }
 }
-$backupRoot = Join-Path $targetLib ("tmp\upgrade-backup-" + (Get-Date -Format 'yyyyMMddHHmmss'))
+Write-LibraryManifest -LibRoot $targetLib -Dirs $libraryDirs -OutFile (Join-Path $backupRoot 'manifest-after.txt')
+Assert-SkillsVersionCopied -SourceVersionFile $srcVersionFile -DestVersionFile (Join-Path $targetLib 'skills\VERSION')
+
 foreach ($f in @('hooks.json', 'link-platform.ps1', 'link-platform.sh', 'README.md', 'USER-GUIDE.md', 'METHODOLOGY.md', 'LICENSE', 'CHANGELOG.md')) {
     $src = Join-Path $srcLib $f
     if (Test-Path -LiteralPath $src) {

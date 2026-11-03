@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.2.2（洞种门禁与书写习惯 · patch；前版 5.2.1 定版信息保留）
+**当前 LTS**：v5.3.0（kill switch 与安装安全 · minor；前版 5.2.2 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,16 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-11-03：bump `skills/VERSION` → **5.3.0**。收口 5.2.2 之后未发版条目：kill switch 不再认空文件，须在本机终端跑 `scripts/enable-kill-switch.ps1` 并输入短语，空文件与 Agent 写入都不算；传送门解析绝对目标，对不上报 STALE、不自动删；真实 `.codex` 与中央库不同先备份再换链接；安装覆盖前备份哈希不同与将删文件并写前后清单，`skills/VERSION` 不一致即失败。`hooks-log/*.log` 超 8MB 只留末尾 2MB，按整行切，不碰 json。human-voice 改为每轮写给人看的话之前读，不占参考文件份额；进度说法仍以 `user-visible-states.md` 为准。迷雾读卡能回答窗指纹过期、边依据、四类缺口，合同只写结构面，query 不调用 generate。`plugin.json` version=`5.3.0`。新包 `releases/ai_dev_v5.3.0.7z`，不覆盖 5.2.2 包。`validate-pipeline -Strict` 全绿（test-hooks 108/0）。
+
+- 2026-11-03：`.ai-gates/hooks-log` 里每个 `*.log` 超过 8MB 时，只留末尾 2MB，从完整行切开。不碰 json。不 bump VERSION。Included：`hooks/cursor-hooks-common.ps1` + `hooks/claude/claude-hooks-common.ps1` + `hooks/codex/codex-hooks-common.ps1` + `hooks/mark-changelog-write.ps1`
+
+- 2026-11-02：读卡能回答三问：窗指纹是否过期、过阈边能否指到依据、缺口四种。合同只写结构面；两脚本写出 `fresh`/`grade`/`cite`/`gaps`，query 不调用 generate。不 bump VERSION。Included：`skills/references/fog-map-structure.md` + `scripts/generate-fog-map.ps1` + `scripts/query-fog-card.ps1`
+
+- 2026-10-30：每轮写给人看的话之前读 `skills/references/human-voice.md`。它不占参考文件的两份名额。命令、路径、表头、周报骨架、技能正文不改口吻。进度说法仍以 `user-visible-states.md` 为准。不 bump VERSION。Included：`skills/references/resident.md` + `skills/references/agent-entry-route.md` + `skills/references/reference-routing.md` + `skills/references/human-voice.md` + `rules/ai-dev-pipeline.mdc` + `skills/MAINTAINER.md`
+
+- 2026-10-30：kill switch 不再认空文件。须在本机终端（不要经过 Agent）运行 `scripts/enable-kill-switch.ps1` 并输入 ENABLE KILL SWITCH；空文件和 Agent 写入不算。已有传送门解析绝对目标，对不上报 STALE、不自动删。真实 `.codex` 与中央库内容不同时先备份，确认后再换链接。安装覆盖 `skills/hooks/scripts/rules/codex` 前备份哈希不同和即将删除的文件，并写覆盖前后清单；`skills/VERSION` 不一致则失败。Level 1 放行只证明本会话 120 分钟内写过正式 `.ai-gates/CHANGELOG.md`，不证明条目描述了即将修改的文件或内容。已知限制：认不出的 Shell 程序仍可能写出伪造 JSON；这一刀关掉的是写工具、显式 Set-Content/Out-File/重定向，以及空文件。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/pm-gate-check.ps1` + `hooks/bash-write-gate.ps1` + `hooks/claude/pm-gate-check.ps1` + `hooks/claude/bash-write-gate.ps1` + `hooks/codex/pm-gate-check.ps1` + `hooks/codex/bash-write-gate.ps1` + `hooks/mark-changelog-write.ps1` + `hooks/claude/mark-changelog-write.ps1` + `hooks/codex/mark-changelog-write.ps1` + `scripts/enable-kill-switch.ps1` + `scripts/disable-kill-switch.ps1` + `scripts/pipeline-health.ps1` + `scripts/install-tree.ps1` + `scripts/install-ai-gates.ps1` + `scripts/test-hooks.ps1` + `scripts/test-gate-decision.ps1` + `scripts/test-codex-hooks.ps1` + `scripts/test-claude-hooks.ps1` + `scripts/test-link-platform.ps1` + `scripts/test-install-tree.ps1` + `link-platform.ps1` + `link-platform.sh` + `USER-GUIDE.md` + `skills/CORE.md` + `skills/references/skill-eval-checklist.md`
 
 - 2026-10-30：bump `skills/VERSION` → **5.2.2**。收口 5.2.1 之后未发版条目：来源为逆链 / 思考碰撞的待准错题，以及来源为分歧标注的知识缺口，必须带洞种签名 / 触发条件 / 下次怎么提前发现，缺任一行拒收；给人看的正文新增书写习惯参考并登记读取路由；Express 命中止损升 Standard；首页、使用指南、方法论按改写稿定版；使用指南补回方案先审后确认的流程句。`plugin.json` version=`5.2.2`。新包 `releases/ai_dev_v5.2.2.7z`，不覆盖 5.2.1 包。`validate-pipeline -Strict` 全绿（test-hooks 101/0）。
 

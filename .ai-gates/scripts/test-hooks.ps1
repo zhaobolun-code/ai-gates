@@ -154,6 +154,8 @@ try {
     Assert-Test "bash-write-gate: no explicit write -> allow" ((Get-Permission $r.Stdout) -eq "allow") "stdout=$($r.Stdout)"
     $r = Invoke-HookScript -ScriptName "bash-write-gate.ps1" -StdinJson '{"command":"Set-Content -Path .ai-gates/tmp/x.txt -Value 1","conversation_id":"t-none"}' -ExtraArgs @{ LogDir = $bwDir }
     Assert-Test "bash-write-gate: generated path -> allow" ((Get-Permission $r.Stdout) -eq "allow") "stdout=$($r.Stdout)"
+    $r = Invoke-HookScript -ScriptName "bash-write-gate.ps1" -StdinJson '{"command":"Set-Content -Path .ai-gates/hooks-log/pm-gate-disabled -Value x","conversation_id":"t-none"}' -ExtraArgs @{ LogDir = $bwDir }
+    Assert-Test "bash-write-gate: kill switch path -> deny human_only" ((Get-Permission $r.Stdout) -eq "deny" -and $r.Stdout -match "kill_switch_human_only") "stdout=$($r.Stdout)"
     $r = Invoke-HookScript -ScriptName "pre-shell-gate.ps1" -StdinJson '{"command":"git push origin main --force"}' -ExtraArgs @{ LogDir = $bwDir }
     Assert-Test "pre-shell-gate: force push -> deny" ((Get-Permission $r.Stdout) -eq "deny") "stdout=$($r.Stdout)"
 
@@ -465,15 +467,37 @@ try {
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".ai-gates\_release_staging\ai_dev_x.7z" }; conversation_id = $convL1None } | ConvertTo-Json -Compress)
     Assert-Test "A1.7 pm-gate-check: Level2 fallback _release_staging artifact -> allow" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
 
-    # A5：kill-switch → allow
+    # A5：空文件不得 allow；合法确认 JSON 才 kill_switch_active
     $killSwitch = Join-Path $logDir "pm-gate-disabled"
     "" | Set-Content -LiteralPath $killSwitch -Encoding UTF8
     try {
         $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $convNone } | ConvertTo-Json -Compress)
-        Assert-Test "A5 pm-gate-check: kill switch present -> allow regardless" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+        Assert-Test "A5 pm-gate-check: empty kill switch file does not allow" ((Get-Permission $r.Stdout) -ne "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+        Assert-Test "A5 pm-gate-check: empty kill switch reason is not kill_switch_active" ($r.Stdout -notmatch "kill_switch_active") "stdout=$($r.Stdout)"
+        $ksJson = @{
+            schema = 1
+            source = 'interactive-console'
+            phrase = 'ENABLE KILL SWITCH'
+            host = 'ConsoleHost'
+            confirmedAtUtc = [DateTime]::UtcNow.ToString('o')
+        } | ConvertTo-Json -Compress
+        [System.IO.File]::WriteAllText($killSwitch, $ksJson, $utf8Bom)
+        $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = "Assets/Foo.cs" }; conversation_id = $convNone } | ConvertTo-Json -Compress)
+        Assert-Test "A5 pm-gate-check: confirmed kill switch -> allow" ((Get-Permission $r.Stdout) -eq "allow") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+        Assert-Test "A5 pm-gate-check: confirmed kill switch reason" ($r.Stdout -match "kill_switch_active") "stdout=$($r.Stdout)"
     } finally {
         Remove-Item -LiteralPath $killSwitch -ErrorAction SilentlyContinue -Force
     }
+
+    $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (@{ tool_name = "Write"; tool_input = @{ file_path = ".ai-gates\hooks-log\pm-gate-disabled" }; conversation_id = $convNone } | ConvertTo-Json -Compress)
+    Assert-Test "A5 pm-gate-check: write kill switch path -> deny human_only" ((Get-Permission $r.Stdout) -eq "deny" -and $r.Stdout -match "kill_switch_human_only") "exit=$($r.ExitCode) stdout=$($r.Stdout)"
+
+    $enableScript = Join-Path $repoRoot ".ai-gates\scripts\enable-kill-switch.ps1"
+    if (Test-Path -LiteralPath $killSwitch) { Remove-Item -LiteralPath $killSwitch -Force }
+    $r = Invoke-HookScript -ScriptName $enableScript -StdinJson ""
+    Assert-Test "enable-kill-switch: redirected empty input -> nonzero" ($r.ExitCode -ne 0) "exit=$($r.ExitCode) stdout=$($r.Stdout) stderr=$($r.Stderr)"
+    Assert-Test "enable-kill-switch: redirected input does not create file" (-not (Test-Path -LiteralPath $killSwitch)) "path=$killSwitch"
+    if (Test-Path -LiteralPath $killSwitch) { Remove-Item -LiteralPath $killSwitch -Force -ErrorAction SilentlyContinue }
 
     # 解析异常对业务路径 → allow（fail-open；与 MAINTAINER 一致）
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson 'garbage-not-json'

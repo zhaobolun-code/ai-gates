@@ -5,7 +5,8 @@
 # （file_path / notebook_path，见 Get-TargetPaths）。把"这一轮写操作的目标是
 # .ai-gates/CHANGELOG.md"落盘到 .ai-gates/hooks-log/changelog-writes.json
 # （按 session_id 记 lastChangelogWriteAtUtc），供 pm-gate-check.ps1（PreToolUse）的
-# Level 1 轻门禁读取。
+# Level 1 轻门禁读取。Level 1 放行只证明本会话 120 分钟内写过正式
+# .ai-gates/CHANGELOG.md，不证明条目描述了即将修改的文件或内容。
 #
 # 为什么用 PostToolUse：与 Cursor 版一致——preToolUse 多个 hook 并行执行时序不可保证，
 # 打点必须放"写后事件"证明"已写"而非"打算写"；matcher 只是事件过滤，CHANGELOG 判定在脚本内做。

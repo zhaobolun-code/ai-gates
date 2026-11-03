@@ -128,7 +128,17 @@ Write-Case 'C3 business stale marker -> deny' ($out -match '"permissionDecision"
 
 New-Item -ItemType File -Path (Join-Path $ld 'pm-gate-disabled') -Force | Out-Null
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
-Write-Case 'C4 kill switch -> allow' ($out -notmatch 'permissionDecision') $out
+Write-Case 'C4 empty kill switch does not allow' ($out -match '"permissionDecision":"deny"' -and $out -notmatch 'kill_switch_active') $out
+$ksBody = @{
+    schema = 1
+    source = 'interactive-console'
+    phrase = 'ENABLE KILL SWITCH'
+    host = 'ConsoleHost'
+    confirmedAtUtc = [DateTime]::UtcNow.ToString('o')
+} | ConvertTo-Json -Compress
+[System.IO.File]::WriteAllText((Join-Path $ld 'pm-gate-disabled'), $ksBody, (New-Object System.Text.UTF8Encoding($true)))
+$out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
+Write-Case 'C4b confirmed kill switch -> allow' ($out -notmatch 'permissionDecision') $out
 Remove-Item -LiteralPath (Join-Path $ld 'pm-gate-disabled') -Force
 
 $p = Get-SessionPayload -SessionId $sid -ToolName 'apply_patch' -Command $patchCursorSkill

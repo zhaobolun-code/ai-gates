@@ -20,7 +20,7 @@ $killSwitch = Join-Path $LogDir 'pm-gate-disabled'
 $FreshnessMinutes = 120
 
 function Test-KillSwitch {
-    return (Test-Path -LiteralPath $killSwitch)
+    return (Test-KillSwitchActive -FilePath $killSwitch)
 }
 
 $raw = Read-HookStdin
@@ -68,7 +68,7 @@ $blocks = Get-ShellWriteBlocks -Paths $paths -HasFreshPm $hasPm -HasFreshChangel
 if ($blocks.Count -gt 0) {
     $blocked = @($blocks | ForEach-Object { $_.Path })
     $blockedReasons = @($blocks | ForEach-Object { $_.Reason })
-    $hint = "逃生：先在本会话回复中发出 [PM] 标记（设施路径则先写 CHANGELOG），待 Stop hook 打点后重试；或人工确认后放置 .ai-gates/hooks-log/pm-gate-disabled（kill switch）后重试；或改用 apply_patch 走常规写门禁。"
+    $hint = "逃生：先在本会话回复中发出 [PM] 标记（设施路径则先写 CHANGELOG），待 Stop hook 打点后重试；或$(Get-KillSwitchEscapeHint) 或改用 apply_patch 走常规写门禁。"
     Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("DENY session={0} paths={1} reasons={2}" -f $sessionId, ($blocked -join ','), ($blockedReasons -join ','))
     Write-Output (Emit-PreToolUseDeny -Reason ("Bash write gate deny: explicit file write to {0} without {1}. {2}" -f ($blocked -join ', '), ($blockedReasons -join ', '), $hint))
     return

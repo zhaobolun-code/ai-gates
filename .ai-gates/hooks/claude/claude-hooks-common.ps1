@@ -139,10 +139,105 @@ function Redact-HookSecrets {
     return [regex]::Replace($t, '(?i)(Authorization:\s*Bearer\s+)\S+', '${1}[redacted]')
 }
 
+# 每个 *.log 超过 8MB 时，只从末尾读 2MB 写回（不把整文件装进内存）。
+# 截断失败必须吞掉，不得阻断后续 Add-Content / exit 0。
+function Limit-MarkChangelogAuditLog {
+    param([string]$Path)
+    $maxBytes = 8 * 1024 * 1024
+    $keepBytes = 2 * 1024 * 1024
+    $tempPath = $null
+    $bakPath = $null
+    $fs = $null
+    $outFs = $null
+    try {
+        if ([string]::IsNullOrWhiteSpace($Path)) { return }
+        if (-not (Test-Path -LiteralPath $Path)) { return }
+
+        $fs = [System.IO.File]::Open($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+        $len = $fs.Length
+        if ($len -le $maxBytes) { return }
+
+        $readLen = [int64]$keepBytes
+        if ($readLen -gt $len) { $readLen = $len }
+        [void]$fs.Seek(-$readLen, [System.IO.SeekOrigin]::End)
+        $buf = New-Object byte[] $readLen
+        $got = 0
+        while ($got -lt $readLen) {
+            $n = $fs.Read($buf, $got, [int]($readLen - $got))
+            if ($n -le 0) { break }
+            $got += $n
+        }
+        $fs.Dispose()
+        $fs = $null
+        if ($got -le 0) { return }
+
+        $start = 0
+        $nl = -1
+        for ($i = 0; $i -lt $got; $i++) {
+            if ($buf[$i] -eq 10) { $nl = $i; break }
+        }
+        if ($nl -ge 0) { $start = $nl + 1 }
+        $end = $got
+        if ($nl -ge 0 -and $end -gt $start -and $buf[$end - 1] -ne 10) {
+            $lastNl = -1
+            for ($j = $end - 1; $j -ge $start; $j--) {
+                if ($buf[$j] -eq 10) { $lastNl = $j; break }
+            }
+            if ($lastNl -ge $start) { $end = $lastNl + 1 }
+        }
+
+        $dir = Split-Path $Path -Parent
+        $leaf = Split-Path $Path -Leaf
+        $tempPath = Join-Path $dir ($leaf + '.tmp.' + [Guid]::NewGuid().ToString('N'))
+        $bakPath = Join-Path $dir ($leaf + '.bak.' + [Guid]::NewGuid().ToString('N'))
+        $outFs = [System.IO.File]::Open($tempPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+        $writeLen = $end - $start
+        if ($writeLen -lt 0) { $writeLen = 0 }
+        if ($writeLen -eq 0 -and $nl -lt 0) {
+            $start = 0
+            $writeLen = $got
+        }
+        if ($writeLen -gt 0) { $outFs.Write($buf, $start, [int]$writeLen) }
+        $outFs.Dispose()
+        $outFs = $null
+
+        [System.IO.File]::Replace($tempPath, $Path, $bakPath)
+        $tempPath = $null
+        Remove-Item -LiteralPath $bakPath -Force -ErrorAction SilentlyContinue
+        $bakPath = $null
+    } catch {
+        # 截断失败不阻断调用方追加
+    } finally {
+        if ($null -ne $fs) { try { $fs.Dispose() } catch { } }
+        if ($null -ne $outFs) { try { $outFs.Dispose() } catch { } }
+        if ($tempPath -and (Test-Path -LiteralPath $tempPath)) {
+            Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
+        }
+        if ($bakPath -and (Test-Path -LiteralPath $bakPath)) {
+            Remove-Item -LiteralPath $bakPath -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+function Limit-OversizedHookLogs {
+    param([string]$LogDir)
+    if ([string]::IsNullOrWhiteSpace($LogDir)) { return }
+    if (-not (Test-Path -LiteralPath $LogDir)) { return }
+    $maxBytes = 8 * 1024 * 1024
+    foreach ($f in @(Get-ChildItem -LiteralPath $LogDir -File -Filter *.log -ErrorAction SilentlyContinue)) {
+        if ($f.Length -gt $maxBytes) {
+            Limit-MarkChangelogAuditLog -Path $f.FullName
+        }
+    }
+}
+
 function Write-HookAudit {
     param([string]$LogDir, [string]$FileName, [string]$Line)
     try {
         $file = Join-Path $LogDir $FileName
+        if ($FileName -like '*.log') {
+            try { Limit-MarkChangelogAuditLog -Path $file } catch { }
+        }
         $ts = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
         $safe = Redact-HookSecrets $Line
         Add-Content -LiteralPath $file -Value ("$ts | $safe") -Encoding UTF8
@@ -244,4 +339,9 @@ function Emit-SessionStartContext {
 
 function Emit-StopEmpty {
     return '{}'
+}
+
+if (-not $global:AI_GATES_HOOK_LOG_SWEEP) {
+    $global:AI_GATES_HOOK_LOG_SWEEP = $true
+    try { Limit-OversizedHookLogs -LogDir (Get-LogDir -ScriptRoot $PSScriptRoot) } catch { }
 }

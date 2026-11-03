@@ -54,7 +54,7 @@ if ([string]::IsNullOrWhiteSpace($cmd)) {
     return
 }
 
-if (Test-Path -LiteralPath $killSwitch) {
+if (Test-KillSwitchActive -FilePath $killSwitch) {
     Write-BashAudit "ALLOW kill_switch_active session=$sessionId"
     Write-Output '{"permission":"allow","reason":"kill_switch_active"}'
     return
@@ -84,7 +84,7 @@ $blocks = Get-ShellWriteBlocks -Paths $paths -HasFreshPm $hasPm -HasFreshChangel
 if ($blocks.Count -gt 0) {
     $pathText = ($blocks | ForEach-Object { $_.Path }) -join ', '
     $reasonText = ($blocks | ForEach-Object { $_.Reason }) -join ', '
-    $hint = "逃生：业务路径先在本会话回复里发出 [PM]，设施路径先写 CHANGELOG，待打点后重试；或放置 .ai-gates/hooks-log/pm-gate-disabled 后重试；或改用 Write 工具。"
+    $hint = "逃生：业务路径先在本会话回复里发出 [PM]，设施路径先写 CHANGELOG，待打点后重试；或$(Get-KillSwitchEscapeHint) 或改用 Write 工具。"
     Write-BashAudit ("DENY session={0} paths={1} reasons={2}" -f $sessionId, $pathText, $reasonText)
     $result = @{
         permission    = "deny"

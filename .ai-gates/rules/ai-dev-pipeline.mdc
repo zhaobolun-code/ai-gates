@@ -5,7 +5,7 @@ alwaysApply: true
 
 # AI 开发流水线 Skills（当前版本见 `.cursor/skills/VERSION`）
 
-**入口**：`项目经理` / `PM` + 需求 → 先读 [resident.md](../skills/references/resident.md)，再只读当前车道那一张卡。CORE 全文仅争议 / recovery / `按 CORE 重来`。每轮 `[PM]` 加白话「你下一步」。
+**入口**：`项目经理` / `PM` + 需求 → 先读 [resident.md](../skills/references/resident.md)，再只读当前车道那一张卡。CORE 全文仅争议 / recovery / `按 CORE 重来`。每轮 `[PM]` 加白话「你下一步」。对人说的话先读 [human-voice.md](../skills/references/human-voice.md)。命令、路径、表头、周报骨架不改口吻。
 
 **硬门禁 #7**：无 PM 结构化判定不得改交付物。直叫岗位须同条先 `[PM]`。改代码前 Read **`.cursor/project-context.md`**（若存在）。
 

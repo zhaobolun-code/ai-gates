@@ -14,7 +14,7 @@ param(
 if (-not $LogDir) { $LogDir = Get-LogDir -ScriptRoot $PSScriptRoot }
 $killSwitch = Join-Path $LogDir 'pm-gate-disabled'
 
-if (Test-Path -LiteralPath $killSwitch) {
+if (Test-KillSwitchActive -FilePath $killSwitch) {
     Write-HookAudit -LogDir $LogDir -FileName 'pm-gate-check.log' -Line 'ALLOW kill_switch_active'
     Write-Output (Emit-PreToolUseAllow)
     return

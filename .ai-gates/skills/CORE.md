@@ -158,7 +158,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 
 **非门禁**：Standard / Full 的隔离审核是否成功、用户是否手动新开 Chat、换模型 — 只要求诚实标注，不硬阻断。Direct 的 CR 须子窗或新开 Chat，标注「隔离复核」；同 Chat 只标非独立不算完成。缺 PM 结构化判定或 **你下一步**（含 Express 简略四条）→ **已阻塞**。
 
-**机器强制层（如实）**：分两层，禁止混名。**window_pm**（机器）：Cursor / Codex CLI / Claude Code 的 hooks 可 deny；放行只证明「本会话 120 分钟内打过 `[PM]` 点」，reason 字面为 `window_pm_not_this_turn`，**不是**本条已完成结构化判定。**this_turn_pm**（硬门禁 #7）：本条须有结构化 `[PM]`，机器做不到（preToolUse 拿不到正在生成的回复）。Codex **桌面**对 `apply_patch` 钩子可能不触发（信任已批准仍零打点，关键写后自查 `.ai-gates/hooks-log/`）。Trae 为软层（规则 + 技能传送门，**无**机器 hooks）。macOS / Linux 无 `pwsh` 时机器 hooks **未接线**，体检须报 `hooks_not_wired_no_pwsh`，不得写成已接线。`failClosed: false`：hook 脚本失败则放行。kill switch `.ai-gates/hooks-log/pm-gate-disabled` 可整条关掉。硬门禁 #7 仍须自觉。
+**机器强制层（如实）**：分两层，禁止混名。**window_pm**（机器）：Cursor / Codex CLI / Claude Code 的 hooks 可 deny；放行只证明「本会话 120 分钟内打过 `[PM]` 点」，reason 字面为 `window_pm_not_this_turn`，**不是**本条已完成结构化判定。**this_turn_pm**（硬门禁 #7）：本条须有结构化 `[PM]`，机器做不到（preToolUse 拿不到正在生成的回复）。Codex **桌面**对 `apply_patch` 钩子可能不触发（信任已批准仍零打点，关键写后自查 `.ai-gates/hooks-log/`）。Trae 为软层（规则 + 技能传送门，**无**机器 hooks）。macOS / Linux 无 `pwsh` 时机器 hooks **未接线**，体检须报 `hooks_not_wired_no_pwsh`，不得写成已接线。`failClosed: false`：hook 脚本失败则放行。kill switch 须在本机终端（不要经过 Agent）运行 `.ai-gates/scripts/enable-kill-switch.ps1` 并输入 ENABLE KILL SWITCH 才关掉；空文件和 Agent 写入不算。Level 1 放行只证明本会话 120 分钟内写过正式 `.ai-gates/CHANGELOG.md`，不证明条目描述了即将修改的文件或内容。硬门禁 #7 仍须自觉。
 
 **工作区卫生（非门禁）**：一次性中间产物只放 **`.ai-gates/tmp/`**。细则 → [execution-discipline.md](references/execution-discipline.md) §工作区卫生。
 

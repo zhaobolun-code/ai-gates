@@ -31,9 +31,10 @@ Express 机械改、纯代码热修不碰文档窗、闲聊、战役中刀只实
 ## 怎么查
 
 1. 禁止用 Read 打开 `fog-map.json` / `fog-map.html`；禁止把 `ConvertFrom-Json` 的 `nodes`/`edges` 整表贴进对话。
-2. 按短名打一张卡：跑 `.ai-gates/scripts/query-fog-card.ps1 -Id <窗短名>`。默认 JSON=仓库 `.ai-gates/verify/fog-map.json`；主题旁图用 `-JsonPath` 或 `-DocRoot`（读该目录 `fog-map.json`）。stdout 只有这一张卡（`id`/`state`/`neighbors`/`rec`；可附 `generated`/`jsonPath`）。找不到节点 → 输出含 `MISSING`。
-3. 邻格各 ≤1 行写入对话；`rec` 一行。未过阈的 `near` 与雾名不是邻格卡片行。
-4. 缺图或图落后于文档状态 → 按出图门问「是否创建迷雾地图」或「是否更新迷雾地图」，同意后再跑 generate。禁止有夹自动出图。
+2. 按短名打一张卡：跑 `.ai-gates/scripts/query-fog-card.ps1 -Id <窗短名>`。默认 JSON=仓库 `.ai-gates/verify/fog-map.json`；主题旁图用 `-JsonPath` 或 `-DocRoot`（读该目录 `fog-map.json`）。stdout 只有这一张卡（`id`/`state`/`neighbors`/`rec`/`fresh`/`gaps`；可附 `generated`/`jsonPath`/`dir`）。找不到节点 → 输出含 `MISSING`。查询短名不在 `nodes` 也不在 `fog` → 另含 `unexplored`。`query-fog-card.ps1` 不调用 generate、不写 JSON/HTML、只列该节点 `dir`，不扫其它窗。
+3. 邻格各 ≤1 行写入对话（短名、等级、文件名）；`quote` 留在卡片，用户追问才出示。`rec` 一行。未过阈的 `near` 与雾名不是邻格卡片行。
+4. 缺图或图落后于文档状态 → 按出图门问「是否创建迷雾地图」或「是否更新迷雾地图」，同意后再跑 generate。禁止有夹自动出图。禁止每个 Step 收口都问。
+5. `fresh.status` 不是 `fresh` 时仍打印 `neighbors` 与 `gaps`，进程仍 0；不得据此声称关系仍成立。
 
 ## 预算
 
@@ -43,4 +44,16 @@ Express 机械改、纯代码热修不碰文档窗、闲聊、战役中刀只实
 
 ## 字段（只读合同）
 
-`nodes[]`：`id`、`state`、`neighbors`、`rec`。顶层：`edges`、`fog`。禁止 `pins` / 布局坐标。
+瘦 `nodes[]`：`id`、`state`、`dir`（该窗相对仓库路径、`/` 分隔、generate 扫到的文件夹原样写入）、`fp`、`fpFiles`、`neighbors`、`rec`、`evCount`、`gaps`。顶层：`edges`、`fog`。禁止 `pins` / 布局坐标。
+
+`fresh.status` 只能是 `fresh` / `stale` / `absent`。只比窗指纹，不比 `generated`、不用 mtime。窗指纹覆盖且仅覆盖：`未完成.md`（必有）；`物理口径.md`（存在才算）；窗根 `Mandatory-Step*.md`（不递归）。证据目录不进窗指纹。哈希 = 文件原始字节 SHA-256；payload 路径仓库相对、`/` 分隔、Ordinal 排序、每行 `path=sha256` 加换行、UTF-8 无 BOM，再哈希。旧节点无 `fp`/`fpFiles` 或无 `dir` → `absent`。相对存储 `fpFiles`：内容变、集合里消失、或生成后新增 `物理口径.md`/`Mandatory-Step*.md` → `stale`，`changed` 含该文件名。读卡只列这一 `dir` 发现新增；禁止只重哈希已记名单，禁止从 `id`/`fpFiles` 反推窗根。
+
+过阈边 `neighbors[]` 增加 `grade` 与 `cite`。`grade` 只能是 `confirmed` / `supported` / `inferred`（取最高，禁止并列）。计分 KEEP：关系表 +5、正文 +3、符号共现 +3、证据 +2，过阈 ≥3。`confirmed` 只认关系摘要表格单元格：名称列走 `Get-RelNames`，其它列走该单元格 `Test-IdInText`；段内表外正文不算 rel、不加 +5、不得 `confirmed`。`supported`：已经过阈、无关系表命中、任一侧证据目录点名对方。`inferred`：已经过阈、不是上两者，仅正文或 `.cs` 共现。仅证据 +2 不过阈，进 `pending`，不进 `neighbors`，不是 `supported`。
+
+`cite`：`file`、`quote`、`sha256`、`raw`、`resolved` 均非空。`quote` Trim 后 `.NET String.Length` ≤80。`confirmed` 的 `quote` 取该表实际命中行：名称列命中用名称列那一行（`raw`=解析前名字，`resolved`=邻格 `id`）；名称列未命中、完整短名只在其它列用该列所在行且必须非空（`raw`=`resolved`=对方完整短名）。同一过阈边只一条 cite：两侧关系表或多份证据/正文同时命中时，只取短名 Ordinal 升序靠前那一侧的 `file`/`quote`。证据文件变只标该条 `cite.status=stale`，不把整窗打成 `stale`。
+
+`gaps.kind` 只能四种：`undocumented`（关系摘要点名且当时无方案夹）、`thin-evidence`（本窗 `evCount=0`）、`pending`（与本窗有关、分数 1–2 的 near，含仅证据 +2）、`unexplored`（仅 query：查询短名不在 `nodes` 也不在 `fog`）。禁止第五种。过阈 `inferred` 不进 `pending`。`unexplored` 不列举未被点名的对象。
+
+`rec` 只从 `grade=confirmed ∧ broken=false` 的邻格里挑，过滤后再走现有 `Get-Recommend`。窗状态不是执行中 → `rec` 必须为 `null`。没有合格候选 → `rec` 为 `null`。「有合格候选则 rec 不得为 null」只约束执行中的窗。`supported` / `inferred` 可在 `neighbors`，不得当 `rec`。
+
+读卡能出卡（含 `stale`/`absent`）则 exit 0。非 0 仅当：JSON 不存在或读不成；查询短名不在 `nodes`（`MISSING`，exit 1）；`-SelfCheck` 失败。Agent 不回写地图。地图仍是索引，不替代 `未完成.md` / `物理口径.md` / Mandatory。

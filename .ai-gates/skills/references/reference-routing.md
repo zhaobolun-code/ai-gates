@@ -4,7 +4,7 @@
 
 ## 默认读取预算
 
-1. **基线**：`agent-entry-route.md` + `.cursor/project-context.md`（若有）+ 当前岗 `SKILL.md` checklist；**CORE 全文不在基线**。
+1. **基线**：`agent-entry-route.md` + `.cursor/project-context.md`（若有）+ 当前岗 `SKILL.md` checklist；**CORE 全文不在基线**。每轮写给人看的话另读 `human-voice.md`，不占下面的 1～2 份名额。
 2. **任务白名单**：当前 `未完成.md` / Mandatory、模块 README 风险短段、真实源码/diff、命中的 lessons 行、**有则整节装载的认知卡片**（project-context「热路径认知卡片 / 代码认知卡片」）；这些不是 reference 预算，不得为省 Token 跳过。
 3. **Reference**：每个阶段默认最多点名 1～2 份；新需要出现时优先替换已完成用途的 reference，不累积整包。确有硬规则冲突可超出，但交接须写理由与文件名。
 
@@ -104,7 +104,7 @@
 | 止损和热度对照 | `stop-loss-heat-compare.md` |
 | 技术负责人接入 | `tl-onboarding.md` |
 | 对人说话 | `user-visible-states.md` |
-| 写首页 / 使用说明 / 给人看的正文；周报只删腔、不改骨架 | `human-voice.md` |
+| 每轮给人看的话（已在基线，不另占名额）；周报只删腔、不改骨架 | `human-voice.md` |
 | 点名执行文档黄金样例 | `执行文档黄金样例.md` |
 
 ## 按岗加载

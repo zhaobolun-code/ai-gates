@@ -25,22 +25,127 @@
 #   - 其余：报错拒绝（防数据丢失），需人工处理。
 param(
     # 真迁移模式：.codex 等旧真实目录存在时允许自动迁移（默认开）
-    [switch]$NoMigrate
+    [switch]$NoMigrate,
+    [switch]$AcceptCodexMigration,
+    [string]$RepoRoot = ''
 )
 $ErrorActionPreference = 'Stop'
 $portalConflicts = New-Object System.Collections.Generic.List[string]
-$repoRoot = Split-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) -Parent
+if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
+    $repoRoot = Split-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) -Parent
+} else {
+    $repoRoot = [IO.Path]::GetFullPath($RepoRoot)
+}
 $central = Join-Path $repoRoot '.ai-gates'
 if (-not (Test-Path (Join-Path $central 'skills\CORE.md'))) {
     throw "central library not found: $central\skills\CORE.md"
 }
 $isWindows = ($env:OS -eq 'Windows_NT')
+
+function Convert-ToComparablePath {
+    param([string]$Path)
+    if ([string]::IsNullOrWhiteSpace($Path)) { return '' }
+    $p = $Path -replace '^\\\\\?\\', '' -replace '^\?\?\\', ''
+    try { $p = [IO.Path]::GetFullPath($p) } catch { }
+    return $p.TrimEnd('\', '/')
+}
+
+function Test-SamePortalTarget {
+    param([string]$Actual, [string]$Expected)
+    $a = Convert-ToComparablePath $Actual
+    $b = Convert-ToComparablePath $Expected
+    if ([string]::IsNullOrWhiteSpace($a) -or [string]::IsNullOrWhiteSpace($b)) { return $false }
+    if ($isWindows) {
+        return [string]::Equals($a, $b, [StringComparison]::OrdinalIgnoreCase)
+    }
+    return $a -eq $b
+}
+
+function Get-ExistingLinkTarget {
+    param($Item)
+    $t = $Item.Target
+    if ($null -eq $t) { return $null }
+    if ($t -is [array]) {
+        if ($t.Count -eq 0) { return $null }
+        $t = $t[0]
+    }
+    $raw = [string]$t
+    if ([string]::IsNullOrWhiteSpace($raw)) { return $null }
+    if (-not [IO.Path]::IsPathRooted($raw)) {
+        $parent = Split-Path -Parent $Item.FullName
+        $raw = Join-Path $parent $raw
+    }
+    return Convert-ToComparablePath $raw
+}
+
+function Test-HardLinkPointsTo {
+    param([string]$Link, [string]$Target)
+    if (-not (Test-Path -LiteralPath $Link) -or -not (Test-Path -LiteralPath $Target)) { return $false }
+    $it = Get-Item -LiteralPath $Link -Force
+    $expected = Convert-ToComparablePath $Target
+    foreach ($cand in @($it.Target)) {
+        if ([string]::IsNullOrWhiteSpace([string]$cand)) { continue }
+        $raw = [string]$cand
+        if (-not [IO.Path]::IsPathRooted($raw)) {
+            $raw = Join-Path (Split-Path -Parent $it.FullName) $raw
+        }
+        if (Test-SamePortalTarget $raw $expected) { return $true }
+    }
+    if (Test-SamePortalTarget $it.FullName $expected) { return $true }
+    try {
+        $listed = cmd /c "fsutil hardlink list `"$Link`"" 2>$null
+        $drive = [IO.Path]::GetPathRoot($it.FullName)
+        foreach ($line in @($listed)) {
+            $p = ([string]$line).Trim()
+            if ([string]::IsNullOrWhiteSpace($p)) { continue }
+            if ($p -match '^[\\/]' -and $p -notmatch '^[A-Za-z]:') {
+                $p = $drive.TrimEnd('\') + $p
+            }
+            if (Test-SamePortalTarget $p $expected) { return $true }
+        }
+    } catch { }
+    try {
+        if ($it.LinkType -eq 'HardLink') {
+            $h1 = (Get-FileHash -LiteralPath $Link -Algorithm SHA256).Hash
+            $h2 = (Get-FileHash -LiteralPath $Target -Algorithm SHA256).Hash
+            if ($h1 -eq $h2) { return $true }
+        }
+    } catch { }
+    return $false
+}
+
+function Test-ExistingPortalMatch {
+    param($Item, [string]$ExpectedTarget)
+    if ($Item.LinkType -eq 'HardLink') {
+        return (Test-HardLinkPointsTo -Link $Item.FullName -Target $ExpectedTarget)
+    }
+    if ($Item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        $actual = Get-ExistingLinkTarget $Item
+        return (Test-SamePortalTarget $actual $ExpectedTarget)
+    }
+    if ($Item.LinkType) {
+        $actual = Get-ExistingLinkTarget $Item
+        return (Test-SamePortalTarget $actual $ExpectedTarget)
+    }
+    return $false
+}
+
+function Write-StalePortal {
+    param([string]$Label, [string]$Link, [string]$Actual, [string]$Expected)
+    Write-Host "STALE: $Label -> $Actual (expected $Expected)" -ForegroundColor Yellow
+    $portalConflicts.Add("$Label (stale link: $Link)") | Out-Null
+}
+
 function New-DirPortal {
     param([string]$Link, [string]$Target, [string]$Label)
     if (Test-Path -LiteralPath $Link) {
         $it = Get-Item -LiteralPath $Link -Force
         if ($it.Attributes -band [IO.FileAttributes]::ReparsePoint) {
-            Write-Host "OK (linked): $Label -> $($it.Target)" -ForegroundColor Green
+            if (Test-ExistingPortalMatch -Item $it -ExpectedTarget $Target) {
+                Write-Host "OK (linked): $Label -> $(Get-ExistingLinkTarget $it)" -ForegroundColor Green
+            } else {
+                Write-StalePortal -Label $Label -Link $Link -Actual (Get-ExistingLinkTarget $it) -Expected (Convert-ToComparablePath $Target)
+            }
             return
         }
         $portalConflicts.Add("$Label (real dir: $Link)") | Out-Null
@@ -59,8 +164,12 @@ function New-FilePortal {
     param([string]$Link, [string]$Target, [string]$Label)
     if (Test-Path -LiteralPath $Link) {
         $it = Get-Item -LiteralPath $Link -Force
-        if ($it.LinkType) {
-            Write-Host "OK (file portal exists): $Label" -ForegroundColor Green
+        if ($it.LinkType -or ($it.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            if (Test-ExistingPortalMatch -Item $it -ExpectedTarget $Target) {
+                Write-Host "OK (file portal exists): $Label" -ForegroundColor Green
+            } else {
+                Write-StalePortal -Label $Label -Link $Link -Actual (Get-ExistingLinkTarget $it) -Expected (Convert-ToComparablePath $Target)
+            }
             return
         }
         # 升级残留检测（2026-08-04）：真实文件且与中央库不一致 → 提示替换，不自动删除（防误删自定义接线）
@@ -90,19 +199,45 @@ function New-CodexPortal {
     if (Test-Path -LiteralPath $link) {
         $it = Get-Item -LiteralPath $link -Force
         if ($it.Attributes -band [IO.FileAttributes]::ReparsePoint) {
-            Write-Host "OK (linked): .codex -> $($it.Target)" -ForegroundColor Green
+            if (Test-ExistingPortalMatch -Item $it -ExpectedTarget $target) {
+                Write-Host "OK (linked): .codex -> $(Get-ExistingLinkTarget $it)" -ForegroundColor Green
+            } else {
+                Write-StalePortal -Label '.codex' -Link $link -Actual (Get-ExistingLinkTarget $it) -Expected (Convert-ToComparablePath $target)
+            }
             return
         }
         if ($NoMigrate) {
             throw ".codex exists as a real directory; re-run without -NoMigrate to migrate it into .ai-gates/codex/ and relink."
         }
+        if (-not (Test-Path -LiteralPath $target)) {
+            New-Item -ItemType Directory -Path $target -Force | Out-Null
+        }
+        $stamp = Get-Date -Format 'yyyyMMddHHmmss'
+        $backupRoot = Join-Path $central ("tmp\codex-migrate-backup-" + $stamp)
+        $contentDiff = $false
         foreach ($f in @('hooks.json', 'config.toml')) {
             $src = Join-Path $link $f
             $dst = Join-Path $target $f
             if ((Test-Path -LiteralPath $src) -and -not (Test-Path -LiteralPath $dst)) {
                 Copy-Item -LiteralPath $src -Destination $dst -Force
                 Write-Host "migrated: $src -> $dst" -ForegroundColor Yellow
+            } elseif ((Test-Path -LiteralPath $src) -and (Test-Path -LiteralPath $dst)) {
+                $same = (Get-FileHash -LiteralPath $src -Algorithm SHA256).Hash -eq (Get-FileHash -LiteralPath $dst -Algorithm SHA256).Hash
+                if ($same) {
+                    Write-Host "migrate skip (same hash): $f" -ForegroundColor DarkGray
+                } else {
+                    New-Item -ItemType Directory -Path $backupRoot -Force | Out-Null
+                    $bak = Join-Path $backupRoot $f
+                    Copy-Item -LiteralPath $src -Destination $bak -Force
+                    Write-Host "DIFF: old=$src new=$dst backup=$bak" -ForegroundColor Yellow
+                    $contentDiff = $true
+                }
             }
+        }
+        if ($contentDiff -and -not $AcceptCodexMigration) {
+            Write-Host "Review the backup, then re-run with -AcceptCodexMigration. Not deleting old .codex, not creating a new link." -ForegroundColor Yellow
+            $portalConflicts.Add(".codex (content differs; backup $backupRoot)") | Out-Null
+            return
         }
         try {
             Remove-Item -LiteralPath $link -Recurse -Force -ErrorAction Stop
@@ -140,7 +275,11 @@ function New-TraePortal {
     if (Test-Path -LiteralPath $link) {
         $it = Get-Item -LiteralPath $link -Force
         if ($it.Attributes -band [IO.FileAttributes]::ReparsePoint) {
-            Write-Host "OK (linked): .trae/skills -> $($it.Target)" -ForegroundColor Green
+            if (Test-ExistingPortalMatch -Item $it -ExpectedTarget $target) {
+                Write-Host "OK (linked): .trae/skills -> $(Get-ExistingLinkTarget $it)" -ForegroundColor Green
+            } else {
+                Write-StalePortal -Label '.trae/skills' -Link $link -Actual (Get-ExistingLinkTarget $it) -Expected (Convert-ToComparablePath $target)
+            }
         } else {
             $portalConflicts.Add(".trae/skills (real dir: $link)") | Out-Null
             Write-Host "CONFLICT: .trae/skills occupied by a real directory (old-version layout) - $link" -ForegroundColor Yellow
@@ -160,7 +299,11 @@ function New-TraePortal {
     if (Test-Path -LiteralPath $linkRules) {
         $it = Get-Item -LiteralPath $linkRules -Force
         if ($it.Attributes -band [IO.FileAttributes]::ReparsePoint) {
-            Write-Host "OK (linked): .trae/rules -> $($it.Target)" -ForegroundColor Green
+            if (Test-ExistingPortalMatch -Item $it -ExpectedTarget $targetRules) {
+                Write-Host "OK (linked): .trae/rules -> $(Get-ExistingLinkTarget $it)" -ForegroundColor Green
+            } else {
+                Write-StalePortal -Label '.trae/rules' -Link $linkRules -Actual (Get-ExistingLinkTarget $it) -Expected (Convert-ToComparablePath $targetRules)
+            }
         } else {
             $portalConflicts.Add(".trae/rules (real dir: $linkRules)") | Out-Null
             Write-Host "CONFLICT: .trae/rules occupied by a real directory - $linkRules" -ForegroundColor Yellow
@@ -232,7 +375,7 @@ if ($portalConflicts.Count -gt 0) {
     Write-Host "2) 删除这些旧目录和旧的 .cursor/hooks.json；"
     Write-Host "3) 项目状态文件（regression-index.yaml、lessons-*、pipeline-*.log、hooks-log/、tmp/、verify/）已自动迁入 .ai-gates/；保留、不要删：.cursor/project-context.md、mcp.json；"
     Write-Host "4) 删除后重新运行本脚本。"
-    Write-Host "（.codex 旧真实目录会自动迁移，无需手动删。）" -ForegroundColor DarkGray
+    Write-Host "（.codex 旧真实目录：内容不同时先备份，确认后带 -AcceptCodexMigration 再换链接。）" -ForegroundColor DarkGray
     exit 1
 }
 Write-Host 'link-platform: all portals ready.' -ForegroundColor Green
