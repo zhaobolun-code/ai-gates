@@ -10,11 +10,11 @@ Claude / Codex 的同名脚本跟下面同一条假设，不另开行。`cursor-
 
 | 钩子 | 决定 | 防什么 | 上次看过 |
 | --- | --- | --- | --- |
-| `pre-write-gate.ps1` → `pm-gate-check.ps1` | 拒绝 | 120 分钟内这个会话没有新鲜 `[PM]` 就改交付物。机器只能证明窗口里打过点，证明不了本条已经判定。改技能设施还要先有变更日志打点。 | 2026-10-22 |
+| `pre-write-gate.ps1` → `pm-gate-check.ps1` | 不因打点拒绝 | 业务路径不再查 `[PM]`。改技能设施仍要先有变更日志打点。审核戳记和派发文件仍只有子窗能写。 | 2026-11-11 |
 | `git-safety-check.ps1` | 拒绝 | 强推（`--force` / `-f` / `+` 引用）、`reset --hard`、`clean` 带 d/f/x、`checkout -f` 或丢掉路径上的改动、`branch -D`。`--force-with-lease` 不拒绝，只记一笔。规则在 `gate-decision.ps1`。 | 2026-10-23 |
-| `bash-write-gate.ps1` | 拒绝 | Shell 里 `Set-Content` / `Out-File` / `Clear-Content` / `[IO.File]::WriteAll*` / 重定向写文件。业务路径要新鲜 `[PM]`，设施路径要新鲜变更日志。生成目录放行。提不到路径则放行。规则在 `gate-decision.ps1`。 | 2026-10-23 |
+| `bash-write-gate.ps1` | 拒绝 | Shell 里 `Set-Content` / `Out-File` / `Clear-Content` / `[IO.File]::WriteAll*` / 重定向写文件。业务路径不查 `[PM]`，设施路径要新鲜变更日志。生成目录放行。提不到路径则放行。规则在 `gate-decision.ps1`。 | 2026-11-11 |
 | `task-model-gate.ps1` | 拒绝 | 流水线岗位子窗没写 `model` 或写成 `inherit`，从而抄主窗模型。探索类子窗不拦。 | 2026-10-22 |
-| `gate-decision.ps1` | 拒绝 | 上一刀仍是待测时，写业务 `.cs` / `.lua`。人测记录对上现象句之后，脚本才把待测翻掉。 | 2026-10-23 |
+| `gate-decision.ps1` | 不拒绝 | 待测只记在回复里，不挡下一行业务 `.cs` / `.lua`。同一现象热修满 2 次仍拒绝。 | 2026-11-10 |
 | `gate-decision.ps1` | 拒绝 | 同一窗、同一 A#、同一句现象，热修已有 2 次后再写业务代码。三个字段对不上，或车道已经升了，就放行。 | 2026-10-23 |
 | `post-write-gate.ps1` → `check-unity-compile.ps1` | 只提示 | 刚写过 `.cs` / `.lua`，Editor.log 里出现 `error CS`。不拦这次写入，也不跑 Unity。 | 2026-10-22 |
 | `check-hooks-drift.ps1` | 只提示 | `hooks.json` 和门禁脚本的声明对不上。 | 2026-10-22 |
@@ -24,7 +24,9 @@ Claude / Codex 的同名脚本跟下面同一条假设，不另开行。`cursor-
 
 - `audit-write.ps1`：每次写入留下审计。
 - `mark-changelog-write.ps1`：变更日志写过之后打点，设施改动才放得过。
-- `mark-pm-gate.ps1`：回复里有 `[PM]` 就写入 `pm-gate.json`，供写门禁查新鲜度。Cursor 上换窗行只写给本对话：首次记账后再增加至少 20 万输入，且缓存读仍达到输入的 80%，才必须换行写「已满足换窗条件, 请执行换窗逻辑减少token消耗」。禁止抄别的对话。不拒绝工具。
+- `mark-pm-gate.ps1`：脚本只退出。不再写 `pm-gate.json`，也不往下一轮塞 token 行。不拒绝工具。
+- `hooks/copilot/mark-pm-gate.ps1`：同样只退出，stdout 是 `{}`。把 `hooks/copilot/hooks.json` 复制到 `.github/hooks/pm-gate.json` 才生效；安装脚本不自动创建。
+- `inject-turn-tokens.ps1`：已从 `beforeSubmitPrompt` 卸下。旧 token 文件还在也不注入。
 
 ## 每端会不会响
 

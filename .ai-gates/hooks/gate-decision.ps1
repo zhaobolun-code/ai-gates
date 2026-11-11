@@ -278,8 +278,6 @@ function Get-ShellWriteBlocks {
             if (-not $HasFreshChangelog) {
                 $blocks.Add([pscustomobject]@{ Path = $p; Reason = 'infra_no_recent_changelog' }) | Out-Null
             }
-        } elseif (-not $HasFreshPm) {
-            $blocks.Add([pscustomobject]@{ Path = $p; Reason = 'business_no_fresh_pm' }) | Out-Null
         }
     }
     return ,$blocks
@@ -294,13 +292,12 @@ function Test-BusinessSourcePath {
     return $true
 }
 
-# 状态对不上、读坏、缺文件 = 不拒绝。待测为真，或三个字段齐全且热修已满 2 次且车道未升 = 拒绝。
+# 状态对不上、读坏、缺文件 = 不拒绝。待测只是提醒，不挡下一行。三个字段齐全且热修已满 2 次且车道未升 = 拒绝。
 function Get-KnifeBusinessDeny {
     param([string]$FilePath, [string]$StateJson)
     if (-not (Test-BusinessSourcePath -FilePath $FilePath)) { return $null }
     if ([string]::IsNullOrWhiteSpace($StateJson)) { return $null }
     try { $state = $StateJson | ConvertFrom-Json -ErrorAction Stop } catch { return $null }
-    if ($state.awaitingHumanTest -eq $true) { return 'awaiting_human_test' }
     $window = [string]$state.window
     $acceptance = [string]$state.acceptance
     $symptom = [string]$state.symptom
@@ -517,26 +514,16 @@ function Get-WriteDenyHint {
     if ($Detail -eq 'kill_switch_human_only') {
         return $ks
     }
-    if ($Detail -eq 'parent_pm_not_marked') {
-        return ('子窗不要发 [PM]，也不要把 [PM] 写进 resume 提示词。主窗须在自己的回复里发出 [PM]，等打点写入 pm-gate.json 后再派或续写。或主窗代写并标明未开子窗。或' + $ks + ' 或手动编辑。')
+    if ($Detail -eq 'parent_pm_not_marked' -or $Detail -like 'stale_pm_marker_age*' -or $Detail -eq 'timestamp_unparseable' -or $Detail -eq 'gate_file_unreadable') {
+        return ('这条拒绝不再要求写出 [PM]。或' + $ks + ' 或手动编辑目标文件。')
     }
-    $childTail = ' 若本窗是子窗：不要发 [PM]，也不要把 [PM] 写进 resume，等主窗回复打点或主窗代写。'
     if ($Detail -like 'stale_changelog_write_age*' -or $Detail -like 'no_changelog_write_*' -or $Detail -eq 'changelog_writes_missing_level1') {
         return ('逃生：先写 .ai-gates/CHANGELOG.md（CHANGELOG 自身 Level 0 豁免）后重试；或' + $ks + ' 或手动编辑目标文件。顺序见 MAINTAINER 文首「改 skill 五步」。')
-    }
-    if ($Detail -like 'stale_pm_marker_age*') {
-        return ('逃生：先在本会话回复中重新发出 [PM] 标记（标记已超 120 分钟），待打点后重试；或' + $ks + ' 或手动编辑目标文件。' + $childTail)
-    }
-    if ($Detail -eq 'timestamp_unparseable') {
-        return ('逃生：先在本会话回复中重新发出 [PM] 标记，待打点后重试；或' + $ks + ' 或手动编辑目标文件。' + $childTail)
-    }
-    if ($Detail -eq 'gate_file_unreadable') {
-        return ('逃生：先在本会话回复中发出 [PM] 标记，待打点后重试；或' + $ks + ' 或手动编辑目标文件。' + $childTail)
     }
     if ($Detail -eq 'main_window_business_code' -or $Detail -eq 'parse_failed_business_code' -or $Detail -eq 'cr_stamp_main_window' -or $Detail -eq 'dispatch_main_window' -or $Detail -eq 'gate_auth_state' -or $Detail -eq 'awaiting_human_test' -or $Detail -eq 'third_hotfix') {
         return 'Do not edit the file in this window.'
     }
-    return ('逃生：先在本会话回复中发出 [PM] 标记（如「PM 判定：…」），待 mark-pm-gate 打点后重试；或' + $ks + ' 或手动编辑目标文件。' + $childTail)
+    return ('逃生：按拒绝原因处理。改技能包先写 .ai-gates/CHANGELOG.md。或' + $ks + ' 或手动编辑目标文件。')
 }
 
 function Complete-GateDeny {
@@ -576,15 +563,12 @@ function Get-WriteGateVerdict {
     $businessCode = @($pathsIn | Where-Object { Test-BusinessSourcePath -FilePath $_ })
 
     if ($ParseFailed) {
-        if ($OwnPm -eq 'Fresh' -and $businessCode.Count -gt 0) {
-            $code = Get-PmDetailCode -HostName $HostName -Kind 'parse_business'
-            $base = 'PM gate deny detail=main_window_business_code : stdin parse failed, path is business .cs/.lua, and this session has its own [PM]. Dispatch a programmer subagent.'
-            return New-GateVerdict -Allow $false -Detail $code -Message (Complete-GateDeny -Detail $code -Base $base)
-        }
         return New-GateVerdict -Allow $true -Detail 'parse_failed_fail_open'
     }
 
-    if ($hasStamp -and $OwnPm -eq 'Fresh') {
+    $isMainWindow = (-not $ParentHasFreshPm) -and [string]::IsNullOrWhiteSpace($ParentId)
+
+    if ($hasStamp -and $isMainWindow) {
         $base = 'PM gate deny detail=cr_stamp_main_window : only the code-reviewer subagent may write hooks-log/cr-stamp.json.'
         return New-GateVerdict -Allow $false -Detail 'cr_stamp_main_window' -Message (Complete-GateDeny -Detail 'cr_stamp_main_window' -Base $base)
     }
@@ -602,50 +586,15 @@ function Get-WriteGateVerdict {
     }
 
     $dispatch = @($pathsIn | Where-Object { Test-ReviewDispatchPath -FilePath $_ })
-    if ($dispatch.Count -gt 0 -and $OwnPm -eq 'Fresh') {
+    if ($dispatch.Count -gt 0 -and $isMainWindow) {
         $base = 'PM gate deny detail=dispatch_main_window : the main window must not edit review dispatch files. The planner refreshes the plan dispatch. The programmer refreshes the code dispatch.'
         return New-GateVerdict -Allow $false -Detail 'dispatch_main_window' -Message (Complete-GateDeny -Detail 'dispatch_main_window' -Base $base)
     }
 
     $businessAllow = $null
     if ($hasBusiness) {
-        if ($GateState -eq 'Missing') {
-            $base = 'PM gate deny detail=gate_file_missing : no fresh [PM] marker detected.'
-            return New-GateVerdict -Allow $false -Detail 'gate_file_missing' -Message (Complete-GateDeny -Detail 'gate_file_missing' -Base $base)
-        }
-        if ($GateState -eq 'Unreadable') {
-            $base = 'PM gate deny detail=gate_file_unreadable : no fresh [PM] marker detected.'
-            return New-GateVerdict -Allow $false -Detail 'gate_file_unreadable' -Message (Complete-GateDeny -Detail 'gate_file_unreadable' -Base $base)
-        }
-        if ($OwnPm -eq 'Unparseable') {
-            $base = 'PM gate deny detail=timestamp_unparseable : no fresh [PM] marker detected.'
-            return New-GateVerdict -Allow $false -Detail 'timestamp_unparseable' -Message (Complete-GateDeny -Detail 'timestamp_unparseable' -Base $base)
-        }
-        if ($OwnPm -eq 'Fresh' -and $businessCode.Count -gt 0) {
-            $base = 'PM gate deny detail=main_window_business_code : this session has its own [PM], so it is the main window. It must not edit business .cs/.lua. Dispatch a programmer subagent.'
-            return New-GateVerdict -Allow $false -Detail 'main_window_business_code' -Message (Complete-GateDeny -Detail 'main_window_business_code' -Base $base)
-        }
-        if ($OwnPm -eq 'Fresh') { $businessAllow = 'window_pm_not_this_turn' }
-        elseif ($ParentHasFreshPm) {
-            if ([string]::IsNullOrWhiteSpace($InheritReason)) { $businessAllow = 'window_pm_not_this_turn_inherited_parent_pm' }
-            else { $businessAllow = $InheritReason }
-        }
-        elseif (-not [string]::IsNullOrWhiteSpace($ParentId)) {
-            $base = 'PM gate deny detail=parent_pm_not_marked : unique parent transcript found but parent has no fresh [PM]. Child must not emit [PM].'
-            return New-GateVerdict -Allow $false -Detail 'parent_pm_not_marked' -Message (Complete-GateDeny -Detail 'parent_pm_not_marked' -Base $base)
-        }
-        elseif ($OwnPm -eq 'Stale') {
-            $detail = 'stale_pm_marker_age'
-            if ($AgeMinutes -gt 0) { $detail = ('stale_pm_marker_age={0}min' -f [Math]::Round($AgeMinutes, 1)) }
-            $base = "PM gate deny detail=stale_pm_marker_age=${AgeMinutes}min : no fresh [PM] marker detected."
-            return New-GateVerdict -Allow $false -Detail $detail -Message (Complete-GateDeny -Detail $detail -Base $base)
-        }
-        else {
-            $noPm = Get-PmDetailCode -HostName $HostName -Kind 'no_pm'
-            $base = "PM gate deny detail=$noPm : no fresh [PM] marker detected."
-            return New-GateVerdict -Allow $false -Detail $noPm -Message (Complete-GateDeny -Detail $noPm -Base $base)
-        }
-        if ($businessAllow -and $businessCode.Count -gt 0 -and -not [string]::IsNullOrWhiteSpace($KnifeJson)) {
+        $businessAllow = 'business_write'
+        if ($businessCode.Count -gt 0 -and -not [string]::IsNullOrWhiteSpace($KnifeJson)) {
             foreach ($bp in $businessCode) {
                 $knife = Get-KnifeBusinessDeny -FilePath $bp -StateJson $KnifeJson
                 if ($knife) {

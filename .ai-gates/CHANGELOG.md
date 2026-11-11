@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.3.1（检查健康与 tmp 卫生 · patch；前版 5.3.0 定版信息保留）
+**当前 LTS**：v5.4.0（门禁放宽与 Copilot 接入 · minor；前版 5.3.1 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,24 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-11-11：bump `skills/VERSION` → **5.4.0**。收口 5.3.1 之后未发版条目：PM 门禁放宽（业务写入不再查 `[PM]`，放行代号 `business_write`；Express 主窗直接改；`mark-pm-gate` 只退出）、Express/Direct 以「少于 3 个业务文件且不是设计核心逻辑」分界、新增 Copilot CLI `agentStop` / `subagentStop` 打点、升级或初始化给 project-context 补三节、human-voice 与周报模板瘦身、用户现象只作验收。另把 `test-ensure-project-context-sections.ps1` 接进 `validate-pipeline.ps1`，并在 `hook-gates.md` 写明 Copilot 手动接线。`plugin.json` version=`5.4.0`。新包 `releases/ai_dev_v5.4.0.7z`，不覆盖 5.3.1 包。`validate-pipeline -Strict` 全绿（test-hooks 107/0）。
+
+- 2026-11-11：升级时若本地项目说明缺少常用命令、仓库分仓、客户端事实，补上模板里的空节和索引行。已有同名节，或已有「Claude 侧事实」，不覆盖。初始化时已有项目说明也补这一处。不 bump VERSION。Included：`scripts/ensure-project-context-sections.ps1` + `scripts/test-ensure-project-context-sections.ps1` + `scripts/install-ai-gates.ps1` + `scripts/pm-init.ps1` + `skills/CORE.md` + `USER-GUIDE.md`
+
+- 2026-11-11：补上同日瘦身留下的旧句子和死代码。改代码前先读「先读哪一节」，再读点名的节；压缩后的点亮也是这一句。打点脚本只退出，不再加载旧逻辑。用户发下一条之前不再注入 token 行。拒绝提示和岗位卡不再要求先写 `[PM]`。体检不再把已停写的 `pm-gate.json` 当成门禁还活着。打包补上 `hooks/copilot`。根目录入口句同样改成这一句，不进 Included。打包用的项目说明模板补上常用命令、仓库分仓、客户端事实三节，由「先读哪一节」点到，不写具体仓库路径。不 bump VERSION。Included：`hooks/mark-pm-gate.ps1` + `hooks/claude/mark-pm-gate.ps1` + `hooks/codex/mark-pm-gate.ps1` + `hooks/copilot/mark-pm-gate.ps1` + `hooks/inject-turn-tokens.ps1` + `hooks.json` + `hooks/relight-after-compact.ps1` + `hooks/gate-decision.ps1` + `hooks/claude/bash-write-gate.ps1` + `hooks/codex/bash-write-gate.ps1` + `hooks/claude/check-hooks-drift.ps1` + `scripts/test-hooks.ps1` + `scripts/pipeline-health.ps1` + `package-release.ps1` + `skills/references/agent-entry-route.md` + `skills/references/skill-eval-checklist.md` + `skills/references/anti-patterns.md` + `skills/references/hook-gates.md` + `skills/templates/AGENTS.md` + `skills/project-context.template.md` + `skills/developer/SKILL.md` + `skills/code-reviewer/SKILL.md` + `skills/plan-reviewer/SKILL.md` + `skills/planner/SKILL.md` + `skills/module-readme/SKILL.md` + `skills/weekly-report/SKILL.md`
+
+- 2026-11-11：书写习惯每轮只留规则和两组范文。来源改记在维护者手册。周报删腔三查和一组范文改到周报模板，骨架不动。改代码前先读项目说明顶部「先读哪一节」，再读点名的节。项目说明正文不进本日志。不 bump VERSION。Included：`skills/references/human-voice.md` + `skills/templates/weekly-report.md` + `skills/MAINTAINER.md` + `skills/references/reference-routing.md` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md`
+
+- 2026-11-11：业务路径不再因缺少 `[PM]` 打点而拒绝，放行代号 `business_write`。Express 主窗自己读、自己改。问句和点名改法不扫错题，错题留在开方案和热修。回复不必再带 `[PM]`，也不再抄 token 行。`mark-pm-gate` 不再写 `pm-gate.json`。改技能包仍要新鲜变更日志；同一现象热修满 2 次仍拒绝；审核戳记和派发文件仍只有子窗能写；强推和硬重置仍拒绝。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/pm-gate-check.ps1` + `hooks/claude/pm-gate-check.ps1` + `hooks/codex/pm-gate-check.ps1` + `hooks/mark-pm-gate.ps1` + `hooks/claude/mark-pm-gate.ps1` + `hooks/codex/mark-pm-gate.ps1` + `hooks/copilot/mark-pm-gate.ps1` + `scripts/test-gate-decision.ps1` + `scripts/test-hooks.ps1` + `scripts/test-claude-hooks.ps1` + `scripts/test-codex-hooks.ps1` + `scripts/simulate-cursor-session.ps1` + `scripts/check-hooks-policy.ps1` + `scripts/check-rule-invariants.ps1` + `scripts/fixtures/pm-gate-deny-freeze.json` + `skills/CORE.md` + `skills/references/resident.md` + `skills/references/lane-express.md` + `skills/references/lane-direct.md` + `skills/references/lane-standard.md` + `skills/references/lane-full.md` + `skills/references/agent-entry-route.md` + `skills/references/hook-gates.md` + `skills/references/reference-routing.md` + `skills/read-evidence/SKILL.md` + `skills/run-evidence/SKILL.md` + `skills/log-evidence/SKILL.md` + `skills/MAINTAINER.md` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md`
+
+- 2026-11-10：Copilot CLI 的 `agentStop` / `subagentStop` 也记 `[PM]`。回复正文在 `response` / `last_assistant_message`，否则读 `transcriptPath` 里最后一条 `assistant.message`。写入与 Cursor 相同的 `hooks-log/pm-gate.json`。接线在 `.github/hooks/pm-gate.json`（`.github/` 被 gitignore，本机生效）。不 bump VERSION。Included：`hooks/copilot/mark-pm-gate.ps1` + `hooks/copilot/hooks.json` + `skills/references/hook-gates.md`
+
+- 2026-11-10：快速车道改由主窗直接改代码，不派程序员，不写待测锁，不补 README。用户已经说出改哪一行、改成什么，同条就改，不再另要一次「准」。待测不再挡住业务 `.cs` / `.lua`；同一现象热修满 2 次仍拒绝。本会话已有 `[PM]` 时，主窗可以写业务代码。直通仍要求派程序员和隔离审核，但钩子不再因主窗身份拒绝写入。不 bump VERSION。Included：`skills/references/resident.md` + `skills/references/lane-express.md` + `skills/CORE.md` + `skills/developer/SKILL.md` + `skills/references/hook-gates.md` + `hooks/gate-decision.ps1` + `scripts/test-gate-decision.ps1`
+
+- 2026-11-10：快速车道优先。少于 3 个业务文件，且不是设计核心逻辑的简单修改（调整数值、修改现象、修改注释、改已有日志），走快速车道，仍不派代码审核。直通车道改为 3 个及以上业务文件，或这刀是在设计核心逻辑。文件数本身不再升标准；接口、存档、跨模块、说不清、第一次止损仍升标准。设计核心逻辑指新写或改写判定规则、控制流、守恒、通断真源或方向。调已有数值或改已有现象的疏密快慢不算。改了现象仍写规则和不点名。不 bump VERSION。Included：`skills/references/resident.md` + `skills/references/lane-express.md` + `skills/references/lane-direct.md` + `skills/CORE.md` + `skills/references/full-lane-decision-tree.md` + `skills/references/lane-glossary.md` + `skills/templates/express-slice.md` + `skills/express-self-check.md` + `skills/references/execution-discipline.md` + `skills/developer/SKILL.md` + `skills/references/pm-init.md` + `skills/references/tl-onboarding.md` + `skills/project-context.template.md` + `skills/references/examples.md` + `skills/references/skill-eval-checklist.md` + `skills/references/anti-patterns.md` + `USER-GUIDE.md` + `README.md` + `METHODOLOGY.md`
+
+- 2026-11-09：用户描述的现象只作验收。行为改动同条写三句：规则只用系统已有判定量，同类情况判定量相同则结果相同；现象只用来打红或打绿；规则和代码条件不出现这一次报告的专名。缺三句为 major，点名专名为 blocker。新开框架、配置或第二条路径仍按过度设计，不因此放行。直通道切片、根因句、不得超出验收、方案审、代码审、根因钉死和另开短窗都指回这一处。快车道机械改不要求。不 bump VERSION。Included：`skills/references/execution-discipline.md` + `skills/references/lane-direct.md` + `skills/planner/SKILL.md` + `skills/developer/SKILL.md` + `skills/references/acceptance-and-delta.md` + `skills/plan-reviewer/SKILL.md` + `skills/code-reviewer/SKILL.md` + `skills/references/diagnosis-gates.md`
 
 - 2026-11-03：bump `skills/VERSION` → **5.3.1**。收口 5.3.0 之后未发版条目：检查健康须跑 `install-ai-gates.ps1 -CheckUpdate`，stdout 含 `UPDATE AVAILABLE` 时用户可见正文写「有新版本，需要更新。」，不得安装或覆盖；主动搜索排除 `.ai-gates/tmp/`，已经点名的路径仍可读；会话开始时删掉 `.ai-gates/tmp/` 里超过 1 天的文件和空目录，目录本身留下。`plugin.json` version=`5.3.1`。新包 `releases/ai_dev_v5.3.1.7z`，不覆盖 5.3.0 包。`validate-pipeline -Strict` 全绿（test-hooks 108/0）。
 

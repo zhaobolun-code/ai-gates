@@ -42,7 +42,7 @@ try {
 
     $ctx = @"
 摘要不是约定。
-下一步先读 .cursor/skills/references/agent-entry-route.md、.cursor/project-context.md 的模型路由、以及当前任务文件夹里的未完成说明。
+下一步先读 .cursor/skills/references/agent-entry-route.md、.cursor/project-context.md 的「先读哪一节」、以及当前任务文件夹里的未完成说明。
 读完之前不要改代码。
 "@
     $result = [ordered]@{

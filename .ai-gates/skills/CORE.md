@@ -5,15 +5,15 @@
 
 ## 入口
 
-用户：`项目经理` / `PM` + 需求 → **`[PM]`** 结构化判定 + 白话 **你下一步** 并派岗；无 project-context → §冷启动。  
+用户：`项目经理` / `PM` + 需求 → **`[PM]`** 结构化判定 + 白话 **你下一步** 并派岗；无 project-context → §冷启动。
 口令等价（强制）：**`项目经理` = `PM`**，**`初始化` = `init`**，**`准` = `approve`**，
-**`升级` = `upgrade`**，**`检查健康` = `doctor`**。  
-`升级 ai-gates`（可带 GitHub 地址）= **联网更新**：先比对官方源最新 tag 与本地版本（install-info 优先，否则读 `skills/VERSION`），有新版才下载替换本地库（项目状态文件保留），随后跑 link-platform 校验/补齐传送门；网络不可用或无新版时回退「本地已解压包重接传送门」。替换前 PM 白话说明来源与版本（口令本身即授权）。Skill 回传下发 = 本口令拉技能包真源仓 `zhaobolun-code/ai-gates`（不是 collect 仓）；收集仓合并 ≠ 已下发。
-**特例** 二者相加即接入流程（不判车道；任选语种组合，效果相同）→ Read [pm-init.md](references/pm-init.md)。例：`项目经理 初始化`、`PM init`。同义：`流水线初始化`。  
+**`升级` = `upgrade`**，**`检查健康` = `doctor`**。
+`升级 ai-gates`（可带 GitHub 地址）= **联网更新**：先比对官方源最新 tag 与本地版本（install-info 优先，否则读 `skills/VERSION`），有新版才下载替换本地库（项目状态文件保留；本地项目说明若缺常用命令、仓库分仓、客户端事实，补上模板空节，已有同名节不覆盖），随后跑 link-platform 校验/补齐传送门；网络不可用或无新版时回退「本地已解压包重接传送门」。替换前 PM 白话说明来源与版本（口令本身即授权）。Skill 回传下发 = 本口令拉技能包真源仓 `zhaobolun-code/ai-gates`（不是 collect 仓）；收集仓合并 ≠ 已下发。
+**特例** 二者相加即接入流程（不判车道；任选语种组合，效果相同）→ Read [pm-init.md](references/pm-init.md)。例：`项目经理 初始化`、`PM init`。同义：`流水线初始化`。
 
 ## PM 内部结构化判定（强制）
 
-每轮 `[PM]` 在回复用户前**必须**完成下列 YAML 字段判定；回复**必须含**字面 `[PM]` YAML 块供 hooks 打点。YAML **不对团队讲解字段名**（如 `review_tier`）。用户可见内容按 §用户可见输出；TL / 维护模式或用户追问时可展开内部字段。
+选车道仍按下面的字段在内部做完。回复**不必**为写文件带字面 `[PM]`，hooks 也不再查打点。YAML **不对团队讲解字段名**（如 `review_tier`）。用户可见内容按 §用户可见输出；TL / 维护模式或用户追问时可展开内部字段。
 
 ```yaml
 pm:
@@ -31,7 +31,7 @@ pm:
 
 ### Express 简略（用户可见）
 
-**全部**满足 → 用户可见只输出白话 **你下一步**（**不要**摘要表）。回复仍须含字面 `[PM]` YAML（给机器，不向用户讲解）：
+**全部**满足 → 用户可见只输出白话 **你下一步**（**不要**摘要表）。不必另附 `[PM]`：
 
 - `lane: Express`
 - `blockers: []`
@@ -39,7 +39,7 @@ pm:
 - 非 recovery / `按 CORE 重来` 恢复轮
 - 本轮**无**车道升级（`lane_rules_hit` 不含 `→`）
 
-**你下一步**（可 1～2 句，禁只写「等待」）：车道理由 · 下一岗 · 五态 · 用户动作（确认切片 / 等改完 / Unity 测 / 回是否通过）。二选一/多选一另加 **推荐 + 为什么**（≤3 句）→ [demand-clarification.md](references/demand-clarification.md)。缺任一项或推荐 → **缺 PM 结构化判定**。Express 判定**必须**附一句**风险复述 + 升道出口**：「我判定为机械微改（仅 1 个文件），走快车道；若你认为涉及行为变化，请回『直通道』；超过 3 个文件或涉及 API / 存档 / 跨模块，请回『走标准道』。」
+**你下一步**（可 1～2 句，禁只写「等待」）：车道理由 · 下一岗 · 五态 · 用户动作（确认切片 / 等改完 / Unity 测 / 回是否通过）。二选一/多选一另加 **推荐 + 为什么**（≤3 句）→ [demand-clarification.md](references/demand-clarification.md)。缺任一项或推荐 → **缺 PM 结构化判定**。Express 判定**必须**附一句**风险复述 + 升道出口**：「我判定为简单修改（少于 3 个文件，不是设计核心逻辑），走快车道；若你认为这是在设计核心逻辑，或文件会到 3 个及以上，请回『直通道』；涉及 API / 存档 / 跨模块，请回『走标准道』。」
 
 **Verify / Unity 失败**：「你下一步」走 [diagnosis-gates.md](references/diagnosis-gates.md) §0（含有意义评审；同 A# **第一次**且有意义=有、根因钉死 → 同条热修，第二次才菜单）；禁默认开 Step N+1、「新切片」清零止损。
 
@@ -58,14 +58,14 @@ pm:
 
 **隔离审核**：L1.5 CR / L2 / L3 / 高风险对抗 CR → **优先**主 Agent 拉起 Subagent 隔离会话；高风险**优先异模型**（首选高质量档，失败回退同模型，不硬拦）；失败再提示手动新开 Chat；同 Chat 续审须标非独立。细则 → [isolated-review.md](references/isolated-review.md)。**不校验**用户是否接受隔离/是否换模型。
 
-**主窗仅 PM + 流水线岗子窗**：主窗**只**做 `[PM]`。方案审 / CR / 文档 **一律优先 Subagent**。Express 与 Direct 的业务改码**必须子窗**（程序员，低级档）。CR 仍必须隔离子窗。主窗不改业务 `.cs`/`.lua`。范围不清的 Direct 仍派策划子窗。**周报例外**：用户单独调用，不要求子窗。模型：策划/方案审=高质量；实现/文档=便宜快速；CR 相对实现优先高质量；**具体 slug 只读 project-context §模型路由**（没有该节则标「未按模型路由」，技能不另造默认表）。细则 → [model-routing.md](references/model-routing.md)。
+**主窗仅 PM + 流水线岗子窗**：方案审 / CR / 文档 **一律优先 Subagent**。Express 主窗直接改业务 `.cs`/`.lua`，不派程序员。Direct 及更重的业务改码仍派程序员子窗（低级档）。CR 仍必须隔离子窗。范围不清的 Direct 仍派策划子窗。钩子不因主窗身份拒绝业务代码。**周报例外**：用户单独调用，不要求子窗。模型：策划/方案审=高质量；实现/文档=便宜快速；CR 相对实现优先高质量；**具体 slug 只读 project-context §模型路由**（没有该节则标「未按模型路由」，技能不另造默认表）。细则 → [model-routing.md](references/model-routing.md)。
 
 Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr-dispatch-l1.5.md](./templates/cr-dispatch-l1.5.md)（Subagent 派发或手动粘贴）。
 **禁止**未完成内部结构化判定就仅凭白话判车道。
 
 ### 用户可见输出（强制）
 
-**机器层**（hooks / Stop 打点）：回复**必须含**字面 `[PM]` YAML 块。YAML 出现在回复里 **不是**「本条已完成结构化判定」。形状、人话、语言与五态 → [user-visible-states.md](references/user-visible-states.md) §对人说话、§用户语言。
+**机器层**：业务写入不再查 `[PM]`。形状、人话、语言与五态 → [user-visible-states.md](references/user-visible-states.md) §对人说话、§用户语言。
 
 ### Full 强制 — 用户可见（强制）
 
@@ -80,28 +80,29 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 **判定前**：需求存在 ≥2 种合理解释且影响车道/范围（如"改顺畅点"无验收标准）→ 先追问 ≤3 个关键问题（最多 1 轮，答不全按默认决策继续），细则 → [demand-clarification.md](references/demand-clarification.md)。改代码需求：判车道前用**一次**窄 `codegraph_explore`（或已有 diff 文件清单）估**将改业务源文件数**，按将改数判，禁止只按用户口头文件数。
 
-**判定实现顺序（单一优先级，M1）**：**先查步骤 4 Full 强制条**——命中任一即 `lane: Full`；**未命中再按步骤 1 → 步骤 2 → 步骤 3 判定**（等效「取最高命中车道」）；升级链 `Express → Direct → Standard → Full`，过程中命中升级立即改判。**PM 默认直通道**（步骤 2），不要无理由抬到标准。决策树 → [references/full-lane-decision-tree.md](references/full-lane-decision-tree.md)。
+**判定实现顺序（单一优先级，M1）**：**先查步骤 4 Full 强制条**——命中任一即 `lane: Full`；**未命中再按步骤 1 → 步骤 2 → 步骤 3 判定**（等效「取最高命中车道」）；升级链 `Express → Direct → Standard → Full`，过程中命中升级立即改判。**简单改动默认快速车道**。不要把调数值、改现象抬到直通，也不要无理由抬到标准。决策树 → [references/full-lane-decision-tree.md](references/full-lane-decision-tree.md)。
 
 ```
 0. 纯问答 / 只读咨询（不涉及落盘改动——「怎么改」「能不能改」「解释现象」「查代码/文档/接口」）→ **主窗直接答**：不判车道、不建窗、不生成文档、不派岗、不写快照（`snapshot: n/a`）。仅当用户要求或隐含要**落盘改动**（改代码/文档/配置）才进入车道判定。
-1. Express（快捷道 · 机械清单，准入条件**全部**满足）→ Express
-   · 仅字符串/注释/日志文本、编译错误修复（缺符号/类型不匹配，不重设计）、数字/常量/阈值 ≤3 行
-   · **恰好 1 个**业务源文件（如 `.cs`）；`.meta`、同批 prefab 配套资源**不计入**。有行为变化即使 1 个文件 → 步骤 2 Direct（快车道无代码审）
-   · 无 API/持久/跨模块/生成文件；一句话说清；一句话 A# 可证伪
+1. Express（快捷道 · 优先于直通）→ Express
+   · 少于 3 个业务源文件（1 或 2）。`.meta`、同批 prefab 配套资源不计入
+   · 简单修改：调整数值、修改现象、修改注释、改已有日志、编译错误修复（缺符号/类型不匹配，不重设计）
+   · 不是设计核心逻辑。设计核心逻辑 = 新写或改写判定规则、控制流、守恒、通断真源或方向。调已有数值或改已有现象的疏密快慢不算
+   · 无 API/持久/跨模块/生成文件；一句话说清；一句话 A# 可证伪。改了现象仍同条写规则和不点名。仍不派代码审核
    · 未命中止损链。**回归索引 / 文件热度 / project-context 路径前缀不单独否决 Express**
    · PM 认为风险高可改判 Direct/Standard（须在「你下一步」写一句为什么）；用户点名标准/完整从其点名
    · 判定须含一句话 A# + 风险复述/升道出口（见 §Express 简略）；过程中命中升级立即改判
 1.5 严格非功能微改旁路（步骤 1 的子集）：用户未要求 Full；**1 个**已跟踪文本业务文件；无 API/持久/跨模块/生成文件；只改注释或既有日志字符串（不增删调用）；slice 预计且改后 `git diff --numstat HEAD -- <path>` 新增+删除≤20、恰一行整数且 name-status 非R/C → Express；不满足 → 按步骤 2/3，不因回归/热度单独改判 Standard
-2. Direct（直通道 · **PM 默认**）→ Direct
-   · 有**行为变化**（即使 1 个文件），**或**机械改但已是 2～3 个业务源文件
-   · ≤3 业务源文件；**无 API / 无持久（存档/序列化）/ 无跨模块**
+2. Direct（直通道）→ Direct
+   · **3 个及以上**业务源文件，或者这刀是在设计核心逻辑
+   · **无 API / 无持久（存档/序列化）/ 无跨模块**。文件数本身不升 Standard
    · **回归索引 / §车道升级路径 / 文件热度不单独升 Standard**
    · **PM 本轮写**对话内 A#/切片（不落盘）；范围/口径说不清才派策划子窗。默认单会话完成，跨会话/改不完自动升 Standard
    · 当前为 Express 或 Direct 时命中止损 → **升 Standard**（不是 Full）
    · PM 可改判 Standard（须写一句风险）；用户点名标准/完整从其点名
-   · 判定须含一句话 A# + 升道出口（默认「直通道」；架构/API/存档/跨模块/超 3 文件→「走标准道」）
+   · 判定须含一句话 A# + 升道出口（默认「直通道」；API/存档/跨模块→「走标准道」）
 3. Standard（难任务）→ Standard
-   · **>3** 业务源文件 / 跨模块 / public API / 持久或序列化 / 说不清
+   · 跨模块 / public API / 持久或序列化 / 说不清。**禁止仅因文件数 ≥3 就 Standard**
    · Express/Direct **第一次**命中止损（升上来）
    · PM 书面改判（用户未点名完整流程）
    · **已判 Standard** 且命中回归索引模块 → 方案审 **L1.5**（加强审，不回头改车道）
@@ -109,16 +110,15 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 4. Full（完整道）→ Full
    · 用户说「完整流程」
    · **已经在 Standard 上再次命中止损**（止损两段：先标准，标准上再止损才完整）
-   · 禁止仅因路径前缀、回归索引、>3 文件、存档、跨模块就 Full（这些走步骤 3）
+   · 禁止仅因路径前缀、回归索引、文件数、存档、跨模块就 Full（文件数走步骤 2；存档/跨模块走步骤 3）
 ```
 
 ### Express 升级（过程中立即改判）
 
 | 触发 | 升级至 |
 | --- | --- |
-| 实际改动变成 2～3 个业务源文件（仍无 API/持久/跨模块） | Direct |
-| 实际改动 > 3 业务源文件 | Standard |
-| 出现行为变化（仍 1 个文件、无 API/持久/跨模块） | Direct |
+| 实际改动变成 3 个及以上业务源文件（仍无 API/持久/跨模块） | Direct |
+| 这刀做成了设计核心逻辑（仍无 API/持久/跨模块） | Direct |
 | 跨模块 / public API / 持久 | Standard |
 | 当前 Express 或 Direct 命中止损 | Standard |
 | 当前已是 Standard 再命中止损 | Full |
@@ -129,7 +129,7 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 | 车道 | 流程 | 文档 |
 | --- | --- | --- |
-| **Express** | 一句话切片 → **一轮确认** → 实现（**必须子窗**）→ 一行自检 → Unity 测；无 CR；默认不落盘、不建窗；**一旦已建分类夹** → [doc-windowing.md](references/doc-windowing.md) §与 Express（最小两文件 + 终态须 migrate；不强制 `未完成.md`） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
+| **Express** | 一句话切片 → 用户已说出改法就同条改，否则一次「准」→ 主窗直接改 → 一行自检 → Unity 测；无 CR、无待测锁、不补 README；默认不落盘、不建窗；**一旦已建分类夹** → [doc-windowing.md](references/doc-windowing.md) §与 Express（最小两文件 + 终态须 migrate；不强制 `未完成.md`） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
 | **Direct** | **PM 写**对话内 A#/切片（不清才派策划）→ **一轮确认** → 实现（**必须子窗**）→ 隔离 CR（**必须子窗**，高级档）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
 | **Standard** | plan-lite → L1/L1.5/L2 → **一轮确认** → `[developer]` → `[CR]` → README。同窗同口径连续刀 → [circuit-windows.md](references/circuit-windows.md) **战役模式**（方案审不每刀重做；每刀仍 CR） | plan-lite；A# + delta-only |
 | **Full** | TL 显式启用；见 [references/](references/) | 执行文档；须含验收 A# |
@@ -152,20 +152,20 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 4. **CR 有 blocker 不写最终 README**
 5. **Unity 未测不得标「已通过」** — 例外：Skill/Doc AI 验收通过可抬升（见 [handoff-automation.md](references/handoff-automation.md) / [loop-engineering.md](references/loop-engineering.md)；非可不测）
 6. **PM 不替岗** — 不写 Step 规格、不改代码、不替 CR 宣布无 blocker
-7. **无 PM 门禁不改交付物** — 用户直接叫岗位名时，须同条先 `[PM]` 判车道并输出 **你下一步**；**本轮尚无 PM 结构化判定时不得**创建/修改代码、执行文档、README（只读咨询除外）
+7. **问句不改文件** — 问句先答。Express 里用户已经说出改哪一行、改成什么，同条就改。标准道和完整道仍先有方案再改代码。直叫岗位名时先选车道。
 
-**反合理化（借口对照）**：无 `[PM]` 就写 / 日志关键词冒充 A# / 伪称隔离 CR → [anti-patterns.md](references/anti-patterns.md) §反合理化；评测 §K。
+**反合理化（借口对照）**：问句就改文件 / 日志关键词冒充 A# / 伪称隔离 CR → [anti-patterns.md](references/anti-patterns.md) §反合理化；评测 §K。
 
-**非门禁**：Standard / Full 的隔离审核是否成功、用户是否手动新开 Chat、换模型 — 只要求诚实标注，不硬阻断。Direct 的 CR 须子窗或新开 Chat，标注「隔离复核」；同 Chat 只标非独立不算完成。缺 PM 结构化判定或 **你下一步**（含 Express 简略四条）→ **已阻塞**。
+**非门禁**：Standard / Full 的隔离审核是否成功、用户是否手动新开 Chat、换模型 — 只要求诚实标注，不硬阻断。Direct 的 CR 须子窗或新开 Chat，标注「隔离复核」；同 Chat 只标非独立不算完成。标准道还没有方案就改代码 → **已阻塞**。
 
-**机器强制层（如实）**：分两层，禁止混名。**window_pm**（机器）：Cursor / Codex CLI / Claude Code 的 hooks 可 deny；放行只证明「本会话 120 分钟内打过 `[PM]` 点」，reason 字面为 `window_pm_not_this_turn`，**不是**本条已完成结构化判定。**this_turn_pm**（硬门禁 #7）：本条须有结构化 `[PM]`，机器做不到（preToolUse 拿不到正在生成的回复）。Codex **桌面**对 `apply_patch` 钩子可能不触发（信任已批准仍零打点，关键写后自查 `.ai-gates/hooks-log/`）。Trae 为软层（规则 + 技能传送门，**无**机器 hooks）。macOS / Linux 无 `pwsh` 时机器 hooks **未接线**，体检须报 `hooks_not_wired_no_pwsh`，不得写成已接线。`failClosed: false`：hook 脚本失败则放行。kill switch 须在本机终端（不要经过 Agent）运行 `.ai-gates/scripts/enable-kill-switch.ps1` 并输入 ENABLE KILL SWITCH 才关掉；空文件和 Agent 写入不算。Level 1 放行只证明本会话 120 分钟内写过正式 `.ai-gates/CHANGELOG.md`，不证明条目描述了即将修改的文件或内容。硬门禁 #7 仍须自觉。
+**机器强制层（如实）**：业务路径放行代号 `business_write`，不查 `[PM]` 打点。改技能包仍看 120 分钟内的变更日志。同一现象热修满 2 次仍拒绝。审核戳记和派发文件仍只有子窗能写。Codex **桌面**对 `apply_patch` 钩子可能不触发。Trae 为软层（规则 + 技能传送门，**无**机器 hooks）。macOS / Linux 无 `pwsh` 时机器 hooks **未接线**，体检须报 `hooks_not_wired_no_pwsh`，不得写成已接线。`failClosed: false`：hook 脚本失败则放行。kill switch 须在本机终端（不要经过 Agent）运行 `.ai-gates/scripts/enable-kill-switch.ps1` 并输入 ENABLE KILL SWITCH 才关掉；空文件和 Agent 写入不算。Level 1 放行只证明本会话 120 分钟内写过正式 `.ai-gates/CHANGELOG.md`，不证明条目描述了即将修改的文件或内容。标准道和完整道仍先写方案再改代码，这一条靠流程，不靠打点。
 
 **工作区卫生（非门禁）**：一次性中间产物只放 **`.ai-gates/tmp/`**。细则 → [execution-discipline.md](references/execution-discipline.md) §工作区卫生。
 
 ## 无 project-context 冷启动
 
 1. 只读咨询 → **不阻塞**。
-2. **改代码** → `missing-coldstart`；**你下一步**须含「未初始化，默认直通道」+ 建议 **`项目经理 初始化`**；未初始化前：Express 仅机械且恰好 1 个业务源文件；行为小改或 2～3 文件默认 Direct（无 API/持久/跨模块）；>3 文件或 API/存档/跨模块 → Standard。细则 → [pm-init.md](references/pm-init.md)。
+2. **改代码** → `missing-coldstart`；**你下一步**须含「未初始化」+ 建议 **`项目经理 初始化`**；未初始化前按本树：少于 3 个文件且不设计核心逻辑 → Express；3 个及以上或设计核心逻辑 → Direct；API/存档/跨模块 → Standard。细则 → [pm-init.md](references/pm-init.md)。
 
 ## 岗位切换
 
@@ -178,7 +178,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 | 查正文 | `read-evidence` 下 `SKILL.md`（主窗要看代码或长文档时派低级子窗） | `[read]` |
 | 跑命令 | `run-evidence` 下 `SKILL.md`（主窗要跑终端时派低级子窗） | `[run]` |
 
-切换岗位前 Read 对应 `SKILL.md`。Express 切片由 **`[PM]`** 输出，**策划不参与**。Direct A# 已写清同样不派策划。直叫岗位名须同条先 `[PM]`（硬门禁 #7）；无 slice/plan-lite 且未 ready 不得直接 `[developer]`。一轮确认「准」→ 同条 `[developer]`（[handoff-automation.md](references/handoff-automation.md) §0/§F）。
+切换岗位前 Read 对应 `SKILL.md`。Express 切片写在回复里，**策划不参与**。Direct A# 已写清同样不派策划。直叫岗位仍先选车道；无 slice/plan-lite 且未 ready 不得直接 `[developer]`。一轮确认「准」→ 同条 `[developer]`（[handoff-automation.md](references/handoff-automation.md) §0/§F）。
 
 翻车索引 → [anti-patterns.md](references/anti-patterns.md)（**仅列近 90 天真实命中反模式、上限 15 条**，超限最低命中降级回完整表）。写方案/改码/扩 README 前 → [execution-discipline.md](references/execution-discipline.md) **复用四问**（已有→复用→少写/不写→能删）。测挂修复 → `证据/_repair-blackboard.md`；止损/`repair_rounds` 触顶 → **A#/口径复议**（[diagnosis-gates.md](references/diagnosis-gates.md) §0.6/§0.7），禁同 A# 死磕。错题 → 大纲 `.ai-gates/lessons-outline.md`（错因+改正）+ 方案「错题本必读」指路（[lessons-learned.md](references/lessons-learned.md)）。
 

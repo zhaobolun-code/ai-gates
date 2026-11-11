@@ -113,7 +113,13 @@ if ($ctxState -eq "missing") {
     & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $initScript
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 } else {
-    Write-Host "Skip context create (already exists)." -ForegroundColor DarkGray
+    $ensureScript = Join-Path $scriptDir "ensure-project-context-sections.ps1"
+    if (-not (Test-Path -LiteralPath $ensureScript)) {
+        Write-Error "Missing $ensureScript"
+        exit 1
+    }
+    & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $ensureScript -RepoRoot $repoRoot
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 # AGENTS.md：缺则从模板拷贝；已存在永不覆盖（与 init-project-context 同模式）
@@ -181,7 +187,7 @@ if ($InstallCodeGraph) {
 Write-Host ""
 Write-Host "=== 下一步清单（引导式 init） ===" -ForegroundColor Cyan
 # 1. project-context（-Apply 已自动创建/跳过；幂等不覆盖）
-$ctxText = if ($ctxState -eq "missing") { "已调用 init-project-context.ps1 生成（不覆盖已有文件）" } else { "已存在，跳过（不覆盖）" }
+$ctxText = if ($ctxState -eq "missing") { "已调用 init-project-context.ps1 生成（不覆盖已有文件）" } else { "已存在，缺的常用命令 / 仓库分仓 / 客户端事实已补上（不覆盖已有节）" }
 Write-Host "1. [done] init-project-context：.cursor/project-context.md $ctxText；打开填写技术栈 / Express 升级表 / 回归索引。"
 # 2. AGENTS.md（-Apply 缺则从 templates 拷贝；已存在永不覆盖）
 $agentsText = if ($agentsCreated) { "已创建（从 templates/AGENTS.md 拷贝）" } else { "已存在跳过" }

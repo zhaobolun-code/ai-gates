@@ -1,7 +1,6 @@
 {
   "cursor": [
     "changelog_writes_missing_level1",
-    "gate_file_missing",
     "gate_file_unreadable",
     "main_window_business_code",
     "no_changelog_write_for_conversation_level1",
@@ -13,7 +12,6 @@
   ],
   "claude": [
     "changelog_writes_missing_level1",
-    "gate_file_missing",
     "gate_file_unreadable",
     "main_window_business_code",
     "no_changelog_write_for_session_level1",
@@ -26,7 +24,6 @@
   ],
   "codex": [
     "changelog_writes_missing_level1",
-    "gate_file_missing",
     "gate_file_unreadable",
     "main_window_business_code",
     "no_changelog_write_for_session_level1",

@@ -11,7 +11,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 
 ## PM 门禁（硬停）
 
-用户直接叫本岗、且本轮尚无 `[PM]` YAML + **你下一步** → **不得**改执行文档状态；同条先 `[PM]`。只读咨询不阻塞。
+问句只给结论。不改执行文档状态，除非本岗被派来写审核结论。回复不必带 `[PM]`。
 
 ## 车道
 
@@ -50,7 +50,7 @@ Express 与 Direct 是否跳过见当前车道卡。档位见 [plan-review-tiers
 3.11 有神类止血节：只追加无 REMOVED → major；超净增阈无收敛 → blocker
 3.12 设计模式外部校验 → [design-patterns.md](../references/design-patterns.md)
 3.13–3.22 声明启用才审：分歧/碰撞/收集仓/回传/test-first/外仓。未声明不硬拦。指针：[divergence-annotation.md](../references/divergence-annotation.md) / [collision-review.md](../references/collision-review.md) / [collect-queue.md](../references/collect-queue.md) / [pattern-harvest.md](../references/pattern-harvest.md) / [test-first.md](../references/test-first.md) / [external-compare.md](../references/external-compare.md) / [reverse-allusion.md](../references/reverse-allusion.md)
-3.23 修故障无根因 → major；无根因定版保底 → blocker
+3.23 修故障无根因 → major；无根因定版保底 → blocker。行为改动缺规则句 → major；规则或条件点名本次报告专名 → blocker。[execution-discipline.md](../references/execution-discipline.md)「规则先于专名」
 4. 有 blocker 不得 `implementation-ready`
 5. L1.5：Regression Validation 须引回归索引行
 6. L2：跨 2+ 模块；优先隔离 [isolated-review.md](../references/isolated-review.md)

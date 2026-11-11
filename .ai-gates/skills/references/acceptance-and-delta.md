@@ -24,7 +24,7 @@ A#：[场景] + [操作] + [预期现象或 Console 关键词] + [失败判据]
 
 规则：
 
-1. 编号连续：`A1`、`A2`…；实现与 CR **不得超出**条款范围。
+1. 编号连续：`A1`、`A2`…；实现与 CR **不得超出**条款范围。超出指不要连带改第二种行为。条件跟 [execution-discipline.md](./execution-discipline.md)「规则先于专名」的规则句走，不跟验收里的专名走。
 2. 须含至少一条**正向预期**；建议含一条**非目标/失败判据**（什么算没做对）。
 3. 每个 Step / Express 切片须写 **`满足验收：A1, A2`**（或等价「覆盖验收」）。
 4. Unity 未测不得把条款标为已通过（仍遵守证据等级；人工测）。
@@ -46,7 +46,7 @@ A#：[场景] + [操作] + [预期现象或 Console 关键词] + [失败判据]
 | Mandatory | Code Changes / Delta Spec（ADDED/MODIFIED/REMOVED 相对当前物理口径） |
 | 预期 Console 关键词 | 回归索引场景 / 验收信号（[unity-editor-log.md](./unity-editor-log.md)） |
 
-三表须一致：A# 覆盖范围 ⊇ 实现改动（不得超出），Mandatory 的 MODIFIED/REMOVED 与 A# 现象对应，预期关键词能作为 A# 的观察信号。缺任一或对不上 → 方案审 **major**（缺 A# 直接 blocker，见 §验收条款）；Developer 交 CR 前自检缺任一不得交。
+三表须一致：A# 覆盖范围 ⊇ 实现改动的行为（不得超出：不要连带改第二种行为）。条件跟 [execution-discipline.md](./execution-discipline.md)「规则先于专名」的规则句走，不跟验收里的专名走。Mandatory 的 MODIFIED/REMOVED 与该规则对应，A# 只作见证。预期关键词能作为 A# 的观察信号。缺任一或对不上 → 方案审 **major**（缺 A# 直接 blocker，见 §验收条款）；Developer 交 CR 前自检缺任一不得交。
 
 **条款可证伪（思考碰撞回灌 · 与方案审 3.55 同句）**：下列任一条 → 方案审 **major**：
 

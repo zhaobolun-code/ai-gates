@@ -15,7 +15,7 @@
 #                + scripts/fixtures/** (read-only data, recursive; e.g. check-volume / test-gate-decision /
 #                  publish-reject fixtures)
 #     rules/ai-dev-pipeline.mdc
-#     hooks.json + hooks/*.ps1 + hooks/codex/*.ps1 + hooks/claude/*.ps1 + hooks/plugin/*.ps1  (Cursor + Codex + Claude + Cursor-marketplace hooks)
+#     hooks.json + hooks/*.ps1 + hooks/codex/*.ps1 + hooks/claude/*.ps1 + hooks/copilot/*.ps1 + hooks/plugin/*.ps1  (Cursor + Codex + Claude + Copilot + Cursor-marketplace hooks)
 #     codex/hooks.json + codex/config.toml  (Codex wiring, git-tracked central copy)
 #     claude/settings.json + claude/agents/ + claude/mcp.json  (Claude wiring; exclude settings.local.json)
 #     link-platform.ps1/.sh  (new-project one-shot portal creation)
@@ -176,7 +176,7 @@ try {
         Copy-Item -Path $mdcPath -Destination $stageRules -Force
     }
 
-    Write-Host "Copying hooks.json + hooks/*.ps1 + hooks/codex/*.ps1 + hooks/claude/*.ps1 + hooks/plugin/*.ps1..."
+    Write-Host "Copying hooks.json + hooks/*.ps1 + hooks/codex/*.ps1 + hooks/claude/*.ps1 + hooks/copilot/*.ps1 + hooks/plugin/*.ps1..."
     $hooksJsonPath = Join-Path $repoRoot ".ai-gates/hooks.json"
     $hooksDir = Join-Path $repoRoot ".ai-gates/hooks"
     if (Test-Path $hooksJsonPath) {
@@ -202,6 +202,13 @@ try {
                 Copy-Item -Destination $stageClaudeHooks -Force
         }
         # Cursor 市场插件门禁入口：plugin-hooks.json 指向 ${CURSOR_PLUGIN_ROOT}/.ai-gates/hooks/plugin/invoke.ps1
+        $copilotHooksDir = Join-Path $hooksDir "copilot"
+        if (Test-Path $copilotHooksDir) {
+            $stageCopilotHooks = Join-Path $stageHooks "copilot"
+            New-Item -ItemType Directory -Force -Path $stageCopilotHooks | Out-Null
+            Get-ChildItem -Path (Join-Path $copilotHooksDir "*") -Include *.ps1, *.json -File -ErrorAction SilentlyContinue |
+                Copy-Item -Destination $stageCopilotHooks -Force
+        }
         $pluginHooksDir = Join-Path $hooksDir "plugin"
         if (Test-Path $pluginHooksDir) {
             $stagePluginHooks = Join-Path $stageHooks "plugin"
@@ -317,7 +324,7 @@ try {
         "",
         "## 首次接入新项目",
         "",
-        "1. 解压本包到目标仓库根：包顶层 = 中央技能库 .ai-gates/ 的内容（skills/、hooks/（含 hooks/codex、hooks/claude 与 hooks/plugin）、scripts/（含 fog-map.template.html）、rules/、codex/、claude/、link-platform.* 等），无需额外嵌套",
+        "1. 解压本包到目标仓库根：包顶层 = 中央技能库 .ai-gates/ 的内容（skills/、hooks/（含 hooks/codex、hooks/claude、hooks/copilot 与 hooks/plugin）、scripts/（含 fog-map.template.html）、rules/、codex/、claude/、link-platform.* 等），无需额外嵌套",
         "2. 在 Agent 窗口粘贴「项目经理 升级 ai-gates」（=PM upgrade ai-gates），由 Agent 建好传送门（自动建 .cursor/*、.codex、.claude、.trae/skills 软连接；手动运行 .ai-gates/link-platform.ps1 亦可，非必需）",
         "3. 先读 .ai-gates/README.md（30 秒看懂 + 安装）→ .ai-gates/USER-GUIDE.md（口令与第一次接入）→ 需要时再读 .ai-gates/METHODOLOGY.md（为什么这么设计）",
         "4. Codex 用户：按源仓库示例创建根级 AGENTS.md（入口路由；本包不含，项目相关），再在 Agent 粘贴「项目经理 初始化」（项目经理=PM，初始化=init，升级=upgrade，检查健康=doctor），填写 project-context 后提需求",

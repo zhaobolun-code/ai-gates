@@ -11,8 +11,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 
 ## PM 门禁（硬停）
 
-用户直接叫本岗、且本轮尚无 `[PM]` YAML + **你下一步** → **不得**改代码；同条先 `[PM]`。只读咨询不阻塞。
-子窗被 Write 拦住：**禁止**本窗发 `[PM]` / 把 `[PM]` 写进 resume。看 `pm-gate-check.log` 同秒 `inherited_parent_pm`；DENY `parent_pm_not_marked` → 等主窗打点或主窗代写并标未开子窗。
+问句不改文件。Express 由主窗改，不派本岗。标准道和完整道仍先有方案再改。回复不必带 `[PM]`。
 
 ## 车道
 
@@ -20,7 +19,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 
 ## 模型路由 + 子窗
 
-优先子窗 + 便宜快速档，**必须** `model=`（程序员 = 项目说明里的低级 slug）。省略或 `inherit` 会复制主窗，钩子拒绝。Express、Direct、Standard、Full 的业务改码都**必须子窗**。主窗不改业务 `.cs`/`.lua`。CR 仍必须隔离子窗。主窗提示里的岗位卡和合同正文忽略，自己读本页和白名单。交回主窗只留三行。代码审核派发由本岗刷新，主窗不改。AFK → [agent-brief.md](../references/agent-brief.md)。
+优先子窗 + 便宜快速档，**必须** `model=`（程序员 = 项目说明里的低级 slug）。省略或 `inherit` 会复制主窗，钩子拒绝。Direct、Standard、Full 的业务改码都**必须子窗**。Express 由主窗直接改，不派本岗。CR 仍必须隔离子窗。主窗提示里的岗位卡和合同正文忽略，自己读本页和白名单。交回主窗只留三行。代码审核派发由本岗刷新，主窗不改。AFK → [agent-brief.md](../references/agent-brief.md)。
 
 ## Checklist（每次）
 
@@ -29,14 +28,14 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 1.55 完成即迁移：非战役本 Step 收口即迁；战役可批到签收。Direct/Express 无夹跳过。
 1.57 仅开窗/改邻接/签收 → Read [fog-map-structure.md](../references/fog-map-structure.md)。中刀只实现 / Express 机械 / 闲聊 → 不读。
 1.58 有认知卡片节且改受管文件：本会话整节一次，之后按点名对象走 R。禁止图谱冒充全图。[code-cognition-map.md](../references/code-cognition-map.md)
-2. Read project-context（若有）+ README 风险短段 + 真实代码（优先 `codegraph_explore`）
+2. 先读 project-context 的「先读哪一节」（若有），再读点名的节。README 风险短段 + 真实代码（优先 `codegraph_explore`）
 2.1 改码前复用四问 → [execution-discipline.md](../references/execution-discipline.md)
-2.11 修 bug（Express 机械除外）：先写根因一句；写不出停。连败 → [diagnosis-gates.md](../references/diagnosis-gates.md)
+2.11 修 bug（快车道里不改现象的除外）：先写规则句（[execution-discipline.md](../references/execution-discipline.md)「规则先于专名」）；写不出停。连败 → [diagnosis-gates.md](../references/diagnosis-gates.md)
 2.2 `未完成.md` 有错题本必读 → 只读点名行。[lessons-learned.md](../references/lessons-learned.md)
 2.3 交 CR 须引用错题路径 + 黑板 ≤3 或「无黑板（已查路径）」
 2.4 命中热路径表 → 结案前跑表内场景。禁黄金绿冒充 A#。[diagnosis-gates.md](../references/diagnosis-gates.md) §0.2.1
 2.5 覆盖度只认 coverage-map；禁自报。点名才 Read [coverage-map.md](../references/coverage-map.md)
-3. 只改本 Step A#。[acceptance-and-delta.md](../references/acceptance-and-delta.md)。Auto 一次一 Step → [loop-engineering.md](../references/loop-engineering.md)
+3. 只改本 Step A# 覆盖的行为，不连带第二种行为。条件按「规则先于专名」的规则句，不按 A# 里的专名。[acceptance-and-delta.md](../references/acceptance-and-delta.md)。Auto 一次一 Step → [loop-engineering.md](../references/loop-engineering.md)
 3.05 只改本子窗路径集。[circuit-windows.md](../references/circuit-windows.md)
 4. YAGNI；未「准, 抽离」禁止整段搬家
 4.5 微循环：改一段就自检。单个 Step 里至少一半小改动块留自检痕迹。这种自检不计入 `repair_rounds`。业务 C# 交 CR 前真编译零错误，并写出可执行 Unity 步骤或 Console 关键词。Skill/纯文档交审走静态核对和可证伪假需求，不写成已跑 Unity。禁 grep 冒充编译。[unity-editor-log.md](../references/unity-editor-log.md) §A

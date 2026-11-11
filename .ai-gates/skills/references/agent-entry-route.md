@@ -20,27 +20,27 @@
 
 ## 压缩之后
 
-对话若已被收成摘要，或钩子写了「摘要不是约定」：下一步先读本页、`.cursor/project-context.md` 的模型路由、当前任务夹的 `未完成.md`（没有任务夹则只读项目说明）。读完之前不要改代码。摘要里的「继续修」不是过关标准，也不能把「此路不通」当成已经作废。这不是换窗交接。
+对话若已被收成摘要，或钩子写了「摘要不是约定」：下一步先读本页、`.cursor/project-context.md` 的「先读哪一节」、当前任务夹的 `未完成.md`（没有任务夹则只读「先读哪一节」）。读完之前不要改代码。摘要里的「继续修」不是过关标准，也不能把「此路不通」当成已经作废。这不是换窗交接。
 
 ## 默认必读
 
 1. **[resident.md](./resident.md)**
 2. **当前这一张车道卡**（`skills/references/` 下的 `lane-express.md` / `lane-direct.md` / `lane-standard.md` / `lane-full.md`）
-3. 用到才打开那一份，不把三份全文装进每轮：**[read-evidence](../read-evidence/SKILL.md)**、**[run-evidence](../run-evidence/SKILL.md)**、**[log-evidence](../log-evidence/SKILL.md)**。主窗不自己读代码和长文档、不自己搜索、不自己跑终端、不自己看日志。
+3. 标准道和完整道用到才打开那一份：**[read-evidence](../read-evidence/SKILL.md)**、**[run-evidence](../run-evidence/SKILL.md)**、**[log-evidence](../log-evidence/SKILL.md)**。Express 和问句由主窗自己读、自己搜、自己跑。直通派程序员，不另派这三份。
 
-派子窗前再读 `.cursor/project-context.md` 的模型路由那一节。回归索引和物理口径派查正文去读，主窗不自己读。不把整份项目说明装进每轮。派发只写岗位、轮次、派发文件路径。不贴哈希算法、预期哈希、blocker 原文、岗位卡。子窗交回只留三行。岗位卡由子窗自己读。
+派子窗前读 `.cursor/project-context.md` 的「先读哪一节」，再读表里点名的节。不把整份项目说明装进每轮。派发只写岗位、轮次、派发文件路径。不贴哈希算法、预期哈希、blocker 原文、岗位卡。子窗交回只留三行。岗位卡由子窗自己读。
 
 ## 任务白名单（非 reference 预算 · 不得为省 Token 跳过）
 
-- 当前任务夹这一份 `未完成.md` 主窗可以直接读。`物理口径.md`、点名 `Mandatory-Step*.md`、模块 README、真实源码和 diff 派查正文，主窗不自己读。其它窗的未完成不读、不贴
+- 当前任务夹这一份 `未完成.md` 主窗可以直接读。标准道和完整道里，`物理口径.md`、点名 `Mandatory-Step*.md`、模块 README、真实源码和 diff 派查正文。Express 主窗自己读。其它窗的未完成不读、不贴
 - 方案点名的 lessons / 错题大纲行
 - Express：`express-slice` / `express-self-check`
 - 点名「模式沉淀」→ 加载 [pattern-harvest.md](./pattern-harvest.md)
 - 点名「电路子窗」→ 加载 [circuit-windows.md](./circuit-windows.md)
 - 点名「外仓对照」→ 加载 [external-compare.md](./external-compare.md)
-- 主窗要看日志原文（Unity `Editor.log`、编译/测试输出、`hooks-log` 长日志）或用户说「查日志」→ 加载 [log-evidence/SKILL.md](../log-evidence/SKILL.md)。主窗不读原文
-- 主窗要看代码或长文档，或用户说「查正文」→ 加载 [read-evidence/SKILL.md](../read-evidence/SKILL.md)。主窗不自己调 CodeGraph，不自己读长文。当前 `未完成.md`、本页、模型路由仍可由主窗直接读
-- 主窗要跑编译、测试、脚本或其它命令，或用户说「跑命令」→ 加载 [run-evidence/SKILL.md](../run-evidence/SKILL.md)。主窗不自己跑终端
+- 标准道和完整道要看日志原文，或用户说「查日志」→ 加载 [log-evidence/SKILL.md](../log-evidence/SKILL.md)
+- 标准道和完整道要看代码或长文档，或用户说「查正文」→ 加载 [read-evidence/SKILL.md](../read-evidence/SKILL.md)。Express 主窗自己读
+- 标准道和完整道要跑编译、测试、脚本，或用户说「跑命令」→ 加载 [run-evidence/SKILL.md](../run-evidence/SKILL.md)。Express 主窗自己跑
 - 开窗 / 改邻接 / 签收须读迷雾卡片 + 一度边（加载 [fog-map-structure.md](./fog-map-structure.md)；邻格各 ≤1 行、下一站 ≤1 行）。未读邻边不得自称已按 5.0.0 合规。写方案复用四问「已有吗」/ 问下一窗或文档怎么连 → 同样加载。Express 机械改 / 纯代码热修 / 战役中刀只实现 / 闲聊 → 不读。禁止把 `fog-map.json` 列入默认必读
 - 点名「代码认知地图」或 project-context 有「热路径认知卡片 / 代码认知卡片」节且本步分析/改热路径代码 → 加载 [code-cognition-map.md](./code-cognition-map.md)，**本会话整节一次**（与迷雾一张卡相反；本 Step 按点名对象走 R）。无该节不强制。压缩后禁止用摘要冒充 FRAS。Express 机械改不读。禁止把 CodeGraph 冒充已装载全图
 

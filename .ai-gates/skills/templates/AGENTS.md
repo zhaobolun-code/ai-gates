@@ -9,16 +9,16 @@
   `升级`=`upgrade`，`检查健康`=`doctor`）。
 - 新项目首次：`项目经理 初始化`（=`PM init`）；升级技能包：`项目经理 升级 ai-gates`（=`PM upgrade ai-gates`）；
   体检：`项目经理 检查健康`（=`PM doctor`）。
-- 每轮 `[PM]` 先做结构化判定（内部 YAML），对用户只输出白话「你下一步」；回复仍须带 `[PM]` 字面量 YAML（白话可附后，Stop 打点与门禁依赖字面量）。
+- 问句先答，不改文件。Express 里用户已经说出改哪一行，主窗自己读、自己改。回复不必带 `[PM]`。标准道和完整道仍先有方案再改代码。
 - 恢复口令：`按 CORE 重来`（= 流水线重来 / 没按流程来）。
 
 ## 必读顺序
 
 1. `.ai-gates/skills/references/resident.md`
 2. 当前这一张车道卡（`skills/references/` 下的 `lane-express.md` / `lane-direct.md` / `lane-standard.md` / `lane-full.md`）
-3. 用到才打开那一份，不把三份全文装进每轮：`read-evidence`、`run-evidence`、`log-evidence`。主窗不自己读、不自己搜、不自己跑、不自己看日志。
+3. 标准道和完整道用到才打开那一份：`read-evidence`、`run-evidence`、`log-evidence`。Express、问句、直通由主窗自己读、自己搜、自己跑。
 
-派子窗前再读 `.cursor/project-context.md` 的模型路由那一节。回归索引和物理口径派查正文去读。不把整份项目说明装进每轮。派发只写岗位、轮次、派发文件路径。不贴哈希算法、预期哈希、blocker 原文、岗位卡。子窗交回只留三行。岗位卡由子窗自己读。
+派子窗前读 `.cursor/project-context.md` 的「先读哪一节」，再读表里点名的节。不把整份项目说明装进每轮。派发只写岗位、轮次、派发文件路径。不贴哈希算法、预期哈希、blocker 原文、岗位卡。子窗交回只留三行。岗位卡由子窗自己读。
 
 ## 岗位路由（切岗前 Read 对应 SKILL.md）
 

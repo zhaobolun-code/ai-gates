@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "pwsh -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/copilot/mark-pm-gate.ps1",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/copilot/mark-pm-gate.ps1",
+        "timeoutSec": 15
+      }
+    ],
+    "subagentStop": [
+      {
+        "type": "command",
+        "bash": "pwsh -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/copilot/mark-pm-gate.ps1",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File .ai-gates/hooks/copilot/mark-pm-gate.ps1",
+        "timeoutSec": 15
+      }
+    ]
+  }
+}

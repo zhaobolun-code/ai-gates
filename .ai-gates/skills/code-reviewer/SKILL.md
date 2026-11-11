@@ -11,7 +11,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 
 ## PM 门禁（硬停）
 
-用户直接叫本岗、且本轮尚无 `[PM]` YAML + **你下一步** → **不得**改代码；同条先 `[PM]`。只读结论不阻塞。
+问句只给结论。本岗不改业务代码。回复不必带 `[PM]`。
 
 ## 车道
 
@@ -60,7 +60,7 @@ description: 审查程序员改动，找 blocker 与回归风险。用户说「�
 
 - **语言维**：`.cs` / `.lua` 按 project-context §代码审核额外关注点扫，不内联复制
 - Skill/Doc-only 无图谱 → [codegraph-probe.md](../references/codegraph-probe.md) soft risk，不硬拦
-- **质量维**（每刀）：只本 Step A#。[acceptance-and-delta.md](../references/acceptance-and-delta.md)。复用四问 / 神类 / 根因先于保底 / 抽离口令 → [execution-discipline.md](../references/execution-discipline.md)。模式结构 → [design-patterns.md](../references/design-patterns.md)。外仓粘贴 → blocker [external-compare.md](../references/external-compare.md)
+- **质量维**（每刀）：只本 Step A# 的行为范围。[acceptance-and-delta.md](../references/acceptance-and-delta.md)。复用四问 / 神类 / 根因先于保底 / 规则先于专名 / 抽离口令 → [execution-discipline.md](../references/execution-discipline.md)。方案写成点名本次报告，diff 仍按该节退回。模式结构 → [design-patterns.md](../references/design-patterns.md)。外仓粘贴 → blocker [external-compare.md](../references/external-compare.md)
 - **集成维**（L1.5+ 必扫）：调用链、回归场景、冻结表/黑板禁项。缺「集成维：」句 → major
 - **安全维**：Full 或派发 `+security` 才扫
 

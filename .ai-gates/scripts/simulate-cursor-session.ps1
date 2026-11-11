@@ -224,7 +224,7 @@ try {
     if (Test-Path -LiteralPath $gateFile) {
         try { $gateNow = [System.IO.File]::ReadAllText($gateFile, [System.Text.Encoding]::UTF8) | ConvertFrom-Json } catch { $gateNow = $null }
     }
-    Assert-Sim "P5 big payload afterAgentResponse -> [PM] mark written" ($r.ExitCode -eq 0 -and $null -ne $gateNow -and $null -ne $gateNow.$simConv.lastPmAtUtc) "exit=$($r.ExitCode) keys=$($gateNow.PSObject.Properties.Name -join ',')"
+    Assert-Sim "P5 big payload afterAgentResponse -> no [PM] mark" ($r.ExitCode -eq 0 -and ($null -eq $gateNow -or $null -eq $gateNow.$simConv)) "exit=$($r.ExitCode)"
 
     # P6：同会话（有 CHANGELOG 流水）写 .cursor/skills 设施 → allow（Level 1）
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (New-HookPayload -Event "preToolUse" -SessionId $simSession -ConversationId $simConv -FilePath $skillsPath -Content "small")
@@ -242,7 +242,7 @@ try {
     $r = Invoke-HookScript -ScriptName "pm-gate-check.ps1" -StdinJson (New-HookPayload -Event "preToolUse" -SessionId $simSession -ConversationId $simConvNoFlow -FilePath $businessPath -Content "small")
     $perm8 = $null
     try { $perm8 = ($r.Stdout | ConvertFrom-Json).permission } catch { }
-    Assert-Sim "P8 business path no [PM] -> deny" ($r.ExitCode -eq 0 -and $perm8 -eq "deny") "exit=$($r.ExitCode) perm=$perm8 stdout=$($r.Stdout)"
+    Assert-Sim "P8 business path no [PM] -> allow" ($r.ExitCode -eq 0 -and $perm8 -eq "allow" -and $r.Stdout -match "business_write") "exit=$($r.ExitCode) perm=$perm8 stdout=$($r.Stdout)"
 
     # P9：会话结束时打点仍可查（链路未被大 payload 打断的最终证据）
     $cwFinal = $null
@@ -253,7 +253,7 @@ try {
     if (Test-Path -LiteralPath $gateFile) {
         try { $gateFinal = [System.IO.File]::ReadAllText($gateFile, [System.Text.Encoding]::UTF8) | ConvertFrom-Json } catch { $gateFinal = $null }
     }
-    Assert-Sim "P9 end-of-session both marks persisted" ($null -ne $cwFinal -and $null -ne $cwFinal.$simConv -and $null -ne $gateFinal -and $null -ne $gateFinal.$simConv) "cw=$($cwFinal.PSObject.Properties.Name -join ',') gate=$($gateFinal.PSObject.Properties.Name -join ',')"
+    Assert-Sim "P9 end-of-session changelog persisted and pm stamp absent" ($null -ne $cwFinal -and $null -ne $cwFinal.$simConv -and ($null -eq $gateFinal -or $null -eq $gateFinal.$simConv)) "cw=$($cwFinal.PSObject.Properties.Name -join ',')"
 
 } finally {
     # 清理仿真会话条目（保留真实数据）；kill switch 原样恢复

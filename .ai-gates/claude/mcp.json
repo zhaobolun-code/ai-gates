@@ -7,6 +7,14 @@
     "code-review-graph": {
       "command": "uvx",
       "args": ["code-review-graph", "serve"]
+    },
+    "unity-mcp": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "mcpforunityserver==10.0.0", "mcp-for-unity", "--transport", "stdio", "--default-instance", "Chemical"],
+      "env": {
+        "DISABLE_TELEMETRY": "1"
+      }
     }
   }
 }

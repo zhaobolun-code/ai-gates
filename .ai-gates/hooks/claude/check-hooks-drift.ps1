@@ -188,7 +188,7 @@ try {
         Write-Audit 'OK no_drift'
         $ctx = @"
 [claude-hooks-live] 机器强制层提醒（2026-08-10 适配版，真机验证点）：
-- Claude Code 侧 PreToolUse/PostToolUse 对 Bash 与 Write|Edit|MultiEdit|NotebookEdit 是否如文档触发、session_id 是否可用——首次会话请自查 .ai-gates/hooks-log/ 打点（pm-gate-check.log / write-audit.log / mark-pm-gate.log）。
+- 业务路径放行代号 business_write，不查 [PM]。首次会话要核对钩子，看 pm-gate-check.log 里的 business_write 或变更日志 deny，以及 write-audit.log。
 - 若 deny 未生效：检查 .claude/settings.json 是否被真实文件占用（非传送门），或字段名 hook_event_name 与实机不符（见 claude-hooks-common.ps1 头注释真机验证点 #1）。
 - 验证钩子内部逻辑：powershell -File .ai-gates/scripts/test-claude-hooks.ps1
 "@

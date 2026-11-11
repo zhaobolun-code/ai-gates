@@ -112,7 +112,7 @@ Write-Case 'A3 parse fail -> allow' ($out -match '"permissionDecision":"allow"')
 
 $p = Get-BashPayload -SessionId $sid -Command 'Set-Content -Path Assets/Foo.cs -Value 1'
 $out = Invoke-Hook -Script 'bash-write-gate.ps1' -Payload $p -LogDir $ld
-Write-Case 'A4 shell write business no pm -> deny' ($out -match '"permissionDecision":"deny"' -and $out -match 'business_no_fresh_pm') $out
+Write-Case 'A4 shell write business no pm -> allow' ($out -match '"permissionDecision":"allow"') $out
 
 $p = Get-BashPayload -SessionId $sid -Command 'git status'
 $out = Invoke-Hook -Script 'bash-write-gate.ps1' -Payload $p -LogDir $ld
@@ -131,21 +131,21 @@ $ld = Join-Path $tmpRoot 'C'
 New-Item -ItemType Directory -Path $ld -Force | Out-Null
 $p = Get-WritePayload -SessionId $sid -FilePath $businessPath
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
-Write-Case 'C1 business no marker -> deny' ($out -match '"permissionDecision":"deny"' -and $out -match 'permissionDecisionReason') $out
+Write-Case 'C1 business no marker -> allow' ($out -match '"permissionDecision":"allow"') $out
 
 $now = [DateTime]::UtcNow.ToString('o')
 [System.IO.File]::WriteAllText((Join-Path $ld 'pm-gate.json'), (@{ $sid = @{ lastPmAtUtc = $now; snippet = 'PM 判定' } } | ConvertTo-Json -Depth 6), (New-Object System.Text.UTF8Encoding($true)))
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
-Write-Case 'C2 business fresh marker on main window -> deny' ($out -match '"permissionDecision":"deny"' -and $out -match 'main_window_business_code') $out
+Write-Case 'C2 business fresh marker -> allow' ($out -match '"permissionDecision":"allow"') $out
 
 $stale = [DateTime]::UtcNow.AddHours(-3).ToString('o')
 [System.IO.File]::WriteAllText((Join-Path $ld 'pm-gate.json'), (@{ $sid = @{ lastPmAtUtc = $stale } } | ConvertTo-Json -Depth 6), (New-Object System.Text.UTF8Encoding($true)))
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
-Write-Case 'C3 business stale marker -> deny' ($out -match '"permissionDecision":"deny"') $out
+Write-Case 'C3 business stale marker -> allow' ($out -match '"permissionDecision":"allow"') $out
 
 New-Item -ItemType File -Path (Join-Path $ld 'pm-gate-disabled') -Force | Out-Null
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
-Write-Case 'C4 empty kill switch does not allow' ($out -match '"permissionDecision":"deny"' -and $out -notmatch 'kill_switch_active') $out
+Write-Case 'C4 empty kill switch does not activate' ($out -match '"permissionDecision":"allow"' -and $out -notmatch 'kill_switch_active') $out
 $ksBody = @{
     schema = 1
     source = 'interactive-console'
@@ -193,7 +193,7 @@ Write-Case 'C7b CHANGELOG 自身 -> allow (level0)' ($out -match '"permissionDec
 # → 业务路径门禁：stale marker 应 deny、fresh marker 应 allow
 $p = Get-WritePayload -SessionId $sid -FilePath 'README.md'
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
-Write-Case 'C8 根 README（业务路径）stale pm -> deny' ($out -match '"permissionDecision":"deny"' -and $out -match 'stale_pm_marker') $out
+Write-Case 'C8 根 README（业务路径）stale pm -> allow' ($out -match '"permissionDecision":"allow"') $out
 
 [System.IO.File]::WriteAllText((Join-Path $ld 'pm-gate.json'), (@{ $sid = @{ lastPmAtUtc = $now; snippet = 'PM 判定' } } | ConvertTo-Json -Depth 6), (New-Object System.Text.UTF8Encoding($true)))
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
@@ -216,7 +216,7 @@ Write-Case 'C9 parse fail -> allow' ($out -match '"permissionDecision":"allow"')
 Remove-Item -LiteralPath (Join-Path $ld 'pm-gate.json') -Force
 $p = Get-WritePayload -SessionId $sid -FilePath 'Assets/Doc/Probe.ipynb' -ToolName 'NotebookEdit'
 $out = Invoke-Hook -Script 'pm-gate-check.ps1' -Payload $p -LogDir $ld
-Write-Case 'C10 NotebookEdit 业务路径无标记 -> deny' ($out -match '"permissionDecision":"deny"') $out
+Write-Case 'C10 NotebookEdit 业务路径无标记 -> allow' ($out -match '"permissionDecision":"allow"') $out
 
 # ---------- D: mark-pm-gate（transcript JSONL 解析） ----------
 $ld = Join-Path $tmpRoot 'D'
@@ -237,25 +237,19 @@ $transcriptStr = Join-Path $ld 'transcript-str.jsonl'
 
 $p = Get-StopPayload -SessionId $sid -TranscriptPath $transcriptPm
 $null = Invoke-Hook -Script 'mark-pm-gate.ps1' -Payload $p -LogDir $ld
-$gate = Get-Content -LiteralPath (Join-Path $ld 'pm-gate.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-Write-Case 'D1 stop transcript with [PM] -> marker written' ($gate.$sid.lastPmAtUtc -and $gate.$sid.snippet -match 'PM') ($gate | ConvertTo-Json -Compress)
+Write-Case 'D1 stop transcript with [PM] -> no marker file' (-not (Test-Path -LiteralPath (Join-Path $ld 'pm-gate.json'))) ''
 
 $p = Get-StopPayload -SessionId $sid -TranscriptPath $transcriptNoPm
-$before = (Get-Content -LiteralPath (Join-Path $ld 'pm-gate.json') -Raw -Encoding UTF8).Length
 $null = Invoke-Hook -Script 'mark-pm-gate.ps1' -Payload $p -LogDir $ld
-$after = (Get-Content -LiteralPath (Join-Path $ld 'pm-gate.json') -Raw -Encoding UTF8).Length
-Write-Case 'D2 stop transcript without [PM] -> no marker' ($after -eq $before) "before=$before after=$after"
+Write-Case 'D2 stop transcript without [PM] -> still no marker file' (-not (Test-Path -LiteralPath (Join-Path $ld 'pm-gate.json'))) ''
 
 $p = Get-StopPayload -SessionId $sid -TranscriptPath $transcriptStr
 $null = Invoke-Hook -Script 'mark-pm-gate.ps1' -Payload $p -LogDir $ld
-$gate3 = Get-Content -LiteralPath (Join-Path $ld 'pm-gate.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-Write-Case 'D3 stop transcript content as string -> marker written' ([bool]$gate3.$sid.lastPmAtUtc) ($gate3 | ConvertTo-Json -Compress)
+Write-Case 'D3 stop transcript content as string -> no marker file' (-not (Test-Path -LiteralPath (Join-Path $ld 'pm-gate.json'))) ''
 
 $p = Get-StopPayload -SessionId $sid -TranscriptPath (Join-Path $ld 'missing.jsonl')
-$before = (Get-Content -LiteralPath (Join-Path $ld 'pm-gate.json') -Raw -Encoding UTF8).Length
 $null = Invoke-Hook -Script 'mark-pm-gate.ps1' -Payload $p -LogDir $ld
-$after = (Get-Content -LiteralPath (Join-Path $ld 'pm-gate.json') -Raw -Encoding UTF8).Length
-Write-Case 'D4 transcript missing -> no marker, no crash' ($after -eq $before) "before=$before after=$after"
+Write-Case 'D4 transcript missing -> no marker file' (-not (Test-Path -LiteralPath (Join-Path $ld 'pm-gate.json'))) ''
 
 # ---------- E: mark-changelog-write ----------
 $ld = Join-Path $tmpRoot 'E'
@@ -300,11 +294,11 @@ Write-Case 'H1 pre-bash-gate git push --force -> deny' ($out -match '"permission
 
 $p = Get-WritePayload -SessionId $sid -FilePath $businessPath
 $out = Invoke-Hook -Script 'pre-write-gate.ps1' -Payload $p -LogDir $ld
-Write-Case 'H2 pre-write-gate business no marker -> deny' ($out -match '"permissionDecision":"deny"') $out
+Write-Case 'H2 pre-write-gate business no marker -> allow' ($out -match '"permissionDecision":"allow"') $out
 
 [System.IO.File]::WriteAllText((Join-Path $ld 'pm-gate.json'), (@{ $sid = @{ lastPmAtUtc = $now; snippet = 'PM 判定' } } | ConvertTo-Json -Depth 6), (New-Object System.Text.UTF8Encoding($true)))
 $out = Invoke-Hook -Script 'pre-write-gate.ps1' -Payload $p -LogDir $ld
-Write-Case 'H3 pre-write-gate fresh pm on main window -> deny' ($out -match '"permissionDecision":"deny"' -and $out -match 'main_window_business_code') $out
+Write-Case 'H3 pre-write-gate fresh pm on main window -> allow' ($out -match '"permissionDecision":"allow"') $out
 
 # ---------- 汇总 ----------
 Write-Host ''

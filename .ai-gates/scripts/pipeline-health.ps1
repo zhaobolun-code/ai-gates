@@ -137,6 +137,7 @@ function Get-LastMatchTime {
 $pmGate = Read-MarkFile -Path (Join-Path $logDir "pm-gate.json") -SourceFieldName "sourceField"
 $cw = Read-MarkFile -Path (Join-Path $logDir "changelog-writes.json")
 $denyCount = Count-LogLines -Path (Join-Path $logDir "pm-gate-check.log") -Pattern "DENY|deny"
+$auditCount = Count-LogLines -Path (Join-Path $logDir "write-audit.log") -Pattern "\|"
 $parseFailMarkPm = Count-LogLines -Path (Join-Path $logDir "mark-pm-gate.log") -Pattern "PARSE_FAIL"
 $parseFailMarkCw = Count-LogLines -Path (Join-Path $logDir "mark-changelog-write.log") -Pattern "PARSE_FAIL"
 $parseFailMarkPm12 = Count-LogLines -Path (Join-Path $logDir "mark-pm-gate.log") -Pattern "PARSE_FAIL" -SinceUtc $since12h
@@ -150,10 +151,10 @@ $killSwitch = Test-KillSwitchActive -FilePath $killSwitchPath
 # 退化信号判定
 $signals = @()
 $level = "OK"
-if ($pmGate.Total -lt 0 -or $cw.Total -lt 0) {
-    $signals += "CRIT D1a 打点文件损坏（pm-gate.json / changelog-writes.json 解析失败）"; $level = "CRIT"
-} elseif (-not (Test-Path -LiteralPath (Join-Path $logDir "pm-gate.json")) -or -not (Test-Path -LiteralPath (Join-Path $logDir "changelog-writes.json"))) {
-    $signals += "CRIT D1 打点文件缺失：门禁退化为 fail-open/初始态"; $level = "CRIT"
+if ($cw.Total -lt 0) {
+    $signals += "CRIT D1a 变更日志打点文件损坏（changelog-writes.json 解析失败）"; $level = "CRIT"
+} elseif (-not (Test-Path -LiteralPath (Join-Path $logDir "changelog-writes.json"))) {
+    $signals += "CRIT D1 变更日志打点文件缺失：技能包改动会按初始态拒绝"; $level = "CRIT"
 }
 $parseFailTotal = $parseFailMarkPm + $parseFailMarkCw
 $parseFail12h = $parseFailMarkPm12 + $parseFailMarkCw12
@@ -172,16 +173,11 @@ if ($killSwitchExists -and -not $killSwitch) {
 if ($killSwitch) {
     $signals += "INFO D5 kill switch 已确认：门禁被人工禁用（豁免期内不判退化）"
 }
-if (-not $killSwitch -and ($pmGate.Recent -gt 0 -or $cw.Recent -gt 0)) {
-    if ($denyCount -eq 0) {
-        $signals += "WARN D2 近 $Days 天有打点但门禁 deny=0：门禁可能未接线或全豁免（机制形同虚设仍当已生效）"; if ($level -ne "CRIT") { $level = "WARN" }
-    }
-}
-if ($pmGate.Recent -eq 0 -and $cw.Recent -eq 0 -and $denyCount -eq 0 -and -not $killSwitch) {
-    $signals += "CRIT D4 近 $Days 天打点与 deny 全为 0：hook 链路全静默（hooks.json 未接线或 Cursor 侧失效）"; $level = "CRIT"
+if ($auditCount -eq 0 -and $cw.Recent -eq 0 -and $denyCount -eq 0 -and -not $killSwitch) {
+    $signals += "CRIT D4 近 $Days 天没有写入审计、变更日志和拒绝：hook 链路全静默（hooks.json 未接线或 Cursor 侧失效）"; $level = "CRIT"
 }
 if ($signals.Count -eq 0) {
-    $signals += "OK 近 $Days 天无退化信号：打点正常、门禁有触发、链路稳定"
+    $signals += "OK 近 $Days 天无退化信号"
 }
 if ($codexWrite -eq 0) {
     $signals += "INFO D6 近 $Days 天 Codex 桌面拦截未证实：write-audit 无 apply_patch。不因此改退出码"
@@ -212,7 +208,7 @@ if ($JsonOutput) {
     $md = @()
     $md += "# 流水线体检（近 $Days 天 · $([DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm:ss'))Z）"
     $md += ""
-    $md += "## [PM] 打点（pm-gate.json）"
+    $md += "## 旧 [PM] 打点（已停写，pm-gate.json）"
     $md += "- 会话数：$($pmGate.Total)（近 $Days 天 $($pmGate.Recent)）· 最近：$latestPmStr"
     $md += "- 来源分布：$fieldSummary"
     $md += ""

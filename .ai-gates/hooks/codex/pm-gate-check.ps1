@@ -1,6 +1,7 @@
 ﻿# pm-gate-check.ps1 -- Codex
 # Reads stdin and emits hook JSON. Allow omits permissionDecision.
 # Deny and allow decisions live in gate-decision.ps1.
+# business_write：业务路径不查 [PM] 打点。
 
 param(
     [string]$LogDir = ""

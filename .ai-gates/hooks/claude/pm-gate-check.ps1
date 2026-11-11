@@ -1,6 +1,7 @@
 ﻿# pm-gate-check.ps1 -- Claude Code
 # Reads stdin and emits permissionDecision JSON.
 # Deny and allow decisions live in gate-decision.ps1.
+# business_write：业务路径不查 [PM] 打点。
 
 param(
     [string]$LogDir = ""

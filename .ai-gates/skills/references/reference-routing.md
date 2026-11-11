@@ -4,7 +4,7 @@
 
 ## 默认读取预算
 
-1. **基线**：`agent-entry-route.md` + `.cursor/project-context.md`（若有）+ 当前岗 `SKILL.md` checklist；**CORE 全文不在基线**。每轮写给人看的话另读 `human-voice.md`，不占下面的 1～2 份名额。
+1. **基线**：`agent-entry-route.md` + `.cursor/project-context.md` 的「先读哪一节」及它点名的节（若有）+ 当前岗 `SKILL.md` checklist；**整份项目说明不进基线**；**CORE 全文不在基线**。每轮写给人看的话另读 `human-voice.md`，不占下面的 1～2 份名额。
 2. **任务白名单**：当前 `未完成.md` / Mandatory、模块 README 风险短段、真实源码/diff、命中的 lessons 行、**有则整节装载的认知卡片**（project-context「热路径认知卡片 / 代码认知卡片」）；这些不是 reference 预算，不得为省 Token 跳过。
 3. **Reference**：每个阶段默认最多点名 1～2 份；新需要出现时优先替换已完成用途的 reference，不累积整包。确有硬规则冲突可超出，但交接须写理由与文件名。
 
@@ -19,7 +19,7 @@
 | A# / Delta / 结案收敛 | `acceptance-and-delta.md`；窗口超长再加 `doc-windowing.md` |
 | L1.5/L2/L3 隔离 | `isolated-review.md`；派发版本问题再加 `review-dispatch-lifecycle.md` |
 | 派岗选模型 / 贵便宜路由 | `model-routing.md`（可与 isolated-review 二选一加载） |
-| 测挂 L0 / 签收待准错题 / 错题大纲 | `lessons-learned.md`（含 §错题大纲）；项目文件 `.ai-gates/lessons-outline.md` |
+| 开方案 / 热修 / 测挂 L0 / 签收待准错题 | `lessons-learned.md`（含 §错题大纲）；项目文件 `.ai-gates/lessons-outline.md`。问句和点名改法不扫 |
 | 签收可复用结构 / CR 未入表真锚点 / 点名「模式沉淀」 | `pattern-harvest.md` |
 | 写 ≥2 Step 契约 / 点名「电路子窗」 | `circuit-windows.md`（含战役模式；加载 ≠ 减 CR） |
 | 改当前文档窗须读迷雾卡片 + 一度边 / 写方案复用四问「已有吗」/ 问下一窗或文档怎么连 | `fog-map-structure.md`（仅开窗/改邻接/签收；未读邻边不得自称已按 5.0.0 合规；出图仅开窗或签收问一次；已有图可给策划/程序结构面；直通账本只在 `.ai-gates/Doc/直通文档/` 查找；挂钉不占格；加载 ≠ 每轮灌整图；Express 机械改 / 纯代码热修 / 战役中刀只实现 → 不读） |
@@ -104,7 +104,7 @@
 | 止损和热度对照 | `stop-loss-heat-compare.md` |
 | 技术负责人接入 | `tl-onboarding.md` |
 | 对人说话 | `user-visible-states.md` |
-| 每轮给人看的话（已在基线，不另占名额）；周报只删腔、不改骨架 | `human-voice.md` |
+| 每轮给人看的话（已在基线，不另占名额）；周报骨架和删腔见周报模板 | `human-voice.md` |
 | 点名执行文档黄金样例 | `执行文档黄金样例.md` |
 
 ## 按岗加载

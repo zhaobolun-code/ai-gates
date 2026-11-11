@@ -338,6 +338,16 @@ try {
             $exitCode = 1
         }
 
+        Write-Host "`n--- project-context 补节回归 ---" -ForegroundColor Cyan
+        $testContextPath = Join-Path $scriptDir "test-ensure-project-context-sections.ps1"
+        if (Test-Path -LiteralPath $testContextPath) {
+            & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $testContextPath
+            if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
+        } else {
+            Write-Host "test-ensure-project-context-sections.ps1 missing" -ForegroundColor Red
+            $exitCode = 1
+        }
+
         Write-Host "`n--- PM scripts (CheckScripts) ---" -ForegroundColor Cyan
         $requiredScripts = @(
             "pipeline-doc-parse.ps1",

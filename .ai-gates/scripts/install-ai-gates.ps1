@@ -276,6 +276,12 @@ if (-not $NoLink) {
     }
 }
 
+$ensureScript = Join-Path $targetLib "scripts\ensure-project-context-sections.ps1"
+if (Test-Path -LiteralPath $ensureScript) {
+    & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $ensureScript -RepoRoot $TargetRoot
+    if ($LASTEXITCODE -ne 0) { throw "ensure-project-context-sections failed: $LASTEXITCODE" }
+}
+
 $info = [ordered]@{
     source       = $Source
     tag          = $Tag

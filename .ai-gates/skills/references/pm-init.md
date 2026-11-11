@@ -28,7 +28,7 @@
 - 已有 `.codegraph/` 或 `codegraph` CLI 可用 → 记「已就绪」，提示必要时重载 Cursor（Codex 用户重开会话）。
    - 未安装 → **先征得用户同意**，再执行 `codegraph install --platform cursor` 与 `codegraph init`；失败则给出手动命令与 [codegraph-probe.md](./codegraph-probe.md)。
 6. 输出白话汇总：**已完成 / 跳过 / 失败 / 仍须你填**。模型路由未答时，汇总里必须带上那一句询问。
-7. **你下一步**：模型路由仍是占位时，下一动作就是等用户回答并写入，不要先开工。已答或已有 slug 后，再引导编辑技术栈、车道升级表、至少 1～2 条回归索引，填完后跑 `sync-regression-index.ps1`；然后可用 `PM + 需求` 开工。**车道升级表**是提示路径、**不封车道**（与 CORE §四车道判定同步）：未初始化前 PM 默认 Direct（≤3 文件、无 API/存档/跨模块）；Express 仅机械且恰好 1 个业务源文件；有行为即使 1 文件 → Direct；>3 或 API/存档/跨模块 → Standard。禁止把车道升级表写成「最低 Standard」。
+7. **你下一步**：模型路由仍是占位时，下一动作就是等用户回答并写入，不要先开工。已答或已有 slug 后，再引导编辑技术栈、车道升级表、至少 1～2 条回归索引，填完后跑 `sync-regression-index.ps1`；然后可用 `PM + 需求` 开工。**车道升级表**是提示路径、**不封车道**（与 CORE §四车道判定同步）：少于 3 个文件且不设计核心逻辑 → Express；3 个及以上或设计核心逻辑 → Direct；API/存档/跨模块 → Standard。禁止把车道升级表写成「最低 Standard」。禁止仅因文件数 ≥3 就写成 Standard。
 
 ## 用户可见输出（强制）
 

@@ -57,7 +57,7 @@ function Get-CursorInputPaths {
     return @()
 }
 
-# parse_failed_fail_open：解析失败仍放行。window_pm_not_this_turn：120 分钟窗口不是本条判定。
+# parse_failed_fail_open：解析失败仍放行。business_write：业务路径不查 [PM] 打点。
 function Emit-Deny {
     param([string]$ConversationId, [string]$Detail, [string]$UserMessage)
     Write-Audit "DENY conversation=$ConversationId detail=$Detail"

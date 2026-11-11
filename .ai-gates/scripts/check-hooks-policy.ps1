@@ -104,8 +104,8 @@ function Get-HooksPolicyReport {
         if ($pmGateRaw -notmatch 'parse_failed_fail_open' -and $pmGateRaw -notmatch 'fail-open') {
             $issues.Add("pm-gate-check must fail-open on parse errors") | Out-Null
         }
-        if ($pmGateRaw -notmatch 'window_pm_not_this_turn') {
-            $issues.Add("pm-gate-check must name window_pm_not_this_turn (120-min window is not this_turn_pm)") | Out-Null
+        if ($pmGateRaw -notmatch 'business_write') {
+            $issues.Add("pm-gate-check must name business_write (business paths are not gated on a [PM] stamp)") | Out-Null
         }
     }
 

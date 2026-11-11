@@ -80,7 +80,7 @@ $blocked = @($blocks | ForEach-Object { $_.Path })
 $blockedReasons = @($blocks | ForEach-Object { $_.Reason })
 
 if ($blocked.Count -gt 0) {
-    $hint = "逃生：先在本会话回复中发出 [PM] 标记（设施路径则先写 CHANGELOG），待 Stop hook 打点后重试；或$(Get-KillSwitchEscapeHint) 或改用 Write/Edit 走常规写门禁。"
+    $hint = "逃生：设施路径先写 .ai-gates/CHANGELOG.md。授权状态文件和 kill switch 不要从终端写。或$(Get-KillSwitchEscapeHint) 或改用 Write/Edit 走常规写门禁。"
     Write-HookAudit -LogDir $LogDir -FileName 'bash-write-gate.log' -Line ("DENY session={0} paths={1} reasons={2}" -f $sessionId, ($blocked -join ','), ($blockedReasons -join ','))
     Write-Output (Emit-PreToolUseDeny -Reason ("Bash write gate deny: explicit file write to {0} without {1}. {2}" -f ($blocked -join ', '), ($blockedReasons -join ', '), $hint))
     return

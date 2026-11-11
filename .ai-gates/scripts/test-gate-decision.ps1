@@ -51,7 +51,7 @@ Assert-Decision 'cursor path is infra' (Test-InfraWritePath -FilePath '.cursor/h
 Assert-Decision 'claude path needs the switch' ((-not (Test-InfraWritePath -FilePath '.claude/settings.json')) -and (Test-InfraWritePath -FilePath '.claude/settings.json' -IncludeClaude)) ''
 
 $deny = Get-ShellWriteBlocks -Paths @('Assets/Foo.cs') -HasFreshPm $false -HasFreshChangelog $false
-Assert-Decision 'business without pm blocks' ($deny.Count -eq 1 -and $deny[0].Reason -eq 'business_no_fresh_pm') "count=$($deny.Count)"
+Assert-Decision 'business without pm allows' ($deny.Count -eq 0) "count=$($deny.Count)"
 $ok = Get-ShellWriteBlocks -Paths @('Assets/Foo.cs') -HasFreshPm $true -HasFreshChangelog $false
 Assert-Decision 'business with pm allows' ($ok.Count -eq 0) "count=$($ok.Count)"
 $gen = Get-ShellWriteBlocks -Paths @('.ai-gates/tmp/x.txt') -HasFreshPm $false -HasFreshChangelog $false
@@ -68,7 +68,11 @@ $infra = Get-ShellWriteBlocks -Paths @('.cursor/skills/a.md') -HasFreshPm $true 
 Assert-Decision 'infra without changelog blocks' ($infra.Count -eq 1 -and $infra[0].Reason -eq 'infra_no_recent_changelog') "count=$($infra.Count)"
 
 $await = '{"awaitingHumanTest":true,"window":"w","acceptance":"A1","symptom":"left still full","hotfixCount":0,"lane":"Direct","hotfixLane":"Direct"}'
-Assert-Decision 'awaiting human test blocks cs' ((Get-KnifeBusinessDeny -FilePath 'Assets/Foo.cs' -StateJson $await) -eq 'awaiting_human_test') ''
+Assert-Decision 'awaiting human test does not block cs' ((Get-KnifeBusinessDeny -FilePath 'Assets/Foo.cs' -StateJson $await) -eq $null) ''
+$mainEdit = Get-WriteGateVerdict -HostName cursor -Paths @('Assets/Foo.cs') -GateState Ok -OwnPm Fresh
+Assert-Decision 'fresh pm main window can edit cs' ($mainEdit.Allow -and $mainEdit.Detail -eq 'business_write') $mainEdit.Detail
+$noStampEdit = Get-WriteGateVerdict -HostName cursor -Paths @('Assets/Foo.cs') -GateState Missing -OwnPm Missing
+Assert-Decision 'missing pm still allows business cs' ($noStampEdit.Allow -and $noStampEdit.Detail -eq 'business_write') $noStampEdit.Detail
 Assert-Decision 'awaiting human test ignores md' ((Get-KnifeBusinessDeny -FilePath 'README.md' -StateJson $await) -eq $null) ''
 $second = '{"awaitingHumanTest":false,"window":"w","acceptance":"A1","symptom":"left still full","hotfixCount":1,"lane":"Direct","hotfixLane":"Direct"}'
 Assert-Decision 'second hotfix still allows' ((Get-KnifeBusinessDeny -FilePath 'Assets/Foo.cs' -StateJson $second) -eq $null) ''
@@ -116,13 +120,13 @@ Assert-Decision 'stamp path recognized' (Test-CrStampPath -FilePath '.ai-gates/h
 Assert-Decision 'main window cannot write stamp' ((Get-CrStampDeny -FilePath '.ai-gates/hooks-log/cr-stamp.json' -IsMainWindow $true) -eq 'cr_stamp_main_window') ''
 Assert-Decision 'reviewer can write stamp' ((Get-CrStampDeny -FilePath '.ai-gates/hooks-log/cr-stamp.json' -IsMainWindow $false) -eq $null) ''
 $cursorMiss = Get-WriteGateVerdict -HostName cursor -Paths @('Assets/Foo.cs') -GateState Missing -OwnPm Missing
-Assert-Decision 'cursor missing gate uses conversation code' ((-not $cursorMiss.Allow) -and $cursorMiss.Detail -eq 'gate_file_missing') $cursorMiss.Detail
+Assert-Decision 'cursor missing gate still allows business cs' ($cursorMiss.Allow -and $cursorMiss.Detail -eq 'business_write') $cursorMiss.Detail
 $claudeParse = Get-WriteGateVerdict -HostName claude -Paths @('Assets/Foo.cs') -ParseFailed $true -OwnPm Fresh
-Assert-Decision 'claude parse fail keeps its code' ((-not $claudeParse.Allow) -and $claudeParse.Detail -eq 'parse_failed_business_code' -and $claudeParse.Message.Contains('main_window_business_code')) $claudeParse.Detail
+Assert-Decision 'claude parse fail stays open' ($claudeParse.Allow -and $claudeParse.Detail -eq 'parse_failed_fail_open') $claudeParse.Detail
 $cursorParse = Get-WriteGateVerdict -HostName cursor -Paths @('Assets/Foo.cs') -ParseFailed $true -OwnPm Fresh
-Assert-Decision 'cursor parse fail stays main window code' ((-not $cursorParse.Allow) -and $cursorParse.Detail -eq 'main_window_business_code') $cursorParse.Detail
+Assert-Decision 'cursor parse fail stays open' ($cursorParse.Allow -and $cursorParse.Detail -eq 'parse_failed_fail_open') $cursorParse.Detail
 $rootReadme = Get-WriteGateVerdict -HostName cursor -Paths @('README.md') -GateState Ok -OwnPm Fresh
-Assert-Decision 'root readme is not facility' ($rootReadme.Allow -and $rootReadme.Detail -eq 'window_pm_not_this_turn') $rootReadme.Detail
+Assert-Decision 'root readme is not facility' ($rootReadme.Allow -and $rootReadme.Detail -eq 'business_write') $rootReadme.Detail
 $stamp = Get-WriteGateVerdict -HostName cursor -Paths @('.ai-gates/hooks-log/cr-stamp.json') -OwnPm Fresh
 Assert-Decision 'verdict blocks main window stamp' ((-not $stamp.Allow) -and $stamp.Detail -eq 'cr_stamp_main_window') $stamp.Detail
 $planDispatch = 'Assets/LabSDK/证据/_方案审核派发.md'
@@ -190,9 +194,9 @@ $installLocal = Join-Path (Split-Path $PSScriptRoot -Parent) (($installUrl.Group
 Assert-Decision 'readme install url matches the script' ($installUrl.Success -and (Test-Path -LiteralPath $installLocal)) $installUrl.Value
 Assert-Decision 'other hooks-log file is not the stamp' (-not (Test-CrStampPath -FilePath '.ai-gates/hooks-log/pm-gate.json')) ''
 $noParent = Get-WriteGateVerdict -HostName cursor -Paths @('Assets/Foo.cs') -GateState Ok -OwnPm Missing
-Assert-Decision 'no parent tells this session to emit PM' ((-not $noParent.Allow) -and $noParent.Detail -eq 'no_pm_marker_for_conversation' -and $noParent.Message.Contains('先在本会话回复中发出')) $noParent.Detail
+Assert-Decision 'no parent can still edit cs' ($noParent.Allow -and $noParent.Detail -eq 'business_write' -and -not $noParent.Message.Contains('先在本会话回复中发出')) $noParent.Detail
 $parentDeny = Get-WriteGateVerdict -HostName cursor -Paths @('Assets/Foo.cs') -GateState Ok -OwnPm Missing -ParentId 'parent-1'
-Assert-Decision 'child deny does not tell the child to emit PM' ((-not $parentDeny.Allow) -and $parentDeny.Detail -eq 'parent_pm_not_marked' -and $parentDeny.Message.Contains('子窗不要发') -and -not $parentDeny.Message.Contains('先在本会话回复中发出')) $parentDeny.Detail
+Assert-Decision 'child can edit cs without a parent stamp' ($parentDeny.Allow -and $parentDeny.Detail -eq 'business_write' -and -not $parentDeny.Message.Contains('子窗不要发')) $parentDeny.Detail
 $cursorReadme = Get-WriteGateVerdict -HostName cursor -Paths @('.cursor/README.md') -ChangelogState Missing
 Assert-Decision 'cursor readme stays level2' ($cursorReadme.Allow) $cursorReadme.Detail
 $cursorAiReadme = Get-WriteGateVerdict -HostName cursor -Paths @('.ai-gates/README.md') -ChangelogState Missing
