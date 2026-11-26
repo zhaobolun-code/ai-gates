@@ -529,7 +529,7 @@ try {
             elseif ($hooksSecStart -ge 0 -and $maintainerLines[$i] -match '^## ') { $hooksSecEnd = $i; break }
         }
         $hookTableRows = @($maintainerLines[$hooksSecStart..($hooksSecEnd - 1)] | Where-Object { $_ -match '^\|' -and $_ -match '\.ps1' })
-        Assert-Test "A1.6 MAINTAINER: hooks table has 9 rows incl. pre-write-gate" ($hooksSecStart -ge 0 -and $hookTableRows.Count -eq 9 -and $maintainerRaw -match 'pre-write-gate' -and $maintainerRaw -match 'task-model-gate') "rows=$($hookTableRows.Count)"
+        Assert-Test "A1.6 MAINTAINER: hooks table has 10 rows incl. pre-write-gate" ($hooksSecStart -ge 0 -and $hookTableRows.Count -eq 10 -and $maintainerRaw -match 'pre-write-gate' -and $maintainerRaw -match 'task-model-gate' -and $maintainerRaw -match 'collect-instability-prompt') "rows=$($hookTableRows.Count)"
     }
 
     # A7：sessionStart 漂移检测 — 当前仓应无漂移；stdout 为 {} 或无可解析 additional_context

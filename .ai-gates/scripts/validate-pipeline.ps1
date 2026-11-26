@@ -36,7 +36,7 @@ try {
         exit 1
     }
     $pipelineVersion = (Get-Content -LiteralPath $versionPath -Raw).Trim()
-    if (-not (Test-OfficialVersion -Version $pipelineVersion)) {
+    if (-not (Test-AcceptedPackVersion -Version $pipelineVersion)) {
         Write-Host "invalid VERSION: $pipelineVersion" -ForegroundColor Red
         exit 1
     }

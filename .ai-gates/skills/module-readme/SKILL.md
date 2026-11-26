@@ -21,7 +21,7 @@ description: 维护模块 README 与版本记录。用户说「文档」「更�
 
 ## 模型路由 + 子窗
 
-`readme: docs` 时本岗**必须子窗**（便宜快速模型）；禁止主窗切 `[docs]` 后直接改 README 结构。`dev-one-liner` 随实现子窗。细则 → [model-routing.md](../references/model-routing.md)。
+`readme: docs` 时本岗**必须子窗**（便宜快速模型）；禁止主窗切 `[docs]` 后直接改 README 结构。`dev-one-liner` 随实现的那一窗（Express 和 Direct 是主窗）。细则 → [model-routing.md](../references/model-routing.md)。
 
 ## 何时须本岗（与 [readme-dispatch.md](../references/readme-dispatch.md) 一致）
 

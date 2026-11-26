@@ -44,7 +44,7 @@ if (-not $UserCachePath) { $UserCachePath = Join-Path $HOME '.ai-gates-cache' }
 . (Join-Path $PSScriptRoot 'install-tree.ps1')
 function Get-Semver {
     param([string]$Version)
-    return Get-OfficialSemver -Version $Version
+    return Get-PackSemver -Version $Version
 }
 
 function Compare-Semver {

@@ -104,12 +104,12 @@
 | 熔断重审把 Standard 误升 Full | 车道漂移 | 按**当前车道**重审 |
 | Auto 跳过 Delta Spec；静默写 lessons；自动标 runtime-validated | 削弱 P1.5/证据 | 每 Step 保留 Delta/E4/人工签收；错题亦须「准」写主表 |
 | 把 lessons 全表灌进派发提示词 / CORE / 每轮 system | token 膨胀、偏置审查 | 只引用命中行；见 lessons-learned §检索 |
-| 自写自审冒充隔离主 CR；Auto 降 CR 档 | Maker/Checker 失效 | 非 Maker 隔离主 CR；Auto 不降档 |
+| 需隔离档位自写自审冒充隔离主 CR；Auto 降 review_tier | Maker/Checker 失效 | 普通 Standard L1 可主窗同会话复核并标「非独立 CR」；其他档按 [isolated-review.md](./isolated-review.md)；Auto 不得降 review_tier |
 | 主窗 PM 自跑验收剧本并冒充「隔离子窗已验」后抬升 `runtime-validated` | 假隔离、伪签收 | 须 Task 高规格 `mode=verify` 验收子窗；主窗不得代验抬升 |
 | 验收子窗缺 `model=` / 用实现档，或验收子窗改任何仓库交付物 | 验收不可信 / 控制面漂移 | 须显式高质量 `model=`；验收只读+临时目录剧本（见 verify-dispatch） |
 | Checker 自改派发工件 / 扫 `证据/**` / 用陈旧 revision 继续审 | 控制面漂移、伪独立 | 只读点名 `_…派发.md`；不符 → stale_dispatch；见 review-dispatch-lifecycle / handoff §I |
 | L3 第2轮携带第1轮结论；代码复审绑定旧 diff | 复核偏置 | 第2轮独立骨架；复审绑最新 diff + blocker≤20 |
-| 用方案 L3 / 同 Chat CR / 对抗 CR 替代隔离主 CR | Exit Gate 假通过 | 见共同 Exit Gate |
+| 用方案 L3 / 对抗 CR 替代需隔离档位的主 CR；把普通 Standard L1 同 Chat CR 冒称隔离 | Exit Gate 假通过 | 普通 Standard L1 按车道标「非独立 CR」；需隔离档位按共同 Exit Gate |
 
 ---
 
@@ -181,7 +181,7 @@
 | --- | --- | --- |
 | 用户跳过「项目经理」直接说「程序员」「策划」 | 绕过车道判定；无 express-slice / plan-lite 即改代码 | 问句先答。Express 点名改法同条改。标准道和完整道仍先有方案。直叫岗位名时先选车道 |
 | 各岗在问句里就创建/修改交付物 | 跳过车道与审核门禁 | 问句不改文件。Express 点名改法可以同条改。标准道和完整道仍先有方案 |
-| 主窗兼策划/程序员/CR/方案审/文档写改（有 Subagent 仍不派子窗） | 上下文共谋、模型路由失效、非独立冒充独立 | 主窗仅 PM；流水线非 PM 岗必须子窗（[model-routing.md](./model-routing.md)；**周报除外**）；降级须标「主窗执行（未开子窗 · 非独立）」 |
+| 主窗兼策划/方案审/文档结构改写，或需隔离的档位由主窗自审 | 上下文共谋、审核不独立 | Express 和 Direct 的业务改码由主窗做。标准道和完整道的实现仍派程序员子窗。方案审必须子窗；普通 Standard L1 可主窗同会话只读复核并标「非独立 CR」；Direct、Standard L1.5/L2、Full 与高风险 CR 按隔离规则派发（[isolated-review.md](./isolated-review.md)）；**周报除外** |
 | 实现/审核 Task 省略 `model` 或无视 project-context §模型路由 | 落到平台默认快模型、绕过项目偏好 | 按 [model-routing.md](./model-routing.md) 解析后显式传 `model=`；换模型须新开 Task |
 | 把项目专属模型 slug 写进通用 Skill | Skill 不可复用 | 偏好只进 `.cursor/project-context.md` §模型路由（[project-local-config.md](./project-local-config.md)） |
 | 用户未初始化 project-context 仍期望 Express 小改核心模块 | 误判车道、漏回归 | 冷启动保守 Standard；提示 TL 按 [USER-GUIDE.md](../../USER-GUIDE.md) §第一次接入 初始化 |

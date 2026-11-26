@@ -8,6 +8,13 @@
         "timeout": 10
       }
     ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/collect-instability-prompt.ps1",
+        "failClosed": false,
+        "timeout": 10
+      }
+    ],
     "sessionStart": [
       {
         "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/check-hooks-drift.ps1",

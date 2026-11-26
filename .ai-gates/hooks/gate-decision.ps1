@@ -170,14 +170,14 @@ function Get-ItemCmdletWritePaths {
 function Test-AuthScriptInvoke {
     param([string]$CommandText)
     if ([string]::IsNullOrWhiteSpace($CommandText)) { return $false }
-    return [bool]($CommandText -match '(?i)(?:^|[\s''"\\/])(?:mark-pm-gate|mark-changelog-write|set-knife-state|mark-human-tested|enable-kill-switch|disable-kill-switch)\.ps1\b')
+    return [bool]($CommandText -match '(?i)(?:^|[\s''"\\/])(?:mark-pm-gate|mark-changelog-write|set-knife-state|mark-human-tested|enable-kill-switch|disable-kill-switch|collect-instability-prompt|invalidate-instability-event|enable-instability-stop-write|disable-instability-stop-write)\.ps1\b')
 }
 
 function Test-GateAuthStatePath {
     param([string]$FilePath)
     if ([string]::IsNullOrWhiteSpace($FilePath)) { return $false }
     $norm = $FilePath -replace '\\', '/'
-    return [bool]($norm -match '(?i)(?:^|/)hooks-log/(pm-gate|changelog-writes|knife-state)\.json$')
+    return [bool]($norm -match '(?i)(?:^|/)hooks-log/(?:pm-gate\.json|changelog-writes\.json|knife-state\.json|instability-tasks\.json|instability-ledger\.jsonl|instability-stop-write\.json)$')
 }
 
 function Test-KillSwitchPath {
@@ -575,7 +575,7 @@ function Get-WriteGateVerdict {
 
     $authState = @($pathsIn | Where-Object { Test-GateAuthStatePath -FilePath $_ })
     if ($authState.Count -gt 0) {
-        $base = 'PM gate deny detail=gate_auth_state : pm-gate.json, changelog-writes.json, and knife-state.json are written by the hooks and the official scripts. Do not write them from the editor or an explicit shell redirect.'
+        $base = 'PM gate deny detail=gate_auth_state : pm-gate.json, changelog-writes.json, knife-state.json, instability-ledger.jsonl, instability-tasks.json, and instability-stop-write.json are written by the hooks and the official scripts. Do not write them from the editor or an explicit shell redirect.'
         return New-GateVerdict -Allow $false -Detail 'gate_auth_state' -Message (Complete-GateDeny -Detail 'gate_auth_state' -Base $base)
     }
 
@@ -776,13 +776,14 @@ function Resolve-WriteGateVerdictFromFiles {
     $parentFresh = $false
     $inheritReason = ''
     $needsParent = $false
-    if (-not $ParseFailed -and $gateState -eq 'Ok' -and $own -ne 'Fresh') {
+    if (-not $ParseFailed -and $gateState -eq 'Ok') {
         $clean = @($Paths | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
-        if ($clean.Count -eq 0) { $needsParent = $true }
+        if ($clean.Count -eq 0) { $needsParent = $own -ne 'Fresh' }
         else {
             foreach ($p in $clean) {
                 $cls = Get-WritePathClass -FilePath $p -IncludeClaude $IncludeClaude -RootReadmeIsFacility $RootReadmeIsFacility -RootDocsAreLevel1 $RootDocsAreLevel1
-                if ($cls -eq 'business') { $needsParent = $true }
+                if ($cls -eq 'stamp') { $needsParent = $true }
+                elseif (($cls -eq 'business') -and ($own -ne 'Fresh')) { $needsParent = $true }
             }
         }
     }
@@ -802,4 +803,369 @@ function Resolve-WriteGateVerdictFromFiles {
     $ageForVerdict = $ageMinutes
     if ($changelogStamp -eq 'Stale' -and $changelogAge -gt $ageForVerdict) { $ageForVerdict = $changelogAge }
     return Get-WriteGateVerdict -HostName $HostName -Paths $Paths -ParseFailed $ParseFailed -GateState $gateState -OwnPm $own -ChangelogState $changelogState -ChangelogStamp $changelogStamp -ParentHasFreshPm $parentFresh -ParentId $parentId -InheritReason $inheritReason -KnifeJson $knife -IncludeClaude $IncludeClaude -RootReadmeIsFacility $RootReadmeIsFacility -RootDocsAreLevel1 $RootDocsAreLevel1 -AgeMinutes $ageForVerdict
+}
+
+$script:ShapeRejectCompareMessage = '形状拒绝：局部变量的赋值已改，后面的运算仍使用未改的操作数。'
+$script:ShapeRejectConditionMessage = '形状拒绝：if 条件里的成员已去掉，该成员的声明还在。'
+
+function Test-ShapeRejectWorktreePath {
+    param([string]$FilePath)
+    if ([string]::IsNullOrWhiteSpace($FilePath)) { return $false }
+    $norm = $FilePath -replace '\\', '/'
+    return [bool]($norm -match '(?i)(^|/)Chemical-p0c-s\d+-stub(/|$)')
+}
+
+function Get-ShapeExecutableText {
+    param([string]$Text)
+    if ([string]::IsNullOrEmpty($Text)) { return '' }
+    $sb = New-Object System.Text.StringBuilder
+    $i = 0
+    $n = $Text.Length
+    while ($i -lt $n) {
+        $c = $Text[$i]
+        $next = if (($i + 1) -lt $n) { $Text[$i + 1] } else { [char]0 }
+        if ($c -eq '/' -and $next -eq '/') {
+            while ($i -lt $n -and $Text[$i] -ne "`n") { $i++ }
+            continue
+        }
+        if ($c -eq '/' -and $next -eq '*') {
+            $i += 2
+            while (($i + 1) -lt $n -and -not ($Text[$i] -eq '*' -and $Text[$i + 1] -eq '/')) { $i++ }
+            if (($i + 1) -lt $n) { $i += 2 } else { $i = $n }
+            [void]$sb.Append(' ')
+            continue
+        }
+        if ($c -eq '@' -and $next -eq '"') {
+            $i += 2
+            while ($i -lt $n) {
+                if ($Text[$i] -eq '"') {
+                    if (($i + 1) -lt $n -and $Text[$i + 1] -eq '"') { $i += 2; continue }
+                    $i++
+                    break
+                }
+                $i++
+            }
+            [void]$sb.Append(' ')
+            continue
+        }
+        if ($c -eq '"') {
+            $i++
+            while ($i -lt $n) {
+                if ($Text[$i] -eq '\') { $i += 2; continue }
+                if ($Text[$i] -eq '"') { $i++; break }
+                $i++
+            }
+            [void]$sb.Append(' ')
+            continue
+        }
+        if ($c -eq "'") {
+            $i++
+            while ($i -lt $n) {
+                if ($Text[$i] -eq '\') { $i += 2; continue }
+                if ($Text[$i] -eq "'") { $i++; break }
+                $i++
+            }
+            [void]$sb.Append(' ')
+            continue
+        }
+        [void]$sb.Append($c)
+        $i++
+    }
+    return $sb.ToString()
+}
+
+function Get-ShapeMethods {
+    param([string]$Executable)
+    $found = New-Object System.Collections.Generic.List[object]
+    if ([string]::IsNullOrEmpty($Executable)) { return $found }
+    $n = $Executable.Length
+    $i = 0
+    $cursor = 0
+    while ($i -lt $n) {
+        if ($Executable[$i] -ne '{') { $i++; continue }
+        $j = $i - 1
+        while ($j -ge 0 -and [char]::IsWhiteSpace($Executable[$j])) { $j-- }
+        if ($j -lt 0 -or $Executable[$j] -ne ')') { $i++; continue }
+        $depth = 0
+        $k = $j
+        $matched = $false
+        while ($k -ge 0) {
+            if ($Executable[$k] -eq ')') { $depth++ }
+            elseif ($Executable[$k] -eq '(') {
+                $depth--
+                if ($depth -eq 0) { $matched = $true; break }
+            }
+            $k--
+        }
+        if (-not $matched) { $i++; continue }
+        $depth = 1
+        $p = $i + 1
+        while ($p -lt $n -and $depth -gt 0) {
+            if ($Executable[$p] -eq '{') { $depth++ }
+            elseif ($Executable[$p] -eq '}') { $depth-- }
+            $p++
+        }
+        if ($depth -ne 0) { break }
+        $sig = ([regex]::Replace($Executable.Substring($cursor, $i - $cursor), '\s+', ' ')).Trim()
+        $bodyLen = ($p - 1) - ($i + 1)
+        $body = if ($bodyLen -gt 0) { $Executable.Substring($i + 1, $bodyLen) } else { '' }
+        $found.Add([pscustomobject]@{ Sig = $sig; Body = $body }) | Out-Null
+        $cursor = $p
+        $i = $p
+    }
+    return $found
+}
+
+function Split-ShapeStatements {
+    param([string]$Body)
+    $parts = New-Object System.Collections.Generic.List[string]
+    if ([string]::IsNullOrEmpty($Body)) { return $parts }
+    $sb = New-Object System.Text.StringBuilder
+    $paren = 0
+    $brace = 0
+    foreach ($ch in $Body.ToCharArray()) {
+        if ($ch -eq '(') { $paren++ }
+        elseif ($ch -eq ')' -and $paren -gt 0) { $paren-- }
+        elseif ($ch -eq '{') { $brace++ }
+        elseif ($ch -eq '}' -and $brace -gt 0) { $brace-- }
+        if ($ch -eq ';' -and $paren -eq 0 -and $brace -eq 0) {
+            $parts.Add($sb.ToString()) | Out-Null
+            [void]$sb.Clear()
+        }
+        else { [void]$sb.Append($ch) }
+    }
+    if ($sb.Length -gt 0) { $parts.Add($sb.ToString()) | Out-Null }
+    return $parts
+}
+
+function Get-ShapeAssignment {
+    param([string]$Statement)
+    if ([string]::IsNullOrWhiteSpace($Statement)) { return $null }
+    $m = [regex]::Match($Statement, '(?s)^\s*(?:[A-Za-z_][\w<>\[\],\.\?]*\s+)*([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)\s*(.*)$')
+    if (-not $m.Success) { return $null }
+    $before = $m.Groups[1].Index - 1
+    if ($before -ge 0) {
+        $prev = $Statement[$before]
+        if ($prev -eq '.' -or [char]::IsLetterOrDigit($prev) -or $prev -eq '_') { return $null }
+    }
+    return [pscustomobject]@{ Name = $m.Groups[1].Value; Rhs = $m.Groups[2].Value.Trim() }
+}
+
+function Test-ShapeUsesName {
+    param([string]$Statement, [string]$Name)
+    if ([string]::IsNullOrEmpty($Statement) -or [string]::IsNullOrEmpty($Name)) { return $false }
+    return [regex]::IsMatch($Statement, '(?<![\w.])' + [regex]::Escape($Name) + '(?![\w])')
+}
+
+function Test-ShapeOperatorStatement {
+    param([string]$Statement, [string]$Name)
+    if (-not (Test-ShapeUsesName -Statement $Statement -Name $Name)) { return $false }
+    return [regex]::IsMatch($Statement, '(==|!=|<=|>=)|(?<![+\-*/%<>=!])[+\-*/%<>]')
+}
+
+function Get-ShapeOtherOperands {
+    param([string]$Statement, [string]$Self)
+    $found = New-Object System.Collections.Generic.List[string]
+    $skip = @{
+        float = $true; int = $true; var = $true; bool = $true; double = $true; decimal = $true
+        string = $true; void = $true; object = $true; return = $true; if = $true; else = $true
+        new = $true; true = $true; false = $true; null = $true; const = $true
+    }
+    foreach ($m in [regex]::Matches($Statement, '(?<![\w.])([A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*)(?![\w.])')) {
+        if ($m.Groups[1].Value -ne $Self) { $found.Add($m.Groups[1].Value) | Out-Null }
+    }
+    $masked = [regex]::Replace($Statement, '(?<![\w.])[A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*(?![\w.])', ' ')
+    foreach ($m in [regex]::Matches($masked, '(?<![\w.])([A-Za-z_][A-Za-z0-9_]*)(?![\w])')) {
+        $name = $m.Groups[1].Value
+        if ($name -eq $Self -or $skip.ContainsKey($name)) { continue }
+        $found.Add($name) | Out-Null
+    }
+    return $found
+}
+
+function Get-ShapeAssignLists {
+    param($Statements)
+    $map = @{}
+    foreach ($statement in @($Statements)) {
+        $assign = Get-ShapeAssignment -Statement $statement
+        if (-not $assign) { continue }
+        if (-not $map.ContainsKey($assign.Name)) { $map[$assign.Name] = New-Object System.Collections.Generic.List[string] }
+        $map[$assign.Name].Add($assign.Rhs) | Out-Null
+    }
+    return $map
+}
+
+function Test-ShapeAssignUnchanged {
+    param($BeforeMap, $AfterMap, [string]$Name)
+    $before = @()
+    $after = @()
+    if ($BeforeMap.ContainsKey($Name)) { $before = @($BeforeMap[$Name]) }
+    if ($AfterMap.ContainsKey($Name)) { $after = @($AfterMap[$Name]) }
+    if ($before.Count -ne $after.Count) { return $false }
+    for ($i = 0; $i -lt $before.Count; $i++) {
+        if ($before[$i] -ne $after[$i]) { return $false }
+    }
+    return $true
+}
+
+function Get-ShapeIfConditions {
+    param([string]$Body)
+    $list = New-Object System.Collections.Generic.List[string]
+    if ([string]::IsNullOrEmpty($Body)) { return $list }
+    $i = 0
+    while ($i -lt $Body.Length) {
+        $slice = $Body.Substring($i)
+        $m = [regex]::Match($slice, '(?<![\w.])if\s*\(')
+        if (-not $m.Success) { break }
+        $i = $i + $m.Index + $m.Length
+        $depth = 1
+        $sb = New-Object System.Text.StringBuilder
+        while ($i -lt $Body.Length -and $depth -gt 0) {
+            $ch = $Body[$i]
+            if ($ch -eq '(') { $depth++ }
+            elseif ($ch -eq ')') {
+                $depth--
+                if ($depth -eq 0) { $i++; break }
+            }
+            [void]$sb.Append($ch)
+            $i++
+        }
+        $list.Add($sb.ToString()) | Out-Null
+    }
+    return $list
+}
+
+function Get-ShapeMemberTails {
+    param([string]$Condition)
+    $tails = New-Object System.Collections.Generic.List[string]
+    if ([string]::IsNullOrEmpty($Condition)) { return $tails }
+    foreach ($m in [regex]::Matches($Condition, '(?<![\w.])[A-Za-z_][A-Za-z0-9_]*\.([A-Za-z_][A-Za-z0-9_]*)(?![\w.])')) {
+        $tails.Add($m.Groups[1].Value) | Out-Null
+    }
+    return $tails
+}
+
+function Test-ShapeConditionsHaveName {
+    param($Conditions, [string]$Name)
+    $pat = '(?<![\w])' + [regex]::Escape($Name) + '(?![\w])'
+    foreach ($condition in @($Conditions)) {
+        if ($condition -match $pat) { return $true }
+    }
+    return $false
+}
+
+function Test-ShapeDeclaresName {
+    param([string]$Executable, [string]$Name)
+    if ([string]::IsNullOrEmpty($Executable) -or [string]::IsNullOrEmpty($Name)) { return $false }
+    $pat = '(?m)(?:^|[;{}])\s*(?:\[[^\]]+\]\s*)*(?:(?:public|private|protected|internal|static|const|readonly|volatile|new|partial|extern|unsafe|override|virtual|abstract|sealed)\s+)*[A-Za-z_][\w\.\?]*\s+' + [regex]::Escape($Name) + '\s*(=|;|,|\{)'
+    return [regex]::IsMatch($Executable, $pat)
+}
+
+function Test-ShapeCompareReject {
+    param([string]$BeforeBody, [string]$AfterBody)
+    $beforeStatements = @(Split-ShapeStatements -Body $BeforeBody)
+    $afterStatements = @(Split-ShapeStatements -Body $AfterBody)
+    if ($beforeStatements.Count -ne $afterStatements.Count) { return $false }
+    $beforeAssign = Get-ShapeAssignLists -Statements $beforeStatements
+    $afterAssign = Get-ShapeAssignLists -Statements $afterStatements
+    for ($i = 0; $i -lt $beforeStatements.Count; $i++) {
+        $beforeOne = Get-ShapeAssignment -Statement $beforeStatements[$i]
+        $afterOne = Get-ShapeAssignment -Statement $afterStatements[$i]
+        if (-not $beforeOne -or -not $afterOne) { continue }
+        if ($beforeOne.Name -ne $afterOne.Name) { continue }
+        if ($beforeOne.Rhs -eq $afterOne.Rhs) { continue }
+        $name = $afterOne.Name
+        for ($j = $i + 1; $j -lt $afterStatements.Count; $j++) {
+            if (-not (Test-ShapeOperatorStatement -Statement $afterStatements[$j] -Name $name)) { continue }
+            if ($beforeStatements[$j].Trim() -ne $afterStatements[$j].Trim()) { continue }
+            foreach ($operand in @(Get-ShapeOtherOperands -Statement $afterStatements[$j] -Self $name)) {
+                if (Test-ShapeAssignUnchanged -BeforeMap $beforeAssign -AfterMap $afterAssign -Name $operand) { return $true }
+            }
+        }
+    }
+    return $false
+}
+
+function Test-ShapeConditionReject {
+    param([string]$BeforeBody, [string]$AfterBody, [string]$BeforeFile, [string]$AfterFile)
+    $beforeIfs = @(Get-ShapeIfConditions -Body $BeforeBody)
+    $afterIfs = @(Get-ShapeIfConditions -Body $AfterBody)
+    $seen = @{}
+    foreach ($condition in $beforeIfs) {
+        foreach ($tail in @(Get-ShapeMemberTails -Condition $condition)) {
+            if ($seen.ContainsKey($tail)) { continue }
+            $seen[$tail] = $true
+            if (Test-ShapeConditionsHaveName -Conditions $afterIfs -Name $tail) { continue }
+            $declaredBefore = Test-ShapeDeclaresName -Executable $BeforeFile -Name $tail
+            $declaredAfter = Test-ShapeDeclaresName -Executable $AfterFile -Name $tail
+            if ($declaredBefore -and -not $declaredAfter) { continue }
+            return $true
+        }
+    }
+    return $false
+}
+
+function Test-ShapeRejectWrite {
+    param([string]$FilePath, [string]$Before, [string]$After)
+    if (-not (Test-ShapeRejectWorktreePath -FilePath $FilePath)) { return $null }
+    if (-not (Test-BusinessSourcePath -FilePath $FilePath)) { return $null }
+    $beforeText = Get-ShapeExecutableText -Text $Before
+    $afterText = Get-ShapeExecutableText -Text $After
+    if ($beforeText -eq $afterText) { return $null }
+    $beforeMethods = @(Get-ShapeMethods -Executable $beforeText)
+    $afterMethods = @(Get-ShapeMethods -Executable $afterText)
+    $afterBySig = @{}
+    foreach ($method in $afterMethods) {
+        if (-not $afterBySig.ContainsKey($method.Sig)) { $afterBySig[$method.Sig] = New-Object System.Collections.Generic.List[object] }
+        $afterBySig[$method.Sig].Add($method) | Out-Null
+    }
+    $beforeBySig = @{}
+    foreach ($method in $beforeMethods) {
+        if (-not $beforeBySig.ContainsKey($method.Sig)) { $beforeBySig[$method.Sig] = New-Object System.Collections.Generic.List[object] }
+        $beforeBySig[$method.Sig].Add($method) | Out-Null
+    }
+    foreach ($sig in @($beforeBySig.Keys)) {
+        if (-not $afterBySig.ContainsKey($sig)) { continue }
+        if ($beforeBySig[$sig].Count -ne 1 -or $afterBySig[$sig].Count -ne 1) { continue }
+        $beforeBody = [string]$beforeBySig[$sig][0].Body
+        $afterBody = [string]$afterBySig[$sig][0].Body
+        if (Test-ShapeCompareReject -BeforeBody $beforeBody -AfterBody $afterBody) { return $script:ShapeRejectCompareMessage }
+        if (Test-ShapeConditionReject -BeforeBody $beforeBody -AfterBody $afterBody -BeforeFile $beforeText -AfterFile $afterText) { return $script:ShapeRejectConditionMessage }
+    }
+    return $null
+}
+
+function Get-ShapeAfterText {
+    param([string]$Before, $ToolInput)
+    if ($null -eq $ToolInput) { return $null }
+    foreach ($key in @('contents', 'content')) {
+        $prop = $ToolInput.PSObject.Properties[$key]
+        if ($prop -and $null -ne $prop.Value) { return [string]$prop.Value }
+    }
+    $oldProp = $ToolInput.PSObject.Properties['old_string']
+    $newProp = $ToolInput.PSObject.Properties['new_string']
+    if (-not $oldProp -or -not $newProp) { return $null }
+    $old = [string]$oldProp.Value
+    $new = [string]$newProp.Value
+    if ([string]::IsNullOrEmpty($old)) { return $null }
+    $idx = $Before.IndexOf($old)
+    if ($idx -lt 0) { return $null }
+    $replaceAll = $false
+    $allProp = $ToolInput.PSObject.Properties['replace_all']
+    if ($allProp -and $allProp.Value -eq $true) { $replaceAll = $true }
+    if ($replaceAll) { return $Before.Replace($old, $new) }
+    return $Before.Remove($idx, $old.Length).Insert($idx, $new)
+}
+
+function Get-ShapeRejectFromToolInput {
+    param([string]$FilePath, $ToolInput)
+    if (-not (Test-ShapeRejectWorktreePath -FilePath $FilePath)) { return $null }
+    if (-not (Test-BusinessSourcePath -FilePath $FilePath)) { return $null }
+    $before = ''
+    if (Test-Path -LiteralPath $FilePath) {
+        try { $before = [System.IO.File]::ReadAllText($FilePath) } catch { return $null }
+    }
+    $after = Get-ShapeAfterText -Before $before -ToolInput $ToolInput
+    if ($null -eq $after) { return $null }
+    return Test-ShapeRejectWrite -FilePath $FilePath -Before $before -After $after
 }

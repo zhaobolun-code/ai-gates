@@ -19,6 +19,8 @@ Claude / Codex 的同名脚本跟下面同一条假设，不另开行。`cursor-
 | `post-write-gate.ps1` → `check-unity-compile.ps1` | 只提示 | 刚写过 `.cs` / `.lua`，Editor.log 里出现 `error CS`。不拦这次写入，也不跑 Unity。 | 2026-10-22 |
 | `check-hooks-drift.ps1` | 只提示 | `hooks.json` 和门禁脚本的声明对不上。 | 2026-10-22 |
 | `relight-after-compact.ps1` | 只提示 | 对话被收成摘要之前，把入口指针塞回去，避免把摘要当成约定。 | 2026-10-22 |
+| `collect-instability-prompt.ps1` | 只记录 | 用户原话里的独立整行治理信号追加进不稳度账本。不挡这次提交。 | 2026-11-16 |
+| `pm-gate-check.ps1` | 默认不拒绝 | 迭代停写开关不在时，业务写入不读不稳度。开关打开后，当前不稳度到了临时阈值才拒绝下一行业务代码。 | 2026-11-17 |
 
 只记录、不拦截：
 
@@ -26,7 +28,8 @@ Claude / Codex 的同名脚本跟下面同一条假设，不另开行。`cursor-
 - `mark-changelog-write.ps1`：变更日志写过之后打点，设施改动才放得过。
 - `mark-pm-gate.ps1`：脚本只退出。不再写 `pm-gate.json`，也不往下一轮塞 token 行。不拒绝工具。
 - `hooks/copilot/mark-pm-gate.ps1`：同样只退出，stdout 是 `{}`。把 `hooks/copilot/hooks.json` 复制到 `.github/hooks/pm-gate.json` 才生效；安装脚本不自动创建。
-- `inject-turn-tokens.ps1`：已从 `beforeSubmitPrompt` 卸下。旧 token 文件还在也不注入。
+- `inject-turn-tokens.ps1`：不再注入 token。`beforeSubmitPrompt` 改由 `collect-instability-prompt.ps1` 只记录治理信号。
+- `invalidate-instability-event.ps1`：本机交互终端作废一条尚未结清的计分事件。口令从键盘读入。模型调用不算。
 
 ## 每端会不会响
 
@@ -41,5 +44,6 @@ Claude / Codex 的同名脚本跟下面同一条假设，不另开行。`cursor-
 | 压缩前点亮 | 只提示 | 未接线 | 未接线 | 未接线 | 未接线 | 未接线 |
 | 回复打点 | 只记录 | 只记录 | 只记录 | 未证实 | 未接线 | 未接线 |
 | 读文件 | 未接线 | 未接线 | 未接线 | 未接线 | 未接线 | 未接线 |
+| 用户原话 | 只记录 | 未接线 | 未接线 | 未接线 | 未接线 | 未接线 |
 
 Cursor 的 Shell 入口是 `pre-shell-gate.ps1`（先 Git，再写文件）。允许时的 JSON 按端不同：Cursor 写 `permission`，Claude 写 `permissionDecision: allow`，Codex 必须省略该字段。

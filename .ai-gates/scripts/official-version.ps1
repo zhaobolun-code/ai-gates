@@ -6,6 +6,26 @@ function Test-OfficialVersion {
     return [bool]($v -match '^\d+\.\d+\.\d+$')
 }
 
+function Test-TestPackVersion {
+    param([string]$Version)
+    $v = ([string]$Version).Trim() -replace '^[vV](?=\d)', ''
+    return [bool]($v -match '^\d+\.\d+\.\d+A$')
+}
+
+function Test-AcceptedPackVersion {
+    param([string]$Version)
+    return (Test-OfficialVersion -Version $Version) -or (Test-TestPackVersion -Version $Version)
+}
+
+function Get-PackSemver {
+    param([string]$Version)
+    $official = Get-OfficialSemver -Version $Version
+    if ($null -ne $official) { return $official }
+    if (-not (Test-TestPackVersion -Version $Version)) { return $null }
+    $v = ([string]$Version).Trim() -replace '^[vV](?=\d)', ''
+    return Get-OfficialSemver -Version $v.Substring(0, $v.Length - 1)
+}
+
 function Get-OfficialSemver {
     param([string]$Version)
     if (-not (Test-OfficialVersion -Version $Version)) { return $null }

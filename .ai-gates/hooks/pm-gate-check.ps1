@@ -6,6 +6,7 @@
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false
 . (Join-Path $PSScriptRoot 'cursor-hooks-common.ps1')
 . (Join-Path $PSScriptRoot 'gate-decision.ps1')
+. (Join-Path $PSScriptRoot 'instability-ledger.ps1')
 
 $repoRoot = Get-AiGatesProjectRoot
 $logDir = Join-Path $repoRoot ".ai-gates\hooks-log"
@@ -69,6 +70,17 @@ function Emit-Deny {
     Write-Output ($result | ConvertTo-Json -Compress)
 }
 
+function Emit-ShapeDeny {
+    param([string]$ConversationId, [string]$Message)
+    Write-Audit "DENY conversation=$ConversationId detail=shape_reject"
+    $result = @{
+        permission    = "deny"
+        user_message  = $Message
+        agent_message = $Message
+    }
+    Write-Output ($result | ConvertTo-Json -Compress)
+}
+
 function Emit-CursorVerdict {
     param($Verdict, [string]$ConversationId)
     if ($Verdict.Allow) {
@@ -97,4 +109,26 @@ try {
 $sessionId = Get-CursorSessionId -Json $json -Raw $raw
 $paths = @(Get-CursorInputPaths -Json $json -Raw $raw -ParseFailed $parseFailed)
 $verdict = Resolve-WriteGateVerdictFromFiles -HostName cursor -SessionId $sessionId -Paths $paths -ParseFailed $parseFailed -LogDir $logDir
+$shapeMessage = $null
+if (-not $parseFailed -and $verdict.Allow -and $json -and $paths.Count -gt 0) {
+    try {
+        $toolInput = $null
+        if ($json.PSObject.Properties['tool_input']) { $toolInput = $json.tool_input }
+        $shapeMessage = Get-ShapeRejectFromToolInput -FilePath ([string]$paths[0]) -ToolInput $toolInput
+    } catch { $shapeMessage = $null }
+}
+if ($shapeMessage) {
+    Emit-ShapeDeny -ConversationId $sessionId -Message $shapeMessage
+    return
+}
+if ($verdict.Allow) {
+    $stopMessage = $null
+    try {
+        $stopMessage = Get-InstabilityStopWriteMessage -LedgerDir $logDir -SessionId $sessionId -Paths $paths
+    } catch { $stopMessage = $null }
+    if ($stopMessage) {
+        Emit-Deny -ConversationId $sessionId -Detail 'instability_iteration' -UserMessage $stopMessage
+        return
+    }
+}
 Emit-CursorVerdict -Verdict $verdict -ConversationId $sessionId

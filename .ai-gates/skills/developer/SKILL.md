@@ -19,7 +19,7 @@ description: 按方案分步实现代码。用户说「程序员」「做 Step N
 
 ## 模型路由 + 子窗
 
-优先子窗 + 便宜快速档，**必须** `model=`（程序员 = 项目说明里的低级 slug）。省略或 `inherit` 会复制主窗，钩子拒绝。Direct、Standard、Full 的业务改码都**必须子窗**。Express 由主窗直接改，不派本岗。CR 仍必须隔离子窗。主窗提示里的岗位卡和合同正文忽略，自己读本页和白名单。交回主窗只留三行。代码审核派发由本岗刷新，主窗不改。AFK → [agent-brief.md](../references/agent-brief.md)。
+优先子窗 + 便宜快速档，**必须** `model=`（程序员 = 项目说明里的低级 slug）。省略或 `inherit` 会复制主窗，钩子拒绝。Standard、Full 的业务改码都**必须子窗**。Express 与 Direct 由主窗直接改，不派本岗。Direct、Standard L1.5/L2、Full 与高风险 CR 按 [isolated-review.md](../references/isolated-review.md) 隔离；普通 Standard L1 可主窗同会话只读复核并标「非独立 CR」。隔离审核窗只读派发白名单。主窗提示里的岗位卡和合同正文忽略，自己读本页和白名单。交回主窗只留三行。代码审核派发由本岗刷新，主窗不改。AFK → [agent-brief.md](../references/agent-brief.md)。
 
 ## Checklist（每次）
 

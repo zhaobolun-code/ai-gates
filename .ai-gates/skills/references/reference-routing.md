@@ -4,7 +4,7 @@
 
 ## 默认读取预算
 
-1. **基线**：`agent-entry-route.md` + `.cursor/project-context.md` 的「先读哪一节」及它点名的节（若有）+ 当前岗 `SKILL.md` checklist；**整份项目说明不进基线**；**CORE 全文不在基线**。每轮写给人看的话另读 `human-voice.md`，不占下面的 1～2 份名额。
+1. **基线**：`agent-entry-route.md` + `.cursor/project-context.md` 的「先读哪一节」及它点名的节（若有）+ 当前岗 `SKILL.md` checklist；**整份项目说明不进基线**；**CORE 全文不在基线**。每轮写给人看的话另读 `human-voice.md`，不占下面的 1～2 份名额。隔离审核子窗不在这条基线里，只读派发白名单。
 2. **任务白名单**：当前 `未完成.md` / Mandatory、模块 README 风险短段、真实源码/diff、命中的 lessons 行、**有则整节装载的认知卡片**（project-context「热路径认知卡片 / 代码认知卡片」）；这些不是 reference 预算，不得为省 Token 跳过。
 3. **Reference**：每个阶段默认最多点名 1～2 份；新需要出现时优先替换已完成用途的 reference，不累积整包。确有硬规则冲突可超出，但交接须写理由与文件名。
 
@@ -54,10 +54,11 @@
 | 外部事实 / API / 文档调研（开子窗） | `research-task.md` |
 | 用户点名「外仓对照」；加载 ≠ 启用；PM 提示 ≠ 启用；禁止每窗必搜 GitHub | `external-compare.md` |
 | 改 `hooks/*.ps1` 或 `hooks.json`，或点名门禁短表。零日志不拆；本表不自动升降门禁 | `hook-gates.md` |
-| 车道已判为 Express。只装这一张，不装另外三张 | `lane-express.md` |
-| 车道已判为 Direct。只装这一张，不装另外三张 | `lane-direct.md` |
-| 车道已判为 Standard。只装这一张，不装另外三张 | `lane-standard.md` |
-| 车道已判为 Full。只装这一张，不装另外三张 | `lane-full.md` |
+| 车道已判为 Express。只装这一张，不装其余车道卡 | `lane-express.md` |
+| 车道已判为 Auto。只装这一张，不装其余车道卡 | `lane-auto.md` |
+| 车道已判为 Direct。只装这一张，不装其余车道卡 | `lane-direct.md` |
+| 车道已判为 Standard。只装这一张，不装其余车道卡 | `lane-standard.md` |
+| 车道已判为 Full。只装这一张，不装其余车道卡 | `lane-full.md` |
 | AFK 子代理委托书 / 耐久契约 | `agent-brief.md` |
 | 需求评估 / 被拒需求去重 | `out-of-scope.md` |
 | 设计模块形状 / 找 seam / 接口方案对比（与 `architecture-health-check`「体检找候选」互补；并行接口设计见 `design-it-twice.md`，共用本行） | `codebase-design.md` |
@@ -81,7 +82,7 @@
 | 7 天卡住 / 质量趋势停点 | `long-task.md` |
 | 压缩重派 / 跨会话续作账本 | `loop-engineering.md` |
 | 覆盖度 / 读过测过失败过 / 禁止自报覆盖率 | `coverage-map.md` |
-| 每轮先读常驻，再只读当前车道卡 | `resident.md` |
+| 每轮先读常驻，再只读当前车道卡。隔离审核子窗不读 | `resident.md` |
 | 点名反模式全表 | `anti-patterns.md` |
 | 代码审要结构图、不是认知全图 | `codegraph-probe.md` |
 | 执行文档默认路径 | `doc-path-defaults.md` |
@@ -104,7 +105,7 @@
 | 止损和热度对照 | `stop-loss-heat-compare.md` |
 | 技术负责人接入 | `tl-onboarding.md` |
 | 对人说话 | `user-visible-states.md` |
-| 每轮给人看的话（已在基线，不另占名额）；周报骨架和删腔见周报模板 | `human-voice.md` |
+| 每轮给人看的话（已在基线，不另占名额）；周报骨架和删腔见周报模板。隔离审核子窗不读 | `human-voice.md` |
 | 点名执行文档黄金样例 | `执行文档黄金样例.md` |
 
 ## 按岗加载

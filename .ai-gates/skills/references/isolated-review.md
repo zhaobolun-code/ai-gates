@@ -1,18 +1,22 @@
 # 隔离审核（Subagent / 独立 Chat）
 
-> 权威：本文件。CORE 只保留摘要指针。适用于 L1.5 CR、L2 方案审、L3、高风险对抗 CR。
+> 权威：本文件。CORE 只保留摘要指针。适用于 Direct CR、Standard L1.5/L2、Full CR、L2/L3 方案审及高风险对抗 CR。
 > Express / 普通 Standard L1：**不要求**隔离会话。
 
 ## 目标
 
 用**空上下文**做方案审或代码审，避免主对话里「刚写完代码/刚写完方案」的共同前提污染结论。
 
+## 必读
+
+隔离审核子窗只读两样：点名派发工件；没有工件时，就是这次最短包。然后只读里面列出的路径。不读常驻卡、车道卡、human-voice、入口路由、CORE、错题全文、项目说明全文。白名单没点名的 reference 不读。本岗 SKILL 这一页只说明输出，不拿它当阅读许可。
+
 在 Cursor Agent（如 GPT-5.6）或 Codex 桌面中，主 Agent 可拉起 **Subagent**（UI 上表现为独立标签页/子任务）——这与「用户手动新开 Chat」同属隔离复核，优先用前者，减少人工粘贴。
 
 ## 优先级（强制顺序）
 
 1. **优先：主 Agent 自行拉起隔离会话（Subagent）**  
-   - 只注入：**最短派发包**（岗位口令、档位、`未完成.md`、`Mandatory-Step*.md` 若有、当前 Step、Mandatory 源码路径、只读约束、上轮 blocker≤20 行、**阅读白名单**）  
+   - 只注入：**最短派发包**（岗位口令、档位、`未完成.md`、`Mandatory-Step*.md` 若有、当前 Step、Mandatory 源码路径、路径规则（每个源码文件点一节，只读点到的节）、只读约束、上轮 blocker≤20 行、**阅读白名单**）  
    - **禁止**注入：主对话未入库讨论；历史全文；第二份长方案；`已完成/` 全文；大段 Console（见 [doc-windowing.md](./doc-windowing.md)）  
    - 审核会话 **只读**（L3 / 对抗模式尤甚）：只输出 findings 短表，不改执行文档/代码（用户明确要求修复除外）  
    - 结论交回主对话后，由 `[PM]` / `[planner]` 决定是否改文档状态 / 迁移归档  
@@ -23,9 +27,10 @@
    - 附可复制派发块（见 [cr-dispatch-l1.5.md](../templates/cr-dispatch-l1.5.md) / [plan-review-tiers.md](./plan-review-tiers.md) L3 模板）  
    - 高风险：派发块须提示用户在新 Chat **优先选高质量档**（slug 见 model-routing / project-context；仍不校验是否照做）
 
-3. **降级：同 Chat 续审**  
-   - Standard / Full 允许，但输出**必须**标注 **「非独立复核」** / **「非独立 CR」**  
-   - Direct 不走这条降级，须子窗或新开 Chat，标注「隔离复核」  
+3. **同 Chat 复核**  
+   - 普通 Standard L1 是允许的主窗复核路径，输出**必须**标注 **「非独立 CR」**；不要求子窗戳记，也不得称为隔离复核  
+   - Standard L1.5/L2、Full 或高风险优先隔离；Subagent 不可用或失败时可同 Chat 降级，必须标注 **「非独立复核」** / **「非独立 CR」**，不得记成隔离完成  
+   - Direct 不走同 Chat 降级，须子窗或新开 Chat，标注「隔离复核」  
    - **不校验**用户是否接受隔离；最终是否定版仍由用户决定
 
 ## 高风险审核异模型（优先 · 不硬拦）
@@ -37,7 +42,7 @@
 | Standard L1.5 代码审核 | **是** |
 | Standard L2 / Full L3 方案审核 | **是** |
 | 高风险对抗 CR | **是** |
-| Full 车道且本 Step 含业务 Runtime/Editor C# | **是** |
+| Full 车道代码审核 | **是** |
 | Express / 普通 Standard L1 | 否（默认 `inherit`） |
 
 **模型选择（强制顺序）**（与 [model-routing.md](./model-routing.md) 解析结果一致；project-context §模型路由优先）：
@@ -77,13 +82,13 @@
 
 ## 主 Agent 派发时须做
 
-1. 组装最小派发块（路径、档位、Step、只读、禁改范围；**CR** 默认注明 `dimensions: quality+integration`，Full/高风险可 `+security`）；有活跃控制工件时优先生成/刷新点名 `证据/_…派发.md`（见 [review-dispatch-lifecycle.md](./review-dispatch-lifecycle.md)）  
+1. 组装最小派发块（路径、档位、Step、只读、禁改范围、路径规则（每个源码文件点一节，只读点到的节）；**CR** 默认注明 `dimensions: quality+integration`，Full/高风险可 `+security`）；若使用持久控制工件，须由对应 Maker（方案：planner；代码：developer）创建/刷新点名 `证据/_…派发.md` 后再派（见 [review-dispatch-lifecycle.md](./review-dispatch-lifecycle.md)），PM 不直接编辑；Direct 无工件时仅传最短派发包  
 2. Reviewer **先读**点名派发工件，再**只读**工件白名单；校验 `target_revision` / `review_input_revision`，不匹配 → `blocked reason=stale_dispatch`  
 3. 若环境支持 Subagent/Task：按 §高风险审核异模型 选定 `model` 后启动；白话 **你下一步** 说明「已开隔离审核（异模型/同模型）」  
 4. 若不支持：输出派发块，请用户新开 Chat（高风险附「优先选 Opus 5」）  
 5. 收回结论后：有 blocker → 交策划/程序员（Checker **不改**工件）；无 blocker → 按车道继续，**不**替用户宣布 Unity 已通过  
 6. 若窗内 `证据/_knowledge-gap.md` 有 **open** 且标注 `来源：分歧标注`，组装最短派发包时必须点名这些条目；审方须逐条表态（同意/不同意/须用户澄清）。这就是「同一族洞回灌便宜审」。  
-工人不自审：实现者禁止 Task 派审核子窗；Checker 不改码；主窗派审后不得改 Mandatory 点名的业务文件。
+工人不自审：程序员子窗不派审核。直通由主窗改完，再开审核空窗；派发只给白名单，不写改码过程。Checker 不改码。主窗派审后不得改 Mandatory 点名的业务文件，直通在审核交回前不再改这刀的业务文件。
 
 ## 禁止
 

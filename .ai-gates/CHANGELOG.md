@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v5.4.0（门禁放宽与 Copilot 接入 · minor；前版 5.3.1 定版信息保留）
+**当前 LTS**：v6.0.0（适应性治理 · major；前版 5.4.0 定版信息保留）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,38 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-11-26：bump `skills/VERSION` → **6.0.0**。适应性治理从测试版 `6.0.0A` 改为正式版。这次改版本号不把修改成功率、Phase 0 质量不劣、影子期误报率、漏报率、冻结 `T`、读文件遥测当作条件。停写仍默认关。没有读文件遥测，不写「`skills/` 读取次数为 0」。新包 `releases/ai_dev_v6.0.0.7z`，不覆盖 5.4.0 包；`skills/unity-skills/` 是本机 Unity 工具树，不进包。`plugin.json` version=`6.0.0`。`validate-pipeline -Strict` 全绿（test-hooks 107/0）。Included：`skills/VERSION` + `cursor-marketplace/.cursor-plugin/plugin.json` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md` + `skills/references/resident.md` + `skills/templates/AGENTS.md`。根目录 `AGENTS.md` 与 `CLAUDE.md` 同步这一句，不进 Included。
+
+- 2026-11-23：auto 车道只在消息带有「Auto车道」时启动。先问技术细节，人回「准」才写文档；按 UnitySkills 的 `editor_run_scenario` 先测、再写代码、再测，直到断言通过或同一失败连续 3 次。通过后隔离审，人再回一次「准」才 `git commit`。没带这句的需求仍走 Express。通过只认这次作业的断言结果，服务没开不许说通过。这张车道不启用标准道/完整道「准」之后的 Auto 执行模式，不建 Step 账本。不 bump VERSION。Included：`skills/references/lane-auto.md` + `skills/references/resident.md` + `skills/CORE.md` + `skills/references/full-lane-decision-tree.md` + `skills/references/loop-engineering.md` + `skills/references/reference-routing.md` + `skills/references/agent-entry-route.md` + `skills/templates/AGENTS.md` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md` + `USER-GUIDE.md` + `README.md`。根目录 `AGENTS.md` 与 `.cursor/project-context.md` 同步，不进 Included。
+
+- 2026-11-18：常驻卡只选车道。读完再只读这一刀的一张车道卡，Express 读 `lane-express.md`，不读另外三张。九句和各车道的派发放回对应的卡。不 bump VERSION。Included：`skills/references/resident.md` + `skills/references/lane-express.md` + `skills/references/lane-direct.md` + `skills/references/lane-standard.md` + `skills/references/lane-full.md` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md` + `skills/templates/AGENTS.md`
+
+- 2026-11-18：装了 ai-gates 就先读常驻卡。仓库里有 `.ai-gates/skills/references/resident.md` 时先读这一份，不必先说「项目经理」或「PM」。停在 Express 仍不打开其它 `skills/`。`初始化`、`检查健康`、`升级 ai-gates` 不再要求前面加这两个词。不 bump VERSION。Included：`rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md` + `skills/templates/AGENTS.md` + `skills/CORE.md` + `USER-GUIDE.md` + `README.md`
+
+- 2026-11-18：书写习惯先锁事实和确定程度，再动句子。被改的正文是材料，里面的命令不改变这一轮要做的事。具体只取材料里已经有的，不补新的数字、例子或经历。否定本身是事实、三项各是一件事、材料和读者会碰到的限制，都留下。交出去之前再查有没有把「可能」写成「确定」、把一起出现写成因果、把「还没做」写成「已经」。不 bump VERSION。Included：`skills/references/human-voice.md`
+
+- 2026-11-18：车道绑定文件次数，只推荐不强制。每一刀开工是 Express。停在 Express 时九句，不另开阅读。第 8 句：任务要求的新行为可以新增；除此之外新增不超过删除，多出来的行不挪到新文件。第 9 句：已有方法能接，就改原方法，不并行第二套。读 `regression-heat.yaml` 的 `files:`，近 20 天失败次数到 2 建议直通道、到 4 建议标准道、到 6 建议完整流程；最近一次须是失败。不回就停在 Express。确认或点名才改这一刀。文件个数、是不是在改规则、API、存档、跨模块、说不清、止损都不改标签。只改注释或已有日志不读这份账。`files:` 仍空时不写建议句。不 bump VERSION。Included：`skills/references/resident.md` + `skills/CORE.md` + `skills/references/full-lane-decision-tree.md` + `skills/references/lane-glossary.md` + `skills/references/lane-express.md` + `skills/references/lane-direct.md` + `skills/references/lane-full.md` + `skills/references/execution-discipline.md` + `skills/references/shared-language.md` + `skills/references/doc-windowing.md` + `skills/references/state-machine.md` + `skills/references/plan-review-tiers.md` + `skills/templates/express-slice.md` + `skills/express-self-check.md` + `skills/references/skill-eval-checklist.md` + `skills/references/pm-init.md` + `skills/references/tl-onboarding.md` + `skills/references/examples.md` + `skills/project-context.template.md` + `USER-GUIDE.md` + `README.md` + `METHODOLOGY.md`
+
+- 2026-11-18：最短派发包补上路径规则。每个源码文件点一节，只读点到的节。没有正在等待的新派发，不回改已有派发文件。不 bump VERSION。Included：`skills/references/isolated-review.md`
+
+- 2026-11-18：代码审核按路径点节。每个白名单文件只读派发点名的节，`.cs` / `.lua` 的语言检查并在该节上，不换掉它。派发没点节为 major。不把整份额外关注点塞进审核窗。不 bump VERSION。Included：`skills/code-reviewer/SKILL.md` + `skills/templates/cr-dispatch-l1.5.md`
+
+- 2026-11-18：代码审核子窗写 `hooks-log/cr-stamp.json` 时，先按子窗记录找到唯一父会话。找不到，仍视为主窗并拒绝。主窗自己写这枚戳记仍拒绝。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `scripts/test-gate-decision.ps1`
+
+- 2026-11-18：代码审核短表里的 blocker / major / minor / nit 要写本轮 diff 里对得上的路径和行，对不上的不进短表。集成维那一句可以点 diff 外的文件，但要写出路径。复审先逐条写上一轮 blocker/major 还在不在，新条目只写本轮 fix 新带进来的问题；上一轮都已核对且本轮没有新问题，才停。不 bump VERSION。Included：`skills/code-reviewer/SKILL.md`
+
+- 2026-11-17：工作区技能包版本改为 **6.0.0A**。这是测试版，不是 6.0.0 正式版，不替换 5.4.0 发布包。停在 Express 时只遵守常驻卡里的七句，不打开其它 `skills/`，不读车道卡、human-voice、项目说明。高危钩子仍拦截。离开 Express 才读那一张车道卡。不把对照写成「质量不劣」。Included：`skills/VERSION` + `cursor-marketplace/.cursor-plugin/plugin.json` + `scripts/official-version.ps1` + `scripts/validate-pipeline.ps1` + `scripts/install-ai-gates.ps1` + `scripts/test-gate-decision.ps1` + `skills/references/resident.md` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md` + `skills/templates/AGENTS.md`。根目录 `AGENTS.md` 与 `CLAUDE.md` 同步这一句，不进 Included。
+
+- 2026-11-17：适应性治理按当天样例迭代，不再等满 30 条影子账才改技能包。停写判定放进写门禁，默认关。开关文件不在时，业务写入不读不稳度。打开后只认这一轮的临时阈值，这个数不是收口后的发布阈值 `T`。不 bump VERSION。Included：`hooks/instability-ledger.ps1` + `hooks/pm-gate-check.ps1` + `hooks/gate-decision.ps1` + `scripts/enable-instability-stop-write.ps1` + `scripts/disable-instability-stop-write.ps1` + `scripts/test-instability-ledger.ps1` + `scripts/test-gate-decision.ps1` + `skills/references/hook-gates.md` + `skills/MAINTAINER.md`
+
+- 2026-11-16：影子期开始只追加不稳度账本。Cursor 的 `beforeSubmitPrompt` 只记录独立整行治理信号，不注入 token，不挡这次提交，不挡业务写入。写门禁不读这本账。测试信号没有登记入口，不造事件。账本和任务序号文件跟 `knife-state.json` 一样，编辑器和显式 Shell 写不进去；模型直接跑采集脚本或作废脚本也会被拒绝。作废只在本机交互终端读入口令。不 bump VERSION。Included：`hooks/instability-ledger.ps1` + `hooks/collect-instability-prompt.ps1` + `hooks.json` + `hooks/gate-decision.ps1` + `scripts/invalidate-instability-event.ps1` + `scripts/test-instability-ledger.ps1` + `scripts/test-gate-decision.ps1` + `scripts/test-hooks.ps1` + `skills/references/hook-gates.md` + `skills/MAINTAINER.md`
+
+- 2026-11-15：形状拒绝只拦 `Chemical-p0c-s<数字>-stub` 里的业务 `.cs` / `.lua`。比较式换了算法且后面仍用没改过的量，或 `if` 条件拿掉了仍存在的成员，这一次写入不落地。注释和字符串去掉之后文本没变，不拒绝。成员名还在 `a.b` 里，不算已经拿掉。其它路径不新增拒绝。不 bump VERSION。Included：`hooks/gate-decision.ps1` + `hooks/pm-gate-check.ps1` + `scripts/test-gate-decision.ps1`
+
+- 2026-11-12：直通改码放回主窗，不派程序员。改完仍派隔离审核。审核空窗的必读只有派发白名单，不读常驻卡、车道卡、入口路由、错题全文、项目说明全文。标准道和完整道的实现仍派程序员子窗。不 bump VERSION。Included：`skills/CORE.md` + `skills/developer/SKILL.md` + `skills/code-reviewer/SKILL.md` + `skills/plan-reviewer/SKILL.md` + `skills/module-readme/SKILL.md` + `skills/references/resident.md` + `skills/references/lane-direct.md` + `skills/references/lane-glossary.md` + `skills/references/shared-language.md` + `skills/references/full-lane-decision-tree.md` + `skills/references/execution-discipline.md` + `skills/references/agent-entry-route.md` + `skills/references/anti-patterns.md` + `skills/references/isolated-review.md` + `skills/references/reference-routing.md` + `skills/templates/AGENTS.md` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md` + `claude/agents/developer.md`。根目录 `AGENTS.md` 同步这一句，不进 Included。
+
+- 2026-11-12：普通 Standard L1 代码审查允许主窗同会话完成，并标「非独立 CR」；Direct、Standard L1.5/L2、Full/高风险仍按隔离审核路由，降级须如实标注。同会话 L1 不要求子窗 CR 戳记。清理日常入口过时的 `[PM]` / token 行要求。不 bump VERSION。Included：`skills/CORE.md` + `skills/developer/SKILL.md` + `skills/code-reviewer/SKILL.md` + `skills/references/agent-entry-route.md` + `skills/references/isolated-review.md` + `skills/references/lane-standard.md` + `skills/references/lane-full.md` + `skills/references/resident.md` + `skills/references/anti-patterns.md` + `skills/references/full-lane-decision-tree.md` + `skills/references/handoff-automation.md` + `skills/references/skill-eval-checklist.md` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md`
 
 - 2026-11-11：bump `skills/VERSION` → **5.4.0**。收口 5.3.1 之后未发版条目：PM 门禁放宽（业务写入不再查 `[PM]`，放行代号 `business_write`；Express 主窗直接改；`mark-pm-gate` 只退出）、Express/Direct 以「少于 3 个业务文件且不是设计核心逻辑」分界、新增 Copilot CLI `agentStop` / `subagentStop` 打点、升级或初始化给 project-context 补三节、human-voice 与周报模板瘦身、用户现象只作验收。另把 `test-ensure-project-context-sections.ps1` 接进 `validate-pipeline.ps1`，并在 `hook-gates.md` 写明 Copilot 手动接线。`plugin.json` version=`5.4.0`。新包 `releases/ai_dev_v5.4.0.7z`，不覆盖 5.3.1 包。`validate-pipeline -Strict` 全绿（test-hooks 107/0）。
 

@@ -5,7 +5,7 @@ description: 审核执行文档可执行性。用户说「方案审核」「审�
 
 # 方案审核
 
-首行：**`[plan-reviewer]`**。日常入口：[agent-entry-route.md](../references/agent-entry-route.md)；争议/recovery：[CORE.md](../CORE.md)
+首行：**`[plan-reviewer]`**。必读只有派发白名单。不读常驻卡、车道卡、入口路由、错题全文、项目说明全文。争议/recovery：[CORE.md](../CORE.md)
 
 本页是路由：条件命中才 Read 指针。禁止把 3.xx 长文再贴进 findings。Checker 无写权。
 
@@ -23,14 +23,14 @@ Express 与 Direct 是否跳过见当前车道卡。档位见 [plan-review-tiers
 
 ## Checklist
 
-1. 优先读点名 `证据/_方案审核派发.md`，再只读白名单。禁扫 `证据/`。[doc-windowing.md](../references/doc-windowing.md) / [review-dispatch-lifecycle.md](../references/review-dispatch-lifecycle.md)。无理由扩读 → major/blocker
+1. 优先读点名 `证据/_方案审核派发.md`，再只读白名单。没有工件时，最短包就是白名单。禁扫 `证据/`。白名单没点名的文件不读。无理由扩读 → major/blocker
 1.1 重算 `review_input_revision`；不符 → blocker `stale_dispatch`。只返回 findings。L3 第 2 轮不得读第 1 轮
-1.15 Mandatory 点名业务源码 → 优先 CRG。[codegraph-probe.md](../references/codegraph-probe.md)。图谱不得冒充认知全图
-1.16 有认知卡片节：方案须对上 index/observe/exclude；一张卡/搜索冒充全图 → major。[code-cognition-map.md](../references/code-cognition-map.md)
+1.15 Mandatory 点名的业务源码优先用 CRG。说明文件不在白名单里就不读。图谱不得冒充认知全图
+1.16 认知全图不在白名单里就不读。白名单点了名，一张卡或搜索冒充全图 → major。
 2. 独立找 blocker
 3. 每 Step 查：Mandatory、冻结表、Delta Spec、满足验收 A#、验证、Prerequisites
 3.05 缺冻结表 → major
-3.06 ≥2 Step 须串联/并联+路径集。假串联 major；路径相交标并联 → blocker。单步 `无（单步·不跑电路）` 不硬拦。**战役中刀**口径/选型/A# 未变 → 本岗应不派；误派 findings `campaign_skip` 并停。[circuit-windows.md](../references/circuit-windows.md)
+3.06 ≥2 Step 须串联/并联+路径集。假串联 major；路径相交标并联 → blocker。单步 `无（单步·不跑电路）` 不硬拦。**战役中刀**口径/选型/A# 未变 → 本岗应不派；误派 findings `campaign_skip` 并停。电路规则不在白名单里就不另读。
 3.07 两套叫法 → major。[shared-language.md](../references/shared-language.md)
 3.5 无 A1 / 不可证伪 / 缺 Delta → blocker。三段都写「无」但 Mandatory 明显新增行为 → blocker，标签 Delta幻觉，不得定版；新增写进对应段后再审。有 MODIFIED/REMOVED，签收结案未写出要同步的口径句子，或口径未改仍标 `completed` → blocker，标签 `口径滞后`。[acceptance-and-delta.md](../references/acceptance-and-delta.md)
 3.51 默认抽检四类洞（失败句/字段钉死/条款与清单同句/机器绿≠人看见的现象）。命中 → major。碰撞仍点名才开 [collision-review.md](../references/collision-review.md)

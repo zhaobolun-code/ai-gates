@@ -33,6 +33,7 @@ axis：standards+spec（默认必填双轴，禁止省略；findings 必须分�
 冻结表扫描：【本 Step DO NOT TOUCH / 冻结符号清单；空=无（已扫）】
 Mandatory 源码：
 - 【文件路径 1】
+路径规则：【每个源码文件点一节。只读点到的节。】
 回归索引：【模块 / 场景 — 步骤 — Console 关键词】
 上轮 blocker（≤20 行，可无）：【…】
 

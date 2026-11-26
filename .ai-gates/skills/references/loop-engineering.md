@@ -12,7 +12,7 @@
 | **Harness** | 单次会话内规则与岗位（CORE / skills） |
 | **Loop Engineering** | 外环：何时连跑、如何独立验证、何时整圈停止 |
 | **Agent loop（内环）** | Cursor/模型 tool 循环；**不改**产品内环 |
-| **Auto 执行模式** | Standard/Full 在「准」之后，允许在停机条件前连续推进**当前 Step 的实现与 CR**；**不是**第五条需求判定车道；**Express / Direct 不启用 Auto** |
+| **Auto 执行模式** | Standard/Full 在「准」之后，允许在停机条件前连续推进**当前 Step 的实现与 CR**；**不是**车道。需求车道 `lane-auto.md` 与本模式同字不同物。本模式仍只在标准道/完整道启用，**Express / Direct / auto 车道不启用** |
 
 **启动前仍须「准」**（一轮确认包）。Standard/Full：「准」**默认** Auto；显式「准, 不 Auto」则单步。`lane: Full` ≠ `execution_mode: Auto`（正交）。
 

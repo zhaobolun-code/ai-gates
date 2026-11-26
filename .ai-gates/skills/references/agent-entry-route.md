@@ -1,6 +1,6 @@
 # Agent 日常入口路由（≤1 屏）
 
-常驻只读 [resident.md](./resident.md)。判定之后只读当前车道那一张卡，不把四张一起装进来。
+常驻只读 [resident.md](./resident.md)。判定之后只读当前车道那一张卡，不把车道卡一起装进来。
 
 > **默认入口**。日常勿通读 CORE 全文；争议 / recovery / `按 CORE 重来` 再查 [CORE.md](../CORE.md)。  
 > 第二跳：按 [reference-routing.md](./reference-routing.md) 点名 ≤2 份 reference（禁整目录灌入）。给人看的话另读 [human-voice.md](./human-voice.md)，不占这两份名额。
@@ -25,10 +25,10 @@
 ## 默认必读
 
 1. **[resident.md](./resident.md)**
-2. **当前这一张车道卡**（`skills/references/` 下的 `lane-express.md` / `lane-direct.md` / `lane-standard.md` / `lane-full.md`）
-3. 标准道和完整道用到才打开那一份：**[read-evidence](../read-evidence/SKILL.md)**、**[run-evidence](../run-evidence/SKILL.md)**、**[log-evidence](../log-evidence/SKILL.md)**。Express 和问句由主窗自己读、自己搜、自己跑。直通派程序员，不另派这三份。
+2. **当前这一张车道卡**（`skills/references/` 下的 `lane-express.md` / `lane-auto.md` / `lane-direct.md` / `lane-standard.md` / `lane-full.md`）
+3. 标准道和完整道用到才打开那一份：**[read-evidence](../read-evidence/SKILL.md)**、**[run-evidence](../run-evidence/SKILL.md)**、**[log-evidence](../log-evidence/SKILL.md)**。Express、问句、直通由主窗自己读、自己搜、自己跑、自己改。直通不派程序员，不另派这三份。隔离审核子窗只读派发白名单，不读这三份。
 
-派子窗前读 `.cursor/project-context.md` 的「先读哪一节」，再读表里点名的节。不把整份项目说明装进每轮。派发只写岗位、轮次、派发文件路径。不贴哈希算法、预期哈希、blocker 原文、岗位卡。子窗交回只留三行。岗位卡由子窗自己读。
+派子窗前读 `.cursor/project-context.md` 的「先读哪一节」，再读表里点名的节。不把整份项目说明装进每轮。派发只写岗位、轮次、派发文件路径。不贴哈希算法、预期哈希、blocker 原文、岗位卡。子窗交回只留三行。实现子窗自己读岗位卡。隔离审核子窗只读派发白名单。
 
 ## 任务白名单（非 reference 预算 · 不得为省 Token 跳过）
 
@@ -56,13 +56,13 @@
 
 | 岗 | 子弹 |
 | --- | --- |
-| PM | 1. 内部 YAML 须含字面 `[PM]`（120 分钟窗口≠本条已判定）；Express 用户可见只「你下一步」和下面这一行 token；非 Express=白话摘要表+你下一步。YAML 结束后另起一行：`token：上一轮 输入 N / 输出 N / 缓存读 N / 缓存写 N`。满 5 位的 N 写成万，保留一位小数，整万不写小数。N 只抄本轮注入。没有本轮注入就写「上一轮未记到」，禁止抄别的对话。这是上一轮回复结束后的实测，禁止估算本轮。注入里若有换窗行，必须换行再写「已满足换窗条件, 请执行换窗逻辑减少token消耗」，禁止用空格接在 token 同一行。换窗行只在本对话首次记账后又增加至少 20 万输入时出现<br>2. 车道步骤不在本表复述。Express → [lane-express.md](./lane-express.md)；Direct → [lane-direct.md](./lane-direct.md)；Standard → [lane-standard.md](./lane-standard.md)；Full → [lane-full.md](./lane-full.md)<br>3. 主窗仅 PM（Express 与 Direct 的业务改码必须子窗）；子窗显式 `model=`；派策划禁点名典故 → [execution-discipline.md](./execution-discipline.md) §设计模式一问<br>4. 一轮确认「准」；查得到的不问（文件、接口、已写明的数值和口径先读进确认包，只问必须拍板的事）；确认包可含【重构候选】；「准」≠ 准抽离 → [demand-clarification.md](./demand-clarification.md)。错题大纲有命中时，「你下一步」点名那一行的日期或关键词，最多 1 行；没命中写「已扫，无命中」。禁止只写「看过错题」<br>5. 迷雾仅开窗/改邻接/签收；出图门问是否创建/更新；卡住/压缩/换窗 → [fog-map-structure.md](./fog-map-structure.md) / [long-task.md](./long-task.md) / [session-handover.md](./session-handover.md)。阶段结束换新对话，只吐四格短交接。主窗不贴 diff。工具输出用完只留路径和决定 → [execution-discipline.md](./execution-discipline.md) §上下文只留指针。主窗要看日志时先读 [log-evidence/SKILL.md](../log-evidence/SKILL.md)，派低级子窗，不自己读原文。主窗要看代码或长文档时先读 [read-evidence/SKILL.md](../read-evidence/SKILL.md)，派低级子窗调 CodeGraph 或读点名文档。主窗要跑终端时先读 [run-evidence/SKILL.md](../run-evidence/SKILL.md)，派低级子窗，只收回退出码和一句结论 |
+| PM | 车道、确认和用户可见输出（含「你下一步」）按 [CORE.md](../CORE.md)；不要求字面 `[PM]` 或 token 行。Express/Direct 主窗改码；Standard/Full 实现派程序员子窗。普通 Standard L1 可主窗同会话复核并标「非独立 CR」；Direct、Standard L1.5/L2、Full 和高风险 CR 按隔离规则走。各车道卡与确认规则不在本表复述 |
 | planner | **Express=PM 一句话切片；Direct=PM 已写清则本岗不派，否则对话内 A#/切片不落盘；Standard/Full 落盘**；同窗同口径战役则口径未变不重做方案；复用四问（第4问须升级触发）+选型；错题本必读节；A#+Delta；一轮确认包「准」；确认包填【重构候选】；无症状则无或一行无；写热路径 Mandatory 先装载认知全图 |
 | plan-reviewer | 只读派发白名单；查 A#/Delta/选型/错题节；第4问无触发=填空 blocker；有 blocker 不定版；禁再要一轮确认；战役中刀口径/选型/A# 契约未变 → 不派本岗；默认抽检四类洞（失败句/字段钉死/条款与清单同句/机器绿≠人看见的现象）；碰撞仍点名才开；图谱不得冒充认知全图 |
-| developer | 有「准」/恢复口令才改；只改本 Step A#（**Direct=对话内切片**）；Express 与 Direct 的业务改码**必须子窗**；复用四问；微循环自检；**Direct 完成交隔离 CR（必须子窗）**；Step 收口迁 `已完成/_索引`（战役可批到签收；迁签收≠归档）；分析热路径：①本会话认知全图一次 ②本 Step 点名对象的 R ③CodeGraph ④源码 |
-| CR | 只读派发+白名单+diff；优先 CRG；短表 findings；禁扫证据夹；**Direct=高级档隔离复核（必须子窗）**；Skill/Doc 可提示 verify；未装载认知全图却自称理解 / 用图谱冒充 → major |
+| developer | 有「准」/恢复口令才改；只改本 Step A#（**Direct=对话内切片**）；Express 与 Direct 由主窗改，不派本岗。Standard 与 Full 的业务改码**必须子窗**；复用四问；微循环自检；CR 按 [isolated-review.md](./isolated-review.md) 分流；Step 收口迁 `已完成/_索引`（战役可批到签收；迁签收≠归档）；分析热路径：①本会话认知全图一次 ②本 Step 点名对象的 R ③CodeGraph ④源码 |
+| CR | 普通 Standard L1 可主窗同会话只读复核并标「非独立 CR」；Direct、Standard L1.5/L2、Full、高风险优先隔离子窗；只读派发+白名单+diff；优先 CRG；短表 findings；禁扫证据夹；Skill/Doc 可提示 verify；白名单外的认知全图不读，也不自称已装载 |
 | docs | 无 blocker 才写；能一行不扩章；不夸大验证等级；新回归同步索引 |
 | weekly | 只出汇报正文；禁路径/黑话；不改代码；固定 `# 工作周报` 骨架 |
-| log | 主窗要看日志时派低级子窗；只收回三行；主窗不读原文 |
-| read | 主窗要看代码或长文档时派低级子窗；代码走 CodeGraph；只收回三行 |
-| run | 主窗要跑终端时派低级子窗；只收回退出码和一句结论 |
+| log | 标准道和完整道要看日志时派低级子窗；只收回三行。Express、问句、Direct 主窗自己读 |
+| read | 标准道和完整道要看代码或长文档时派低级子窗；只收回三行。Express、问句、Direct 主窗自己读 |
+| run | 标准道和完整道要跑终端时派低级子窗；只收回退出码和一句结论。Express、问句、Direct 主窗自己跑 |

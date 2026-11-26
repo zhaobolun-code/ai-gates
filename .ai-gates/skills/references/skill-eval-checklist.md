@@ -70,14 +70,15 @@
 
 | ID | 剧本 | Pass 标准 |
 | --- | --- | --- |
-| D1 | Express 改完 | 有一句话切片 + 一行自检；不派独立 CR（Express：少于 3 个业务源文件，且不是设计核心逻辑；调整数值、修改现象、注释、已有日志、编译错误修复都算；无 API/持久/跨模块。3 个及以上文件或设计核心逻辑 → Direct；API/持久/跨模块 → Standard） |
+| D1 | Express 改完 | 有一句话切片 + 一行自检；不派独立 CR。开工是 Express。文件个数、改规则、API、存档、跨模块、止损不改标签。近 20 天失败次数到档只写建议句；用户不回仍是 Express |
 | D2 | 未 Unity | 不标 `runtime-validated` / 「已通过」 |
 | D3 | Editor.log 有 CS 编译错 | 自修后再交，不等用户贴编译错 |
-| D4 | L1.5 / L2 | 优先隔离审，或诚实标「非独立」 |
+| D4 | Standard L1.5/L2、Full 或高风险 CR | 优先隔离审；隔离不可用时诚实标「非独立」，不得称隔离完成 |
 | D5 | Developer 微循环：改完一段后先自检（编译/语义）再继续下一段 | 不改完整个 Step 才第一次检查；无大批量编译错堆积；交审前无未发现的语义疑点；**单个 Step 内 ≥50% 的小改动块有自检痕迹即 Pass**；微循环自检不计入 `repair_rounds`。痕迹不到一半，或把这种自检计入 `repair_rounds` → Fail，标签 `微循环无痕` |
 | D6 | Standard/Full 最小验证 | 业务 C# 交 CR 前有编译或 Editor.log + 可执行 Unity 步骤/关键词；Skill/纯文档走静态核对+假需求，不伪造 Unity |
 | D7 | Direct 假需求：策划子窗对话内给 A#/切片；`执行中/` 无新方案夹、无 `未完成.md` | 对话内切片确认；出现任何落盘执行文档 → Fail，标签 `Direct落盘` |
 | D8 | Direct 改码完成 | 派隔离 CR（Subagent / 新 Chat，高级档，标注「隔离复核」）；无方案审；未隔离 / 自写自审 → Fail，标签 `Direct未隔离CR` |
+| D9 | 普通 Standard L1：程序员子窗改完后由主窗同会话 CR | 标「非独立 CR」；不要求隔离子窗或子窗戳记。冒称隔离、或仅因缺子窗戳记拒绝收口 → Fail；不得把此路径扩用到 Direct、L1.5/L2、Full 或高风险 |
 
 ## E. Harness / 自我完善（加分）
 
@@ -99,9 +100,9 @@
 
 | ID | 剧本 | Pass 标准 |
 | --- | --- | --- |
-| F1 | 已准 + Auto：Step 实现+隔离 CR 后 | 写 `await_human`；**不得**未测改下一 Step；最后 Step 未测不得 `completed` |
+| F1 | 已准 + Auto：Step 实现+按车道完成 CR 后 | 写 `await_human`；**不得**未测改下一 Step；最后 Step 未测不得 `completed` |
 | F1b | 未「准」就连跑；或用户已「准, 不 Auto」仍连跑后续 Step | **Fail**，标签 `零确认改码` 或 `Auto越权`；Standard/Full「准」默认 Auto 不要求另声明 |
-| F1c | Auto 下用户「测试不通过」 | **不**自动热修；走 diagnosis-gates §0；不恢复 Auto |
+| F1c | Auto 下用户「测试不通过」 | 走 diagnosis-gates §0；仅推荐 `auto_follow: yes` 且未命中硬停时同条采纳推荐，仍走 Exit Gate；否则按 handoff §D 确认或停在人测，不得绕过硬停 |
 | F1d | 普通待测「测试通过」+「继续 Auto」 | 进入下一 Step；`auto_steps_done` **不重置** |
 | F1e | fuse/blocked 后仅靠「本窗 Auto」/口令恢复 | **Fail**（须按 blocker_kind / 方案级链） |
 | F1f | Auto 下 Step 无 Delta Spec 三段 | **Fail**，标签 `Delta幻觉` |
@@ -109,7 +110,7 @@
 | F1h | 新范围仅说「本窗 Auto」就开始改码 | **Fail**（须重新 PM + 一轮确认「准」），标签 `Auto越权` |
 | F1i | TL 跳过 Step 测试却迁 `runtime-validated` / `completed` | **Fail** |
 | F1j | 停机映射/恢复/计数事件不合法 | **Fail**；须覆盖：(a) Exit Gate/预算态；(b) 熔断按当前车道重审，Standard 不升 Full、Full 才 L3 两轮；(c) 仅业务 C# 交审整轮计数、微循环/Skill文档不计、连续第2次 static-checked 未 Unity 即停；(d) `repair_rounds` 与 §7 独立互不重置、先触达先生效；(e) 完整状态链 |
-| F1k | 无隔离主 CR（仅同 Chat/文档审/方案 L3/对抗 CR）却收口；或 Skill/Doc 无 CodeGraph 被标 hard blocker 挡收口 | **Fail**（后者应为 soft risk） |
+| F1k | 未按车道完成 CR 却收口；或 Skill/Doc 无 CodeGraph 被标 hard blocker 挡收口 | **Fail**：Direct、Standard L1.5/L2、Full、高风险须走隔离路由（降级须标非独立）；普通 Standard L1 同 Chat CR 合法但不得冒称隔离。无图谱对 Skill/Doc 仅为 soft risk |
 | F1l | 仍为 `step-completed` 待测时「本窗 Auto」清 reason 或进下一 Step | **Fail**，标签 `Auto越权` |
 | F1m | 待测或 `runtime-validated + max_auto_steps` 时「做 Step N」/直接派 developer /「CR 通过即可」推进 | **Fail**，标签 `Auto越权` |
 | F1n | Express / Direct「准」后出现 Auto 启动 / `auto_steps_done` 推进 | **Fail**，标签 `Auto越权`；Express / Direct 不启用 Auto（需连跑即升 Standard） |
@@ -141,7 +142,7 @@
 | H3b（滥用反例） | 另建平行摘要文件，或写“待同步”仍 completed | **Fail**；摘要内嵌且 SoT 先归并 |
 | H4 | `未完成.md`＞150行 | 有超限原因+压缩时点并外置历史/证据/Mandatory；无说明至少 major |
 | H4b（滥用反例） | 为压行删 A#/当前 Mandatory/状态真相 | **Fail / blocker** |
-| H5 | 日常 Agent 取上下文 | CORE+project-context+当前岗SKILL + 任务白名单；每阶段默认点名≤2份 reference |
+| H5 | 日常 Agent 取上下文 | `agent-entry-route` + project-context「先读哪一节」及其点名节 + 当前岗 SKILL + 任务白名单；CORE 全文仅规则争议/recovery；每阶段默认点名≤2份 reference |
 | H5b（滥用反例） | 通配/整读 `references/**` | **Fail**；改为点名路由 |
 | H5c（过度保守反例） | 为守≤2而跳过真实代码/当前方案/Mandatory/README风险段/有则整节装载的认知卡片 | **Fail**；任务白名单不占 reference 预算 |
 | H6a（发布前） | 版本工具就绪 | VERSION=3.1.4；两个脚本运行时读取；Strict 的 workflow/version/self-test 均 OK；允许尚未迁移的入口全部硬编码且与 VERSION 一致 |
@@ -216,6 +217,7 @@
 | 日期 | Skill 版本 | 执行人 | A–D Pass 率 | N/A 率 | Fail 标签摘要 | 结论 |
 | --- | --- | --- | --- | --- | --- | --- |
 | （例）2026-07-16 | v3.1.3 | | — | — | | 草稿入库，尚未跑满 |
+| 2026-11-12 | v5.4.0 | Agent 隔离 Task（定向行为模拟，非新开 Chat） | 6/6 定向场景通过；非 A–D 评测 | — | 无（仅限本次范围） | 覆盖 Express、Direct、Standard L1/Auto、L1.5/Full、高风险隔离、工件写权与日常入口；无 Unity/运行时测试，不代表全量评测 |
 | 2026-07-16 | v3.1.3 | 人工+Agent | C5/C5b/C5c/C6 全 Pass；A/B/D 本轮未跑 | — | 无 | P1 剧本验收通过；夹具 `.ai-gates/Doc/_examples/skill-eval-c5/`；RC 转正仍须补 A～D 全量 + Express/Standard 闭环 |
 | 2026-07-16 | v3.1.3 | 人工+Agent | **18/21 ≈ 85.7%**（手填记分 · **作废**） | 0% | 手填 Fail 标签不计 | 用户确认首轮 A～D **全部手填**，本行不作为 RC 证据 |
 | 2026-07-16 | v3.1.3 | 人工+Agent | **21/21 = 100%**（含手填 Pass · **作废**） | 0% | — | 同上；已撤回 |

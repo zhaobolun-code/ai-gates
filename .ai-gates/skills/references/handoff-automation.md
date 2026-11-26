@@ -52,7 +52,7 @@
 1. `implementation-ready`，`可交给程序员`=是
 2. `in-progress`
 3. Standard/Full：默认启用 Auto（§H；`auto_steps_done=0`），除非用户用了退出句；Express / Direct：**不**启用 Auto
-4. `[developer]` 立即改码（仅当前 Step / 登记窗）：Express / Direct / Standard / Full 的业务改码都 **必须** Task 子窗。均按 [model-routing.md](./model-routing.md) 解析后的首选 slug **显式**传 `model=`（project-context §模型路由优先）。Direct CR 仍必须隔离子窗。
+4. `[developer]` 立即改码（仅当前 Step / 登记窗）：Standard / Full 的业务改码 **必须** Task 子窗；Express / Direct 由主窗改。按 [model-routing.md](./model-routing.md) 解析后的首选 slug **显式**传 `model=`（project-context §模型路由优先）。Direct CR 必须隔离；普通 Standard L1 可主窗同会话复核并标「非独立 CR」；更高档按 [isolated-review.md](./isolated-review.md) 隔离路由。
 
 **派策划 Task**：提示词禁点名典故 / 「很像某某模式」；扫 `design-patterns.md` 触发症状由策划完成。细则 [execution-discipline.md](./execution-discipline.md) §设计模式一问。
 
@@ -142,7 +142,7 @@ Standard/Full：确认包【推荐】「准」→ **默认本窗启用 Auto**（
 
 ### 方案 A（每 Step）
 
-实现 + **隔离主 CR** 无 blocker → `auto_steps_done +1` → 按 §C Exit 分支写**唯一** reason：命中 AI 验收 → 派验收子窗（可瞬态 `await_verify reason=ai_static`，**禁止**只写 `unity_test` 干等）；未命中/不确定 → `< max_auto_steps` → `await_human reason=unity_test`；`≥` → `await_human reason=max_auto_steps`；文档均为 `step-completed`。**禁止**未验改下一 Step；**禁止多 Step 攒批再验**。
+实现 + **按车道要求完成 CR** 无 blocker → `auto_steps_done +1` → 按 §C Exit 分支写**唯一** reason：普通 Standard L1 可主窗同会话 CR 并标「非独立 CR」；需隔离档位按 [isolated-review.md](./isolated-review.md) 路由。命中 AI 验收 → 派验收子窗（可瞬态 `await_verify reason=ai_static`，**禁止**只写 `unity_test` 干等）；未命中/不确定 → `< max_auto_steps` → `await_human reason=unity_test`；`≥` → `await_human reason=max_auto_steps`；文档均为 `step-completed`。**禁止**未验改下一 Step；**禁止多 Step 攒批再验**。
 
 **用户停点**：待验 / AI 验收 / `max_auto_steps` / diagnosis 硬停。Auto 下**禁止**在实现↔CR 之间或可自动跟的测挂推荐上再发确认包。
 **立即派 CR（准后无 blocker）**：一次「准」后无 blocker，实现子窗交回须**立即派 CR**；中间**禁止再发用户确认包**。禁止教「请先测再让我派 CR」。业务 C# 的交审材料里带上编译或 Editor.log 零错误，以及可执行 Unity 步骤或关键词。Skill/纯文档的交审材料写静态核对和可证伪假需求。禁止只写口号、禁止第二套 Auto。权威只落本节（§0 可互指一句；禁止写进 §F）。
@@ -175,14 +175,14 @@ Standard/Full：确认包【推荐】「准」→ **默认本窗启用 Auto**（
 
 - 普通签收 + 有下一已批准 Step：`step-completed → runtime-validated → in-progress`（清当前 stop_reason）
 - 预算用尽签收：`→ runtime-validated` 保留 reason；仅「本窗 Auto」后清 reason 进下一 Step
-- `blocker_kind=implementation`：解除 → `in-progress(原 Step)` + 重做隔离 CR
+- `blocker_kind=implementation`：解除 → `in-progress(原 Step)` + 按车道复审；普通 Standard L1 可主窗同会话并标非独立，需隔离档位重新派隔离 CR
 - `blocker_kind=plan` / discover 等：`blocked → review-pending → 按当前车道重审（Standard 不升 Full；Full 才 L3 两轮）→ 重新「准」→ implementation-ready → in-progress`
 - `fuse reason=max_repair_rounds`：同上方案级链；同条归零留据；口令不得重置计数
 - 修复轮：进 Step=0；初实现/初 CR 不计；CR blocker 后、下一次交审级修复前 +1；第 2 轮后仍 blocker → fuse，禁第 3 轮
 
 ### 禁止（Auto）
 
-自动 runtime-validated；自动开热修/新窗；自动改口径；静默 lessons；跳过 Delta Spec；CR 降档；自写自审冒充隔离；待验「本窗 Auto」或旁路口令进下一 Step；用「本窗 Auto」刷 `max_repair_rounds`；命中 AI 验收却只写 `unity_test` 干等。
+自动 runtime-validated；在 §D1 条件外自动跟进；借 §D1 自动跟进扩范围或绕过必要确认、车道派岗、隔离 CR、Exit Gate；自动改口径；静默 lessons；跳过 Delta Spec；CR 降档；需隔离档位自写自审；待验「本窗 Auto」或旁路口令进下一 Step；用「本窗 Auto」刷 `max_repair_rounds`；命中 AI 验收却只写 `unity_test` 干等。
 
 ## I. 复核派发转场（方案 / 代码）
 
@@ -192,7 +192,7 @@ Standard/Full：确认包【推荐】「准」→ **默认本窗启用 Auto**（
 
 1. **方案首次交审**：PM/planner 生成并保存 `证据/_方案审核派发.md`（`mode=plan`，`round=1`）后再派 plan-reviewer；Checker **只读** findings，**无写权**。
 2. **方案 blocker / 实质修订后**：Maker 修目标 → 重算 `target_revision`/`review_input_revision` → 去重压缩 `blocker_regression`（≤20 行）→ L3 有效轮次清零 → 重生第1轮工件 → 再派新 Checker。排除三节变更与同输入 1→2 切轮不清零。
-3. **代码交 CR / 复审**：developer（或 PM）生成/刷新 `证据/_Step{NN}-代码审核派发.md`，绑定当前 Step、Mandatory、最新 diff；blocker 修复后更新 revision/diff + 上轮 blocker≤20 行再开隔离复审。可选对抗使用独立 `mode=adversarial` 工件，**不可替代**隔离主 CR。
+3. **代码交 CR / 复审**：developer 生成/刷新 `证据/_Step{NN}-代码审核派发.md`，绑定当前 Step、Mandatory、最新 diff；blocker 修复后更新 revision/diff + 上轮 blocker≤20 行再复审。需隔离的档位派新隔离 Reviewer；普通 Standard L1 可主窗同会话复审并标「非独立 CR」。Direct 无工件时 PM 只组装最短派发包，不改持久派发文件。可选对抗使用独立 `mode=adversarial` 工件，**不可替代**需隔离档位的 CR。
 4. **验收/verify**：齐套见 [review-dispatch-lifecycle.md](./review-dispatch-lifecycle.md) `mode=verify` + [verify-dispatch.md](../templates/verify-dispatch.md) + 模型表「验收/verify」行；**强制派验收接线**见 §C / Exit Gate（须齐套已存在；能 AI 测则子窗，不能再人测）。
 
 ### L3 第1→第2（仅 PM/planner）

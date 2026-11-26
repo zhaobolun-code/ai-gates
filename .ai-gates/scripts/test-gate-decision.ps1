@@ -38,6 +38,9 @@ Assert-Decision 'log patch is not denied' (-not (Test-DangerousGitCommand -Comma
 Assert-Decision 'plain version is official' (Test-OfficialVersion -Version '5.1.0') ''
 Assert-Decision 'v prefix is official' (Test-OfficialVersion -Version 'v5.1.0') ''
 Assert-Decision 'garbage suffix is not official' (-not (Test-OfficialVersion -Version '5.1.0garbage')) ''
+Assert-Decision '6.0.0A is a test pack not a release' ((-not (Test-OfficialVersion -Version '6.0.0A')) -and (Test-AcceptedPackVersion -Version '6.0.0A') -and (Test-TestPackVersion -Version '6.0.0A')) ''
+Assert-Decision '6.0.0A compares as 6.0.0' ((Get-PackSemver -Version '6.0.0A').Raw -eq '6.0.0') ''
+Assert-Decision 'release tag does not match the A test pack' (-not (Test-TagMatchesPackVersion -Tag 'v6.0.0' -PackVersion '6.0.0A')) ''
 Assert-Decision 'v tag matches pack version' (Test-TagMatchesPackVersion -Tag 'v5.2.0' -PackVersion '5.2.0') ''
 Assert-Decision 'different tag does not match pack' (-not (Test-TagMatchesPackVersion -Tag 'v5.2.0' -PackVersion '5.1.0')) ''
 
@@ -129,6 +132,8 @@ $rootReadme = Get-WriteGateVerdict -HostName cursor -Paths @('README.md') -GateS
 Assert-Decision 'root readme is not facility' ($rootReadme.Allow -and $rootReadme.Detail -eq 'business_write') $rootReadme.Detail
 $stamp = Get-WriteGateVerdict -HostName cursor -Paths @('.ai-gates/hooks-log/cr-stamp.json') -OwnPm Fresh
 Assert-Decision 'verdict blocks main window stamp' ((-not $stamp.Allow) -and $stamp.Detail -eq 'cr_stamp_main_window') $stamp.Detail
+$childStamp = Get-WriteGateVerdict -HostName cursor -Paths @('.ai-gates/hooks-log/cr-stamp.json') -GateState Ok -OwnPm Missing -ParentId 'parent-conv'
+Assert-Decision 'child window can write stamp' ($childStamp.Allow) $childStamp.Detail
 $planDispatch = 'Assets/LabSDK/证据/_方案审核派发.md'
 Assert-Decision 'plan dispatch path recognized' (Test-ReviewDispatchPath -FilePath $planDispatch) ''
 Assert-Decision 'verify dispatch is not the review file' (-not (Test-ReviewDispatchPath -FilePath '证据/_Step01-验收派发.md')) ''
@@ -157,6 +162,16 @@ Assert-Decision 'auth script name is denied' (Test-AuthScriptInvoke -CommandText
 Assert-Decision 'renamed script name is not denied' (-not (Test-AuthScriptInvoke -CommandText 'powershell -File .\copied-gate.ps1')) ''
 Assert-Decision 'enable kill switch script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates\scripts\enable-kill-switch.ps1') ''
 Assert-Decision 'disable kill switch script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates/scripts/disable-kill-switch.ps1') ''
+Assert-Decision 'instability collector script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates\hooks\collect-instability-prompt.ps1') ''
+Assert-Decision 'instability invalidate script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates/scripts/invalidate-instability-event.ps1') ''
+Assert-Decision 'enable iteration stop-write script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates/scripts/enable-instability-stop-write.ps1 -IterationT 3') ''
+Assert-Decision 'disable iteration stop-write script name is denied' (Test-AuthScriptInvoke -CommandText 'powershell -File .ai-gates/scripts/disable-instability-stop-write.ps1') ''
+$iterFlag = Get-WriteGateVerdict -HostName cursor -Paths @('.ai-gates/hooks-log/instability-stop-write.json') -GateState Ok -OwnPm Fresh
+Assert-Decision 'editor cannot forge iteration stop-write flag' ((-not $iterFlag.Allow) -and $iterFlag.Detail -eq 'gate_auth_state') $iterFlag.Detail
+$ledgerWrite = Get-WriteGateVerdict -HostName cursor -Paths @('.ai-gates/hooks-log/instability-ledger.jsonl') -GateState Ok -OwnPm Fresh
+Assert-Decision 'editor cannot forge instability ledger' ((-not $ledgerWrite.Allow) -and $ledgerWrite.Detail -eq 'gate_auth_state') $ledgerWrite.Detail
+$taskWrite = Get-WriteGateVerdict -HostName cursor -Paths @('.ai-gates/hooks-log/instability-tasks.json') -GateState Ok -OwnPm Missing -ParentHasFreshPm $true
+Assert-Decision 'child cannot forge instability tasks' ((-not $taskWrite.Allow) -and $taskWrite.Detail -eq 'gate_auth_state') $taskWrite.Detail
 Assert-Decision 'empty path is not an active kill switch' (-not (Test-KillSwitchActive -FilePath '')) ''
 Assert-Decision 'kill switch path matched' (Test-KillSwitchPath -FilePath '.ai-gates/hooks-log/pm-gate-disabled') ''
 Assert-Decision 'kill switch path backslash matched' (Test-KillSwitchPath -FilePath '.ai-gates\hooks-log\pm-gate-disabled') ''
@@ -225,6 +240,31 @@ foreach ($hostName in @("cursor", "claude", "codex")) {
         Assert-Decision ("freeze " + $hostName + " " + $code) ($combined.Contains($code)) "missing"
     }
 }
+
+$shapeStub = 'D:\Work\Chemical-p0c-s0-stub\A.cs'
+$shape54 = 'D:\Work\Chemical-p0c-s0-54\A.cs'
+$shapeMain = 'D:\Work\Chemical\Assets\LabSDK\A.cs'
+$shapeCompare = '形状拒绝：局部变量的赋值已改，后面的运算仍使用未改的操作数。'
+$shapeCondition = '形状拒绝：if 条件里的成员已去掉，该成员的声明还在。'
+$shapeS1Before = 'void M() { float r = a / b; float t = (r - r1) / (r2 - r1); }'
+$shapeS1After = 'void M() { float r = c / d; float t = (r - r1) / (r2 - r1); }'
+$shapeS2After = 'void M() { float r = c / d; float t = (r - r1) / (u2 - r1); }'
+$shapeS3Before = 'void M() { if (box.limit >= 1f) return; }'
+$shapeS3After = 'void M() { if (box.value >= 1f) return; }'
+$shapeS4Before = 'void M() { if (ratio >= 0.9f) return; }'
+$shapeS4After = 'void M() { if (ratio >= 1f) return; }'
+Assert-Decision 'S1 stub compare rejects' ((Test-ShapeRejectWrite -FilePath $shapeStub -Before $shapeS1Before -After $shapeS1After) -eq $shapeCompare) ''
+Assert-Decision 'S2 successor change allows' ($null -eq (Test-ShapeRejectWrite -FilePath $shapeStub -Before $shapeS1Before -After $shapeS2After)) ''
+Assert-Decision 'S3 member removed rejects' ((Test-ShapeRejectWrite -FilePath $shapeStub -Before $shapeS3Before -After $shapeS3After) -eq $shapeCondition) ''
+Assert-Decision 'S4 literal change allows' ($null -eq (Test-ShapeRejectWrite -FilePath $shapeStub -Before $shapeS4Before -After $shapeS4After)) ''
+Assert-Decision 'S5 5.4 path allows' ($null -eq (Test-ShapeRejectWrite -FilePath $shape54 -Before $shapeS1Before -After $shapeS1After)) ''
+Assert-Decision 'main path allows the S1 shape' ($null -eq (Test-ShapeRejectWrite -FilePath $shapeMain -Before $shapeS1Before -After $shapeS1After)) ''
+$shapeCommentBefore = "void M() { float r = a / b; if (box.limit >= 1f) return; }`n// 场景 3 热修"
+$shapeCommentAfter = "void M() { float r = a / b; if (box.limit >= 1f) return; }`n// 连接件到容器"
+Assert-Decision 'comment only allows' ($null -eq (Test-ShapeRejectWrite -FilePath $shapeStub -Before $shapeCommentBefore -After $shapeCommentAfter)) ''
+$shapeKeepBefore = 'void M() { float r = a / b; if (box.limit >= 1f) return; }'
+$shapeKeepAfter = 'void M() { float r = c / d; if (box.limit >= 1f) return; }'
+Assert-Decision 'kept member does not trip the condition' ($null -eq (Test-ShapeRejectWrite -FilePath $shapeStub -Before $shapeKeepBefore -After $shapeKeepAfter)) ''
 
 if ($failed -gt 0) { exit 1 }
 Write-Host "gate-decision: all passed"

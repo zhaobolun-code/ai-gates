@@ -6,7 +6,7 @@
 #
 # Packaged scope (see .ai-gates/skills/MAINTAINER.md §目录与同步策略 / project-local-config.md):
 #   包顶层 = .ai-gates/（解压到目标项目根即得中央技能库 .ai-gates/）：
-#     skills/    all files EXCEPT MAINTAINER.md (maintainer-only); after copy, references/design-patterns.md
+#     skills/    all files EXCEPT MAINTAINER.md (maintainer-only) and unity-skills/ (project-local Unity tool tree); after copy, references/design-patterns.md
 #                is overwritten from templates/design-patterns.template.md (empty table)
 #                本仓验证在仓库根 design-patterns.project.md（不拷）
 #                CHANGELOG.md at pack root IS shipped for public trust
@@ -21,7 +21,7 @@
 #     link-platform.ps1/.sh  (new-project one-shot portal creation)
 #     METHODOLOGY.md + USER-GUIDE.md + README.md + LICENSE + CHANGELOG.md + PACKAGE-INFO.md
 # Excluded: this script itself, project-context.md (含项目口诀), regression-index.yaml, pipeline-*.log,
-#           hooks-log/ (runtime log), skills/MAINTAINER.md, scripts/ci-pressure-manager-gate.ps1,
+#           hooks-log/ (runtime log), skills/MAINTAINER.md, skills/unity-skills/ (project-local Unity tool tree), scripts/ci-pressure-manager-gate.ps1,
 #           lessons-learned.md / lessons-outline.md (错题本, .ai-gates 根, 本就不拷),
 #           design-patterns.project.md（本仓验证，.ai-gates 根, 本就不拷）,
 #           claude/settings.local.json（机器本地，若有）,
@@ -112,10 +112,12 @@ $stageRoot = Join-Path $stage ".ai-gates"
 New-Item -ItemType Directory -Force -Path $stageRoot | Out-Null
 
 try {
-    Write-Host "Copying skills (excluding MAINTAINER.md)..."
+    Write-Host "Copying skills (excluding MAINTAINER.md and unity-skills)..."
     $stageSkills = Join-Path $stageRoot "skills"
     Copy-Item -Path $skillsDir -Destination $stageSkills -Recurse -Force
     Remove-Item -Path (Join-Path $stageSkills "MAINTAINER.md") -Force -ErrorAction SilentlyContinue
+    # unity-skills/ 是本机 Unity 工具树，只服务当前 Unity 工程，不随 ai-gates 发布。
+    Remove-Item -Path (Join-Path $stageSkills "unity-skills") -Recurse -Force -ErrorAction SilentlyContinue
 
     Write-Host "Replacing design-patterns.md with empty-table template (project verification stays in design-patterns.project.md)..."
     $dpTemplate = Join-Path $stageSkills "templates/design-patterns.template.md"
