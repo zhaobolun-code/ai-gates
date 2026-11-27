@@ -5,7 +5,7 @@
 
 .DESCRIPTION
   - -DocFolder：方案夹路径（证据写入 <DocFolder>/证据/）
-  - -Aids："A1,A2" 或 "A1 A2"；-Status 默认「通过」
+  - -Aids："A1,A2" 或 "A1 A2"；未传 -Status 且没有采集到文件时，结论写「未采集」
   - -LogFile：控制台/Editor.log 路径（写入证据/evidence-console.md 尾部 200 行）
   - -Screenshots："a.png,b.png"；-TestReport：测试报告文件（拷入证据目录）
   - 输出 evidence.md（A# 表 + 证据文件清单）；退出码 0 = 采集成功
@@ -20,7 +20,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$DocFolder,
     [string]$Aids = '',
-    [string]$Status = '通过',
+    [string]$Status = '未核',
     [string]$LogFile = '',
     [string]$Screenshots = '',
     [string]$TestReport = '',
@@ -66,10 +66,15 @@ if ($TestReport -and (Test-Path -LiteralPath $TestReport)) {
 }
 
 $aidList = @($Aids -split '[,\s]+' | Where-Object { $_ })
+$conclusion = $Status
+if (-not $PSBoundParameters.ContainsKey('Status') -and $copied.Count -eq 0) {
+    $conclusion = '未采集'
+}
+$stamp = Get-Date -Format 'yyyy-MM-dd HH:mm'
 $aidRows = if ($aidList.Count -gt 0) {
-    ($aidList | ForEach-Object { "| $_ | $Status | $(Get-Date -Format 'yyyy-MM-dd HH:mm') |" }) -join "`n"
+    ($aidList | ForEach-Object { "| $_ | $conclusion | $stamp |" }) -join "`n"
 } else {
-    "| （未列 A#） | $Status | $(Get-Date -Format 'yyyy-MM-dd HH:mm') |"
+    "| （未列 A#） | $conclusion | $stamp |"
 }
 
 $md = @(

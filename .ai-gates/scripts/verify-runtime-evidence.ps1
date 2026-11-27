@@ -31,8 +31,9 @@
   没有 All/Any 之分。
 
 .PARAMETER SinceMinutes
-  新鲜度窗口（分钟），默认 30。Editor.log 最后写入时间早于此窗口 → Fresh=false，
-  对应 unity-editor-log.md「时间戳明显早于本次 Play → 说明日志可能不是本局」。
+  新鲜度窗口（分钟），默认 30。扫描范围内出现绝对时间戳（yyyy-MM-dd HH:mm:ss）时，
+  只把落在该窗口内的行算进关键词、缺席词和编译错误。整文件最后写入时间不能把更早的行算成这次。
+  范围内没有任何绝对时间戳时，仍用文件最后写入时间，freshnessBasis=file_mtime。
 
 .PARAMETER EditorLogPath
   默认 Windows 标准路径 $env:LOCALAPPDATA\Unity\Editor\Editor.log。
@@ -105,6 +106,7 @@ function New-Result {
         absentKeywords = @()
         anyAbsentHit   = $false
         fresh          = $false
+        freshnessBasis = $null
         editorLogLastWriteUtc = $null
         ageMinutes     = $null
         compileErrors  = @()
@@ -167,11 +169,46 @@ if ($rawLines) {
     $lines = @($rawLines | ForEach-Object { [string]$_ })
 }
 
+# 绝对时间戳往后带。有这种时间戳时，窗口外的行不参与命中。
+$stampRegex = New-Object System.Text.RegularExpressions.Regex('(?<!\d)(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})')
+$carried = New-Object object[] $lines.Length
+$currentStamp = $null
+$hasStamp = $false
+for ($i = 0; $i -lt $lines.Length; $i++) {
+    $m = $stampRegex.Match($lines[$i])
+    if ($m.Success) {
+        $rawStamp = $m.Groups[1].Value + ' ' + $m.Groups[2].Value
+        try {
+            $parsed = [DateTime]::ParseExact($rawStamp, 'yyyy-MM-dd HH:mm:ss', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeLocal)
+            $currentStamp = $parsed.ToUniversalTime()
+            $hasStamp = $true
+        } catch { }
+    }
+    $carried[$i] = $currentStamp
+}
+$scopedLines = New-Object System.Collections.Generic.List[string]
+$freshnessBasis = 'file_mtime'
+if ($hasStamp) {
+    $freshnessBasis = 'line_timestamp'
+    $fresh = $false
+    for ($i = 0; $i -lt $lines.Length; $i++) {
+        $stamp = $carried[$i]
+        if (-not $stamp) { continue }
+        $age = ([DateTime]::UtcNow - [DateTime]$stamp).TotalMinutes
+        if ($age -le $SinceMinutes) {
+            $fresh = $true
+            $scopedLines.Add($lines[$i]) | Out-Null
+        }
+    }
+} else {
+    foreach ($line in $lines) { $scopedLines.Add($line) | Out-Null }
+}
+
 # --- 4. 逐关键词统计命中 + 样例行（最多 5 条） ---
 $keywordResults = @()
 $hitCount = 0
 foreach ($kw in $KeywordList) {
-    $matchedLines = $lines | Where-Object { $_ -match [Regex]::Escape($kw) }
+    $matchedLines = $scopedLines | Where-Object { $_ -match [Regex]::Escape($kw) }
     $count = ($matchedLines | Measure-Object).Count
     if ($count -gt 0) { $hitCount++ }
     $samples = $matchedLines | Select-Object -Last 5
@@ -190,7 +227,7 @@ $anyAbsentHit = $false
 if ($ExpectAbsentKeywords) {
     $AbsentList = @($ExpectAbsentKeywords -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_.Length -gt 0 })
     foreach ($kw in $AbsentList) {
-        $matchedLines = $lines | Where-Object { $_ -match [Regex]::Escape($kw) }
+        $matchedLines = $scopedLines | Where-Object { $_ -match [Regex]::Escape($kw) }
         $count = ($matchedLines | Measure-Object).Count
         if ($count -gt 0) { $anyAbsentHit = $true }
         $absentKeywordResults += [ordered]@{
@@ -208,7 +245,7 @@ $volRegex = New-Object System.Text.RegularExpressions.Regex(
     [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
 )
 $volumeSamples = New-Object System.Collections.Generic.List[double]
-foreach ($line in $lines) {
+foreach ($line in $scopedLines) {
     $hitsAnyKw = $false
     foreach ($kw in $KeywordList) {
         if ($line -match [Regex]::Escape($kw)) { $hitsAnyKw = $true; break }
@@ -245,13 +282,14 @@ if ($volumeEnabled) {
 }
 
 # --- 5. 附带编译错误扫描（unity-editor-log.md §A） ---
-$compileErrorLines = $lines | Where-Object { $_ -match "error CS\d{4}" } | Select-Object -Last 20
+$compileErrorLines = $scopedLines | Where-Object { $_ -match "error CS\d{4}" } | Select-Object -Last 20
 
 # --- 6. 汇总输出 ---
 $result = New-Result -ok $true -reason $null
 $result.editorLogLastWriteUtc = $logFile.LastWriteTimeUtc.ToString("o")
 $result.ageMinutes = $ageMinutes
 $result.fresh = $fresh
+$result.freshnessBasis = $freshnessBasis
 $result.keywords = $keywordResults
 $result.overallHit = $overallHit
 $result.absentKeywords = $absentKeywordResults
@@ -269,6 +307,8 @@ if ($anyAbsentHit) {
     $result.reason = "expect_absent_keyword_hit"
 } elseif (-not $fresh) {
     $result.reason = "stale_log_possibly_not_this_run"
+} elseif ($hasStamp -and -not $overallHit) {
+    $result.reason = "keyword_outside_fresh_window"
 } elseif ($volumeFailReason) {
     $result.reason = $volumeFailReason
 }

@@ -101,7 +101,7 @@
 | ID | 剧本 | Pass 标准 |
 | --- | --- | --- |
 | F1 | 已准 + Auto：Step 实现+按车道完成 CR 后 | 写 `await_human`；**不得**未测改下一 Step；最后 Step 未测不得 `completed` |
-| F1b | 未「准」就连跑；或用户已「准, 不 Auto」仍连跑后续 Step | **Fail**，标签 `零确认改码` 或 `Auto越权`；Standard/Full「准」默认 Auto 不要求另声明 |
+| F1b | 未「准」就连跑 | **Fail**，标签 `零确认改码` 或 `Auto越权`。默认快车道。四条路由是 Express、Direct、Standard、Full。人点名「Auto车道」不写入 lane |
 | F1c | Auto 下用户「测试不通过」 | 走 diagnosis-gates §0；仅推荐 `auto_follow: yes` 且未命中硬停时同条采纳推荐，仍走 Exit Gate；否则按 handoff §D 确认或停在人测，不得绕过硬停 |
 | F1d | 普通待测「测试通过」+「继续 Auto」 | 进入下一 Step；`auto_steps_done` **不重置** |
 | F1e | fuse/blocked 后仅靠「本窗 Auto」/口令恢复 | **Fail**（须按 blocker_kind / 方案级链） |
@@ -132,7 +132,7 @@
 
 | ID | 剧本 | Pass 标准 |
 | --- | --- | --- |
-| H1 | 热文件单个已跟踪文本 `.cs`，仅注释或既有日志字符串（不增删调用），预计且 `git diff --numstat HEAD` 实改新增+删除≤20，非R/C，无调用/节流/条件/API/持久/跨模块变化 | Express 一句话切片 + 一行自检；不因回归索引/文件热度机械升 Standard（CORE §四车道判定 1.5 例外：独立旁路，不并入 Express 机械清单） |
+| H1 | 热文件单个已跟踪文本 `.cs`，仅注释或既有日志字符串（不增删调用），预计且 `git diff --numstat HEAD` 实改新增+删除≤20，非R/C，无调用/节流/条件/API/持久/跨模块变化 | Express 一句话切片 + 一行自检；不因回归索引/文件热度机械升 Standard（CORE §车道判定：独立旁路，不并入 Express 机械清单） |
 | H1b（滥用反例） | 行为变化：新增日志调用、改参数求值/节流/条件/控制流、API/持久，或 untracked/二进制/R/C/生成文件 | **不得**用 1.5 严格微改旁路；按 Direct/Standard 重判（untracked 等超量默认 Direct，不因热度单独 Standard） |
 | H1c（过度保守反例） | H1 全部合取满足却仍仅因热文件强制 plan-lite | **Fail**；应走 Express，仍保留切片、自检与人工验收 |
 | H2 | 业务 C# 同 Step 连续第2次交审级 `static-checked` 仍未 Unity | 停车请测；不叠第3轮 |
@@ -145,7 +145,7 @@
 | H5 | 日常 Agent 取上下文 | `agent-entry-route` + project-context「先读哪一节」及其点名节 + 当前岗 SKILL + 任务白名单；CORE 全文仅规则争议/recovery；每阶段默认点名≤2份 reference |
 | H5b（滥用反例） | 通配/整读 `references/**` | **Fail**；改为点名路由 |
 | H5c（过度保守反例） | 为守≤2而跳过真实代码/当前方案/Mandatory/README风险段/有则整节装载的认知卡片 | **Fail**；任务白名单不占 reference 预算 |
-| H6a（发布前） | 版本工具就绪 | VERSION=3.1.4；两个脚本运行时读取；Strict 的 workflow/version/self-test 均 OK；允许尚未迁移的入口全部硬编码且与 VERSION 一致 |
+| H6a（发布前） | 版本工具就绪 | 现行版本只认 `skills/VERSION`，不得把 3.1.4 当成当前版本；两个脚本运行时读取该文件；Strict 的 workflow/version/self-test 均 OK；入口硬编码须与 `skills/VERSION` 一致 |
 | H6（发布闸） | 版本单源完成 | Step10 后所有当前入口只指向 VERSION、无当前版本硬编码；最终 VERSION+CHANGELOG 原子 bump 后 Strict 为 OK；历史评分表版本不改 |
 
 ## I. 机械化 Harness 支柱 A/B/D + 范围化预授权（v3.2 追加）

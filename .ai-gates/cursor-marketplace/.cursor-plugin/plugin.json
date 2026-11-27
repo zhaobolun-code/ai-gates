@@ -1,7 +1,7 @@
 {
   "name": "ai-gates",
-  "version": "6.0.0",
-  "description": "AI development pipeline: one PM entry, four lanes, planner/developer/review skills, and write-gates that block edits without a PM turn. After install, skills live in the project .ai-gates/ folder; say PM upgrade ai-gates to update.",
+  "version": "6.0.1",
+  "description": "AI development pipeline: four route lanes (Express, Direct, Standard, Full). Naming Auto does not write the lane. Say what to do; upgrade with 升级 ai-gates. Skills live in the project .ai-gates/ folder.",
   "author": { "name": "ai-gates" },
   "license": "MIT",
   "keywords": ["pipeline", "skills", "code-review", "gates"],

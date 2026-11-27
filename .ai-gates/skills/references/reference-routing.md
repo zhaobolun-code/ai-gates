@@ -94,7 +94,7 @@
 | 钩子只提示、不升成拒绝 | `hooks-advisory.md` |
 | 车道用词 | `lane-glossary.md` |
 | 方案审档位 | `plan-review-tiers.md` |
-| 项目经理 初始化 / 检查健康 | `pm-init.md` |
+| 初始化 / 检查健康 | `pm-init.md` |
 | 项目经理工具 | `pm-tooling.md` |
 | 项目专属配置不进技能包 | `project-local-config.md` |
 | 派文档岗 | `readme-dispatch.md` |

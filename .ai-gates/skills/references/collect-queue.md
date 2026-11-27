@@ -64,7 +64,7 @@ Chemical「准」不触发 gh pr create / gh issue create、不自动入仓
 缺探测成功 → 不得开 PR；本地队列照常
 禁止 cron；禁止自动扫主表开 PR
 zhaobolun-code/ai-gates 仍是技能包真源，不是收集仓默认
-下发 = 「项目经理 升级 ai-gates」拉 zhaobolun-code/ai-gates（不是拉 collect 仓，不是再开 PR）
+下发 = 「升级 ai-gates」拉 zhaobolun-code/ai-gates（不是拉 collect 仓，不是再开 PR）
 收集仓合并 ≠ 已下发
 入通用格须另「准」
 ```
@@ -84,7 +84,7 @@ gh auth status
 
 ## Skill 自进化（回传 = 升级拉包）
 
-最终：用户上传 GitHub（项目典故 + 项目错题本）→ 抽象成通用级 → 下发到用户 Skill。四格与本仓抽象路径见 [pattern-harvest.md](./pattern-harvest.md) §Skill 自进化。回传=升级拉包：下发=「项目经理 升级 ai-gates」（=`PM upgrade ai-gates`）拉 `zhaobolun-code/ai-gates`，不是拉 collect 仓。收集仓已开通；收集仓合并 ≠ 已下发。入通用格须另「准」。未登录时出口仍是本地队列；上传=collect PR。「准」不开 PR。禁止平行 `github-collect.md`。未验证本机 `gh auth status` 成功时禁止写「本机已登录/已开 PR/技能包已下发」。
+最终：用户上传 GitHub（项目典故 + 项目错题本）→ 抽象成通用级 → 下发到用户 Skill。四格与本仓抽象路径见 [pattern-harvest.md](./pattern-harvest.md) §Skill 自进化。回传=升级拉包：下发=「升级 ai-gates」拉 `zhaobolun-code/ai-gates`，不是拉 collect 仓。收集仓已开通；收集仓合并 ≠ 已下发。入通用格须另「准」。未登录时出口仍是本地队列；上传=collect PR。「准」不开 PR。禁止平行 `github-collect.md`。未验证本机 `gh auth status` 成功时禁止写「本机已登录/已开 PR/技能包已下发」。
 
 本地环到 `shareable` + 抽象草稿为止；「准」才入通用格。禁止把「准」写成自动入仓或自动写入 `shared-language.md` §典故 / `anti-patterns.md` 的触发器。
 

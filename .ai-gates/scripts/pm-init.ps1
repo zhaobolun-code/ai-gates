@@ -228,5 +228,5 @@ if ($needModelAsk) {
 # 6. 人工填写
 Write-Host "6. [人工] 填写 .cursor/project-context.md 的回归索引（≥1~2 行），然后运行：powershell -ExecutionPolicy Bypass -File .cursor/scripts/sync-regression-index.ps1 -Apply"
 Write-Host ""
-Write-Host "按清单逐步确认后，用「项目经理 + 需求」开工（未初始化前 Agent 走 CORE §无 project-context 冷启动，保守 Standard）。" -ForegroundColor DarkGray
+Write-Host "按清单逐步确认后，直接说要做的事（未初始化前每一刀 Express，见 CORE 冷启动）。" -ForegroundColor DarkGray
 exit 0

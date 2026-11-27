@@ -327,14 +327,14 @@ try {
         "## 首次接入新项目",
         "",
         "1. 解压本包到目标仓库根：包顶层 = 中央技能库 .ai-gates/ 的内容（skills/、hooks/（含 hooks/codex、hooks/claude、hooks/copilot 与 hooks/plugin）、scripts/（含 fog-map.template.html）、rules/、codex/、claude/、link-platform.* 等），无需额外嵌套",
-        "2. 在 Agent 窗口粘贴「项目经理 升级 ai-gates」（=PM upgrade ai-gates），由 Agent 建好传送门（自动建 .cursor/*、.codex、.claude、.trae/skills 软连接；手动运行 .ai-gates/link-platform.ps1 亦可，非必需）",
+        "2. 在 Agent 窗口说「升级 ai-gates」（=upgrade），由 Agent 建好传送门（自动建 .cursor/*、.codex、.claude、.trae/skills 软连接；手动运行 .ai-gates/link-platform.ps1 亦可，非必需）",
         "3. 先读 .ai-gates/README.md（30 秒看懂 + 安装）→ .ai-gates/USER-GUIDE.md（口令与第一次接入）→ 需要时再读 .ai-gates/METHODOLOGY.md（为什么这么设计）",
-        "4. Codex 用户：按源仓库示例创建根级 AGENTS.md（入口路由；本包不含，项目相关），再在 Agent 粘贴「项目经理 初始化」（项目经理=PM，初始化=init，升级=upgrade，检查健康=doctor），填写 project-context 后提需求",
+        "4. Codex 用户：按源仓库示例创建根级 AGENTS.md（入口路由；本包不含，项目相关），再在 Agent 说「初始化」（=init）。检查健康说「检查健康」（=doctor）。同意说「准」（=approve）。填写 project-context 后直接说要做的事",
         "",
         "## 预期（避免「不好用」）",
         "",
         "- 不是万能药：每步仍要人验收；须自建项目说明（project-context）",
-        "- 入口固定为「项目经理 + 需求」；跳过容易乱",
+        "- 入口是直接说要做的事。不必先说「项目经理」",
         "- 复杂问题仍可能失败并归档——那是叫停换路，不是流程坏了",
         "",
         "版本号以 skills/VERSION 为准；变更摘要见 CHANGELOG.md（包根）。"
@@ -346,16 +346,23 @@ $releasesDir = Split-Path $outFile -Parent
 if (-not (Test-Path -LiteralPath $releasesDir)) {
     New-Item -ItemType Directory -Force -Path $releasesDir | Out-Null
 }
-if (Test-Path $outFile) { Remove-Item -Force $outFile }
+$outPartial = "$outFile.partial"
+if (Test-Path -LiteralPath $outPartial) { Remove-Item -Force $outPartial }
 
-    Write-Host "Packing to $outFile ..." -ForegroundColor Cyan
+    Write-Host "Packing to $outPartial ..." -ForegroundColor Cyan
     # Archive the contents of $stage (包顶层 = .ai-gates 内容；解压到项目根即得中央技能库)。
+    # 成功后再替换正式包，避免先删掉旧 7z 再打包失败。
     Push-Location $stage
     try {
-        & $sevenZip a -t7z -mx=9 $outFile "*" | Out-Null
+        & $sevenZip a -t7z -mx=9 $outPartial "*" | Out-Null
         $zipExit = $LASTEXITCODE
     } finally {
         Pop-Location
+    }
+    if ($zipExit -eq 0 -and (Test-Path -LiteralPath $outPartial)) {
+        Move-Item -LiteralPath $outPartial -Destination $outFile -Force
+    } elseif (Test-Path -LiteralPath $outPartial) {
+        Remove-Item -Force $outPartial
     }
 
     if ($zipExit -ne 0) {

@@ -1,9 +1,9 @@
 ---
 name: ai-gates
 description: >-
-  AI development pipeline for Cursor (PM entry, four lanes, planner/developer/CR).
-  Use when installing or explaining ai-gates, when the user says 项目经理 or PM,
-  or when wiring marketplace install vs GitHub upgrade.
+  AI development pipeline for Cursor. Four route lanes: Express, Direct,
+  Standard, Full. Naming Auto does not write the lane. Use when installing
+  or explaining ai-gates, or when wiring marketplace install vs upgrade.
 ---
 
 # ai-gates
@@ -12,16 +12,13 @@ This is the **marketplace meta-skill**. Job skills (`planner`, `developer`, …)
 
 ## First open of a project
 
-Plugin `sessionStart` copies `.ai-gates/` into the workspace (if missing) and writes `.cursor/ai-gates-runtime.json` with `owner: project`. Then tell the user to say `项目经理 初始化`.
+Plugin `sessionStart` copies `.ai-gates/` into the workspace (if missing) and writes `.cursor/ai-gates-runtime.json` with `owner: project`. Then tell the user to say `初始化`.
 
 ## Everyday entry
 
-```text
-项目经理
-[what they want]
-```
+Say what to do. Do not require the words 项目经理 or PM first.
 
-Same as `PM`. Upgrade the **project** library with `项目经理 升级 ai-gates` (GitHub tags). That does not update the Cursor plugin cache.
+Upgrade the **project** library with `升级 ai-gates` (GitHub tags). That does not update the Cursor plugin cache.
 
 ## Two hook sets, one run
 

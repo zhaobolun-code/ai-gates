@@ -137,13 +137,13 @@ try {
         Write-Host "workflow consistency: FAILED (README Standard order)" -ForegroundColor Red
         $workflowOk = $false
     }
-    if ($evalRaw -notmatch 'F1b.*未「准」就连跑.*准, 不 Auto') {
-        Write-Host "workflow consistency: FAILED (F1b Auto default/exit regression)" -ForegroundColor Red
+    if ($evalRaw -notmatch 'F1b.*未「准」就连跑.*四条路由.*人点名「Auto车道」.*不写入 lane') {
+        Write-Host "workflow consistency: FAILED (F1b four route lanes, named Auto does not write lane)" -ForegroundColor Red
         $workflowOk = $false
     }
-    if ($readmeRaw -notmatch '(?s)(?=.*Express)(?=.*Direct)(?=.*Standard)(?=.*Full)' -or
+    if ($readmeRaw -notmatch '(?s)(?=.*快车道)(?=.*直通)(?=.*标准道)(?=.*完整流程)(?=.*Auto车道)' -or
         $readmeRaw -match '三车道') {
-        Write-Host "workflow consistency: FAILED (USER-GUIDE four-lane wording)" -ForegroundColor Red
+        Write-Host "workflow consistency: FAILED (USER-GUIDE lane wording)" -ForegroundColor Red
         $workflowOk = $false
     }
     if ($maintainerRaw -match 'CORE\.md.*≈120|USER-GUIDE\.md.*≤120|README\.md.*≤90|METHODOLOGY\.md.*≤120') {
@@ -160,6 +160,7 @@ try {
         param([string]$Raw, [string]$VersionPattern)
         $raw = $Raw
         $head = (($raw -split "`r?`n") | Select-Object -First 12) -join "`n"
+        if ($head -match '(?<v>\d+\.\d+\.\d+)') { return @{ Mode = "hardcoded"; Version = $Matches["v"] } }
         if ($head -match '\bVERSION\b') { return @{ Mode = "pointer"; Version = $null } }
         if ($raw -match $VersionPattern) { return @{ Mode = "hardcoded"; Version = $Matches["v"] } }
         return @{ Mode = "invalid"; Version = $null }
@@ -205,9 +206,14 @@ try {
         Write-Host "version consistency: FAILED (plugin.json missing)" -ForegroundColor Red
         $exitCode = 1
     } else {
-        $pluginVersion = [string](Get-Content -LiteralPath $pluginJsonPath -Raw -Encoding UTF8 | ConvertFrom-Json).version
+        $pluginRaw = Get-Content -LiteralPath $pluginJsonPath -Raw -Encoding UTF8
+        $pluginVersion = [string]($pluginRaw | ConvertFrom-Json).version
         if ($pluginVersion -ne $pipelineVersion) {
             Write-Host "version consistency: FAILED (plugin.json $pluginVersion != skills/VERSION $pipelineVersion)" -ForegroundColor Red
+            $exitCode = 1
+        }
+        if ($pluginRaw -match 'one PM entry' -or $pluginRaw -match 'PM upgrade') {
+            Write-Host "version consistency: FAILED (plugin.json description still uses the PM entry)" -ForegroundColor Red
             $exitCode = 1
         }
     }
@@ -233,11 +239,13 @@ try {
     $syntheticPattern = '(?m)^Current: v(?<v>\d+\.\d+\.\d+)'
     $syntheticPointer = Get-EntryModeFromText -Raw "Current: VERSION" -VersionPattern $syntheticPattern
     $syntheticMismatch = Get-EntryModeFromText -Raw "Current: v9.9.9" -VersionPattern $syntheticPattern
+    $syntheticBoth = Get-EntryModeFromText -Raw "Current: v9.9.9`n见 VERSION" -VersionPattern $syntheticPattern
     $syntheticModes = @($syntheticPointer.Mode, $syntheticMismatch.Mode)
     $syntheticMixedDetected = (@($syntheticModes | Where-Object { $_ -eq "pointer" }).Count -gt 0 -and
         @($syntheticModes | Where-Object { $_ -eq "pointer" }).Count -lt $syntheticModes.Count)
     $syntheticMismatchDetected = ($syntheticMismatch.Mode -eq "hardcoded" -and $syntheticMismatch.Version -ne $pipelineVersion)
-    if (-not $syntheticMixedDetected -or -not $syntheticMismatchDetected) {
+    $syntheticBothDetected = ($syntheticBoth.Mode -eq "hardcoded" -and $syntheticBoth.Version -eq "9.9.9")
+    if (-not $syntheticMixedDetected -or -not $syntheticMismatchDetected -or -not $syntheticBothDetected) {
         Write-Host "version self-test: FAILED" -ForegroundColor Red
         $exitCode = 1
     } else {
@@ -329,13 +337,42 @@ try {
         }
 
         Write-Host "`n--- hooks 行为回归 (支柱 C) ---" -ForegroundColor Cyan
-        $testHooksPath = Join-Path $scriptDir "test-hooks.ps1"
-        if (Test-Path -LiteralPath $testHooksPath) {
-            & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $testHooksPath
-            if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
-        } else {
-            Write-Host "test-hooks.ps1 missing" -ForegroundColor Red
+        $hookTests = @(
+            "test-hooks.ps1",
+            "test-gate-decision.ps1",
+            "test-claude-hooks.ps1",
+            "test-codex-hooks.ps1",
+            "test-evidence-gates.ps1",
+            "test-install-tree.ps1",
+            "test-instability-ledger.ps1",
+            "test-plugin-hook-skip.ps1",
+            "test-knowledge-gap.ps1"
+        )
+        $fogCard = Join-Path $scriptDir "query-fog-card.ps1"
+        if (-not (Test-Path -LiteralPath $fogCard)) {
+            Write-Host "query-fog-card.ps1 missing" -ForegroundColor Red
             $exitCode = 1
+        } elseif (-not (Test-Path -LiteralPath $maintainerDocPath)) {
+            # selfcheck 用本仓 .ai-gates/Doc 的「规则翻错本评测」做探针；安装包不带 MAINTAINER.md，也不带这份 Doc。
+            Write-Host "query-fog-card -SelfCheck: skip (maintainer-only Doc not installed)" -ForegroundColor DarkGray
+        } else {
+            $fogOut = & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $fogCard -SelfCheck
+            if ($LASTEXITCODE -ne 0 -or (($fogOut -join "`n") -notmatch 'SELFCHECK_OK')) {
+                Write-Host "query-fog-card -SelfCheck FAILED" -ForegroundColor Red
+                $exitCode = 1
+            } else {
+                Write-Host "query-fog-card -SelfCheck: OK" -ForegroundColor Green
+            }
+        }
+        foreach ($hookTestName in $hookTests) {
+            $hookTestPath = Join-Path $scriptDir $hookTestName
+            if (Test-Path -LiteralPath $hookTestPath) {
+                & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $hookTestPath
+                if ($LASTEXITCODE -ne 0) { $exitCode = 1 }
+            } else {
+                Write-Host "$hookTestName missing" -ForegroundColor Red
+                $exitCode = 1
+            }
         }
 
         Write-Host "`n--- project-context 补节回归 ---" -ForegroundColor Cyan

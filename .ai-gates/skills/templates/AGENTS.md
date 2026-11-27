@@ -7,15 +7,15 @@
 
 - 仓库里有 `.ai-gates/skills/references/resident.md` 时，先读这一份。不必先说「项目经理」或「PM」。
 - 初始化说 `初始化`（=`init`）。升级技能包说 `升级 ai-gates`。体检说 `检查健康`（=`doctor`）。同意说 `准`（=`approve`）。
-- 问句先答，不改文件。Express 里用户已经说出改哪一行，主窗自己读、自己改。消息带「Auto车道」才走 auto 车道。标准道和完整道仍先有方案再改代码。
+- 问句先答，不改文件。Express 里用户已经说出改哪一行，主窗自己读、自己改。人点名「Auto车道」才读 `lane-auto.md`，不把它算进路由。标准道和完整道仍先有方案再改代码。
 - 恢复口令：`按 CORE 重来`（= 流水线重来 / 没按流程来）。
 
 ## 必读顺序
 
-当前版本是 `6.0.0`。
+当前版本是 `6.0.1`。
 
 1. `.ai-gates/skills/references/resident.md`
-2. 再只读这一刀的一张车道卡：`lane-express.md` / `lane-auto.md` / `lane-direct.md` / `lane-standard.md` / `lane-full.md`。不读其余车道卡。停在 Express 时不再打开其它 `skills/`。消息带「Auto车道」才读 `lane-auto.md`。
+2. 再只读这一刀的一张路由卡：`lane-express.md` / `lane-direct.md` / `lane-standard.md` / `lane-full.md`。人点名「Auto车道」才读 `lane-auto.md`，不把它算进路由。助手自己写上这句不算。停在 Express 时不再打开其它 `skills/`。
 3. 标准道和完整道用到才打开那一份：`read-evidence`、`run-evidence`、`log-evidence`。Express、问句、直通由主窗自己读、自己搜、自己跑、自己改。直通改完派隔离审核，审核窗只读派发白名单。
 
 离开 Express 之后，派子窗前读 `.cursor/project-context.md` 的「先读哪一节」，再读表里点名的节。不把整份项目说明装进每轮。派发只写岗位、轮次、派发文件路径。不贴哈希算法、预期哈希、blocker 原文、岗位卡。子窗交回只留三行。实现子窗自己读岗位卡。隔离审核子窗只读派发白名单。

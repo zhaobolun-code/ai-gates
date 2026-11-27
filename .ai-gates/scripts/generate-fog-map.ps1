@@ -496,6 +496,41 @@ if (Test-Path -LiteralPath $DirectLogRoot) {
         if (-not (Test-Path -LiteralPath $logPath)) { continue }
         $logBody = Read-Utf8 $logPath
         $logCs = @(Get-CsTokens $logBody)
+        if (-not $idSet.Contains($modName)) {
+            [void]$idSet.Add($modName)
+            $stShort = U @(0x77ED, 0x7A97)
+            $shortPins = New-Object System.Collections.Generic.List[object]
+            $shortRels = New-Object System.Collections.Generic.List[string]
+            $epoch = New-Object DateTime 1970,1,1,0,0,0,([DateTimeKind]::Utc)
+            $logItem = Get-Item -LiteralPath $logPath
+            $discoverUnix = [int64]($logItem.CreationTimeUtc.ToUniversalTime() - $epoch).TotalSeconds
+            $dirRel = Get-RepoRelPath $modDir.FullName
+            $logRel = Get-RepoRelPath $logPath
+            $fpFiles = New-Object System.Collections.Generic.List[object]
+            [void]$fpFiles.Add(@{ path = $logRel; sha256 = (Get-FileSha256Hex $logPath) })
+            $docFiles = New-Object System.Collections.Generic.List[object]
+            [void]$docFiles.Add(@{ rel = $logRel; text = $logBody; full = $logPath })
+            $evFiles = New-Object System.Collections.Generic.List[object]
+            $windows.Add([pscustomobject]@{
+                id            = $modName
+                stateLabel    = $stShort
+                cls           = "short"
+                relBlock      = ""
+                relNames      = $shortRels
+                combo         = $logBody
+                cs            = $logCs
+                sealed        = $false
+                evCount       = 1
+                pins          = $shortPins
+                t             = $discoverUnix
+                dirRel        = $dirRel
+                unfinishedRel = $logRel
+                fp            = (Get-PayloadHex $fpFiles)
+                fpFiles       = $fpFiles
+                docFiles      = $docFiles
+                evFiles       = $evFiles
+            }) | Out-Null
+        }
         $pinName = $zhTong + "/" + $modName + "/" + $fileDirectLog
         $pinText = Clip-Text $logBody $clipDoc
         foreach ($w in $windows) {
@@ -609,10 +644,11 @@ for ($i = 0; $i -lt $windows.Count; $i++) {
                     $side2 = Pick-CiteSide $a $b $true $true
                     $otherId = $(if ([string]$side2.id -eq [string]$a.id) { $b.id } else { $a.id })
                     $citeHit = @{
-                        file     = [string]$side2.unfinishedRel
-                        quote    = (Clip-Quote ([string]$share[0]))
-                        raw      = [string]$otherId
-                        resolved = [string]$otherId
+                        file      = [string]$side2.unfinishedRel
+                        quote     = (Clip-Quote ([string]$share[0]))
+                        quoteKind = "shared-symbol"
+                        raw       = [string]$otherId
+                        resolved  = [string]$otherId
                     }
                 }
             }
@@ -626,6 +662,9 @@ for ($i = 0; $i -lt $windows.Count; $i++) {
                     sha256   = [string]$citeSha
                     raw      = [string]$citeHit.raw
                     resolved = [string]$citeHit.resolved
+                }
+                if ($citeHit.ContainsKey("quoteKind") -and -not [string]::IsNullOrWhiteSpace([string]$citeHit.quoteKind)) {
+                    $citeObj["quoteKind"] = [string]$citeHit.quoteKind
                 }
             }
             $obj["grade"] = $grade

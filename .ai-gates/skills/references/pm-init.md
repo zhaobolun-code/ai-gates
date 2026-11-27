@@ -1,9 +1,8 @@
 # PM 初始化（引导式接入）
 
-> 口令等价（强制）：**`项目经理` = `PM`**，**`初始化` = `init`**，**`升级` = `upgrade`**，
-> **`检查健康` = `doctor`**。  
-> 二者相加即本流程（任选语种组合，**效果相同**）：如 `项目经理 初始化`、`PM init`、`PM 初始化`、`项目经理 init`；裸写 `init` 且本轮意图为流水线接入时亦同（勿与 `codegraph init` 混淆）。同义：`流水线初始化`。  
-> 由 **`[PM]`** 执行；不是新岗位。细则权威：本文件；TL 完整命令仍见 [tl-onboarding.md](./tl-onboarding.md)。
+> 口令：**`初始化` = `init`**，**`检查健康` = `doctor`**，**`升级` = `upgrade`**。前面不必加「项目经理」或「PM」。  
+> 裸写 `init` 且本轮意图为流水线接入时即本流程（勿与 `codegraph init` 混淆）。同义：`流水线初始化`。  
+> 由主窗执行；不是新岗位。细则权威：本文件；TL 完整命令仍见 [tl-onboarding.md](./tl-onboarding.md)。
 
 ## 目标
 
@@ -64,13 +63,13 @@ Agent 应优先 `-Apply` 做安全创建；`-InstallCodeGraph` **仅在用户明
 
 ## 与冷启动的关系
 
-- 未初始化时改代码仍走 CORE §无 project-context 冷启动（保守 Standard）。
-- `项目经理 初始化` / `PM init`（及口令等价组合）是**主动接入**口令，完成后 `project_context: loaded`，车道判定可按项目表执行。
+- 未初始化时改代码仍走 CORE §无 project-context 冷启动：每一刀 Express。
+- `初始化` / `init` 是**主动接入**口令，完成后 `project_context: loaded`，车道判定可按项目表执行。
 - 已初始化仓库再跑 → 幂等探测 + 补缺，不得 `-Force` 覆盖已有 project-context（除非用户明确要求覆盖）。
 
 ## 检查健康（doctor）
 
-用户说「项目经理 检查健康」或 `PM doctor` 时，必须跑：
+用户说「检查健康」或 `doctor` 时，必须跑：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .ai-gates/scripts/install-ai-gates.ps1 -CheckUpdate

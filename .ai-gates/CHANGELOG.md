@@ -2,7 +2,7 @@
 
 本文件给技能包用户看，只记打进发布包的文件（`skills/`、`hooks/`、`scripts/`、`rules/`、`USER-GUIDE.md`、`METHODOLOGY.md`、`README.md`）。各仓库自有的项目说明、错题本、回归索引、根目录 `AGENTS.md`、`install-info.json`，以及不进包的维护者手册，都不写进本日志。
 
-**当前 LTS**：v6.0.0（适应性治理 · major；前版 5.4.0 定版信息保留）
+**当前 LTS**：v6.0.1（适应性治理 · patch；前版 6.0.0）
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 思路；版本号遵循语义化：**patch** 为措辞/文档/反模式补充，**minor** 为新增规则或岗位（向后兼容），**major** 为破坏性规则变更。
 **同日同位置**：相邻两条改同一处时，改原条，不叠第二条。
@@ -10,6 +10,32 @@
 ---
 
 ## 最近迭代（最新在上）
+
+- 2026-11-27：bump `skills/VERSION` → **6.0.1**。6.0.0 发布后的文档口径和脚本修正收进这一版。四条路由不变，人点名「Auto车道」不写入 lane。A–D 新开 Chat 走读 33/33。`validate-pipeline -Strict` 退出码 0（test-hooks 107/0）。新包 `releases/ai_dev_v6.0.1.7z`，不覆盖 6.0.0 包。`plugin.json` version=`6.0.1`。规则文件仍只指向 `skills/VERSION`。安装包里没有 `MAINTAINER.md` 时跳过 `query-fog-card -SelfCheck`（探针在本仓 Doc）。Included：`skills/VERSION` + `cursor-marketplace/.cursor-plugin/plugin.json` + `skills/references/resident.md` + `skills/templates/AGENTS.md` + `scripts/validate-pipeline.ps1` + `PACKAGE-INFO.md`。根目录 `AGENTS.md` 与 `CLAUDE.md` 同步这一句，不进 Included。
+
+- 2026-11-27：规则入口不再写死 `6.0.0`，只指向 `skills/VERSION`。版本检查改为：入口前 12 行里还有 `x.y.z` 就按硬编码核对，必须等于 `skills/VERSION`；只出现 VERSION 这个词不再单独当成指针。插件版本更高时的提示改为说「升级 ai-gates」。不 bump VERSION。Included：`rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md` + `scripts/validate-pipeline.ps1` + `scripts/ensure-plugin-seed.ps1`
+
+- 2026-11-27：确认包末尾在三种情况下写一句加审建议。同一做法反复失败建议逆链，两条推理对不上建议分歧标注，止损到顶建议碰撞。不点名就不跑。错题主表仍须「准」。不 bump VERSION。Included：`skills/references/handoff-automation.md` + `skills/CORE.md`
+
+- 2026-11-27：一键安装补上 `claude/`。`pm-init.ps1` 未加 `-Apply` 只探测；开工提示改为直接说需求，冷启动是 Express。市场元技能不再要求先说「项目经理」。严格模式加上已有的安装树、不稳度账、插件空跑、迷雾自检和知识缺口三要素测试。发布包先写临时 7z，成功后再替换。错题命中次数按表里的不同日期计，不再写死 2。回复里出现 `[FAIL] token ::` 才起草 pending，不写主表。推断边的引用标明是共享符号。不 bump VERSION。Included：`scripts/install-ai-gates.ps1` + `scripts/pm-init.ps1` + `scripts/validate-pipeline.ps1` + `scripts/test-knowledge-gap.ps1` + `scripts/compute-evolution-candidates.ps1` + `scripts/generate-fog-map.ps1` + `package-release.ps1` + `hooks/mark-pm-gate.ps1` + `README.md` + `PACKAGE-INFO.md` + `cursor-marketplace/skills/ai-gates/SKILL.md` + `cursor-marketplace/.cursor-plugin/plugin.json`
+
+- 2026-11-27：接入和检查健康的口令改为 `初始化`、`检查健康`，前面不必加「项目经理」。未初始化前每一刀 Express；API、存档、跨模块不升标准道；不回建议停在 Express 不算缺陷。标准道、完整流程回「准」只做当前一步，不默认连跑。不 bump VERSION。Included：`skills/references/pm-init.md` + `skills/references/tl-onboarding.md` + `skills/references/reference-routing.md` + `skills/references/retrospective-metrics.md` + `skills/CORE.md` + `skills/references/handoff-automation.md` + `skills/references/loop-engineering.md` + `skills/references/anti-patterns.md` + `skills/references/demand-clarification.md`
+
+- 2026-11-27：复盘清单里，快车道和直通的主窗改码不算 PM 替岗。CORE 冷启动建议口令改为 `初始化`。v3.1.4 定版说明里「冷启动默认 Direct 且与 CORE 一致」改为：那是当时的句子，现行冷启动是未初始化前每一刀 Express。适用范围那一格不改。不 bump VERSION。Included：`skills/references/retrospective-metrics.md` + `skills/CORE.md` + `skills/MAINTAINER.md`
+
+- 2026-11-27：自进化链的下发口令改为「升级 ai-gates」。复盘清单的主窗边界改成：Express、Direct 由主窗改代码；人点名「Auto车道」不写入 lane；普通 Standard L1 可同会话复核并标「非独立 CR」。不 bump VERSION。Included：`skills/references/pattern-harvest.md` + `skills/references/collect-queue.md` + `skills/references/anti-patterns.md` + `skills/references/retrospective-metrics.md` + `skills/CORE.md` + `skills/MAINTAINER.md`
+
+- 2026-11-27：决策树、评测清单和发布说明跟上四条路由。人点名「Auto车道」不写入 `lane`。F1b 与 `validate-pipeline.ps1` 改成检查「四条路由」和「不写入 lane」。`plugin.json` 的 description 不再写 PM 入口。bump 须同时改 `plugin.json` 的 version。打包说明改为直接说 `升级 ai-gates` / `初始化`，并写明不含 `MAINTAINER.md`。不 bump VERSION。Included：`skills/references/full-lane-decision-tree.md` + `skills/references/skill-eval-checklist.md` + `skills/references/loop-engineering.md` + `skills/templates/AGENTS.md` + `skills/MAINTAINER.md` + `scripts/validate-pipeline.ps1` + `package-release.ps1` + `PACKAGE-INFO.md` + `cursor-marketplace/.cursor-plugin/plugin.json`。根目录 `AGENTS.md` 同步第 10 行，不进 Included。
+
+- 2026-11-27：Auto 不进路由。正式车道是 Express、Direct、Standard、Full。人在本条消息点名「Auto车道」才读 `lane-auto.md`，助手自己写上这句不算，`lane` 不写成 Auto。不 bump VERSION。Included：`skills/CORE.md` + `skills/references/resident.md` + `skills/references/lane-glossary.md` + `skills/references/evidence-levels.md` + `skills/references/model-routing.md` + `skills/MAINTAINER.md` + `skills/templates/AGENTS.md` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md` + `README.md` + `USER-GUIDE.md` + `METHODOLOGY.md`。根目录 `AGENTS.md` 同步这一句，不进 Included。
+
+- 2026-11-27：修改几处冲突。方案审在用户「准」之前。Express、Direct、人点名的 Auto 车道由主窗改代码；普通 Standard L1 可同会话复核并标「非独立 CR」，Direct、L1.5/L2、Full、高风险仍要隔离主 CR。维护者手册和车道术语改为五车道。证据等级补上 Auto、Direct。评测清单 H6a 不再把 3.1.4 当成当前版本。验收证据默认结论改为「未采集」，空证据不再写成通过。运行日志有绝对时间戳时，只认窗口内的行，整文件改写时间不能把更早的行算成这次。`validate-pipeline -Strict` 同时跑 gate-decision、Claude、Codex 钩子测试和这条证据测试。不 bump VERSION。Included：`skills/templates/plan-lite.md` + `skills/references/model-routing.md` + `skills/references/loop-engineering.md` + `skills/MAINTAINER.md` + `skills/references/evidence-levels.md` + `skills/references/lane-glossary.md` + `skills/references/skill-eval-checklist.md` + `skills/references/unity-editor-log.md` + `scripts/collect-acceptance-evidence.ps1` + `scripts/verify-runtime-evidence.ps1` + `scripts/test-evidence-gates.ps1` + `scripts/validate-pipeline.ps1`。`skills/unity-skills/SKILL.md` 的兼容行改成本工程 Unity 2021.3.43f1，该树不进包。
+
+- 2026-11-26：直通短窗单独成一格。`.ai-gates/Doc/直通文档/{模块名}/DIRECTLOG.md` 在生成迷雾地图时成为一格，类名 `short`，图例为「短窗」，颜色是洋红底、浅粉边。已有同名方案格时不重复建格，仍只挂钉。不建 `未完成.md`。不 bump VERSION。Included：`scripts/generate-fog-map.ps1` + `scripts/fog-map.template.html` + `skills/references/fog-map-structure.md`
+
+- 2026-11-26：Direct 人测才是文件热度的结果。AI 觉得通过先把涉及文件的 `fail_count` 减 1（到 0 为止）并记下实际减掉的笔数，然后请人测。人测失败要再改：加回那一笔再加 1，`last_result` 为 `fail`。人测通过：停在已经减去的次数上。脚本不读对话。短记录追加到 `.ai-gates/Doc/直通文档/{模块名}/DIRECTLOG.md`，迷雾地图仍把该文件挂到已有窗上，不新建方案夹。重算热度时保留 `files:`。`file-heat-lib.ps1`、`append-pipeline-outcome.ps1`、`compute-failure-heat.ps1` 以 UTF-8 BOM 保存。不 bump VERSION。Included：`scripts/file-heat-lib.ps1` + `scripts/append-pipeline-outcome.ps1` + `scripts/compute-failure-heat.ps1` + `skills/references/lane-direct.md` + `skills/references/fog-map-structure.md`
+
+- 2026-11-26：给人看的三份文档写出 6.0.0 和 5.4.0 的车道差别。5.4.0 按文件个数、是不是核心逻辑、接口、存档、跨模块、说不清、止损定档。6.0.0 这些都不改标签；近 20 天失败次数到 2 / 4 / 6 只建议，不回就停在 Express；消息里写「Auto车道」才进 auto。auto到人测从当前文档删掉。默认快车道。auto 车道要人点名「Auto车道」才用，助手自己补上这句不算。F1b 和 `validate-pipeline.ps1` 的检查改成同一句。使用指南的车道检查改为「快车道 / 直通 / 标准道 / 完整流程 / Auto车道」，不再要求英文四车道词。`初始化`、`检查健康`、`升级 ai-gates` 不再要求先说「项目经理」。业务写入放行代号 `business_write`。护栏表里的写门、确认和 Auto 与这一版对齐。停写默认关。试验记录 §4–§9 不改。不 bump VERSION。Included：`README.md` + `USER-GUIDE.md` + `METHODOLOGY.md` + `skills/references/skill-eval-checklist.md` + `skills/references/lane-auto.md` + `scripts/validate-pipeline.ps1`
 
 - 2026-11-26：bump `skills/VERSION` → **6.0.0**。适应性治理从测试版 `6.0.0A` 改为正式版。这次改版本号不把修改成功率、Phase 0 质量不劣、影子期误报率、漏报率、冻结 `T`、读文件遥测当作条件。停写仍默认关。没有读文件遥测，不写「`skills/` 读取次数为 0」。新包 `releases/ai_dev_v6.0.0.7z`，不覆盖 5.4.0 包；`skills/unity-skills/` 是本机 Unity 工具树，不进包。`plugin.json` version=`6.0.0`。`validate-pipeline -Strict` 全绿（test-hooks 107/0）。Included：`skills/VERSION` + `cursor-marketplace/.cursor-plugin/plugin.json` + `rules/ai-dev-pipeline.mdc` + `rules/ai-dev-pipeline.md` + `skills/references/resident.md` + `skills/templates/AGENTS.md`。根目录 `AGENTS.md` 与 `CLAUDE.md` 同步这一句，不进 Included。
 

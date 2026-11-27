@@ -100,7 +100,7 @@ try {
             $pv = Get-SemverObj (Get-Content -LiteralPath $projVerPath -Raw -Encoding UTF8)
             $gv = Get-SemverObj (Get-Content -LiteralPath $plugVerPath -Raw -Encoding UTF8)
             if ($null -ne $pv -and $null -ne $gv -and (Compare-SemverObj $gv $pv) -gt 0) {
-                $hint = "ai-gates: project VERSION $($pv.Raw), plugin $($gv.Raw). Say PM upgrade ai-gates to update the project library."
+                $hint = "ai-gates: project VERSION $($pv.Raw), plugin $($gv.Raw). Say 升级 ai-gates to update the project library."
             }
         }
         Write-SeedAudit -Root $projectRoot -Line 'present skip_copy'

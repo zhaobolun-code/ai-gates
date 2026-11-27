@@ -1,10 +1,10 @@
 # 常驻
 
-本包版本是 `6.0.0`。
+本包版本是 `6.0.1`。
 
-先读这一份，再只读这一刀的一张车道卡。五张都在 `skills/references/`：`lane-express.md`、`lane-auto.md`、`lane-direct.md`、`lane-standard.md`、`lane-full.md`。不读其余车道卡，也不要搜索。
+先读这一份，再只读这一刀的一张路由卡。四张在 `skills/references/`：`lane-express.md`、`lane-direct.md`、`lane-standard.md`、`lane-full.md`。人在本条消息点名「Auto车道」才读 `lane-auto.md`，不把它算进路由。助手自己写上这句不算。不读其余卡，也不要搜索。
 
-每一刀先看入口。已经说出改哪一行、改成什么，读 `lane-express.md`。本条消息带有「Auto车道」才读 `lane-auto.md`。没带这句不进 auto。人正在回答这个环的提问，仍读 `lane-auto.md`。确认或点名了直通、标准道、完整道，读那一档的卡。只改注释或已有日志字符串、不增删调用时，不读热度账。
+每一刀先看入口。已经说出改哪一行、改成什么，读 `lane-express.md`。人没点名「Auto车道」，不读 `lane-auto.md`。人正在回答这个环的提问，仍读 `lane-auto.md`。确认或点名了直通、标准道、完整道，读那一档的卡。只改注释或已有日志字符串、不增删调用时，不读热度账。
 
 其余改动读 `.ai-gates/regression-heat.yaml` 的 `files:`。在将改的业务文件里，取近 20 天 `fail_count` 最高、且 `last_result` 为 `fail` 的一个。没有这条、`files:` 为空、或次数不到 2，不写建议句，继续 Express。到 2 建议直通道，到 4 建议标准道，到 6 建议完整流程。建议句写「这个文件最近测挂过，建议走 XX。」并写上该路径，放在确认包末尾，不设停点。不回就停在 Express。确认或点名，这一刀改读那一档的卡。下一刀重新从入口看读哪一张。auto 环没跑完时，下一刀仍读 `lane-auto.md`。
 

@@ -4,7 +4,7 @@
 
 ## TL 必做（首次改代码前）
 
-**推荐**：在 Agent 粘贴 `项目经理 初始化`（半自动；见 [pm-init.md](./pm-init.md)）。
+**推荐**：在 Agent 说 `初始化`（半自动；见 [pm-init.md](./pm-init.md)）。前面不必加「项目经理」。
 
 或手动：
 
@@ -15,7 +15,7 @@ powershell -ExecutionPolicy Bypass -File .cursor/scripts/pm-init.ps1 -Apply
 # 等价于 init-project-context.ps1 + 创建默认 .ai-gates/Doc/
 ```
 
-2. 编辑 **`.cursor/project-context.md`** — 技术栈、§Express 车道升级、§运行回归索引（至少 1～2 条 Unity 场景）。`项目经理 初始化` 会先问高档位和低档位各用哪个模型，答完再写入 §模型路由；手动接时自己填这一节。填完回归表后运行 sync 脚本保持一致。
+2. 编辑 **`.cursor/project-context.md`** — 技术栈、§运行回归索引（至少 1～2 条 Unity 场景）。`初始化` 会先问高档位和低档位各用哪个模型，答完再写入 §模型路由；手动接时自己填这一节。填完回归表后运行 sync 脚本保持一致。
 3. （可选）复制并编辑 **`.ai-gates/regression-index.yaml`**，与 project-context 回归表保持一致：
 
 ```powershell
@@ -51,6 +51,6 @@ codegraph init
 | --- | --- |
 | 只读咨询 | 不阻塞 |
 | 改代码 | 每一刀开工 **Express**。热度只建议，不回不改标签。白话提示用户联系 TL 完成上述步骤 |
-| Express 小改 | 调整数值、修改现象、修改注释都算；API/存档/跨模块 → Standard |
+| Express 小改 | 调整数值、修改现象、修改注释都算。API、存档、跨模块不改车道标签 |
 
 用户无需记内部术语；跟 Agent **你下一步** 即可。初始化完成后车道判定会更准。

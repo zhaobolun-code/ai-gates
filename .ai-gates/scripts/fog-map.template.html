@@ -63,6 +63,7 @@ svg.roads g.trendg line.trend{fill:none;stroke:#e4f2cc;stroke-width:4;opacity:0;
 .s-pause{background:#143a52;border-color:#4ec4e8}
 .s-fail{background:#6a2218;border-color:#ff6b5a}
 .s-layer{background:#3e1e68;border-color:#c080ff}
+.s-short{background:#6b2d5b;border-color:#ff9ad5}
 .tile.island{outline:2px dashed #8a7a50}
 .tile.fog{background:#2a3330;opacity:.45;border-style:dashed}
 .land.nation{border-style:dashed;border-width:3px;background:#243038}
@@ -105,7 +106,7 @@ svg.roads g.trendg line.trend{fill:none;stroke:#e4f2cc;stroke-width:4;opacity:0;
 svg.roads g.nearg line.nearln{pointer-events:none;opacity:.32;stroke:#6a7a68;stroke-width:1.1;stroke-dasharray:2 8}
 svg.roads g.nearg line.hit{pointer-events:stroke;stroke:rgba(0,0,0,0);stroke-width:16;fill:none}
 #legend .lg{display:flex;align-items:center;gap:6px}
-#legend .lg span.s-doing,#legend .lg span.s-done,#legend .lg span.s-pause,#legend .lg span.s-fail,#legend .lg span.s-layer{display:inline-block;width:16px;height:16px;border:3px solid;border-radius:4px;flex:0 0 16px}
+#legend .lg span.s-doing,#legend .lg span.s-done,#legend .lg span.s-pause,#legend .lg span.s-fail,#legend .lg span.s-layer,#legend .lg span.s-short{display:inline-block;width:16px;height:16px;border:3px solid;border-radius:4px;flex:0 0 16px}
 #reader{display:none;position:fixed;left:12px;right:292px;top:60px;bottom:12px;background:#0e1412;border:1px solid #3a4a40;padding:16px;overflow:auto;z-index:8;white-space:pre-wrap;font-family:Consolas,monospace;font-size:12px}
 #reader.show{display:block}
 #reader .close{position:sticky;top:0;float:right;background:#314038;color:var(--ink);border:0;padding:4px 8px;cursor:pointer}
@@ -132,6 +133,7 @@ svg.roads g.nearg line.hit{pointer-events:stroke;stroke:rgba(0,0,0,0);stroke-wid
     <div class="lg"><span class="s-pause"></span> 停写</div>
     <div class="lg"><span class="s-fail"></span> 失败</div>
     <div class="lg"><span class="s-layer"></span> 换层</div>
+    <div class="lg"><span class="s-short"></span> 短窗</div>
     <div class="lg"><span class="pin doc"></span> 方案正文（未完成 / 物理口径 / Mandatory）</div>
     <div class="lg"><span class="pin dispatch"></span> 派发 / 方案审</div>
     <div class="lg"><span class="pin report"></span> 实现 / 代码审核</div>
@@ -525,7 +527,7 @@ function showGroupCard(g){
     (peers.length?("<p><b>岛间互指</b><br>"+peers.map(function(o){ return o.members[0].id; }).join("<br>")+"</p>"):"")+
     (nearby.length?("<p><b>旁边的未建夹</b>（关系表点过、尚未建夹）<br>"+nearby.map(function(fn){ return fn.id; }).join("<br>")+"</p>"):"");
 }
-const cls={doing:"s-doing", done:"s-done", pause:"s-pause", fail:"s-fail", layer:"s-layer", fog:"fog"};
+const cls={doing:"s-doing", done:"s-done", pause:"s-pause", fail:"s-fail", layer:"s-layer", short:"s-short", fog:"fog"};
 function makeTile(n){
   const el=document.createElement("div");
   el.className="tile "+(cls[n.cls]||"s-fail")+(n.island?" island":"");

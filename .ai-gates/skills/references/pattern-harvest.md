@@ -77,12 +77,12 @@ Skill 自进化靠把项目格**抽象**成通用级典故和错题本，不是�
   → 仍须用户「准」才入通用格（shared-language §典故 / anti-patterns.md）
 ```
 
-**回传（项目侧收包）**：下发 = 「项目经理 升级 ai-gates」（=`PM upgrade ai-gates`）拉技能包真源仓 `zhaobolun-code/ai-gates`，不是拉 collect 仓，也不是再开 PR。
+**回传（项目侧收包）**：下发 = 「升级 ai-gates」拉技能包真源仓 `zhaobolun-code/ai-gates`，不是拉 collect 仓，也不是再开 PR。
 
 ```text
 收集仓合并（=审查）
   → 维护者抽象进技能包真源仓 zhaobolun-code/ai-gates（通用典故/反模式）
-  → 各项目「项目经理 升级 ai-gates」（=`PM upgrade ai-gates`）拉回技能包
+  → 各项目「升级 ai-gates」拉回技能包
 下发 = 升级拉 ai-gates 真源仓，不是拉 collect 仓，也不是再开 PR
 收集仓合并 ≠ 已下发
 升级成功 ≠ 自动写入本仓 shared-language.md / anti-patterns.md 之外的项目表
@@ -96,7 +96,7 @@ Skill 自进化靠把项目格**抽象**成通用级典故和错题本，不是�
 **收集仓已开通；本机仍须探测**：仅本机 `gh auth status` exit 0 时按 [collect-queue.md](./collect-queue.md) §gh 以 **PR** 上传到 `zhaobolun-code/ai-gates-collect`；未探测成功则不得开 PR，本地队列照常。上传通道=collect 仓 PR。允许写「收集仓已开通」。禁止把该句写成「本机已登录」或「技能包已下发」。禁止再写「往 ai-gates 开 issue」当上传通道。
 「准」不自动入仓、不自动写入通用格。禁止静默入通用格。禁止第七岗。入通用格须另「准」。
 
-**现状**：本地 [collect-queue.md](./collect-queue.md) 已签收；**收集仓已开通**（`zhaobolun-code/ai-gates-collect`，PR 合并=审查）。本机上传仍须探测。回传=「项目经理 升级 ai-gates」拉 ai-gates 真源。下发=拉 ai-gates 真源。收集仓合并 ≠ 已下发。入通用格须另「准」。本页不实施维护者在 ai-gates 仓里的抽象合入。禁止把收集仓已开通写成已下发。禁止第七岗。不新建通用错题主表文件（晋升前共用项目主表对应桶）。
+**现状**：本地 [collect-queue.md](./collect-queue.md) 已签收；**收集仓已开通**（`zhaobolun-code/ai-gates-collect`，PR 合并=审查）。本机上传仍须探测。回传=「升级 ai-gates」拉 ai-gates 真源。下发=拉 ai-gates 真源。收集仓合并 ≠ 已下发。入通用格须另「准」。本页不实施维护者在 ai-gates 仓里的抽象合入。禁止把收集仓已开通写成已下发。禁止第七岗。不新建通用错题主表文件（晋升前共用项目主表对应桶）。
 
 ## 边界（硬）
 

@@ -107,6 +107,6 @@
 
 每个实现子窗只做自己的 Step；并联组由 PM 同时派多个子窗。只为实现所引用的验收条款。方案与真实代码冲突时停下报差异，禁止臆测 API。Step 签收后由策划/PM 迁入 `已完成/`；若 Delta Spec 含 MODIFIED/REMOVED，须同步提示并更新 `物理口径.md`/A#（见 [acceptance-and-delta.md](../references/acceptance-and-delta.md) §Delta Spec）。
 
-状态迁移：`draft` → 用户确认后 `review-pending` → L1/L1.5 无 blocker 后 `implementation-ready` + **可交给程序员**=是。
+状态迁移：`draft` → 交方案审 `review-pending` → L1/L1.5 无 blocker 后发一次确认包 → 用户「准」后 `implementation-ready` + **可交给程序员**=是。
 
 **L1.5**：CR **优先** Subagent 隔离；派发默认可读本 `未完成.md`，禁读 `已完成/` 全文。

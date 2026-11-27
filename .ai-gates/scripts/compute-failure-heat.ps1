@@ -4,8 +4,8 @@
   （append-pipeline-outcome.ps1 在失败事件时增量更新；本脚本用于重算/防丢。）
 
 .DESCRIPTION
-  - 聚合事件 step_fail / stop_fail，按 doc 路径推断模块（压力系统→PressureManager、
-    溶解→DissolveManager、反应→Reaction，其余 other）
+  - 聚合事件 step_fail / stop_fail / human_fail，按 doc 路径推断模块。
+  - 文件次数按日志重放 ai_pass / human_fail / human_pass。近 20 天没有新的人测失败则归零。
   - heat 档位：fail_count>=3 或 max_stop_count>=2 → high；==2 或 max_stop_count==1 → medium；否则 low
   - 幂等：可反复运行；勿手工编辑输出文件
 
@@ -35,21 +35,19 @@ if (-not (Test-Path -LiteralPath $logPath)) {
     exit 2
 }
 
-function Get-ModuleFromDoc {
-    param([string]$Doc)
-    if ($Doc -match '压力系统') { return 'PressureManager' }
-    if ($Doc -match '溶解') { return 'DissolveManager' }
-    if ($Doc -match '反应') { return 'Reaction' }
-    return 'other'
-}
+. (Join-Path $scriptDir 'file-heat-lib.ps1')
 
 $agg = @{}
+$fileRows = New-Object System.Collections.Generic.List[object]
 foreach ($line in (Get-Content -LiteralPath $logPath -Encoding UTF8)) {
     if ([string]::IsNullOrWhiteSpace($line) -or $line.StartsWith('#')) { continue }
     try {
         $row = $line | ConvertFrom-Json -ErrorAction Stop
     } catch { continue }
-    if ($row.event -notin @('step_fail', 'stop_fail')) { continue }
+    if ($row.event -in @('ai_pass', 'human_fail', 'human_pass') -and $row.files) {
+        $fileRows.Add($row) | Out-Null
+    }
+    if ($row.event -notin @('step_fail', 'stop_fail', 'human_fail')) { continue }
     $mod = Get-ModuleFromDoc -Doc ([string]$row.doc)
     if (-not $agg.ContainsKey($mod)) {
         $agg[$mod] = [ordered]@{ last_fail_ts = ''; fail_count = 0; max_stop_count = 0 }
@@ -64,24 +62,25 @@ foreach ($line in (Get-Content -LiteralPath $logPath -Encoding UTF8)) {
     if ($ts -gt $e.last_fail_ts) { $e.last_fail_ts = $ts }
 }
 
-$sb = New-Object System.Text.StringBuilder
-[void]$sb.AppendLine("# 回归热度（自动生成：compute-failure-heat.ps1 从 pipeline-outcome.log 重算）")
-[void]$sb.AppendLine("# 用途：plan-review-tiers §L1.5 触发（heat≥medium 或近 6 个月有记录）。勿手工编辑。")
-[void]$sb.AppendLine('version: 1')
-[void]$sb.AppendLine('entries:')
+$entries = New-Object System.Collections.Generic.List[object]
 foreach ($mod in ($agg.Keys | Sort-Object)) {
     $e = $agg[$mod]
     $heat = 'low'
     if ($e.fail_count -ge 3 -or $e.max_stop_count -ge 2) { $heat = 'high' }
     elseif ($e.fail_count -eq 2 -or $e.max_stop_count -eq 1) { $heat = 'medium' }
-    [void]$sb.AppendLine("  - module: $mod")
-    [void]$sb.AppendLine("    last_fail_ts: $($e.last_fail_ts)")
-    [void]$sb.AppendLine("    fail_count: $($e.fail_count)")
-    [void]$sb.AppendLine("    max_stop_count: $($e.max_stop_count)")
-    [void]$sb.AppendLine("    heat: $heat")
+    [void]$entries.Add([ordered]@{
+        module = $mod; last_fail_ts = $e.last_fail_ts; fail_count = $e.fail_count
+        max_stop_count = $e.max_stop_count; heat = $heat
+    })
 }
-
-[System.IO.File]::WriteAllText($heatPath, $sb.ToString(), (New-Object System.Text.UTF8Encoding($true)))
+$files = New-Object System.Collections.Generic.List[object]
+foreach ($row in $fileRows) {
+    $day = ([string]$row.ts)
+    if ($day.Length -ge 10) { $day = $day.Substring(0, 10) }
+    Apply-FileHeatEvent -Files $files -Event ([string]$row.event) -Paths @($row.files) -Day $day
+}
+Clear-ExpiredFileHeat -Files $files -Now (Get-Date)
+Write-RegressionHeatDocument -Path $heatPath -Entries $entries -Files $files
 Write-Host "heat written: $heatPath"
 Write-Host ("modules: {0}" -f (($agg.Keys | Sort-Object) -join ', '))
 exit 0

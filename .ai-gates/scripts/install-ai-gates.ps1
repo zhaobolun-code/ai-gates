@@ -243,7 +243,7 @@ function Backup-ChangedOfficialFile {
 }
 
 # 库内容目录（运行时目录 hooks-log/tmp/verify/releases 不复制，项目自留）
-$libraryDirs = @('skills', 'hooks', 'scripts', 'rules', 'codex')
+$libraryDirs = @('skills', 'hooks', 'scripts', 'rules', 'codex', 'claude')
 $backupRoot = Join-Path $targetLib ("tmp\upgrade-backup-" + (Get-Date -Format 'yyyyMMddHHmmss'))
 Write-LibraryManifest -LibRoot $targetLib -Dirs $libraryDirs -OutFile (Join-Path $backupRoot 'manifest-before.txt')
 foreach ($d in $libraryDirs) {

@@ -1,7 +1,7 @@
 # AI 开发流水线 CORE（当前版本见 [VERSION](./VERSION)）
 
 > **日常默认入口** → [agent-entry-route.md](references/agent-entry-route.md)。本文件**全文** = 争议 / recovery / `按 CORE 重来` 再查。
-> Full/L3/状态机/反模式细则 → [references/](references/)。**使用说明** → [USER-GUIDE.md](../USER-GUIDE.md)（只记「项目经理 + 需求」）
+> Full/L3/状态机/反模式细则 → [references/](references/)。**使用说明** → [USER-GUIDE.md](../USER-GUIDE.md)（直接说要做的事，不必先说「项目经理」）
 
 ## 入口
 
@@ -16,7 +16,7 @@
 
 ```yaml
 pm:
-  lane: Express | Auto | Direct | Standard | Full
+  lane: Express | Direct | Standard | Full
   lane_rules_hit: "步骤N"          # 如 "4/4"、"2→Direct"、"3→Standard"、"4→Full"
   review_tier: skip | L1 | L1.5 | L2 | L3
   next_role: planner | plan-reviewer | developer | CR | docs | none
@@ -24,7 +24,7 @@ pm:
   user_state: 进行中 | 待你确认 | 待 Unity 测试 | 已定版 | 已阻塞
   blockers: []                     # 有则列字符串，无写 []
   project_context: loaded | missing-coldstart
-  diff_hint: Express | Auto | Direct | Standard | Full | unknown
+  diff_hint: Express | Direct | Standard | Full | unknown
   snapshot: ok | manual | n/a      # 见 pm-tooling.md；不得伪造 ok
 ```
 
@@ -48,7 +48,7 @@ pm:
 
 | 字段 | 用户可见摘要（一行白话） |
 | --- | --- |
-| 车道 | [Express/Auto/Direct/Standard/Full] — [命中理由] |
+| 车道 | [Express/Direct/Standard/Full] — [命中理由] |
 | 下一岗 | [岗位名] 或「等你确认」/「等你 Unity 测试」/「隔离审核进行中」 |
 | README | [skip / 程序员一行 / 文档岗] — [理由] |
 | 进度 | [五态] |
@@ -74,11 +74,11 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 **PM 脚本与 Git**（advisory）→ [references/pm-tooling.md](references/pm-tooling.md)。`readme` 判定 → [references/readme-dispatch.md](references/readme-dispatch.md)。
 
-## 车道判定（顺序固定）
+## 四车道判定（顺序固定）
 
 **判定前**：需求存在 ≥2 种合理解释且影响范围（如「改顺畅点」无验收标准）→ 先追问 ≤3 个关键问题（最多 1 轮，答不全按默认决策继续），细则 → [demand-clarification.md](references/demand-clarification.md)。改代码需求：列出将改业务源文件，用来查热度账，不按文件个数选车道。
 
-**判定**：已经说出改哪一行、改成什么，开工 `lane: Express`。本条消息带有「Auto车道」才开工 `lane: Auto`，读 [lane-auto.md](references/lane-auto.md)。没带这句不进 Auto。用户点名某一档，或确认了本轮建议句，这一刀改成那一档。下一刀重新从入口看。auto 环没跑完仍读 `lane-auto.md`。文件个数、是不是在改规则、API、存档、跨模块、说不清、止损都不改标签。决策树 → [references/full-lane-decision-tree.md](references/full-lane-decision-tree.md)。
+**判定**：已经说出改哪一行、改成什么，开工 `lane: Express`。路由只有 Express、Direct、Standard、Full。人在本条消息点名「Auto车道」才读 [lane-auto.md](references/lane-auto.md)，`lane` 不写成 Auto。助手自己写上这句不算。没点名不读那张卡。用户点名某一档，或确认了本轮建议句，这一刀改成那一档。下一刀重新从入口看。人还在回答这个环，或这环没跑完，仍读 `lane-auto.md`，路由标签不动。文件个数、是不是在改规则、API、存档、跨模块、说不清、止损都不改标签。决策树 → [references/full-lane-decision-tree.md](references/full-lane-decision-tree.md)。
 
 ```
 0. 纯问答 / 只读咨询（不涉及落盘改动——「怎么改」「能不能改」「解释现象」「查代码/文档/接口」）→ **主窗直接答**：不判车道、不建窗、不生成文档、不派岗、不写快照（`snapshot: n/a`）。仅当用户要求或隐含要**落盘改动**（改代码/文档/配置）才进入车道判定。
@@ -90,7 +90,7 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
    · 不回就停在 Express。确认或点名，这一刀才改标签
    · 改了现象仍同条写规则和不点名。Express 仍不派代码审核
    · 回归索引 / 路径前缀不否决 Express。文件次数不改标签
-1.5 本条消息带有「Auto车道」→ Auto
+1.5 人点名「Auto车道」→ 读 lane-auto.md，不改 `lane`
    · 先问技术细节；人回「准」才写文档，再按 UnitySkills 先测、写代码、再测
    · 通过只认 `editor_run_scenario` 的断言。审完后人再回一次「准」才提交
    · 不建 Step 账本，不启用「准」之后的 Auto 执行模式
@@ -109,7 +109,7 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 | 情况 | 车道 |
 | --- | --- |
 | 文件个数变多，或这刀在改判定规则、控制流、守恒、通断真源、方向 | 仍是 Express，除非用户确认建议或点名 |
-| 消息没有「Auto车道」 | 不进 Auto |
+| 人没点名「Auto车道」 | 不读 lane-auto.md。`lane` 仍是四条之一 |
 | API、存档、跨模块，但已经说出改哪一行 | 仍是 Express，除非用户确认建议或点名 |
 | 止损、热修次数 | 走诊断和热修上限，不改标签 |
 | 用户不回建议句 | 停在这一刀已经选的车道 |
@@ -119,7 +119,6 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 | 车道 | 流程 | 文档 |
 | --- | --- | --- |
 | **Express** | 一句话切片 → 用户已说出改法就同条改，否则一次「准」→ 主窗直接改 → 一行自检 → Unity 测；无 CR、无待测锁、不补 README；默认不落盘、不建窗；**一旦已建分类夹** → [doc-windowing.md](references/doc-windowing.md) §与 Express（最小两文件 + 终态须 migrate；不强制 `未完成.md`） | Chat 一句话切片；须含 PM 判定 + 一句话 A# |
-| **Auto** | 仅「Auto车道」：提问 → 第一次「准」→ 写文档 → UnitySkills 先测 → 写代码 → 再测到通过或同一失败 3 次 → 隔离 CR → 第二次「准」才提交。不建账本，不走 Auto 执行模式 | `.ai-gates/tmp/auto-<短名>.md` |
 | **Direct** | **PM 写**对话内 A#/切片（不清才派策划）→ **一轮确认** → 实现（**主窗自己改**）→ 隔离 CR（**必须子窗**，高级档，只读派发白名单）→ 文档一行版本 → 用户接收；单会话 | 对话内 A#/切片（不落盘）；「文档一行版本」= README `dev-one-liner`，非落盘执行文档 |
 | **Standard** | plan-lite → L1/L1.5/L2 → **一轮确认** → `[developer]` → `[CR]`（普通 L1 可主窗同会话复核，标「非独立 CR」；更高档按隔离规则）→ README。同窗同口径连续刀 → [circuit-windows.md](references/circuit-windows.md) **战役模式**（方案审不每刀重做；每刀仍 CR） | plan-lite；A# + delta-only |
 | **Full** | TL 显式启用；见 [references/](references/) | 执行文档；须含验收 A# |
@@ -128,7 +127,7 @@ Express 简略轮**禁止**摘要表。L1.5 程序员完成后 PM **须**附 [cr
 
 Express 完成后 **不得**再派独立「代码审核」。Standard：方案审无 blocker → 发一次确认包；「准」同条开始改码。普通 CR 无 blocker 后，Full 或热文件反复修复/运行仍异常 → PM **优先**可选 Subagent `代码审核 模式：对抗`；失败再提示手动新开；用户可跳过。细则 → [isolated-review.md](references/isolated-review.md)。
 
-**一轮确认硬律** → [handoff-automation.md](references/handoff-automation.md) §0；白话包 → [demand-clarification.md](references/demand-clarification.md)。每决策点 1 条确认包；「准」同条定版/开窗/改码；续链用**合并包**。禁口令门、先改再补理由、零用户句改码。Standard/Full「准」**默认 Auto**（非车道；Express / Direct 不启用；退出「准, 不 Auto」）→ [loop-engineering.md](references/loop-engineering.md) + handoff §H：连跑实现→CR→待测；测挂默认同条跟可自动跟推荐（硬停除外，见 diagnosis §0）；用户停点=待测/AI 验/硬停；每 Step 仍要测（禁攒批）；口令「本窗 Auto」「继续 Auto」。Auto 链受 [loop-engineering.md](references/loop-engineering.md) §4 预算护栏约束（max_auto_steps / max_repair_rounds / 停滞 fuse / 超时硬停 / 可选 token 预算）。
+**一轮确认硬律** → [handoff-automation.md](references/handoff-automation.md) §0；白话包 → [demand-clarification.md](references/demand-clarification.md)。每决策点 1 条确认包；「准」同条定版/开窗/改当前这一步；续链用**合并包**。禁口令门、先改再补理由、零用户句改码。标准道、完整流程回「准」不连跑后续 Step。不默认启用 Auto 执行模式。每 Step 仍要测。确认包末尾的加审建议见 handoff §0：反复失败建议逆链，推理对不上建议分歧标注，止损到顶建议碰撞。不点名就不跑。错题主表仍须「准」。
 
 ## Standard 审核升档（L1.5 / L2）
 
@@ -155,7 +154,7 @@ Express 完成后 **不得**再派独立「代码审核」。Standard：方案�
 ## 无 project-context 冷启动
 
 1. 只读咨询 → **不阻塞**。
-2. **改代码** → `missing-coldstart`；**你下一步**须含「未初始化」+ 建议 **`项目经理 初始化`**；未初始化前同样每一刀 Express，热度建议照上面的表。细则 → [pm-init.md](references/pm-init.md)。
+2. **改代码** → `missing-coldstart`；**你下一步**须含「未初始化」+ 建议 **`初始化`**；未初始化前同样每一刀 Express，热度建议照上面的表。细则 → [pm-init.md](references/pm-init.md)。
 
 ## 岗位切换
 

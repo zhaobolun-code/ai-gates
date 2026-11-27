@@ -12,7 +12,7 @@
 | **Harness** | 单次会话内规则与岗位（CORE / skills） |
 | **Loop Engineering** | 外环：何时连跑、如何独立验证、何时整圈停止 |
 | **Agent loop（内环）** | Cursor/模型 tool 循环；**不改**产品内环 |
-| **Auto 执行模式** | Standard/Full 在「准」之后，允许在停机条件前连续推进**当前 Step 的实现与 CR**；**不是**车道。需求车道 `lane-auto.md` 与本模式同字不同物。本模式仍只在标准道/完整道启用，**Express / Direct / auto 车道不启用** |
+| **Auto 执行模式** | 不默认启用。标准道、完整流程回「准」只做当前一步，不连跑后续 Step。它不是路由车道。人点名「Auto车道」只读 `lane-auto.md`，不写入 `lane`，也不因此连跑 |
 
 **启动前仍须「准」**（一轮确认包）。Standard/Full：「准」**默认** Auto；显式「准, 不 Auto」则单步。`lane: Full` ≠ `execution_mode: Auto`（正交）。
 
@@ -161,7 +161,7 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 ## 6. Maker/Checker 与 CR
 
 - 方案 L3 ≠ Step CR；互不替代。
-- 每个实现 Step：**至少 1 轮**非 Maker 的隔离主 CR，且针对**最新版 diff**无 blocker（优先 Subagent）；同 Chat / 普通文档审 / 方案 L3 / 可选对抗 CR **均不得替代**。
+- 每个实现 Step：Direct、Standard L1.5/L2、Full、高风险 **至少 1 轮**非 Maker 的隔离主 CR，且针对**最新版 diff**无 blocker（优先 Subagent）。普通 Standard L1 可以由主窗同会话复核，标「非独立 CR」，不得写成隔离。同 Chat 不得替代 Direct、L1.5/L2、Full、高风险的隔离主 CR。普通文档审 / 方案 L3 / 可选对抗 CR **均不得替代**隔离主 CR。
 - CR 有 blocker → 修复后重新隔离 CR；交审级修复受 `max_repair_rounds=2` 约束。
 - **Skill/Doc-only 图谱例外**：本 Step Mandatory **仅**改 `.cursor/skills/**`、`.ai-gates/Doc/**` 等、**无**业务 Runtime/Editor C# 时，无 CodeGraph（或探测失败）→ **soft risk / 验证缺口**，不得单独据此 blocker，不得阻止无业务 blocker 收口。覆盖现行 Full「无图谱=hard blocker」对本类 Step 的适用；业务 C# Step 仍按原规则。
   - **实现期默认决策（至 `code-reviewer/SKILL.md` 接线前）**：本方案 Step 的隔离主 CR 以本文件 + 执行文档共同 Exit Gate 为准；与 CR 车道表冲突时，**Skill/Doc-only 取 soft risk**。
@@ -170,8 +170,8 @@ powershell -File .cursor/scripts/update-doc-state.ps1 -DocFolder "{方案夹}" -
 
 | 口令/动作 | 效果 |
 | --- | --- |
-| 确认包「准」（Standard/Full 默认 Auto） | 启动；`auto_steps_done=0`；进当前待实现 Step |
-| 「准, 不 Auto」/「不要 Auto」/「单步」 | 定版改码但**不**启 Auto；每步后须再开口令 |
+| 确认包「准」 | 定版并改当前 Step。不连跑后续 Step。不把 `auto_steps_done` 当成已启动 |
+| 「准, 不 Auto」/「不要 Auto」/「单步」 | 与「准」相同：只做当前 Step |
 | **「本窗 Auto」** | 仅已批准范围启动/重启；步数重置为 0；**不得**新范围、**不得**重置触顶 `repair_rounds`。推进下一 Step **硬前置**：已是 `runtime-validated`（预算用尽可仍带 `reason=max_auto_steps`）。**禁止**在 `step-completed` 待验时清 reason/开下一 Step |
 | **「继续 Auto」** | 仅普通待验（非 `max_auto_steps`）签收后、已 `runtime-validated`；**不重置**计数；预算用尽时无效 |
 | 「测试通过」同条 / AI 验收通过 | 非预算用尽可续跑下一 Step；预算用尽则保留 reason，须「本窗 Auto」 |

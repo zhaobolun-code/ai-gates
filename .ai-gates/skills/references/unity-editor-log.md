@@ -17,6 +17,7 @@ powershell -ExecutionPolicy Bypass -File .cursor/scripts/verify-runtime-evidence
 - `-ExpectAbsentKeywords`（可选）：不该出现的关键词/审计标签（比如物理口径明确禁止的现象），命中即 `anyAbsentHit=true` 且判失败——补上"预期事件发生了"证不了的另一半："不该发生的没发生"
 - 输出字段：`overallHit`（命中）、`anyAbsentHit`（命中了不该出现的关键词）、`fresh`（日志新鲜度，默认 30 分钟窗口）、`compileErrors`（`error CS\d{4}` 命中行）、每关键词 `count`/`samples`（≤5 行）
 - `exit code`：0 = 新鲜 + 命中（按 Mode）+ 无编译错误；非 0 = 至少一项不满足，**不代表自动 blocker**，仍按下文 §A/§B 由 Agent/CR 解读
+- 日志行里有 `yyyy-MM-dd HH:mm:ss` 时，只认窗口内的行。文件末尾被别的内容续写，不能把更早的关键词行算成这次。没有这种时间戳时，才退回整文件的最后写入时间
 - 找不到 Editor.log（`ok:false, reason:editor_log_not_found`）→ 按下文「读不到 / 不存在」处理，不阻塞
 - 该 JSON 就是可外置的「证据」，写进 `证据/` 后未完成窗只需一行摘要 + 路径引用，不必贴长日志
 - 本脚本只产出事实，**不判定** `static-checked`/`runtime-validated`；证据等级仍按 CORE/developer SKILL 规则由人/Agent 决定

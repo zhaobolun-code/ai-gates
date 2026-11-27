@@ -11,7 +11,7 @@
 
 | # | 机制 | 命中标准 |
 | --- | --- | --- |
-| 1 | 主窗仅 PM | 策划/方案审/实现/CR/文档均子窗；否则标「主窗执行（未开子窗 · 非独立）」 |
+| 1 | 主窗边界 | Express、Direct 由主窗改代码。人点名「Auto车道」时主窗也改，不写入 lane。普通 Standard L1 可同会话复核并标「非独立 CR」。策划、方案审、隔离代码审、文档结构仍走子窗；该走子窗却由主窗做的，标「主窗执行（未开子窗 · 非独立）」 |
 | 2 | 模型路由 | 档位：策划/审核≈高质量、实现≈便宜快速；slug 以 project-context 为准（失败 `inherit` 须标注） |
 | 3 | 测挂 → L0 | `未完成.md` 有 `## 错题 L0`；未偷写主表 |
 | 4 | 可晋升 → pending | 有 `证据/_lesson-pending.md`，或写明「根因未证暂不升」 |
@@ -73,10 +73,10 @@
 | `缺 Express 切片` | Express 无 express-slice 即 developer |
 | `缺 Express 自检` | Express 完成无 express-self-check |
 | `夸大证据等级` | 未 Unity 测却标已通过/runtime-validated |
-| `Express 应升级` | 命中升级表仍维持 Express |
-| `缺 project-context` | 冷启动下误走 Express 或臆测路径 |
+| `Express 被擅自换道` | 用户没确认建议、也没点名，却离开 Express |
+| `缺 project-context` | 冷启动没有走 Express，或臆测路径 |
 | `一次多 Step` | 超出当前 Step/切片范围 |
-| `PM 替岗` | PM 直接写代码或替 CR 宣布无 blocker |
+| `PM 替岗` | 标准道、完整流程里主窗改业务代码，或主窗替代码审宣布无 blocker。快车道和直通的主窗改码不算 |
 | `其他` | 备注栏说明 |
 
 ### Sprint 汇总模板（TL 可选）

@@ -2,7 +2,7 @@
 
 本文件为 ai-dev-pipeline **唯一权威来源**。各岗位 SKILL 与 README 只引用此处，不重复定义。
 
-> **车道术语**：Express / Standard / Full — 见 [lane-glossary.md](./lane-glossary.md)。
+> **车道术语**：Express / Direct / Standard / Full — 见 [lane-glossary.md](./lane-glossary.md)。人点名「Auto车道」不进这四条。
 
 ## 等级定义
 

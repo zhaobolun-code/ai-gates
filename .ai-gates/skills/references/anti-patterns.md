@@ -52,7 +52,7 @@
 | 跳过一轮确认直接改码 | 做错方向 | 方案审后发确认包；「准」同条开始改码（handoff §0） |
 | 把带问号的确认疑问当成开工口令并改文件 | 未拍板就落盘 | 问号句先答该不该与为什么；等确定改法或「准」再改文件。禁止把商量当「准」 |
 | 把开工「准」写成开 PR/建 issue，或把技能包真源仓 issue 当收集出口 | 错通道、一准两用 | 收集仓上传走 pull request；issue 仅草稿。开工「准」只定版和改码。独立口令「上传」且本机探测成功才允许开 PR。未探测成功禁止自称已通 |
-| 把收集仓合并写成已下发，或把下发写成拉收集仓 | 各项目收不到真源包、口径撒谎 | 下发只走「项目经理 升级 ai-gates」拉技能包真源仓；收集仓合并只算审查。入通用格须另「准」。未出现新 tag 不得自称已下发 |
+| 把收集仓合并写成已下发，或把下发写成拉收集仓 | 各项目收不到真源包、口径撒谎 | 下发只走「升级 ai-gates」拉技能包真源仓；收集仓合并只算审查。入通用格须另「准」。未出现新 tag 不得自称已下发 |
 | 拆多轮确认（理解/定版/开始改码，或开窗+开始改码） | 空转 | 每个决策点只 1 包；续链用合并包 |
 | 结案后只写「请说开 γ」 | 口令门 | 续链合并包 +「准」（§G） |
 | 发布前仅走读/假需求验证 hook 链路（ask 权限 bug、大 payload 解析失败等真实环境故障漏检） | 机制形同虚设仍当已生效；门禁实际拦不住 | 发布闸要求**真实 Cursor 会话**真演证据（`.ai-gates/hooks-log/` 真实 DENY/ALLOW + 打点落盘）；走读仅线索（2026-08-03 ask bug / parse 失败两连教训，见 [skill-eval-checklist.md](./skill-eval-checklist.md) §I 真演记录） |
@@ -83,8 +83,8 @@
 | CR 无 blocker 后不提示 README/Unity、或直接标 runtime-validated | 漏收口或夸大证据 | §C：迁 step-completed + README 一行 + 请用户测 |
 | 同一 Chat 内连续多轮 **L3 方案审核** | 独立性弱 | **提示**用户新开 Chat；L3 **只读不写** |
 | L3 Chat **直接修改**执行文档 | 多 Chat 结论冲突、状态被覆盖 | L3 只输出审查结论；定稿由项目经理/策划 **单 Agent** 写入 |
-| 未「准」就连跑 / 把 Auto 当第五车道 / Express / Direct 开 Auto | 绕过确认或打乱 PM 判定 | Standard/Full「准」默认 Auto；Express / Direct 禁；见 [loop-engineering.md](./loop-engineering.md) |
-| 用户已「准, 不 Auto」仍按 Auto 连跑后续 Step | 无视退出 | 单步模式：测签后须「做 Step N」等口令 |
+| 未「准」就连跑 / 把人点名「Auto车道」写成 `lane` | 绕过确认或把点名写进四条路由 | 「准」只做当前一步。人点名「Auto车道」不写入 `lane` |
+| 回「准」后连跑后续 Step | 把已停用的连跑当成默认 | 测签后要做下一步，再开口令 |
 | 测挂后绕过 diagnosis-gates 乱开热修/Step（或硬停仍自动跟） | 假收敛、止损被掏空 | 「测试不通过」→ diagnosis §0；仅 `auto_follow: yes` 可同条跟；硬停须「准」 |
 | 验挂红无脑 `git reset --hard` / 整库硬回滚 | 毁掉诊断现场与无关改动 | 有意义评审后**定向撤**本 Step Mandatory 业务 diff（diagnosis §0.2.1） |
 | 用批量回归/黄金场景绿（含项目配置场景 ID）当「本刀有意义」 | 假绿保留废刀、同 A# 死磕 | 对照 A#/可见现象/本刀假设写黑板；禁假绿冒充有意义 |
@@ -184,7 +184,7 @@
 | 主窗兼策划/方案审/文档结构改写，或需隔离的档位由主窗自审 | 上下文共谋、审核不独立 | Express 和 Direct 的业务改码由主窗做。标准道和完整道的实现仍派程序员子窗。方案审必须子窗；普通 Standard L1 可主窗同会话只读复核并标「非独立 CR」；Direct、Standard L1.5/L2、Full 与高风险 CR 按隔离规则派发（[isolated-review.md](./isolated-review.md)）；**周报除外** |
 | 实现/审核 Task 省略 `model` 或无视 project-context §模型路由 | 落到平台默认快模型、绕过项目偏好 | 按 [model-routing.md](./model-routing.md) 解析后显式传 `model=`；换模型须新开 Task |
 | 把项目专属模型 slug 写进通用 Skill | Skill 不可复用 | 偏好只进 `.cursor/project-context.md` §模型路由（[project-local-config.md](./project-local-config.md)） |
-| 用户未初始化 project-context 仍期望 Express 小改核心模块 | 误判车道、漏回归 | 冷启动保守 Standard；提示 TL 按 [USER-GUIDE.md](../../USER-GUIDE.md) §第一次接入 初始化 |
+| 用户未初始化 project-context 就离开 Express，或臆测路径 | 误判车道 | 未初始化前每一刀 Express。提示说 `初始化`，见 [USER-GUIDE.md](../../USER-GUIDE.md) |
 
 ## 并发与协作
 

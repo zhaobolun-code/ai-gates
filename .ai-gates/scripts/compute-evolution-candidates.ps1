@@ -56,6 +56,19 @@ function Get-DatePrefix {
     return $null
 }
 
+function Get-DistinctDateCount {
+    param([string]$DatePrefix, [string]$LastHitCell)
+    $set = New-Object "System.Collections.Generic.HashSet[string]"
+    if (-not [string]::IsNullOrWhiteSpace($DatePrefix)) { [void]$set.Add($DatePrefix) }
+    if (-not [string]::IsNullOrWhiteSpace($LastHitCell)) {
+        foreach ($m in [Regex]::Matches($LastHitCell, '\d{4}-\d{2}-\d{2}')) {
+            [void]$set.Add($m.Value)
+        }
+    }
+    if ($set.Count -lt 1) { return 1 }
+    return $set.Count
+}
+
 # 行内容单元格提取：保留空单元格（晋升/作用域列常为空），仅去除首尾管道产生的空段
 function Get-ContentCells {
     param([string]$Line)
@@ -181,7 +194,7 @@ for ($i = $headerIdx + 1; $i -lt $lines.Count; $i++) {
         module   = [string]$cells[$idxModule]
         lesson   = $lesson
         last_hit = $lastHitPrefix
-        hit_approx = 2
+        hit_approx = (Get-DistinctDateCount -DatePrefix $datePrefix -LastHitCell $lastHitStr)
         promoted = $promoted
         source   = 'lessons'
     }
@@ -276,7 +289,7 @@ if (-not (Test-Path -LiteralPath $DesignPatternsPath)) {
                 module     = [string]$cells[$idxModule]
                 lesson     = $lesson
                 last_hit   = $lastHitPrefix
-                hit_approx = 2
+                hit_approx = (Get-DistinctDateCount -DatePrefix $datePrefix -LastHitCell $lastHitStr)
                 promoted   = $promoted
                 source     = 'design-patterns'
                 pattern    = $matchedTerm
